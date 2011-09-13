@@ -1,0 +1,8 @@
+We want to correctly attribute all contributions and will maintain this CREDITS.txt file at the head of the trunk.
+
+We discourage including attribution as comments in the code, instead we intend to let the history feature of SVN be the primary method for tracking attributions.
+
+Aparapi Contributors. 
+
+  
+
