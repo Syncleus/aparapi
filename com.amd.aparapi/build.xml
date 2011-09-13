@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<project name="com.amd.aparapi" default="build" basedir=".">
+
+   <target name="clean">
+      <delete dir="api"/>
+      <delete dir="classes"/>
+      <delete file="aparapi.jar"/>
+   </target>
+
+   <target name="build">
+      <mkdir dir="classes"/>
+      <javac destdir="classes" debug="on" includeAntRuntime="false" >
+         <src path="src/java"/>
+      </javac>
+      <jar jarfile="aparapi.jar" basedir="classes"/>
+   </target>
+
+</project>

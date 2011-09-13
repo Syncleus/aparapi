@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+
+<project name="codegen" default="junit" basedir=".">
+
+   <!--<property name="junit.jar" value="/home/gfrost/aparapi/trunk/tools/junit/junit.jar"/>-->
+   <property name="junit.jar" value="C:\Users\gfrost\javalabs\projects\aparapi\trunk\tools\junit\junit.jar"/>
+
+   <path id="classpath">
+      <pathelement path="..\..\com.amd.aparapi\aparapi.jar"/>
+      <pathelement path="${junit.jar}"/>
+      <pathelement path="classes"/>
+   </path>
+
+   <target name="check">
+      <fail message="Error:">
+         <condition>
+            <not><isset property="junit.jar"/></not>
+         </condition>
+         <![CDATA[
+         You will need to edit test/codegen/build.xml
+
+         At present junit.dir is not set.  It needs to point to the junit jar file in your junit installation.
+
+         You can install/download junit from www.junit.org.
+         ]]>
+      </fail>
+      <available file="${junit.jar}" type="file" property="junit.jar.exists"/>
+      <fail message="Error:">
+         <condition>
+            <not><isset property="junit.jar.exists"/></not>
+         </condition>
+         <![CDATA[
+         You will need to edit test/codegen/build.xml
+
+         At present junit.jar is set to ${junit.jar} but that file does not exist
+         ]]>
+      </fail>
+   </target>
+
+   <target name="clean">
+      <delete dir="classes"/>
+      <delete dir="junit"/>
+      <delete dir="src/genjava/com"/>
+   </target>
+
+   <target name="junit" depends="clean, check">
+      <mkdir dir="classes"/>
+      <javac srcdir="src/java" destdir="classes" debug="on"  includeAntRuntime="false" classpathref="classpath" />
+
+      <java classname="com.amd.aparapi.CreateJUnitTests" classpathref="classpath">
+         <sysproperty key="root" value="${basedir}"/>
+      </java>
+
+      <javac srcdir="src/genjava" destdir="classes" debug="on"  includeAntRuntime="false"  classpathref="classpath"/>
+
+      <mkdir dir="junit"/>
+      <mkdir dir="junit/data"/>
+      <junit printsummary="false" fork="false" haltonfailure="false" failureproperty="tests.failed" showoutput="false">
+         <formatter type="xml" />
+         <classpath refid="classpath"/>
+         <batchtest todir="junit/data">
+            <fileset dir="src/genjava"/> 
+         </batchtest>
+      </junit>
+
+      <junitreport todir="junit/data">
+         <fileset dir="junit/data"/>
+         <report format="frames" todir="junit/html" />
+      </junitreport>
+   </target>
+
+</project>

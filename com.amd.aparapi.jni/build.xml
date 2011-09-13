@@ -1,0 +1,295 @@
+<?xml version="1.0"?>
+
+
+<!--
+You should not have to edit this file. First consider editing the properties in build.properties.
+-->
+
+<project name="com.amd.aparapi.jni" default="build" basedir=".">
+   <property environment="env" />   <!-- we need env.PATH for msvc only -->
+   <property file="build.properties"/>
+
+   <target name="check">
+      <fail message="Error:">
+         <condition>
+            <and>
+               <os family="windows" />
+               <isset property="msvc.dir"/>
+               <not><isset property="msvc.sdk.dir"/></not>
+            </and>
+         </condition>
+         <![CDATA[
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+
+         At present msvc.dir seems to be configured but not msvc.sdk.dir
+         ]]>
+      </fail>
+
+      <fail message="Error:">
+         <condition>
+            <and>
+               <os family="windows" />
+               <not><isset property="msvc.dir"/></not>
+               <isset property="msvc.sdk.dir"/>
+            </and>
+         </condition>
+         <![CDATA[
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+
+         At present msvc.sdk.dir seems to be configured but not msvc.dir
+         ]]>
+      </fail>
+      <available file="${msvc.dir}" type="dir" property="msvc.dir.exists"/>
+      <available file="${msvc.sdk.dir}" type="dir" property="msvc.sdk.dir.exists"/>
+
+      <fail message="Error:">
+         <condition>
+            <and>
+               <os family="windows" />
+               <isset property="msvc.dir"/>
+               <not><isset property="msvc.dir.exists"/></not>
+            </and>
+         </condition>
+         <![CDATA[
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+
+         At present msvc.dir is set (to ${msvc.dir}) but that dir does not exist
+         ]]>
+      </fail>
+      <fail message="Error:">
+         <condition>
+            <and>
+               <os family="windows" />
+               <isset property="msvc.sdk.dir"/>
+               <not><isset property="msvc.sdk.dir.exists"/></not>
+            </and>
+         </condition>
+         <![CDATA[
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+
+         At present msvc.sdk.dir is set (to ${msvc.sdk.dir}) but that dir does not exist
+         ]]>
+      </fail>
+
+
+      <available file="${mingw.dir}" type="dir" property="mingw.dir.exists"/>
+      <fail message="Error:">
+         <condition>
+            <and>
+               <os family="windows" />
+               <isset property="mingw.dir"/>
+               <not><isset property="mingw.dir.exists"/></not>
+            </and>
+         </condition>
+         <![CDATA[
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+
+         At present mingw.dir is set (to ${mingw.dir}) but that dir does not exist
+         ]]>
+      </fail>
+      <!--<echo message="java.home ${java.home}"/>-->
+      <!--<echo message="msvc.dir.exists ${msvc.dir.exists}"/>-->
+      <!--<echo message="msvc.sdk.dir.exists ${msvc.sdk.dir.exists}"/>-->
+      <!--<echo message="mingw.dir.exists ${mingw.dir.exists}"/>-->
+      <condition property="use.msvc"> 
+         <and>
+            <os family="windows" />
+            <isset property="msvc.dir.exists"/>
+            <isset property="msvc.sdk.dir.exists"/>
+         </and>
+      </condition>
+      <!--<echo message="use.msvc ${use.msvc}"/>-->
+
+      <condition property="use.mingw"> 
+         <and>
+            <os family="windows" />
+            <isset property="mingw.dir.exists"/>
+         </and>
+      </condition>
+      <!--<echo message="use.mingw ${use.mingw}"/>-->
+
+      <fail message="Error:">
+         <condition>
+            <and>
+               <isset property="use.mingw"/>
+               <isset property="use.msvc"/>
+            </and>
+         </condition>
+         <![CDATA[
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+
+         At present ant is configured for both MinGW AND Microsoft Visual Studio. You need to pick one or the other :) !
+
+         Just comment out the properties for the compiler that you *do not* wish to use.
+         ]]>
+      </fail>
+
+      <fail message="Error:">
+         <condition>
+            <and>
+               <os family="windows" />
+               <not>
+                  <or>
+                     <isset property="use.mingw"/>
+                     <isset property="use.msvc"/>
+                  </or>
+               </not>
+            </and>
+         </condition>
+         <![CDATA[
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+
+         This looks like a windows machine so you probably need to configure either:-
+
+         * msvc.dir and msvc.sdk.dir if you wish to use Microsoft Visual Studio compiler
+
+         * mingw.dir if you prefer if you prefer to use MinGW 
+         ]]>
+      </fail>
+      <condition property="use.gcc"> <os family="unix" /> </condition>
+
+      <condition property="x86_or_x86_64" value="x86" else="x86_64"> <or><os arch="x86"/><os arch="i386"/></or> </condition>
+
+      <condition property="optional.amd64.subdir" value="" else="amd64\"> <or><os arch="x86"/><os arch="i386"/></or> </condition>
+
+      <condition property="optional.x64.subdir" value="" else="x64\"> <or><os arch="x86"/><os arch="i386"/></or></condition>
+
+      <property name="cl" value="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe"/>
+
+      <available file="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe" type="file" property="cl.exists"/>
+
+      <fail message="Error:">
+         <condition>
+            <and>
+               <isset property="use.msvc"/>
+               <not><isset property="cl.exists"/></not>
+            </and>
+         </condition>
+         <![CDATA[
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+
+         Could not find vc\bin\${optional.amd64.subdir}cl under configured msvc.dir. Check if msvc.dir is pointing
+         to a valid visual studio installation
+         ]]>
+      </fail>
+
+      <fail message="Error:">
+         <condition>
+            <not><isset property="amd.app.sdk.dir"/></not>
+         </condition>
+         <![CDATA[
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+
+         You need to set amd.app.sdk.dir to point to the location where AMD APP SDK is installed
+         ]]>
+      </fail>
+      <available file="${amd.app.sdk.dir}" type="dir" property="amd.app.sdk.dir.exists"/>
+
+      <fail message="Error:">
+         <condition>
+            <not><isset property="amd.app.sdk.dir.exists"/></not>
+         </condition>
+         <![CDATA[
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+
+         At present amd.app.sdk.dir is set (to ${amd.app.sdk.dir}) but that dir does not exist
+         ]]>
+      </fail>
+
+   </target>
+
+
+
+   <target name="clean" depends="check">
+      <delete dir="include"/>
+      <echo message="should remove libaparapi_${x86_or_x86_64}.so"/>
+      <delete file="libaparapi_${x86_or_x86_64}.so"/>
+      <delete file="aparapi_${x86_or_x86_64}.dll"/>
+      <delete file="aparapi.dll"/>
+      <delete file="aparapi.obj"/>
+      <delete file="aparapi.o"/>
+      <delete file="aparapi.lib"/>
+      <delete file="aparapi.exp"/>
+   </target>
+
+
+
+   <target name="javah">
+      <mkdir dir="include"/>
+      <javah classpath="..\com.amd.aparapi\aparapi.jar" destdir="include" force="true">
+         <class name="com.amd.aparapi.KernelRunner"/>
+      </javah>
+   </target>
+
+   <target name="gcc" if="use.gcc">
+      <echo message="linuxcc ${os.arch}"/>
+      <exec executable="g++" >
+         <arg value="-O3"/>
+         <arg value="-g"/>
+         <arg value="-fPIC"/>
+         <arg value="-I${java.home}/../include"/> 
+         <arg value="-I${java.home}/../include/linux"/> 
+         <arg value="-Iinclude"/> 
+         <arg value="-I${amd.app.sdk.dir}/include"/> 
+         <arg value="-shared"/>
+         <arg value="-o"/>
+         <arg value="libaparapi_${x86_or_x86_64}.so"/>
+         <arg value="src/cpp/aparapi.cpp"/>
+         <arg value="-L${amd.app.sdk.dir}/lib/${x86_or_x86_64}"/>
+         <arg value="-lOpenCL"/>
+      </exec>
+   </target>
+
+   <target name="msvc" if="use.msvc">
+
+      <exec executable="${cl}" >
+         <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE"/>
+         <arg value="/nologo"/>
+         <arg value="/TP"/>
+         <arg value="/Ox"/>
+         <arg value="/I${msvc.dir}\vc\include"/>
+         <arg value="/I${msvc.sdk.dir}\include"/>
+         <arg value="/I${java.home}\..\include"/>
+         <arg value="/I${java.home}\..\include\win32"/> 
+         <arg value="/Iinclude"/>
+         <arg value="/I${amd.app.sdk.dir}\include"/>
+         <arg value="/c"/>
+         <arg value="src\cpp\aparapi.cpp"/>
+      </exec>
+      <exec executable="${cl}" >
+         <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE"/>
+         <arg value="/nologo"/>
+         <arg value="/LD"/>
+         <arg value="aparapi.obj"/>
+         <arg value="/link"/>
+         <arg value="/libpath:${msvc.dir}\vc\lib\${optional.amd64.subdir}"/>
+         <arg value="/libpath:${msvc.sdk.dir}\lib\${optional.x64.subdir}"/>
+         <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}"/>
+         <arg value="OpenCL.lib"/>
+         <arg value="/out:aparapi_${x86_or_x86_64}.dll"/>
+      </exec>
+
+   </target>
+
+   <target name="mingw" if="use.mingw">
+      <exec executable="${mingw.dir}/bin/g++" >
+         <env key="PATH" path="${env.PATH};${mingw.dir}/bin"/>
+         <arg value="-Wall"/>
+         <arg value="-O3"/>
+         <arg value="-Wl,--kill-at"/>
+         <arg value="-I${java.home}\..\include"/>
+         <arg value="-I${java.home}\..\include\win32"/>
+         <arg value="-Iinclude"/>
+         <arg value="-I${amd.app.sdk.dir}\include"/>
+         <arg value="-shared"/>
+         <arg value="-o"/>
+         <arg value="aparapi_${x86_or_x86_64}.dll"/>
+         <arg value="src\cpp\aparapi.cpp"/>
+         <arg value="-L${amd.app.sdk.dir}\lib\${x86_or_x86_64}"/>
+         <arg value="-lOpenCL"/>
+      </exec>
+   </target>
+
+   <target name="build" depends="check, javah, msvc, mingw, gcc"/>
+
+</project>

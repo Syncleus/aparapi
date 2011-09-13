@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+
+<project name="nbody" default="build" basedir=".">
+   <property name="jogldir" value="..\..\..\..\jogl\jogl-2.0-b23-20110303-windows-i586"/>
+
+   <path id="compiler.class.path">
+      <pathelement path="../../com.amd.aparapi/aparapi.jar"/>
+      <pathelement path="${jogldir}/jar/jogl.all.jar"/>
+      <pathelement path="${jogldir}/jar/nativewindow.all.jar"/>
+      <pathelement path="${jogldir}/jar/gluegen-rt.jar"/>
+   </path>
+
+   <path id="runtime.class.path" cache="true">
+      <path refid="compiler.class.path"/>
+      <pathelement path="${ant.project.name}.jar"/>
+   </path>
+
+   <target name="check">
+      <fail message="Error:">
+         <condition>
+            <not><isset property="jogldir"/></not>
+         </condition>
+         <![CDATA[
+         You will need to edit build.xml
+
+         At present jogldir is not set.  It needs to point to an jogl install directory.
+         ]]>
+      </fail>
+      <available file="${jogldir}" type="dir" property="jogldir.exists"/>
+      <fail message="Error:">
+         <condition>
+            <not><isset property="jogldir.exists"/></not>
+         </condition>
+         <![CDATA[
+         You will need to edit build.xml
+
+         At present jogldir is set to ${jogldir} but that dir does not exist
+         ]]>
+      </fail>
+      <available file="${jogldir}/jar" type="dir" property="jogldir.jar.exists"/>
+      <available file="${jogldir}/lib" type="dir" property="jogldir.lib.exists"/>
+      <fail message="Error:">
+         <condition>
+            <or>
+               <not><isset property="jogldir.jar.exists"/></not>
+               <not><isset property="jogldir.jar.exists"/></not>
+            </or>
+         </condition>
+         <![CDATA[
+         You will need to edit build.xml
+
+         At present jogldir is set to ${jogldir} but that does not seem to be a valid jogl install. 
+         ]]>
+      </fail>
+   </target>
+
+   <target name="build" depends="clean,check">
+      <mkdir dir="classes"/>
+      <javac srcdir="src" destdir="classes" debug="on" includeantruntime="false">
+         <classpath refid="compiler.class.path"/>
+      </javac>
+      <copy todir="classes/com/amd/aparapi/examples/nbody" file="src/com/amd/aparapi/examples/nbody/particle.jpg"/>
+      <jar jarfile="${ant.project.name}.jar" basedir="classes"/>
+   </target>
+
+   <target name="clean">
+      <delete dir="classes"/>
+      <delete file="${ant.project.name}.jar"/>
+   </target>
+
+   <target name="run" depends="check">
+      <java classname="com.amd.aparapi.examples.nbody.Main" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni:${jogldir}\lib"/>
+         <sysproperty key="com.amd.aparapi.executionMode" value="GPU"/>
+         <sysproperty key="bodies" value="16384"/>
+         <sysproperty key="height" value="800"/>
+         <sysproperty key="width" value="800"/>
+      </java>
+   </target>
+
+</project>
