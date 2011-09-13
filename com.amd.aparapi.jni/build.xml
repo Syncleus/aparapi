@@ -202,7 +202,6 @@ You should not have to edit this file. First consider editing the properties in 
 
    <target name="clean" depends="check">
       <delete dir="include"/>
-      <echo message="should remove libaparapi_${x86_or_x86_64}.so"/>
       <delete file="libaparapi_${x86_or_x86_64}.so"/>
       <delete file="aparapi_${x86_or_x86_64}.dll"/>
       <delete file="aparapi.dll"/>
