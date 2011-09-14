@@ -42,7 +42,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.WindowAdapter;
@@ -56,9 +55,8 @@ import javax.swing.JFrame;
 import com.amd.aparapi.Kernel;
 
 /**
- * An example Aparapi application which displays a view of the Mandelbrot set and lets the user zoom in to a particular point. 
+ * An example Aparapi application which tracks the mouse and updates the color pallete of the window based on the distance from the mouse pointer. 
  * 
- * When the user clicks on the view, this example application will zoom in to the clicked point and zoom out there after.
  * On GPU, additional computing units will offer a better viewing experience. On the other hand on CPU, this example 
  * application might suffer with sub-optimal frame refresh rate as compared to GPU. 
  *  
@@ -69,7 +67,7 @@ import com.amd.aparapi.Kernel;
 public class Main{
 
    /**
-    * An Aparapi Kernel implementation for creating a scaled view of the mandelbrot set.
+    * An Aparapi Kernel implementation for tracking the mouse position and coloring each pixel of a window depending on proximity to the mouse position.
     *  
     * @author gfrost
     *
@@ -90,7 +88,7 @@ public class Main{
       final private int pallette[];
 
       /** Maximum iterations we will check for. */
-      final private int maxIterations;
+      final private int palletteSize;
 
       /** Mutable values of scale, offsetx and offsety so that we can modify the zoom level and position of a view. */
 
@@ -103,19 +101,21 @@ public class Main{
       /**
        * Initialize the Kernel.
        *  
-       * @param _width Mandelbrot image width
-       * @param _height Mandelbrot image height
-       * @param _rgb Mandelbrot image RGB buffer
-       * @param _pallette Mandelbrot image palette
+       * @param _width  image width
+       * @param _height  image height
+       * @param _rgb  image RGB buffer
+       * @param _pallette  image palette
+       * @param _trailx  float array holding x ordinates for mouse trail positions
+       * @param _traily  float array holding y ordinates for mouse trail positions
        */
-      public MouseTrackKernel(int _width, int _height, int[] _rgb, int[] _pallette, float[] _offsetx, float[] _offsety) {
+      public MouseTrackKernel(int _width, int _height, int[] _rgb, int[] _pallette, float[] _trailx, float[] _traily) {
          width = _width;
          height = _height;
          rgb = _rgb;
          pallette = _pallette;
-         maxIterations = pallette.length - 1;
-         offsetx = _offsetx;
-         offsety = _offsety;
+         palletteSize = pallette.length - 1;
+         offsetx = _trailx;
+         offsety = _traily;
          trail = offsetx.length;
       }
 
@@ -128,35 +128,32 @@ public class Main{
          float x = (gid % width);
 
          float y = (gid / height);
-         
-         float minr = 1024f;
 
-       
+         float minRadius = 1024f;
+
+         /** determine the minimum radius between this pixel position (x,y) and each of the trail positions _trailx[0..n],_traily[0..n] **/
          for (int i = 0; i < trail; i++) {
-
             float dx = x - offsetx[i];
             float dy = y - offsety[i];
-            minr = min(sqrt(dx * dx + dy * dy), minr);
-            
-           
-           
+            minRadius = min(sqrt(dx * dx + dy * dy), minRadius);
          }
-         int value = (int)minr;
 
-         int newValue = min(value, maxIterations);
+         /** convert the radius length into an index into the pallete array **/
+         int palletteIndex = min((int) minRadius, palletteSize);
 
-         rgb[gid] = pallette[newValue];
+         /** set the rgb value for this color **/
+         rgb[gid] = pallette[palletteIndex];
 
       }
 
    }
 
-   /** User selected zoom-in point on the Mandelbrot view. */
-   public static volatile Point to = null;
+   /** We track the latest mouse position here. */
+   public static volatile Point mousePosition = null;
 
    @SuppressWarnings("serial") public static void main(String[] _args) {
 
-      JFrame frame = new JFrame("MandelBrot");
+      JFrame frame = new JFrame("MouseTracker");
 
       /** Width of Mandelbrot view. */
       final int width = 1024;
@@ -164,26 +161,28 @@ public class Main{
       /** Height of Mandelbrot view. */
       final int height = 1024;
 
-      /** Maximum iterations for Mandelbrot. */
-      final int maxIterations = 128;
+      /** The size of the pallette of pixel colors we choose from. */
+      final int palletteSize = 128;
 
       /** Palette which maps iteration values to RGB values. */
-      final int pallette[] = new int[maxIterations + 1];
-      
-      final float trailx[] = new float[64];
-      final float traily[] = new float[trailx.length];
+      final int pallette[] = new int[palletteSize + 1];
 
-      //Initialize palette values
-      for (int i = 0; i < maxIterations; i++) {
-         float h = i / (float) maxIterations;
+      /** Initialize palette values **/
+      for (int i = 0; i < palletteSize; i++) {
+         float h = i / (float) palletteSize;
          float b = 1.0f - h * h;
          pallette[i] = Color.HSBtoRGB(h, 1f, b);
       }
 
-      /** Image for Mandelbrot view. */
+      /** We will keep a trail of 64 mouse positions **/
+      final float trailx[] = new float[64];
+      final float traily[] = new float[trailx.length];
+
+      /** Image for view. */
       final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
       final BufferedImage offscreen = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-      // Draw Mandelbrot image
+
+      /** Override the paint handler to just copy the image **/
       JComponent viewer = new JComponent(){
          @Override public void paintComponent(Graphics g) {
 
@@ -191,51 +190,58 @@ public class Main{
          }
       };
 
-      // Set the size of JComponent which displays Mandelbrot image
+      /** Set the size of JComponent which displays the image **/
       viewer.setPreferredSize(new Dimension(width, height));
 
+      /** We use this to synchronize access from Swing display thread **/
       final Object doorBell = new Object();
 
-      // Mouse listener which reads the user clicked zoom-in point on the Mandelbrot view 
+      /** Mouse listener which collects the latest the mouse position from Mandelbrot view whenever the mouse is moved **/
       viewer.addMouseMotionListener(new MouseMotionAdapter(){
 
          @Override public void mouseMoved(MouseEvent e) {
-            to = e.getPoint();
-            // System.out.println(to);
+            /** grab the mouse position **/
+            mousePosition = e.getPoint();
+
+            /** tell the waitin thread that we have a new position **/
             synchronized (doorBell) {
                doorBell.notify();
             }
          }
       });
 
-      // Swing housework to create the frame
+      /** Swing housework to create the frame **/
       frame.getContentPane().add(viewer);
       frame.pack();
       frame.setLocationRelativeTo(null);
       frame.setVisible(true);
 
-      // Extract the underlying RGB buffer from the image.
-      // Pass this to the kernel so it operates directly on the RGB buffer of the image
+      /** Extract the underlying RGB buffer from the image. **/
+      /** Pass this to the kernel so it operates directly on the RGB buffer of the image **/
       final int[] rgb = ((DataBufferInt) offscreen.getRaster().getDataBuffer()).getData();
       final int[] imageRgb = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-      // Create a Kernel passing the size, RGB buffer and the palette.
 
-   
+      /** Create a Kernel passing the size, RGB buffer, the palette and the trail positions **/
       final MouseTrackKernel kernel = new MouseTrackKernel(width, height, rgb, pallette, trailx, traily);
 
+      /** initialize the trail positions to center of screen **/
       for (int i = 0; i < trailx.length; i++) {
          trailx[i] = (float) width / 2;
          traily[i] = (float) width / 2;
       }
-      int trailer = 0;
+
+      /** we use this to track the position where we insert latest mouse position, just a circular buffer **/
+
+      int trailLastUpdatedPosition = 0;
+
       kernel.execute(width * height);
       System.arraycopy(rgb, 0, imageRgb, 0, rgb.length);
       viewer.repaint();
 
-      // Report target execution mode: GPU or JTP (Java Thread Pool).
+      /** Report target execution mode: GPU or JTP (Java Thread Pool). **/
       System.out.println("Execution mode=" + kernel.getExecutionMode());
 
-      // Window listener to dispose Kernel resources on user exit.
+      /** Window listener to dispose Kernel resources on user exit. **/
       frame.addWindowListener(new WindowAdapter(){
          public void windowClosing(WindowEvent _windowEvent) {
             kernel.dispose();
@@ -243,11 +249,11 @@ public class Main{
          }
       });
 
-      // Wait until the user selects a zoom-in point on the Mandelbrot view.
+      /** update loop**/
       while (true) {
 
-         // Wait for the user to move somwhere
-         while (to == null) {
+         /** Wait for the user to move mouse **/
+         while (mousePosition == null) {
             synchronized (doorBell) {
                try {
                   doorBell.wait();
@@ -256,13 +262,19 @@ public class Main{
                }
             }
          }
-         trailx[trailer % trailx.length] = (float) to.x;
-         traily[trailer % traily.length] = (float) to.y;
-         trailer++;
-         kernel.execute(width * height);
-         System.arraycopy(rgb, 0, imageRgb, 0, rgb.length);
-         viewer.repaint();
+         /** add the new x,y to the trail arrays and bump the poition **/
+         trailx[trailLastUpdatedPosition % trailx.length] = (float) mousePosition.x;
+         traily[trailLastUpdatedPosition % traily.length] = (float) mousePosition.y;
+         trailLastUpdatedPosition++;
 
+         /** execute the kernel which calculates new pixel values **/
+         kernel.execute(width * height);
+
+         /** copy the rgb values to the imageRgb buffer **/
+         System.arraycopy(rgb, 0, imageRgb, 0, rgb.length);
+
+         /** request a repaint **/
+         viewer.repaint();
       }
 
    }
