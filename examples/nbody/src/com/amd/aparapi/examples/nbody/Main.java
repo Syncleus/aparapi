@@ -68,7 +68,6 @@ import com.jogamp.opengl.util.texture.TextureIO;
 
 public class Main{
 
-
    public static class NBodyKernel extends Kernel{
       protected final float delT = .005f;
 
