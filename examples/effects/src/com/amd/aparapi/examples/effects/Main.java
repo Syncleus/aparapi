@@ -92,9 +92,9 @@ public class Main{
 
       /** Mutable values of scale, offsetx and offsety so that we can modify the zoom level and position of a view. */
 
-      final private float[] offsetx;
+      final private float[] trailx;
 
-      final private float[] offsety;
+      final private float[] traily;
 
       final private int trail;
 
@@ -114,9 +114,9 @@ public class Main{
          rgb = _rgb;
          pallette = _pallette;
          palletteSize = pallette.length - 1;
-         offsetx = _trailx;
-         offsety = _traily;
-         trail = offsetx.length;
+         trailx = _trailx;
+         traily = _traily;
+         trail = trailx.length;
       }
 
       @Override public void run() {
@@ -133,8 +133,8 @@ public class Main{
 
          /** determine the minimum radius between this pixel position (x,y) and each of the trail positions _trailx[0..n],_traily[0..n] **/
          for (int i = 0; i < trail; i++) {
-            float dx = x - offsetx[i];
-            float dy = y - offsety[i];
+            float dx = x - trailx[i];
+            float dy = y - traily[i];
             minRadius = min(sqrt(dx * dx + dy * dy), minRadius);
          }
 
