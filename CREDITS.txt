@@ -2,7 +2,9 @@ We want to correctly attribute all contributions and will maintain this CREDITS.
 
 We discourage including attribution as comments in the code, instead we intend to let the history feature of SVN be the primary method for tracking attributions.
 
-Aparapi Contributors. 
+Aparapi Contributors.  Thanks to all. 
+
+Witold Bolt provided patch for issue #5. Added and tested Mac OS support. Oct 12th 2011 
 
   
 

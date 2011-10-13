@@ -40,12 +40,22 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
+
 #include <sys/types.h>
 #ifndef _WIN32
 #include <unistd.h>
 #endif
+
+#ifndef __APPLE__
 #include <CL/cl.h>
+#else
+#include <cl.h>
+#endif
+
 #include <jni.h>
 
 #define JNIExceptionChecker(){\
@@ -424,8 +434,13 @@ class JNIContext{
                      }
                      // platformVendorName = "Advanced Micro Devices, Inc."||"NVIDIA Corporation"
                      // platformVersionName = "OpenCL 1.1 AMD-APP-SDK-v2.5 (684.213)"|"OpenCL 1.1 CUDA 4.0.1"
-                     //  we check if the platformVersionName starts with "OpenCL 1.1" (10 chars!) 
+#ifndef __APPLE__
+                     // Here we check if the platformVersionName starts with "OpenCL 1.1" (10 chars!) 
                      if (!strncmp(platformVersionName, "OpenCL 1.1", 10)) {
+#else 
+                     // Here we check if the platformVersionName starts with "OpenCL 1.1" or "OpenCL 1.0" (10 chars!) 
+                     if (!strncmp(platformVersionName, "OpenCL 1.1", 10) || !strncmp(platformVersionName, "OpenCL 1.0", 10)) {
+#endif
                         // Get the # of devices
                         status = clGetDeviceIDs(platforms[i], deviceType, 0, NULL, &deviceIdc);
                         // now check if this platform supports the requested device type (GPU or CPU)
@@ -434,7 +449,7 @@ class JNIContext{
                            if (isVerbose()){
                               fprintf(stderr, "platform %s supports requested device type\n", platformVendorName);
                            }
-                      
+
                            deviceIds = new cl_device_id[deviceIdc];
                            status = clGetDeviceIDs(platform, deviceType, deviceIdc, deviceIds, NULL);
                            if (status == CL_SUCCESS){
@@ -482,7 +497,12 @@ class JNIContext{
 
                      }else{
                          if (isVerbose()){
+#ifndef __APPLE__
                             fprintf(stderr, "platform %s version %s is not OpenCL 1.1 skipping!\n", platformVendorName, platformVersionName);
+#else
+                            fprintf(stderr, "platform %s version %s is neither OpenCL 1.1 or OpenCL 1.0 skipping!\n", platformVendorName, platformVersionName);
+#endif
+
                          }
                      }
                   }

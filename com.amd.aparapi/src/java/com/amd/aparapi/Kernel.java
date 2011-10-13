@@ -232,7 +232,7 @@ public abstract class Kernel implements Cloneable{
          String libName = null;
          try {
 
-            if (arch.equals("amd64")) {
+            if (arch.equals("amd64") || arch.equals("x86_64")) {
 
                libName = "aparapi_x86_64";
                logger.fine("attempting to load shared lib " + libName);

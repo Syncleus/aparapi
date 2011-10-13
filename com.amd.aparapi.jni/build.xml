@@ -1,21 +1,25 @@
 <?xml version="1.0"?>
 
-
 <!--
 You should not have to edit this file. First consider editing the properties in build.properties.
 -->
 
 <project name="com.amd.aparapi.jni" default="build" basedir=".">
-   <property environment="env" />   <!-- we need env.PATH for msvc only -->
-   <property file="build.properties"/>
+
+   <property environment="env" />
+   <!-- we need env.PATH for msvc only -->
+
+   <property file="build.properties" />
 
    <target name="check">
       <fail message="Error:">
          <condition>
             <and>
                <os family="windows" />
-               <isset property="msvc.dir"/>
-               <not><isset property="msvc.sdk.dir"/></not>
+               <isset property="msvc.dir" />
+               <not>
+                  <isset property="msvc.sdk.dir" />
+               </not>
             </and>
          </condition>
          <![CDATA[
@@ -29,8 +33,10 @@ You should not have to edit this file. First consider editing the properties in 
          <condition>
             <and>
                <os family="windows" />
-               <not><isset property="msvc.dir"/></not>
-               <isset property="msvc.sdk.dir"/>
+               <not>
+                  <isset property="msvc.dir" />
+               </not>
+               <isset property="msvc.sdk.dir" />
             </and>
          </condition>
          <![CDATA[
@@ -39,15 +45,17 @@ You should not have to edit this file. First consider editing the properties in 
          At present msvc.sdk.dir seems to be configured but not msvc.dir
          ]]>
       </fail>
-      <available file="${msvc.dir}" type="dir" property="msvc.dir.exists"/>
-      <available file="${msvc.sdk.dir}" type="dir" property="msvc.sdk.dir.exists"/>
+      <available file="${msvc.dir}" type="dir" property="msvc.dir.exists" />
+      <available file="${msvc.sdk.dir}" type="dir" property="msvc.sdk.dir.exists" />
 
       <fail message="Error:">
          <condition>
             <and>
                <os family="windows" />
-               <isset property="msvc.dir"/>
-               <not><isset property="msvc.dir.exists"/></not>
+               <isset property="msvc.dir" />
+               <not>
+                  <isset property="msvc.dir.exists" />
+               </not>
             </and>
          </condition>
          <![CDATA[
@@ -60,8 +68,10 @@ You should not have to edit this file. First consider editing the properties in 
          <condition>
             <and>
                <os family="windows" />
-               <isset property="msvc.sdk.dir"/>
-               <not><isset property="msvc.sdk.dir.exists"/></not>
+               <isset property="msvc.sdk.dir" />
+               <not>
+                  <isset property="msvc.sdk.dir.exists" />
+               </not>
             </and>
          </condition>
          <![CDATA[
@@ -72,13 +82,15 @@ You should not have to edit this file. First consider editing the properties in 
       </fail>
 
 
-      <available file="${mingw.dir}" type="dir" property="mingw.dir.exists"/>
+      <available file="${mingw.dir}" type="dir" property="mingw.dir.exists" />
       <fail message="Error:">
          <condition>
             <and>
                <os family="windows" />
-               <isset property="mingw.dir"/>
-               <not><isset property="mingw.dir.exists"/></not>
+               <isset property="mingw.dir" />
+               <not>
+                  <isset property="mingw.dir.exists" />
+               </not>
             </and>
          </condition>
          <![CDATA[
@@ -91,19 +103,19 @@ You should not have to edit this file. First consider editing the properties in 
       <!--<echo message="msvc.dir.exists ${msvc.dir.exists}"/>-->
       <!--<echo message="msvc.sdk.dir.exists ${msvc.sdk.dir.exists}"/>-->
       <!--<echo message="mingw.dir.exists ${mingw.dir.exists}"/>-->
-      <condition property="use.msvc"> 
+      <condition property="use.msvc">
          <and>
             <os family="windows" />
-            <isset property="msvc.dir.exists"/>
-            <isset property="msvc.sdk.dir.exists"/>
+            <isset property="msvc.dir.exists" />
+            <isset property="msvc.sdk.dir.exists" />
          </and>
       </condition>
       <!--<echo message="use.msvc ${use.msvc}"/>-->
 
-      <condition property="use.mingw"> 
+      <condition property="use.mingw">
          <and>
             <os family="windows" />
-            <isset property="mingw.dir.exists"/>
+            <isset property="mingw.dir.exists" />
          </and>
       </condition>
       <!--<echo message="use.mingw ${use.mingw}"/>-->
@@ -111,8 +123,8 @@ You should not have to edit this file. First consider editing the properties in 
       <fail message="Error:">
          <condition>
             <and>
-               <isset property="use.mingw"/>
-               <isset property="use.msvc"/>
+               <isset property="use.mingw" />
+               <isset property="use.msvc" />
             </and>
          </condition>
          <![CDATA[
@@ -130,8 +142,8 @@ You should not have to edit this file. First consider editing the properties in 
                <os family="windows" />
                <not>
                   <or>
-                     <isset property="use.mingw"/>
-                     <isset property="use.msvc"/>
+                     <isset property="use.mingw" />
+                     <isset property="use.msvc" />
                   </or>
                </not>
             </and>
@@ -146,23 +158,52 @@ You should not have to edit this file. First consider editing the properties in 
          * mingw.dir if you prefer if you prefer to use MinGW 
          ]]>
       </fail>
-      <condition property="use.gcc"> <os family="unix" /> </condition>
 
-      <condition property="x86_or_x86_64" value="x86" else="x86_64"> <or><os arch="x86"/><os arch="i386"/></or> </condition>
+      <condition property="use.gcc">
+         <and>
+            <os family="unix" />
+            <not>
+               <os family="mac" />
+            </not>
+         </and>
+      </condition>
 
-      <condition property="optional.amd64.subdir" value="" else="amd64\"> <or><os arch="x86"/><os arch="i386"/></or> </condition>
+      <condition property="use.gcc_mac">
+         <os family="mac" />
+      </condition>
 
-      <condition property="optional.x64.subdir" value="" else="x64\"> <or><os arch="x86"/><os arch="i386"/></or></condition>
+      <condition property="x86_or_x86_64" value="x86" else="x86_64">
+         <or>
+            <os arch="x86" />
+            <os arch="i386" />
+         </or>
+      </condition>
 
-      <property name="cl" value="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe"/>
+      <condition property="optional.amd64.subdir" value="" else="amd64\">
+         <or>
+            <os arch="x86" />
+            <os arch="i386" />
+         </or>
+      </condition>
 
-      <available file="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe" type="file" property="cl.exists"/>
+      <condition property="optional.x64.subdir" value="" else="x64\">
+         <or>
+            <os arch="x86" />
+            <os arch="i386" />
+         </or>
+      </condition>
+
+      <property name="cl" value="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe" />
+
+      <available file="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe" type="file" property="cl.exists" />
 
       <fail message="Error:">
          <condition>
             <and>
-               <isset property="use.msvc"/>
-               <not><isset property="cl.exists"/></not>
+               <isset property="use.msvc" />
+               <not>
+                  <isset property="cl.exists" />
+               </not>
             </and>
          </condition>
          <![CDATA[
@@ -175,7 +216,14 @@ You should not have to edit this file. First consider editing the properties in 
 
       <fail message="Error:">
          <condition>
-            <not><isset property="amd.app.sdk.dir"/></not>
+            <and>
+               <not>
+                  <os family="mac" />
+               </not>
+               <not>
+                  <isset property="amd.app.sdk.dir" />
+               </not>
+            </and>
          </condition>
          <![CDATA[
          You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
@@ -183,11 +231,18 @@ You should not have to edit this file. First consider editing the properties in 
          You need to set amd.app.sdk.dir to point to the location where AMD APP SDK is installed
          ]]>
       </fail>
-      <available file="${amd.app.sdk.dir}" type="dir" property="amd.app.sdk.dir.exists"/>
+      <available file="${amd.app.sdk.dir}" type="dir" property="amd.app.sdk.dir.exists" />
 
       <fail message="Error:">
          <condition>
-            <not><isset property="amd.app.sdk.dir.exists"/></not>
+            <and>
+               <not>
+                  <os family="mac" />
+               </not>
+               <not>
+                  <isset property="amd.app.sdk.dir.exists" />
+               </not>
+            </and>
          </condition>
          <![CDATA[
          You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
@@ -201,94 +256,112 @@ You should not have to edit this file. First consider editing the properties in 
 
 
    <target name="clean" depends="check">
-      <delete dir="include"/>
-      <delete file="libaparapi_${x86_or_x86_64}.so"/>
-      <delete file="aparapi_${x86_or_x86_64}.dll"/>
-      <delete file="aparapi.dll"/>
-      <delete file="aparapi.obj"/>
-      <delete file="aparapi.o"/>
-      <delete file="aparapi.lib"/>
-      <delete file="aparapi.exp"/>
+      <delete dir="include" />
+      <delete file="libaparapi_${x86_or_x86_64}.so" />
+      <delete file="aparapi_${x86_or_x86_64}.dll" />
+      <delete file="aparapi.dll" />
+      <delete file="aparapi.obj" />
+      <delete file="aparapi.o" />
+      <delete file="aparapi.lib" />
+      <delete file="aparapi.exp" />
    </target>
 
 
 
    <target name="javah">
-      <mkdir dir="include"/>
+      <mkdir dir="include" />
       <javah classpath="..\com.amd.aparapi\aparapi.jar" destdir="include" force="true">
-         <class name="com.amd.aparapi.KernelRunner"/>
+         <class name="com.amd.aparapi.KernelRunner" />
       </javah>
    </target>
 
    <target name="gcc" if="use.gcc">
-      <echo message="linuxcc ${os.arch}"/>
-      <exec executable="g++" >
-         <arg value="-O3"/>
-         <arg value="-g"/>
-         <arg value="-fPIC"/>
-         <arg value="-I${java.home}/../include"/> 
-         <arg value="-I${java.home}/../include/linux"/> 
-         <arg value="-Iinclude"/> 
-         <arg value="-I${amd.app.sdk.dir}/include"/> 
-         <arg value="-shared"/>
-         <arg value="-o"/>
-         <arg value="libaparapi_${x86_or_x86_64}.so"/>
-         <arg value="src/cpp/aparapi.cpp"/>
-         <arg value="-L${amd.app.sdk.dir}/lib/${x86_or_x86_64}"/>
-         <arg value="-lOpenCL"/>
+      <echo message="linuxcc ${os.arch}" />
+      <exec executable="g++">
+         <arg value="-O3" />
+         <arg value="-g" />
+         <arg value="-fPIC" />
+         <arg value="-I${java.home}/../include" />
+         <arg value="-I${java.home}/../include/linux" />
+         <arg value="-Iinclude" />
+         <arg value="-I${amd.app.sdk.dir}/include" />
+         <arg value="-shared" />
+         <arg value="-o" />
+         <arg value="libaparapi_${x86_or_x86_64}.so" />
+         <arg value="src/cpp/aparapi.cpp" />
+         <arg value="-L${amd.app.sdk.dir}/lib/${x86_or_x86_64}" />
+         <arg value="-lOpenCL" />
       </exec>
    </target>
 
+   <target name="gcc_mac" if="use.gcc_mac">
+      <echo message="gcc ${os.arch}" />
+      <exec executable="g++">
+         <arg value="-O3" />
+         <arg value="-g" />
+         <arg value="-fPIC" />
+         <arg value="-I/System/Library/Frameworks/JavaVM.framework/Headers" />
+         <arg value="-I/System/Library/Frameworks/OpenCL.framework/Headers" />
+         <arg value="-Iinclude" />
+         <arg value="-shared" />
+         <arg value="-o" />
+         <arg value="libaparapi_${x86_or_x86_64}.dylib" />
+         <arg value="src/cpp/aparapi.cpp" />
+         <arg value="-framework" />
+         <arg value="OpenCL" />
+      </exec>
+   </target>
+
+
    <target name="msvc" if="use.msvc">
-
-      <exec executable="${cl}" >
-         <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE"/>
-         <arg value="/nologo"/>
-         <arg value="/TP"/>
-         <arg value="/Ox"/>
-         <arg value="/I${msvc.dir}\vc\include"/>
-         <arg value="/I${msvc.sdk.dir}\include"/>
-         <arg value="/I${java.home}\..\include"/>
-         <arg value="/I${java.home}\..\include\win32"/> 
-         <arg value="/Iinclude"/>
-         <arg value="/I${amd.app.sdk.dir}\include"/>
-         <arg value="/c"/>
-         <arg value="src\cpp\aparapi.cpp"/>
+      <exec executable="${cl}">
+         <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE" />
+         <arg value="/nologo" />
+         <arg value="/TP" />
+         <arg value="/Ox" />
+         <arg value="/I${msvc.dir}\vc\include" />
+         <arg value="/I${msvc.sdk.dir}\include" />
+         <arg value="/I${java.home}\..\include" />
+         <arg value="/I${java.home}\..\include\win32" />
+         <arg value="/Iinclude" />
+         <arg value="/I${amd.app.sdk.dir}\include" />
+         <arg value="/c" />
+         <arg value="src\cpp\aparapi.cpp" />
       </exec>
-      <exec executable="${cl}" >
-         <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE"/>
-         <arg value="/nologo"/>
-         <arg value="/LD"/>
-         <arg value="aparapi.obj"/>
-         <arg value="/link"/>
-         <arg value="/libpath:${msvc.dir}\vc\lib\${optional.amd64.subdir}"/>
-         <arg value="/libpath:${msvc.sdk.dir}\lib\${optional.x64.subdir}"/>
-         <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}"/>
-         <arg value="OpenCL.lib"/>
-         <arg value="/out:aparapi_${x86_or_x86_64}.dll"/>
+      <exec executable="${cl}">
+         <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE" />
+         <arg value="/nologo" />
+         <arg value="/LD" />
+         <arg value="aparapi.obj" />
+         <arg value="/link" />
+         <arg value="/libpath:${msvc.dir}\vc\lib\${optional.amd64.subdir}" />
+         <arg value="/libpath:${msvc.sdk.dir}\lib\${optional.x64.subdir}" />
+         <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
+         <arg value="OpenCL.lib" />
+         <arg value="/out:aparapi_${x86_or_x86_64}.dll" />
       </exec>
-
    </target>
 
    <target name="mingw" if="use.mingw">
-      <exec executable="${mingw.dir}/bin/g++" >
-         <env key="PATH" path="${env.PATH};${mingw.dir}/bin"/>
-         <arg value="-Wall"/>
-         <arg value="-O3"/>
-         <arg value="-Wl,--kill-at"/>
-         <arg value="-I${java.home}\..\include"/>
-         <arg value="-I${java.home}\..\include\win32"/>
-         <arg value="-Iinclude"/>
-         <arg value="-I${amd.app.sdk.dir}\include"/>
-         <arg value="-shared"/>
-         <arg value="-o"/>
-         <arg value="aparapi_${x86_or_x86_64}.dll"/>
-         <arg value="src\cpp\aparapi.cpp"/>
-         <arg value="-L${amd.app.sdk.dir}\lib\${x86_or_x86_64}"/>
-         <arg value="-lOpenCL"/>
+      <exec executable="${mingw.dir}/bin/g++">
+         <env key="PATH" path="${env.PATH};${mingw.dir}/bin" />
+         <arg value="-Wall" />
+         <arg value="-O3" />
+         <arg value="-Wl,--kill-at" />
+         <arg value="-I${java.home}\..\include" />
+         <arg value="-I${java.home}\..\include\win32" />
+         <arg value="-Iinclude" />
+         <arg value="-I${amd.app.sdk.dir}\include" />
+         <arg value="-shared" />
+         <arg value="-o" />
+         <arg value="aparapi_${x86_or_x86_64}.dll" />
+         <arg value="src\cpp\aparapi.cpp" />
+         <arg value="-L${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
+         <arg value="-lOpenCL" />
       </exec>
    </target>
 
-   <target name="build" depends="check, javah, msvc, mingw, gcc"/>
+
+   <target name="build" depends="check, javah, msvc, mingw, gcc, gcc_mac" />
 
 </project>
