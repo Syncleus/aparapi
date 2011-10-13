@@ -403,66 +403,94 @@ class JNIContext{
 
             // create the context using the mechanism described here
             // http://developer.amd.com/support/KnowledgeBase/Lists/KnowledgeBase/DispForm.aspx?ID=71
+            
+            // We may have one or more available platforms so determine how many we have 
             status = clGetPlatformIDs(0, NULL, &platformc);
+
             if (status == CL_SUCCESS && platformc >0) {
                platforms = new cl_platform_id[platformc];
                status = clGetPlatformIDs(platformc, platforms, NULL);
                if (status == CL_SUCCESS){
-                  for (unsigned i = 0; i < platformc; ++i) {
-                     char pbuf[512];
-                     status = clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, sizeof(pbuf), pbuf, NULL);
+                  // iterate through platforms looking for an OpenCL 1.1 platform supporting required device (GPU|CPU)
+                  // note that we exit the loop when we find a match so we find the first match
+                  for (unsigned i = 0; platform == NULL && i < platformc; ++i) {
+                     char platformVendorName[512];  
+                     char platformVersionName[512];
+                     status = clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, sizeof(platformVendorName), platformVendorName, NULL);
+                     status = clGetPlatformInfo(platforms[i], CL_PLATFORM_VERSION, sizeof(platformVersionName), platformVersionName, NULL);
                      if (isVerbose()){
-                        fprintf(stderr, "platform %d %s\n", i, pbuf); 
+                        fprintf(stderr, "platform name    %d %s\n", i, platformVendorName); 
+                        fprintf(stderr, "platform version %d %s\n", i, platformVersionName); 
                      }
-                     if (!strcmp(pbuf, "Advanced Micro Devices, Inc.")) {
-                        platform = platforms[i];
-                     }
-                  }
-
-                  // Get the # of devices
-                  status = clGetDeviceIDs(platform, deviceType, 0, NULL, &deviceIdc);
-                  if (status == CL_SUCCESS){
-                    
-                     deviceIds = new cl_device_id[deviceIdc];
-                     status = clGetDeviceIDs(platform, deviceType, deviceIdc, deviceIds, NULL);
-                     if (status == CL_SUCCESS){
-                        ASSERT_CL_NO_RETURN("clGetDeviceIDs()"); 
-
-                        GET_DEV_INFO(deviceIds[0], CL_DEVICE_MAX_COMPUTE_UNITS, maxComputeUnits, "%d");
-                        GET_DEV_INFO(deviceIds[0], CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, maxWorkItemDimensions, "%d");
-                        GET_DEV_INFO(deviceIds[0], CL_DEVICE_MAX_WORK_GROUP_SIZE, maxWorkGroupSize, "%d");
-                        GET_DEV_INFO(deviceIds[0], CL_DEVICE_GLOBAL_MEM_SIZE, globalMemSize, "%d");
-                        GET_DEV_INFO(deviceIds[0], CL_DEVICE_LOCAL_MEM_SIZE, localMemSize, "%d");
-                        if (isVerbose()){
-
-                           fprintf(stderr, "device[%p]: Type: ", deviceIds[0]);
-                           if (deviceType & CL_DEVICE_TYPE_DEFAULT) {
-                              //  deviceType &= ~CL_DEVICE_TYPE_DEFAULT;
-                              fprintf(stderr, "Default ");
-                           }else if (deviceType & CL_DEVICE_TYPE_CPU) {
-                              // deviceType &= ~CL_DEVICE_TYPE_CPU;
-                              fprintf(stderr, "CPU ");
-                           }else if (deviceType & CL_DEVICE_TYPE_GPU) {
-                              // deviceType &= ~CL_DEVICE_TYPE_GPU;
-                              fprintf(stderr, "GPU ");
-                           }else if (deviceType & CL_DEVICE_TYPE_ACCELERATOR) {
-                              // deviceType &= ~CL_DEVICE_TYPE_ACCELERATOR;
-                              fprintf(stderr, "Accelerator ");
-                           }else{
-                              fprintf(stderr, "Unknown (0x%llx) ", deviceType);
+                     // platformVendorName = "Advanced Micro Devices, Inc."||"NVIDIA Corporation"
+                     // platformVersionName = "OpenCL 1.1 AMD-APP-SDK-v2.5 (684.213)"|"OpenCL 1.1 CUDA 4.0.1"
+                     //  we check if the platformVersionName starts with "OpenCL 1.1" (10 chars!) 
+                     if (!strncmp(platformVersionName, "OpenCL 1.1", 10)) {
+                        // Get the # of devices
+                        status = clGetDeviceIDs(platforms[i], deviceType, 0, NULL, &deviceIdc);
+                        // now check if this platform supports the requested device type (GPU or CPU)
+                        if (status == CL_SUCCESS && deviceIdc >0 ){
+                           platform = platforms[i];
+                           if (isVerbose()){
+                              fprintf(stderr, "platform %s supports requested device type\n", platformVendorName);
                            }
-                           fprintf(stderr, "\n");
+                      
+                           deviceIds = new cl_device_id[deviceIdc];
+                           status = clGetDeviceIDs(platform, deviceType, deviceIdc, deviceIds, NULL);
+                           if (status == CL_SUCCESS){
+                              ASSERT_CL_NO_RETURN("clGetDeviceIDs()"); 
+      
+                              GET_DEV_INFO(deviceIds[0], CL_DEVICE_MAX_COMPUTE_UNITS, maxComputeUnits, "%d");
+                              GET_DEV_INFO(deviceIds[0], CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, maxWorkItemDimensions, "%d");
+                              GET_DEV_INFO(deviceIds[0], CL_DEVICE_MAX_WORK_GROUP_SIZE, maxWorkGroupSize, "%d");
+                              GET_DEV_INFO(deviceIds[0], CL_DEVICE_GLOBAL_MEM_SIZE, globalMemSize, "%d");
+                              GET_DEV_INFO(deviceIds[0], CL_DEVICE_LOCAL_MEM_SIZE, localMemSize, "%d");
+                              if (isVerbose()){
+      
+                                 fprintf(stderr, "device[%p]: Type: ", deviceIds[0]);
+                                 if (deviceType & CL_DEVICE_TYPE_DEFAULT) {
+                                    //  deviceType &= ~CL_DEVICE_TYPE_DEFAULT;
+                                    fprintf(stderr, "Default ");
+                                 }else if (deviceType & CL_DEVICE_TYPE_CPU) {
+                                    // deviceType &= ~CL_DEVICE_TYPE_CPU;
+                                    fprintf(stderr, "CPU ");
+                                 }else if (deviceType & CL_DEVICE_TYPE_GPU) {
+                                    // deviceType &= ~CL_DEVICE_TYPE_GPU;
+                                    fprintf(stderr, "GPU ");
+                                 }else if (deviceType & CL_DEVICE_TYPE_ACCELERATOR) {
+                                    // deviceType &= ~CL_DEVICE_TYPE_ACCELERATOR;
+                                    fprintf(stderr, "Accelerator ");
+                                 }else{
+                                    fprintf(stderr, "Unknown (0x%llx) ", deviceType);
+                                 }
+                                 fprintf(stderr, "\n");
+                              }
+                              cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platform, 0 };
+                              cl_context_properties* cprops = (NULL == platform) ? NULL : cps;
+                              context = clCreateContextFromType( cprops, deviceType, NULL, NULL, &status);
+                              ASSERT_CL_NO_RETURN("clCreateContextFromType()");
+                              if (status == CL_SUCCESS){
+      
+                                 valid = JNI_TRUE;
+                              }
+                           }
+                        }else{
+                           if (isVerbose()){
+                              fprintf(stderr, "platform %s does not support requested device type skipping!\n", platformVendorName);
+                           }
                         }
-                        cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platform, 0 };
-                        cl_context_properties* cprops = (NULL == platform) ? NULL : cps;
-                        context = clCreateContextFromType( cprops, deviceType, NULL, NULL, &status);
-                        ASSERT_CL_NO_RETURN("clCreateContextFromType()");
-                        if (status == CL_SUCCESS){
 
-                           valid = JNI_TRUE;
-                        }
+                     }else{
+                         if (isVerbose()){
+                            fprintf(stderr, "platform %s version %s is not OpenCL 1.1 skipping!\n", platformVendorName, platformVersionName);
+                         }
                      }
                   }
+
+               } 
+            }else{
+               if (isVerbose()){
+                  fprintf(stderr, "no opencl platforms available!\n");
                }
             }
 
