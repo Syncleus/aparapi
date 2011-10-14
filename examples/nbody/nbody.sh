@@ -5,7 +5,7 @@ export JOGLJARS=${JOGLJARS}:${JOGLDIR}/jar/jogl.all.jar
 export JOGLJARS=${JOGLJARS}:${JOGLDIR}/jar/nativewindow.all.jar
 export JOGLJARS=${JOGLJARS}:${JOGLDIR}/jar/gluegen-rt.jar
 
-${JAVA_HOME}/bin/java \
+java \
   -Djava.library.path=../../com.amd.aparapi.jni:${JOGLDIR}/lib \
   -Dcom.amd.aparapi.executionMode=$1 \
   -Dbodies=$1 \
