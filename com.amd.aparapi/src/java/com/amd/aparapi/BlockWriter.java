@@ -442,12 +442,39 @@ abstract class BlockWriter{
       } else if (_instruction instanceof Constant<?>) {
          Constant<?> constantInstruction = (Constant<?>) _instruction;
          Object value = constantInstruction.getValue();
-         write(value.toString());
+
          if (value instanceof Float) {
-            write("f");
-         }
-         if (value instanceof Long) {
-            write("L");
+
+            Float f = (Float) value;
+            if (f.isNaN()) {
+               write("NAN");
+            } else if (f.isInfinite()) {
+               if (f < 0){
+                  write("-");
+               }
+               write("INFINITY");
+            } else {
+               write(value.toString());
+               write("f");
+            }
+         } else if (value instanceof Double) {
+
+            Double d = (Double) value;
+            if (d.isNaN()) {
+               write("NAN");
+            } else if (d.isInfinite()) {
+               if (d < 0){
+                  write("-");
+               }
+               write("INFINITY");
+            } else {
+               write(value.toString());
+            }
+         } else {
+            write(value.toString());
+            if (value instanceof Long) {
+               write("L");
+            }
          }
 
       } else if (_instruction instanceof AccessLocalVariable) {
