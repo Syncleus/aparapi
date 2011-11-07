@@ -45,6 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -280,6 +281,7 @@ class MethodModel{
          if ((!Config.enableSWITCH) && (instruction instanceof I_LOOKUPSWITCH || instruction instanceof I_TABLESWITCH)) {
             throw new ClassParseException(instruction, ClassParseException.TYPE.SWITCH);
          }
+
          if (!Config.enableMETHODARRAYPASSING) {
             if (instruction instanceof MethodCall) {
                MethodCall methodCall = (MethodCall) instruction;
@@ -1502,6 +1504,30 @@ class MethodModel{
 
          foldExpressions();
 
+         // Attempt to detect accesses through multi-dimension arrays. 
+         // This was issue 10 in open source release http://code.google.com/p/aparapi/issues/detail?id=10
+         for (Entry<Integer, Instruction> instructionEntry : pcMap.entrySet()) {
+            Instruction instruction = instructionEntry.getValue();
+            if (instruction instanceof AccessArrayElement) {
+               AccessArrayElement accessArrayElement = (AccessArrayElement) instruction;
+               Instruction accessed = accessArrayElement.getArrayRef();
+               // System.out.println("accessed "+accessed);
+               if (accessed instanceof AccessArrayElement) {
+                  throw new ClassParseException(ClassParseException.TYPE.MULTIDIMENSIONARRAYACCESS);
+               }
+
+            }
+            if (instruction instanceof AssignToArrayElement) {
+               AssignToArrayElement assignToArrayElement = (AssignToArrayElement) instruction;
+               Instruction assigned = assignToArrayElement.getArrayRef();
+
+               // System.out.println("assigned "+assigned);
+               if (assigned instanceof AccessArrayElement) {
+                  throw new ClassParseException(ClassParseException.TYPE.MULTIDIMENSIONARRAYASSIGN);
+               }
+
+            }
+         }
          // Accessor conversion only works on member object arrays
          if (entrypoint != null && _method.getClassModel() != entrypoint.getClassModel()) {
             if (logger.isLoggable(Level.FINE)) {

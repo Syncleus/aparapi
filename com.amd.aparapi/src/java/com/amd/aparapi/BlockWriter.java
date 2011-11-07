@@ -449,7 +449,7 @@ abstract class BlockWriter{
             if (f.isNaN()) {
                write("NAN");
             } else if (f.isInfinite()) {
-               if (f < 0){
+               if (f < 0) {
                   write("-");
                }
                write("INFINITY");
@@ -463,7 +463,7 @@ abstract class BlockWriter{
             if (d.isNaN()) {
                write("NAN");
             } else if (d.isInfinite()) {
-               if (d < 0){
+               if (d < 0) {
                   write("-");
                }
                write("INFINITY");

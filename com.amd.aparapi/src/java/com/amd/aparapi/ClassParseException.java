@@ -81,7 +81,9 @@ package com.amd.aparapi;
       ACCESSEDOBJECTNONFINAL("Kernel array object member class must be final."), //
       ACCESSEDOBJECTFIELDNAMECONFLICT("Conflicting fields found in class hierarchy"), //
       ACCESSEDOBJECTONLYSUPPORTSSIMPLEPUTFIELD("We don't support putfield instructions beyond simple setters"), //
-      ACCESSEDOBJECTSETTERARRAY("Passing array arguments to Intrinsics in expression form is not supported");
+      ACCESSEDOBJECTSETTERARRAY("Passing array arguments to Intrinsics in expression form is not supported"), //
+      MULTIDIMENSIONARRAYASSIGN("Can't assign to two dimension array"), //
+      MULTIDIMENSIONARRAYACCESS("Can't access through a two dimensional array");
       private String description;
 
       TYPE(String _description) {
