@@ -287,7 +287,7 @@ public class Main{
             try {
                InputStream textureStream = Main.class.getResourceAsStream("particle.jpg");
                Texture texture = TextureIO.newTexture(textureStream, false, null);
-               texture.enable();
+               texture.enable(gl);
             } catch (IOException e) {
                e.printStackTrace();
             } catch (GLException e) {
