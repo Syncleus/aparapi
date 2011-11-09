@@ -24,12 +24,21 @@
       <delete file="${ant.project.name}.jar"/>
    </target>
 
-   <target name="run" >
+   <target name="run-gpu" >
       <java classname="com.amd.aparapi.examples.effects.Main" fork="true">
          <classpath refid="runtime.class.path"/>
          <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni"/>
          <sysproperty key="com.amd.aparapi.executionMode" value="GPU"/>
       </java>
    </target>
+
+   <target name="run-jtp" >
+      <java classname="com.amd.aparapi.examples.effects.Main" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni"/>
+         <sysproperty key="com.amd.aparapi.executionMode" value="JTP"/>
+      </java>
+   </target>
+   <target name="run" depends="run-gpu"/>
 
 </project>
