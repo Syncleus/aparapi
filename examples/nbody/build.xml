@@ -5,8 +5,8 @@
 
    <path id="compiler.class.path">
       <pathelement path="../../com.amd.aparapi/aparapi.jar"/>
-      <pathelement path="lib/jogl.all.jar"/>
-      <pathelement path="lib/gluegen-rt.jar"/>
+      <pathelement path="jogamp/jogl.all.jar"/>
+      <pathelement path="jogamp/gluegen-rt.jar"/>
    </path>
 
    <path id="runtime.class.path" cache="true">
@@ -14,92 +14,56 @@
       <pathelement path="${ant.project.name}.jar"/>
    </path>
 
-   <target name="build" depends="clean">
-      <mkdir dir="classes"/>
-      <javac srcdir="src" destdir="classes" debug="on" includeantruntime="false">
-         <classpath refid="compiler.class.path"/>
-      </javac>
-      <copy todir="classes/com/amd/aparapi/examples/nbody" file="src/com/amd/aparapi/examples/nbody/particle.jpg"/>
-      <jar jarfile="${ant.project.name}.jar" basedir="classes"/>
-   </target>
-
-   <target name="clean">
-      <delete dir="classes"/>
-      <delete file="${ant.project.name}.jar"/>
-   </target>
-
-
-
-   <target name="run-jtp">
-
-
-      <java classname="com.amd.aparapi.examples.nbody.Main" fork="true">
-         <classpath refid="runtime.class.path"/>
-         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni;lib"/>
-         <sysproperty key="com.amd.aparapi.executionMode" value="JTP"/>
-         <sysproperty key="bodies" value="16384"/>
-         <sysproperty key="height" value="800"/>
-         <sysproperty key="width" value="800"/>
-      </java>
-   </target>
-
-   <target name="run-gpu">
-      <java classname="com.amd.aparapi.examples.nbody.Main" fork="true">
-         <classpath refid="runtime.class.path"/>
-         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni;lib"/>
-         <sysproperty key="com.amd.aparapi.executionMode" value="GPU"/>
-         <sysproperty key="bodies" value="16384"/>
-         <sysproperty key="height" value="800"/>
-         <sysproperty key="width" value="800"/>
-      </java>
-   </target>
-
-   <target name="run" depends="run-gpu"/>
-
    <target name="getjogl-windows-i586" if="use.win32">
-      <delete dir="lib"/>
-      <get dest="lib">
+      <delete dir="jogamp"/>
+      <get dest="jogamp">
          <url url="${jogamp-jar-url}/jogl-all-natives-windows-i586.jar"/> 
+         <url url="${jogamp-jar-url}/gluegen-rt-natives-windows-i586.jar"/> 
          <url url="${jogamp-jar-url}/jogl.all.jar"/> 
          <url url="${jogamp-jar-url}/gluegen-rt.jar"/> 
-         <url url="${jogamp-jar-url}/gluegen-rt-natives-windows-i586.jar"/> 
       </get>
-      <unzip src="lib/jogl-all-natives-windows-i586.jar" dest="lib"/>
-      <unzip src="lib/gluegen-rt-natives-windows-i586.jar" dest="lib"/>
-      <delete dir="lib/META-INF"/>
+      <unzip src="jogamp/jogl-all-natives-windows-i586.jar" dest="jogamp"/>
+      <unzip src="jogamp/gluegen-rt-natives-windows-i586.jar" dest="jogamp"/>
+      <delete dir="jogamp/META-INF"/>
    </target>
 
    <target name="getjogl-windows-amd64" if="use.win64">
-      <delete dir="lib"/>
-      <get dest="lib">
+      <delete dir="jogamp"/>
+      <get dest="jogamp">
          <url url="${jogamp-jar-url}/jogl-all-natives-windows-amd64.jar"/> 
          <url url="${jogamp-jar-url}/gluegen-rt-natives-windows-amd64.jar"/> 
+         <url url="${jogamp-jar-url}/jogl.all.jar"/> 
+         <url url="${jogamp-jar-url}/gluegen-rt.jar"/> 
       </get>
-      <unzip src="lib/jogl-all-natives-windows-amd64.jar" dest="lib"/>
-      <unzip src="lib/gluegen-rt-natives-windows-amd64.jar" dest="lib"/>
-      <delete dir="lib/META-INF"/>
+      <unzip src="jogamp/jogl-all-natives-windows-amd64.jar" dest="jogamp"/>
+      <unzip src="jogamp/gluegen-rt-natives-windows-amd64.jar" dest="jogamp"/>
+      <delete dir="jogamp/META-INF"/>
    </target>
 
    <target name="getjogl-linux-i586" if="use.linux32">
-      <delete dir="lib"/>
-      <get dest="lib">
+      <delete dir="jogamp"/>
+      <get dest="jogamp">
          <url url="${jogamp-jar-url}/jogl-all-natives-linux-i586.jar"/> 
          <url url="${jogamp-jar-url}/gluegen-rt-windows-linux-i586.jar"/> 
+         <url url="${jogamp-jar-url}/jogl.all.jar"/> 
+         <url url="${jogamp-jar-url}/gluegen-rt.jar"/> 
       </get>
-      <unzip src="lib/jogl-all-natives-linux-i586.jar" dest="lib"/>
-      <unzip src="lib/gluegen-rt-natives-linux-i586.jar" dest="lib"/>
-      <delete dir="lib/META-INF"/>
+      <unzip src="jogamp/jogl-all-natives-linux-i586.jar" dest="jogamp"/>
+      <unzip src="jogamp/gluegen-rt-natives-linux-i586.jar" dest="jogamp"/>
+      <delete dir="jogamp/META-INF"/>
    </target>
 
    <target name="getjogl-linux-amd64" if="use.linux64">
-      <delete dir="lib"/>
-      <get dest="lib">
+      <delete dir="jogamp"/>
+      <get dest="jogamp">
          <url url="${jogamp-jar-url}/jogl-all-natives-linux-amd64.jar"/> 
          <url url="${jogamp-jar-url}/gluegen-rt-natives-linux-amd64.jar"/> 
+         <url url="${jogamp-jar-url}/jogl.all.jar"/> 
+         <url url="${jogamp-jar-url}/gluegen-rt.jar"/> 
       </get>
-      <unzip src="lib/jogl-all-natives-linux-amd64.jar" dest="lib"/>
-      <unzip src="lib/gluegen-rt-natives-linux-amd64.jar" dest="lib"/>
-      <delete dir="lib/META-INF"/>
+      <unzip src="jogamp/jogl-all-natives-linux-amd64.jar" dest="jogamp"/>
+      <unzip src="jogamp/gluegen-rt-natives-linux-amd64.jar" dest="jogamp"/>
+      <delete dir="jogamp/META-INF"/>
    </target>
 
    <target name="checkos">
@@ -110,6 +74,10 @@
                <os arch="x86" />
                <os arch="i386" />
             </or>
+            <not><available file="jogamp/jogl-all-natives-windows-i586.jar"/> </not>
+            <not><available file="jogamp/gluegen-rt-natives-windows-i586.jar"/> </not>
+            <not><available file="jogamp/jogl.all.jar"/> </not>
+            <not><available file="jogamp/gluegen-rt.jar"/> </not>
          </and>
       </condition>
       <condition property="use.win64">
@@ -121,6 +89,10 @@
                   <os arch="i386" />
                </or>
             </not>
+            <not><available file="jogamp/jogl-all-natives-windows-amd64.jar"/> </not>
+            <not><available file="jogamp/gluegen-rt-natives-windows-amd64.jar"/> </not>
+            <not><available file="jogamp/jogl.all.jar"/> </not>
+            <not><available file="jogamp/gluegen-rt.jar"/> </not>
          </and>
       </condition>
       <condition property="use.linux32">
@@ -133,6 +105,10 @@
                <os arch="x86" />
                <os arch="i386" />
             </or>
+            <not><available file="jogamp/jogl-all-natives-linux-i586.jar"/> </not>
+            <not><available file="jogamp/gluegen-rt-natives-linux-i586.jar"/> </not>
+            <not><available file="jogamp/jogl.all.jar"/> </not>
+            <not><available file="jogamp/gluegen-rt.jar"/> </not>
          </and>
       </condition>
       <condition property="use.linux64">
@@ -147,16 +123,53 @@
                   <os arch="i386" />
                </or>
             </not>
+            <not><available file="jogamp/jogl-all-natives-linux-amd64.jar"/> </not>
+            <not><available file="jogamp/gluegen-rt-natives-linux-amd64.jar"/> </not>
+            <not><available file="jogamp/jogl.all.jar"/> </not>
+            <not><available file="jogamp/gluegen-rt.jar"/> </not>
          </and>
       </condition>
    </target>
 
-   <target name="getjogl" depends="checkos, getjogl-windows-i586, getjogl-windows-amd64, getjogl-linux-i586, getjogl-linux-amd64">
-      <get dest="lib">
-         <url url="${jogamp-jar-url}/jogl.all.jar"/> 
-         <url url="${jogamp-jar-url}/gluegen-rt.jar"/> 
-      </get>
+   <target name="getjogl" depends="checkos, getjogl-windows-i586, getjogl-windows-amd64, getjogl-linux-i586, getjogl-linux-amd64"/>
+
+   <target name="build" depends="clean, getjogl">
+      <mkdir dir="classes"/>
+      <javac srcdir="src" destdir="classes" debug="on" includeantruntime="false">
+         <classpath refid="compiler.class.path"/>
+      </javac>
+      <copy todir="classes/com/amd/aparapi/examples/nbody" file="src/com/amd/aparapi/examples/nbody/particle.jpg"/>
+      <jar jarfile="${ant.project.name}.jar" basedir="classes"/>
    </target>
+
+   <target name="clean">
+      <delete dir="classes"/>
+      <delete file="${ant.project.name}.jar"/>
+   </target>
+
+   <target name="run-jtp">
+      <java classname="com.amd.aparapi.examples.nbody.Main" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni;jogamp"/>
+         <sysproperty key="com.amd.aparapi.executionMode" value="JTP"/>
+         <sysproperty key="bodies" value="16384"/>
+         <sysproperty key="height" value="800"/>
+         <sysproperty key="width" value="800"/>
+      </java>
+   </target>
+
+   <target name="run-gpu">
+      <java classname="com.amd.aparapi.examples.nbody.Main" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni;jogamp"/>
+         <sysproperty key="com.amd.aparapi.executionMode" value="GPU"/>
+         <sysproperty key="bodies" value="16384"/>
+         <sysproperty key="height" value="800"/>
+         <sysproperty key="width" value="800"/>
+      </java>
+   </target>
+
+   <target name="run" depends="run-gpu"/>
 
 
 </project>
