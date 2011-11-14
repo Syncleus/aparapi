@@ -44,7 +44,7 @@
       <delete dir="jogamp"/>
       <get dest="jogamp">
          <url url="${jogamp-jar-url}/jogl-all-natives-linux-i586.jar"/> 
-         <url url="${jogamp-jar-url}/gluegen-rt-windows-linux-i586.jar"/> 
+         <url url="${jogamp-jar-url}/gluegen-rt-natives-linux-i586.jar"/> 
          <url url="${jogamp-jar-url}/jogl.all.jar"/> 
          <url url="${jogamp-jar-url}/gluegen-rt.jar"/> 
       </get>
