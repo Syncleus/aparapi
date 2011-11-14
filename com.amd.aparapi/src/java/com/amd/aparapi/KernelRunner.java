@@ -39,6 +39,7 @@ package com.amd.aparapi;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashSet;
@@ -403,6 +404,11 @@ class KernelRunner{
        * @see ARG_APARAPI_BUF_IS_DIRECT  
        */
       @UsedByJNICode public int type;
+
+      /**
+       * True if the field is static
+       */
+      @UsedByJNICode public boolean isStatic;
 
       /**
        * Name of the field
@@ -1222,6 +1228,7 @@ class KernelRunner{
                      args[i] = new KernelArg();
                      args[i].name = field.getName();
                      args[i].field = field;
+                     args[i].isStatic = (field.getModifiers() & Modifier.STATIC) == Modifier.STATIC; 
 
                      Class<?> type = field.getType();
                      if (type.isArray()) {
