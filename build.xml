@@ -13,7 +13,9 @@
       <echo message="   clean"/> 
       <echo message="      Clean the com.amd.aparapi and com.amd.aparapi.jni subdirs."/> 
       <echo message="   build"/> 
-      <echo message="      Build the com.amd.aparapi and com.amd.aparapi.jni artifacts."/> 
+      <echo message="      Build the com.amd.aparapi and com.amd.aparapi.jni artifacts and samples."/> 
+      <echo message="   examples"/> 
+      <echo message="      Build the com.amd.aparapi and com.amd.aparapi.jni artifacts, samples and examples."/> 
       <echo message="   test"/> 
       <echo message="      Build and execute the test code."/> 
       <echo message="   dist"/> 
@@ -32,6 +34,7 @@
          <fileset dir="examples" includes="*/build.xml"/>
          <fileset dir="test" includes="*/build.xml"/>
       </subant>
+      <delete dir="examples\nbody\jogamp"/> <!-- we handle the jogamp delete here, save downloading each build -->
       <ant dir="com.amd.aparapi.jni" target="clean"/> 
       <ant dir="com.amd.aparapi" target="clean"/> 
    </target>
@@ -42,6 +45,12 @@
       <ant dir="com.amd.aparapi.jni" target="build"/> 
       <subant target="build">
          <fileset dir="samples" includes="*/build.xml"/>
+      </subant>
+   </target>
+
+   <target name="examples" depends="build">
+      <subant target="build">
+         <fileset dir="examples" includes="*/build.xml"/>
       </subant>
    </target>
 
