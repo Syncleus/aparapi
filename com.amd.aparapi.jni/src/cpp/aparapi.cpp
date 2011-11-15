@@ -447,6 +447,15 @@ class JNIContext{
                            status = clGetDeviceIDs(platforms[i], deviceType, 0, NULL, &deviceIdc);
                            // now check if this platform supports the requested device type (GPU or CPU)
                            if (status == CL_SUCCESS && deviceIdc >0 ){
+                              if (deviceIdc >1){
+                                 if (isVerbose()){
+                                    fprintf(stderr, "Warning attempt to use %d devices\n", deviceIdc);
+                                 }
+                                 deviceIdc = 1; // Hack to work around issue #18 (multiple device error)
+                                 if (isVerbose()){
+                                    fprintf(stderr, "Locking deviceIdc to %d to work around issue #18\n", deviceIdc);
+                                 }
+                              }
                               platform = platforms[i];
                               if (isVerbose()){
                                  fprintf(stderr, "platform %s supports requested device type\n", platformVendorName);
