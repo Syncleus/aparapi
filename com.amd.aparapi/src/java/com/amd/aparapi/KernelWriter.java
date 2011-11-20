@@ -429,30 +429,37 @@ abstract class KernelWriter extends BlockWriter{
          }
          write(convertType(returnType, true));
 
-         write(mm.getName());
+         write(mm.getName()+"(");
 
+         if(!mm.getMethod().isStatic()) {
          if (mm.getMethod().getClassModel() == _entryPoint.getClassModel()
                || mm.getMethod().getClassModel().isSuperClass(_entryPoint.getClassModel().getClassWeAreModelling())) {
-            write("(This *this");
+            write("This *this");
          } else {
             // Call to an object member or superclass of member
             for (ClassModel c : _entryPoint.getObjectArrayFieldsClasses().values()) {
                if (mm.getMethod().getClassModel() == c) {
-                  write("( __global " + mm.getMethod().getClassModel().getClassWeAreModelling().getName().replace(".", "_")
+                  write("__global " + mm.getMethod().getClassModel().getClassWeAreModelling().getName().replace(".", "_")
                         + " *this");
                   break;
                } else if (mm.getMethod().getClassModel().isSuperClass(c.getClassWeAreModelling())) {
-                  write("( __global " + c.getClassWeAreModelling().getName().replace(".", "_") + " *this");
+                  write("__global " + c.getClassWeAreModelling().getName().replace(".", "_") + " *this");
                   break;
                }
             }
          }
+         }
+         
+         boolean alreadyHasFirstArg = !mm.getMethod().isStatic();
+         
          LocalVariableTableEntry lvte = mm.getLocalVariableTableEntry();
          for (LocalVariableInfo lvi : lvte) {
-            if (lvi.getStart() == 0 && lvi.getVariableIndex() != 0) { // full scope but skip this
+            if (lvi.getStart() == 0 && (lvi.getVariableIndex() != 0 || mm.getMethod().isStatic())) { // full scope but skip this
                String descriptor = lvi.getVariableDescriptor();
-               write(", ");
-
+               if(alreadyHasFirstArg) {
+            	   write(", ");	
+               }
+               
                // Arrays always map to __global arrays
                if (descriptor.startsWith("[")) {
                   write(" __global ");
@@ -460,6 +467,7 @@ abstract class KernelWriter extends BlockWriter{
 
                write(convertType(descriptor, true));
                write(lvi.getVariableName());
+               alreadyHasFirstArg=true;	
             }
          }
          write(")");

@@ -51,7 +51,6 @@ package com.amd.aparapi;
       NONE("none"), //
       ARRAY_RETURN("We don't support areturn instructions"), //
       PUTFIELD("We don't support putstatic instructions"), //
-      INVOKESTATIC("We don't support invokestatic instructions"), //
       INVOKEINTERFACE("We don't support invokeinterface instructions"), //
       GETSTATIC("We don't support getstatic instructions"), //
       ATHROW("We don't support athrow instructions"), //

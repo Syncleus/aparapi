@@ -2089,6 +2089,10 @@ class ClassModel{
          return (methodAccessFlags);
       }
 
+      public boolean isStatic() {
+    	  return (Access.STATIC.bitIsSet(methodAccessFlags));
+      }
+      
       AttributePool getAttributePool() {
          return (methodAttributePool);
       }

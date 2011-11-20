@@ -16,4 +16,25 @@ public class CallObjectStatic extends Kernel{
    int out[] = new int[2];
 }
 
-/**{Throws{ClassParseException}Throws}**/
+/**{OpenCL{
+typedef struct This_s{
+__global int *out;
+int passid;
+}This;
+int get_pass_id(This *this){
+return this->passid;
+}
+__kernel void run(
+__global int *out, 
+int passid
+){
+This thisStruct;
+This* this=&thisStruct;
+this->out = out;
+this->passid = passid;
+{
+this->out[0] = foo();
+return;
+}
+}
+}OpenCL}**/

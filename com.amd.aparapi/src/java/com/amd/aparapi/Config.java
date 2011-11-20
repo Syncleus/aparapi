@@ -120,8 +120,6 @@ class Config{
 
    static final boolean enableGETSTATIC = Boolean.getBoolean(propPkgName + ".enable.GETSTATIC");
 
-   static final boolean enableINVOKESTATIC = Boolean.getBoolean(propPkgName + ".enable.INVOKESTATIC");
-
    static final boolean enableINVOKEINTERFACE = Boolean.getBoolean(propPkgName + ".enable.INVOKEINTERFACE");
 
    static final boolean enableMONITOR = Boolean.getBoolean(propPkgName + ".enable.MONITOR");
