@@ -56,9 +56,7 @@ package com.amd.aparapi;
       ATHROW("We don't support athrow instructions"), //
       SYNCHRONIZE("We don't support monitorenter or monitorexit instructions"), //
       NEW("We don't support new instructions"), //
-      CHARARRAY("We don't support java char array accesses"), //
       ARRAYALIAS("We don't support copying refs in kernels"), //
-      ACCESSTOCHARFIELD("We don't support java char type"), //
       SWITCH("We don't support lookupswitch or tableswitch instructions"), //
       METHODARRAYARG("We don't support passing arrays as method args"), //
       RECURSION("We don't support recursion"), //
@@ -67,10 +65,9 @@ package com.amd.aparapi;
       BADGETTERTYPEMISMATCH("Getter return type does not match field var type"), //
       BADGETTERNAMEMISMATCH("Getter name does not match fiels name"), //
       BADGETTERNAMENOTFOUND("Getter not found"), //
-      BADSETTERTYPEMISMATCH("Setter arg type does not match field var type"), // 
+      BADSETTERTYPEMISMATCH("Setter arg type does not match field var type"), //
       EXCEPTION("We don't support catch blocks"), //
       ARRAYLOCALVARIABLE("Found an array local variable which assumes that we will alias a field array"), //
-      CHARLOCALVARIABLE("Found a char local variable"), //
       CONFUSINGBRANCHESPOSSIBLYCONTINUE("we don't support continue"), //
       CONFUSINGBRANCHESPOSSIBLYBREAK("we don't support break"), //
       OBJECTFIELDREFERENCE("Using java objects inside kernels is not supported"), //
@@ -83,9 +80,10 @@ package com.amd.aparapi;
       ACCESSEDOBJECTSETTERARRAY("Passing array arguments to Intrinsics in expression form is not supported"), //
       MULTIDIMENSIONARRAYASSIGN("Can't assign to two dimension array"), //
       MULTIDIMENSIONARRAYACCESS("Can't access through a two dimensional array");
+
       private String description;
 
-      TYPE(String _description) {
+      TYPE(final String _description) {
          description = _description;
       }
 
@@ -98,19 +96,19 @@ package com.amd.aparapi;
 
    TYPE type;
 
-   ClassParseException(TYPE _type) {
+   ClassParseException(final TYPE _type) {
       super(_type.getDescription());
       type = _type;
       instruction = null;
    }
 
-   ClassParseException(Instruction _instruction, TYPE _type) {
+   ClassParseException(final Instruction _instruction, final TYPE _type) {
       super("@" + _instruction.getThisPC() + " " + _instruction.getByteCode() + " " + _type.getDescription());
       type = _type;
       instruction = _instruction;
    }
 
-   ClassParseException(TYPE _type, String _methodName) {
+   ClassParseException(final TYPE _type, final String _methodName) {
       super("@" + _methodName + " " + _type.getDescription());
       type = _type;
       instruction = null;
@@ -124,7 +122,7 @@ package com.amd.aparapi;
       return (type);
    }
 
-   ClassParseException(Throwable _t) {
+   ClassParseException(final Throwable _t) {
       super(_t);
    }
 }

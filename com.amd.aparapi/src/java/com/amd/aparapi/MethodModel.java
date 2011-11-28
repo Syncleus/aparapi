@@ -34,7 +34,7 @@ to national security controls as identified on the Commerce Control List (curren
 of EAR).  For the most current Country Group listings, or for additional information about the EAR or your obligations
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
-*/
+ */
 package com.amd.aparapi;
 
 import java.util.ArrayList;
@@ -74,19 +74,16 @@ import com.amd.aparapi.InstructionSet.I_AASTORE;
 import com.amd.aparapi.InstructionSet.I_ARETURN;
 import com.amd.aparapi.InstructionSet.I_ATHROW;
 import com.amd.aparapi.InstructionSet.I_BASTORE;
-import com.amd.aparapi.InstructionSet.I_CALOAD;
 import com.amd.aparapi.InstructionSet.I_CASTORE;
 import com.amd.aparapi.InstructionSet.I_DUP;
 import com.amd.aparapi.InstructionSet.I_DUP2;
 import com.amd.aparapi.InstructionSet.I_DUP_X1;
 import com.amd.aparapi.InstructionSet.I_DUP_X2;
-import com.amd.aparapi.InstructionSet.I_GETFIELD;
 import com.amd.aparapi.InstructionSet.I_GETSTATIC;
 import com.amd.aparapi.InstructionSet.I_IADD;
 import com.amd.aparapi.InstructionSet.I_ICONST_1;
 import com.amd.aparapi.InstructionSet.I_IINC;
 import com.amd.aparapi.InstructionSet.I_INVOKEINTERFACE;
-import com.amd.aparapi.InstructionSet.I_INVOKESTATIC;
 import com.amd.aparapi.InstructionSet.I_LOOKUPSWITCH;
 import com.amd.aparapi.InstructionSet.I_MONITORENTER;
 import com.amd.aparapi.InstructionSet.I_MONITOREXIT;
@@ -195,7 +192,7 @@ class MethodModel{
             logger.fine("Found D on =" + instruction + " in " + getName());
          }
       }
-      if (instruction instanceof I_BASTORE || instruction instanceof I_CASTORE /* || instruction instanceof I_SASTORE */) {
+      if ((instruction instanceof I_BASTORE) || (instruction instanceof I_CASTORE /* || instruction instanceof I_SASTORE */)) {
          usesByteWrites = true;
          if (usesByteWrites && logger.isLoggable(Level.FINE)) {
             logger.fine("Found Byte Addressable Store on =" + instruction + " in " + getName());
@@ -234,57 +231,46 @@ class MethodModel{
          int pc = codeReader.getOffset();
          Instruction instruction = InstructionSet.ByteCode.create(this, codeReader);
 
-         if ((!Config.enablePUTFIELD) && instruction instanceof I_PUTFIELD) {
+         if ((!Config.enablePUTFIELD) && (instruction instanceof I_PUTFIELD)) {
             // Special case putfield handling to allow object setter processing
             // and bail later if necessary
             //throw new ClassParseException("We don't support putfield instructions");
             usesPutfield = true;
          }
 
-         if ((!Config.enableARETURN) && instruction instanceof I_ARETURN) {
+         if ((!Config.enableARETURN) && (instruction instanceof I_ARETURN)) {
             throw new ClassParseException(instruction, ClassParseException.TYPE.ARRAY_RETURN);
          }
 
-         if ((!Config.enablePUTSTATIC) && instruction instanceof I_PUTSTATIC) {
+         if ((!Config.enablePUTSTATIC) && (instruction instanceof I_PUTSTATIC)) {
             throw new ClassParseException(instruction, ClassParseException.TYPE.PUTFIELD);
          }
-         
-         if ((!Config.enableINVOKEINTERFACE) && instruction instanceof I_INVOKEINTERFACE) {
+
+         if ((!Config.enableINVOKEINTERFACE) && (instruction instanceof I_INVOKEINTERFACE)) {
             throw new ClassParseException(instruction, ClassParseException.TYPE.INVOKEINTERFACE);
          }
-         
-         if ((!Config.enableGETSTATIC) && instruction instanceof I_GETSTATIC) {
+
+         if ((!Config.enableGETSTATIC) && (instruction instanceof I_GETSTATIC)) {
             throw new ClassParseException(instruction, ClassParseException.TYPE.GETSTATIC);
          }
-         
-         if ((!Config.enableATHROW) && instruction instanceof I_ATHROW) {
+
+         if ((!Config.enableATHROW) && (instruction instanceof I_ATHROW)) {
             throw new ClassParseException(instruction, ClassParseException.TYPE.ATHROW);
          }
-         
+
          if ((!Config.enableMONITOR) && ((instruction instanceof I_MONITORENTER) || (instruction instanceof I_MONITOREXIT))) {
             throw new ClassParseException(instruction, ClassParseException.TYPE.SYNCHRONIZE);
          }
-         
-         if ((!Config.enableNEW) && instruction instanceof New) {
+
+         if ((!Config.enableNEW) && (instruction instanceof New)) {
             throw new ClassParseException(instruction, ClassParseException.TYPE.NEW);
          }
-         
-         if (instruction instanceof I_CALOAD || instruction instanceof I_CASTORE) {
-            throw new ClassParseException(instruction, ClassParseException.TYPE.CHARARRAY);
-         }
-         
+
          if (instruction instanceof I_AASTORE) {
             throw new ClassParseException(instruction, ClassParseException.TYPE.ARRAYALIAS);
          }
 
-         if (instruction instanceof I_GETFIELD) {
-            I_GETFIELD getFieldInstr = (I_GETFIELD) instruction;
-            if (getFieldInstr.getConstantPoolFieldEntry().getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8().endsWith("C")) {
-               throw new ClassParseException(instruction, ClassParseException.TYPE.ACCESSTOCHARFIELD);
-            }
-         }
-
-         if ((!Config.enableSWITCH) && (instruction instanceof I_LOOKUPSWITCH || instruction instanceof I_TABLESWITCH)) {
+         if ((!Config.enableSWITCH) && ((instruction instanceof I_LOOKUPSWITCH) || (instruction instanceof I_TABLESWITCH))) {
             throw new ClassParseException(instruction, ClassParseException.TYPE.SWITCH);
          }
 
@@ -375,7 +361,7 @@ class MethodModel{
             if (branch.isReverse()) {
                Instruction target = branch.getTarget();
                LinkedList<Branch> list = target.getReverseUnconditionalBranches();
-               if (list != null && list.size() > 0 && list.get(list.size() - 1) != branch) {
+               if ((list != null) && (list.size() > 0) && (list.get(list.size() - 1) != branch)) {
                   Branch unconditional = list.get(list.size() - 1).asBranch();
                   branch.retarget(unconditional);
 
@@ -1289,12 +1275,12 @@ class MethodModel{
        * 
        * a=b=c=<exp>;
        */
-      if (_instruction instanceof AssignToLocalVariable && _operandStart.producesStack()
-            && _operandStart.getNextExpr() instanceof AssignToLocalVariable) {
+      if ((_instruction instanceof AssignToLocalVariable) && _operandStart.producesStack()
+            && (_operandStart.getNextExpr() instanceof AssignToLocalVariable)) {
          Instruction assignFirst = _operandStart.getNextExpr();
          Instruction assign = assignFirst;
          int count = 0;
-         while (assign != null && assign instanceof AssignToLocalVariable) {
+         while ((assign != null) && (assign instanceof AssignToLocalVariable)) {
             assign = assign.getNextExpr();
             count++;
          }
@@ -1354,13 +1340,13 @@ class MethodModel{
 
       // Getters should have 3 bcs: aload_0, getfield, ?return
       if (mightBeSetter) {
-         if (rawVarNameCandidate != null && pcMap.size() == 3) {
+         if ((rawVarNameCandidate != null) && (pcMap.size() == 3)) {
             String firstLetter = rawVarNameCandidate.substring(0, 1).toLowerCase();
             String varNameCandidateCamelCased = rawVarNameCandidate.replaceFirst(rawVarNameCandidate.substring(0, 1), firstLetter);
             String accessedFieldName = null;
             Instruction instruction = expressionList.getHead();
 
-            if (instruction instanceof Return && (expressionList.getHead() == expressionList.getTail())) {
+            if ((instruction instanceof Return) && (expressionList.getHead() == expressionList.getTail())) {
                instruction = instruction.getPrevPC();
                if (instruction instanceof AccessInstanceField) {
                   FieldEntry field = ((AccessInstanceField) instruction).getConstantPoolFieldEntry();
@@ -1372,7 +1358,7 @@ class MethodModel{
                      String returnType = getMethod().getDescriptor().substring(2);
                      //System.out.println( "### field type = " + fieldType );
                      //System.out.println( "### method args = " + returnType );
-                     assert fieldType.length() == 1 && returnType.length() == 1 : " can only use basic type getters";
+                     assert (fieldType.length() == 1) && (returnType.length() == 1) : " can only use basic type getters";
 
                      // Allow isFoo style for boolean fields
                      if ((methodName.startsWith("is") && fieldType.equals("Z")) || (methodName.startsWith("get"))) {
@@ -1415,7 +1401,7 @@ class MethodModel{
          Instruction instruction = expressionList.getHead();
 
          // setters should be aload_0, ?load_1, putfield, return
-         if (instruction instanceof AssignToInstanceField && expressionList.getTail() instanceof Return && pcMap.size() == 4) {
+         if ((instruction instanceof AssignToInstanceField) && (expressionList.getTail() instanceof Return) && (pcMap.size() == 4)) {
             Instruction prev = instruction.getPrevPC();
             if (prev instanceof AccessLocalVariable) {
                FieldEntry field = ((AssignToInstanceField) instruction).getConstantPoolFieldEntry();
@@ -1471,7 +1457,7 @@ class MethodModel{
    private void init(ClassModelMethod _method) throws AparapiException {
       try {
          method = _method;
-         this.expressionList = new ExpressionList(this);
+         expressionList = new ExpressionList(this);
 
          // check if we have any exception handlers
          int exceptionsSize = method.getCodeEntry().getExceptionPoolEntries().size();
@@ -1489,10 +1475,6 @@ class MethodModel{
             if (DISALLOWARRAYLOCALVAR && localVariableInfo.getVariableDescriptor().startsWith("[")) {
                throw new ClassParseException(ClassParseException.TYPE.ARRAYLOCALVARIABLE);
             }
-            if (localVariableInfo.getVariableDescriptor().equals("C")) {
-               throw new ClassParseException(ClassParseException.TYPE.CHARLOCALVARIABLE);
-            }
-
          }
 
          // We are going to make 4 passes.
@@ -1535,7 +1517,7 @@ class MethodModel{
             }
          }
          // Accessor conversion only works on member object arrays
-         if (entrypoint != null && _method.getClassModel() != entrypoint.getClassModel()) {
+         if ((entrypoint != null) && (_method.getClassModel() != entrypoint.getClassModel())) {
             if (logger.isLoggable(Level.FINE)) {
                logger.fine("Considering accessor call: " + getName());
             }
@@ -1549,9 +1531,7 @@ class MethodModel{
          //}
 
          if (logger.isLoggable(Level.FINE)) {
-
-            System.out.println("end \n" + expressionList.dumpDiagram(null));
-
+            logger.fine("end \n" + expressionList.dumpDiagram(null));
          }
          if (Config.instructionListener != null) {
             Config.instructionListener.showAndTell("end", expressionList.getHead(), null);

@@ -77,9 +77,9 @@ class KernelRunner{
    private static Logger logger = Logger.getLogger(Config.getLoggerName());
 
    /**
-    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>boolean</code> type (array or primitive). 
+    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>boolean</code> type (array or primitive).
     * 
-   * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * @see com.amd.aparapi.KernelRunner.KernelArg
     * 
@@ -88,9 +88,9 @@ class KernelRunner{
    @UsedByJNICode public static final int ARG_BOOLEAN = 1 << 0;
 
    /**
-    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>byte</code> type (array or primitive). 
+    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>byte</code> type (array or primitive).
     * 
-   * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * @see com.amd.aparapi.KernelRunner.KernelArg
     * 
@@ -99,9 +99,9 @@ class KernelRunner{
    @UsedByJNICode public static final int ARG_BYTE = 1 << 1;
 
    /**
-    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>float</code> type (array or primitive). 
+    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>float</code> type (array or primitive).
     * 
-   * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * @see com.amd.aparapi.KernelRunner.KernelArg
     * 
@@ -110,9 +110,9 @@ class KernelRunner{
    @UsedByJNICode public static final int ARG_FLOAT = 1 << 2;
 
    /**
-    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>int</code> type (array or primitive). 
+    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>int</code> type (array or primitive).
     * 
-   * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * @see com.amd.aparapi.KernelRunner.KernelArg
     * 
@@ -121,9 +121,9 @@ class KernelRunner{
    @UsedByJNICode public static final int ARG_INT = 1 << 3;
 
    /**
-    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>double</code> type (array or primitive). 
+    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>double</code> type (array or primitive).
     * 
-   * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * @see com.amd.aparapi.KernelRunner.KernelArg
     * 
@@ -132,9 +132,9 @@ class KernelRunner{
    @UsedByJNICode public static final int ARG_DOUBLE = 1 << 4;
 
    /**
-    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>long</code> type (array or primitive). 
+    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>long</code> type (array or primitive).
     * 
-   * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * @see com.amd.aparapi.KernelRunner.KernelArg
     * 
@@ -154,9 +154,9 @@ class KernelRunner{
 
    /**
     * This 'bit' indicates that a particular <code>KernelArg</code> represents an array.<br/>
-    *   So <code>ARG_ARRAY|ARG_INT</code> tells us this arg is an array of <code>int</code>.
+    * So <code>ARG_ARRAY|ARG_INT</code> tells us this arg is an array of <code>int</code>.
     * 
-   * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * @see com.amd.aparapi.KernelRunner.KernelArg
     * 
@@ -166,9 +166,9 @@ class KernelRunner{
 
    /**
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a primitive (non array).<br/>
-    *   So <code>ARG_PRIMITIVE|ARG_INT</code> tells us this arg is a primitive <code>int</code>.
+    * So <code>ARG_PRIMITIVE|ARG_INT</code> tells us this arg is a primitive <code>int</code>.
     * 
-   * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * @see com.amd.aparapi.KernelRunner.KernelArg
     * 
@@ -178,9 +178,9 @@ class KernelRunner{
 
    /**
     * This 'bit' indicates that a particular <code>KernelArg</code> is read by the Kernel (note from the Kernel's point of view).<br/>
-    *   So <code>ARG_ARRAY|ARG_INT|ARG_READ</code> tells us this arg is an array of int's that are read by the kernel.
+    * So <code>ARG_ARRAY|ARG_INT|ARG_READ</code> tells us this arg is an array of int's that are read by the kernel.
     * 
-   * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * @see com.amd.aparapi.KernelRunner.KernelArg
     * 
@@ -190,9 +190,9 @@ class KernelRunner{
 
    /**
     * This 'bit' indicates that a particular <code>KernelArg</code> is mutated by the Kernel (note from the Kernel's point of view).<br/>
-    *   So <code>ARG_ARRAY|ARG_INT|ARG_WRITE</code> tells us this arg is an array of int's that we expect the kernel to mutate.
+    * So <code>ARG_ARRAY|ARG_INT|ARG_WRITE</code> tells us this arg is an array of int's that we expect the kernel to mutate.
     * 
-   * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * @see com.amd.aparapi.KernelRunner.KernelArg
     * 
@@ -203,7 +203,7 @@ class KernelRunner{
    /**
     * This 'bit' indicates that a particular <code>KernelArg</code> resides in local memory in the generated OpenCL code.<br/>
     * 
-   * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * @see com.amd.aparapi.annotations.Experimental
     * @see com.amd.aparapi.KernelRunner.KernelArg
@@ -215,7 +215,7 @@ class KernelRunner{
    /**
     * This 'bit' indicates that a particular <code>KernelArg</code> resides in global memory in the generated OpenCL code.<br/>
     * 
-   * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * @see com.amd.aparapi.annotations.Experimental
     * @see com.amd.aparapi.KernelRunner.KernelArg
@@ -307,6 +307,17 @@ class KernelRunner{
     */
    @UsedByJNICode public static final int ARG_APARAPI_BUF_IS_DIRECT = 1 << 20;
 
+   /**
+    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>char</code> type (array or primitive).
+    * 
+    * 
+    * @see com.amd.aparapi.annotations.UsedByJNICode
+    * @see com.amd.aparapi.KernelRunner.KernelArg
+    * 
+    * @author rlamothe
+    */
+   @UsedByJNICode public static final int ARG_CHAR = 1 << 21;
+
    static final String CL_KHR_FP64 = "cl_khr_fp64";
 
    static final String CL_AMD_FP64 = "cl_amd_fp64";
@@ -334,9 +345,9 @@ class KernelRunner{
    static final String CL_KHR_GL_SHARING = "cl_khr_gl_sharing";
 
    /**
-    * This 'bit' indicates that we wish to enable profiling from the JNI code. 
+    * This 'bit' indicates that we wish to enable profiling from the JNI code.
     * 
-   * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * 
     * @author gfrost
@@ -344,12 +355,12 @@ class KernelRunner{
    @UsedByJNICode public static final int JNI_FLAG_ENABLE_PROFILING = 1 << 0;
 
    /**
-    * This 'bit' indicates that we want to execute on the GPU. 
+    * This 'bit' indicates that we want to execute on the GPU.
     * 
-     * 
+    * 
     * Be careful changing final constants starting with JNI.<br/>
     * 
-     * 
+    * 
     * @see com.amd.aparapi.annotations.UsedByJNICode
     * 
     * @author gfrost
@@ -368,40 +379,41 @@ class KernelRunner{
    @UsedByJNICode @Annotations.Experimental public static final int JNI_FLAG_ENABLE_VERBOSE_JNI = 1 << 2;
 
    /**
-    * Each field (or captured field in the case of an anonymous inner class) referenced by any bytecode rechable from the users Kernel.run(), will 
+    * Each field (or captured field in the case of an anonymous inner class) referenced by any bytecode reachable from the users Kernel.run(), will
     * need to be represented as a <code>KernelArg</code>.
-    *   
+    * 
     * @see com.amd.aparapi.Kernel#execute(int _globalSize)
     * 
     * @author gfrost
-    *
+    * 
     */
    static class KernelArg{
 
       /**
-       * The type of this KernelArg.  Created by oring appropriate flags
+       * The type of this KernelArg. Created by oring appropriate flags
        * 
-       * @see ARG_BOOLEAN 
-       * @see ARG_BYTE 
-       * @see ARG_FLOAT 
-       * @see ARG_INT 
-       * @see ARG_DOUBLE 
-       * @see ARG_LONG 
-       * @see ARG_SHORT 
-       * @see ARG_ARRAY 
-       * @see ARG_PRIMITIVE 
-       * @see ARG_READ 
+       * @see ARG_BOOLEAN
+       * @see ARG_BYTE
+       * @see ARG_CHAR
+       * @see ARG_FLOAT
+       * @see ARG_INT
+       * @see ARG_DOUBLE
+       * @see ARG_LONG
+       * @see ARG_SHORT
+       * @see ARG_ARRAY
+       * @see ARG_PRIMITIVE
+       * @see ARG_READ
        * @see ARG_WRITE
-       * @see ARG_LOCAL 
-       * @see ARG_GLOBAL 
-       * @see ARG_CONSTANT 
-       * @see ARG_ARRAYLENGTH 
-       * @see ARG_APARAPI_BUF 
-       * @see ARG_EXPLICIT 
-       * @see ARG_EXPLICIT_WRITE 
-       * @see ARG_OBJ_ARRAY_STRUCT 
-       * @see ARG_APARAPI_BUF_HAS_ARRAY 
-       * @see ARG_APARAPI_BUF_IS_DIRECT  
+       * @see ARG_LOCAL
+       * @see ARG_GLOBAL
+       * @see ARG_CONSTANT
+       * @see ARG_ARRAYLENGTH
+       * @see ARG_APARAPI_BUF
+       * @see ARG_EXPLICIT
+       * @see ARG_EXPLICIT_WRITE
+       * @see ARG_OBJ_ARRAY_STRUCT
+       * @see ARG_APARAPI_BUF_HAS_ARRAY
+       * @see ARG_APARAPI_BUF_IS_DIRECT
        */
       @UsedByJNICode public int type;
 
@@ -443,18 +455,17 @@ class KernelRunner{
       @UsedByJNICode public Object array;
 
       /**
-       *  Field in Kernel class corresponding to this arg 
+       * Field in Kernel class corresponding to this arg
        */
       @UsedByJNICode public Field field;
 
       /**
-       * The byte array for obj conversion passed to opencl 
+       * The byte array for obj conversion passed to opencl
        */
       byte[] objArrayBuffer;
 
       /**
-       * The ByteBuffer fronting the byte array 
-
+       * The ByteBuffer fronting the byte array
        */
 
       ByteBuffer objArrayByteBuffer;
@@ -485,7 +496,8 @@ class KernelRunner{
    private int argc;
 
    /**
-    * Create a KernelRunner for a specific Kernel instance.  
+    * Create a KernelRunner for a specific Kernel instance.
+    * 
     * @param _kernel
     */
    KernelRunner(Kernel _kernel) {
@@ -505,11 +517,11 @@ class KernelRunner{
    }
 
    /**
-    *  TODO:
-    *  
-    *  synchronized to avoid race in clGetPlatformIDs() in OpenCL lib  problem should fixed in some future OpenCL version
-    *  
-    * @param _kernel 
+    * TODO:
+    * 
+    * synchronized to avoid race in clGetPlatformIDs() in OpenCL lib problem should fixed in some future OpenCL version
+    * 
+    * @param _kernel
     * @param _flags
     * @param numProcessors
     * @param maxJTPLocalSize
@@ -540,75 +552,86 @@ class KernelRunner{
    private long executionTime = 0;
 
    boolean hasFP64Support() {
-      if (capabilitiesSet == null)
+      if (capabilitiesSet == null) {
          throw new IllegalStateException("Capabilities queried before they were initialized");
+      }
       return (capabilitiesSet.contains(CL_KHR_FP64) || capabilitiesSet.contains(CL_AMD_FP64));
    }
 
    boolean hasSelectFPRoundingModeSupport() {
-      if (capabilitiesSet == null)
+      if (capabilitiesSet == null) {
          throw new IllegalStateException("Capabilities queried before they were initialized");
-
+      }
       return capabilitiesSet.contains(CL_KHR_SELECT_FPROUNDING_MODE);
    }
 
    boolean hasGlobalInt32BaseAtomicsSupport() {
-      if (capabilitiesSet == null)
+      if (capabilitiesSet == null) {
          throw new IllegalStateException("Capabilities queried before they were initialized");
+      }
       return capabilitiesSet.contains(CL_KHR_GLOBAL_INT32_BASE_ATOMICS);
    }
 
    boolean hasGlobalInt32ExtendedAtomicsSupport() {
-      if (capabilitiesSet == null)
+      if (capabilitiesSet == null) {
          throw new IllegalStateException("Capabilities queried before they were initialized");
+      }
       return capabilitiesSet.contains(CL_KHR_GLOBAL_INT32_EXTENDED_ATOMICS);
    }
 
    boolean hasLocalInt32BaseAtomicsSupport() {
-      if (capabilitiesSet == null)
+      if (capabilitiesSet == null) {
          throw new IllegalStateException("Capabilities queried before they were initialized");
+      }
       return capabilitiesSet.contains(CL_KHR_LOCAL_INT32_BASE_ATOMICS);
    }
 
    boolean hasLocalInt32ExtendedAtomicsSupport() {
-      if (capabilitiesSet == null)
+      if (capabilitiesSet == null) {
          throw new IllegalStateException("Capabilities queried before they were initialized");
+      }
       return capabilitiesSet.contains(CL_KHR_LOCAL_INT32_EXTENDED_ATOMICS);
    }
 
    boolean hasInt64BaseAtomicsSupport() {
-      if (capabilitiesSet == null)
+      if (capabilitiesSet == null) {
          throw new IllegalStateException("Capabilities queried before they were initialized");
+      }
       return capabilitiesSet.contains(CL_KHR_INT64_BASE_ATOMICS);
    }
 
    boolean hasInt64ExtendedAtomicsSupport() {
-      if (capabilitiesSet == null)
+      if (capabilitiesSet == null) {
          throw new IllegalStateException("Capabilities queried before they were initialized");
+      }
       return capabilitiesSet.contains(CL_KHR_INT64_EXTENDED_ATOMICS);
    }
 
    boolean has3DImageWritesSupport() {
-      if (capabilitiesSet == null)
+      if (capabilitiesSet == null) {
          throw new IllegalStateException("Capabilities queried before they were initialized");
+      }
       return capabilitiesSet.contains(CL_KHR_3D_IMAGE_WRITES);
    }
 
    boolean hasByteAddressableStoreSupport() {
-      if (capabilitiesSet == null)
+      if (capabilitiesSet == null) {
          throw new IllegalStateException("Capabilities queried before they were initialized");
+      }
       return capabilitiesSet.contains(CL_KHR_BYTE_ADDRESSABLE_SUPPORT);
    }
 
    boolean hasFP16Support() {
-      if (capabilitiesSet == null)
+      if (capabilitiesSet == null) {
          throw new IllegalStateException("Capabilities queried before they were initialized");
+      }
       return capabilitiesSet.contains(CL_KHR_FP16);
    }
 
    boolean hasGLSharingSupport() {
-      if (capabilitiesSet == null)
+      if (capabilitiesSet == null) {
          throw new IllegalStateException("Capabilities queried before they were initialized");
+      }
       return capabilitiesSet.contains(CL_KHR_GL_SHARING);
    }
 
@@ -623,7 +646,8 @@ class KernelRunner{
    /**
     * We need to match OpenCL's algorithm for localsize.
     * 
-    * @param _globalSize The globalsize requested by the user (via <code>Kernel.execute(globalSize)</code>)
+    * @param _globalSize
+    *          The globalsize requested by the user (via <code>Kernel.execute(globalSize)</code>)
     * @return The value we use for JTP execution for localSize
     */
    private static int getJTPLocalSizeForGlobalSize(int _globalSize) {
@@ -640,9 +664,12 @@ class KernelRunner{
    }
 
    /**
-    * Execute using a Java thread pool.  Either because we were explicitly asked to do so, or because we 'fall back' after discovering an OpenCL issue.
-    * @param _globalSize The globalSize requested by the user (via <code>Kernel.execute(globalSize)</code>)
-    * @param _passes The # of passes requested by the user (via <code>Kernel.execute(globalSize, passes)</code>).  Note this is usually defaulted to 1 via  <code>Kernel.execute(globalSize)</code>.
+    * Execute using a Java thread pool. Either because we were explicitly asked to do so, or because we 'fall back' after discovering an OpenCL issue.
+    * 
+    * @param _globalSize
+    *          The globalSize requested by the user (via <code>Kernel.execute(globalSize)</code>)
+    * @param _passes
+    *          The # of passes requested by the user (via <code>Kernel.execute(globalSize, passes)</code>). Note this is usually defaulted to 1 via <code>Kernel.execute(globalSize)</code>.
     * @return
     */
    private long executeJava(final int _globalSize, final int _passes) {
@@ -670,13 +697,13 @@ class KernelRunner{
       } else {
          // note uses of final so we can use in anonymous inner class
          final int localSize = getJTPLocalSizeForGlobalSize(_globalSize);
-         // if (localSize == 0) return 0;  // should never happen
+         // if (localSize == 0) return 0; // should never happen
          final int numGroups = _globalSize / localSize;
 
          // compute numThreadSets by multiplying localSize until bigger than numCores
          final int numThreadSets = localSize >= numCores ? 1 : (numCores + (localSize - 1)) / localSize;
          final int numThreads = numThreadSets * localSize;
-         // when dividing to get groupsPerThreadSet, round up 
+         // when dividing to get groupsPerThreadSet, round up
          final int groupsPerThreadSet = (numGroups + (numThreadSets - 1)) / numThreadSets;
          if (logger.isLoggable(Level.FINE)) {
             logger.fine("executeJava: localSize=" + localSize + ", numThreads=" + numThreads + ", numThreadSets=" + numThreadSets
@@ -713,8 +740,8 @@ class KernelRunner{
                            int globalId = (groupId * localSize) + localId;
                            worker.setGroupId(groupId);
                            worker.setGlobalId(globalId);
-                           // System.out.println("running worker with gid=" + globalId + ", lid=" + localId 
-                           //				   + ", groupId=" + groupId + ", threadId=" + threadId);
+                           // System.out.println("running worker with gid=" + globalId + ", lid=" + localId
+                           // + ", groupId=" + groupId + ", threadId=" + threadId);
                            worker.run();
                         }
                         try {
@@ -796,13 +823,13 @@ class KernelRunner{
          throw new AparapiException(e);
       }
 
-      assert newRef != null && objArraySize != 0 : "no data";
+      assert (newRef != null) && (objArraySize != 0) : "no data";
 
       int totalStructSize = c.getTotalStructSize();
       int totalBufferSize = objArraySize * totalStructSize;
 
       // allocate ByteBuffer if first time or array changed
-      if (arg.objArrayBuffer == null || newRef != arg.array) {
+      if ((arg.objArrayBuffer == null) || (newRef != arg.array)) {
          ByteBuffer structBuffer = ByteBuffer.allocate(totalBufferSize);
          arg.objArrayByteBuffer = structBuffer.order(ByteOrder.LITTLE_ENDIAN);
          arg.objArrayBuffer = arg.objArrayByteBuffer.array();
@@ -917,8 +944,8 @@ class KernelRunner{
       assert objArraySize > 0 : "should be > 0";
 
       int totalStructSize = c.getTotalStructSize();
-      //int totalBufferSize = objArraySize * totalStructSize;
-      //assert arg.objArrayBuffer.length == totalBufferSize : "size should match";
+      // int totalBufferSize = objArraySize * totalStructSize;
+      // assert arg.objArrayBuffer.length == totalBufferSize : "size should match";
 
       arg.objArrayByteBuffer.rewind();
 
@@ -1035,7 +1062,7 @@ class KernelRunner{
                   arg.numElements = Array.getLength(newArrayRef);
                   arg.sizeInBytes = arg.numElements * arg.primitiveSize;
 
-                  if ((args[i].type & ARG_EXPLICIT) != 0 && puts.contains(newArrayRef)) {
+                  if (((args[i].type & ARG_EXPLICIT) != 0) && puts.contains(newArrayRef)) {
                      args[i].type |= ARG_EXPLICIT_WRITE;
                      // System.out.println("detected an explicit write " + args[i].name);
                      puts.remove(newArrayRef);
@@ -1148,14 +1175,14 @@ class KernelRunner{
 
                return warnFallBackAndExecute(_entrypointName, _globalSize, _passes, exception);
             }
-            if (entryPoint != null && !entryPoint.shouldFallback()) {
+            if ((entryPoint != null) && !entryPoint.shouldFallback()) {
 
                int jniFlags = 0;
                jniFlags |= (Config.enableProfiling ? JNI_FLAG_ENABLE_PROFILING : 0);
 
                jniFlags |= (Config.enableVerboseJNI ? JNI_FLAG_ENABLE_VERBOSE_JNI : 0);
                jniFlags |= (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU) ? JNI_FLAG_USE_GPU : 0);
-               // Init the device to check capabilities before emitting the 
+               // Init the device to check capabilities before emitting the
                // code that requires the capabilities.
                jniContextHandle = initJNI(kernel, jniFlags, Runtime.getRuntime().availableProcessors(), getMaxJTPLocalSize());
                if (jniContextHandle == 0) {
@@ -1228,7 +1255,7 @@ class KernelRunner{
                      args[i] = new KernelArg();
                      args[i].name = field.getName();
                      args[i].field = field;
-                     args[i].isStatic = (field.getModifiers() & Modifier.STATIC) == Modifier.STATIC; 
+                     args[i].isStatic = (field.getModifiers() & Modifier.STATIC) == Modifier.STATIC;
 
                      Class<?> type = field.getType();
                      if (type.isArray()) {
@@ -1250,6 +1277,8 @@ class KernelRunner{
                         args[i].type |= type.isAssignableFrom(boolean[].class) ? ARG_BOOLEAN : 0;
 
                         args[i].type |= type.isAssignableFrom(byte[].class) ? ARG_BYTE : 0;
+
+                        args[i].type |= type.isAssignableFrom(char[].class) ? ARG_CHAR : 0;
 
                         args[i].type |= type.isAssignableFrom(double[].class) ? ARG_DOUBLE : 0;
 
@@ -1287,6 +1316,9 @@ class KernelRunner{
                      } else if (type.isAssignableFrom(byte.class)) {
                         args[i].type |= ARG_PRIMITIVE;
                         args[i].type |= ARG_BYTE;
+                     } else if (type.isAssignableFrom(char.class)) {
+                        args[i].type |= ARG_PRIMITIVE;
+                        args[i].type |= ARG_CHAR;
                      } else if (type.isAssignableFrom(short.class)) {
                         args[i].type |= ARG_PRIMITIVE;
                         args[i].type |= ARG_SHORT;
@@ -1295,10 +1327,11 @@ class KernelRunner{
                   } catch (IllegalArgumentException e) {
                      e.printStackTrace();
                   }
+
                   args[i].primitiveSize = ((args[i].type & ARG_FLOAT) != 0 ? 4 : (args[i].type & ARG_INT) != 0 ? 4
-                        : (args[i].type & ARG_BYTE) != 0 ? 1 : (args[i].type & ARG_BOOLEAN) != 0 ? 1
-                              : (args[i].type & ARG_SHORT) != 0 ? 2 : (args[i].type & ARG_LONG) != 0 ? 8
-                                    : (args[i].type & ARG_DOUBLE) != 0 ? 8 : 0);
+                        : (args[i].type & ARG_BYTE) != 0 ? 1 : (args[i].type & ARG_CHAR) != 0 ? 2
+                              : (args[i].type & ARG_BOOLEAN) != 0 ? 1 : (args[i].type & ARG_SHORT) != 0 ? 2
+                                    : (args[i].type & ARG_LONG) != 0 ? 8 : (args[i].type & ARG_DOUBLE) != 0 ? 8 : 0);
 
                   if (logger.isLoggable(Level.FINE)) {
                      logger.fine("arg " + i + ", " + args[i].name + ", type=" + Integer.toHexString(args[i].type)
@@ -1353,13 +1386,14 @@ class KernelRunner{
    private native int getJNI(long _jniContextHandle, Object _array);
 
    /**
-    * Enqueue a request to return this array from the GPU. This method blocks until the array is available. 
+    * Enqueue a request to return this array from the GPU. This method blocks until the array is available.
     * <br/>
-    * Note that <code>Kernel.put(type [])</code> calls will delegate to this call. 
+    * Note that <code>Kernel.put(type [])</code> calls will delegate to this call.
     * <br/>
     * Package protected
-    *  
-    * @param array It is assumed that this parameter is indeed an array (of in, float, short etc). 
+    * 
+    * @param array
+    *          It is assumed that this parameter is indeed an array (of int, float, short etc).
     * 
     * @see Kernel#get(int[] arr)
     * @see Kernel#get(short[] arr)
@@ -1369,19 +1403,19 @@ class KernelRunner{
     */
    protected void get(Object array) {
       if (explicit
-            && (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.GPU || kernel.getExecutionMode() == Kernel.EXECUTION_MODE.CPU)) {
+            && ((kernel.getExecutionMode() == Kernel.EXECUTION_MODE.GPU) || (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.CPU))) {
          // Only makes sense when we are using OpenCL
          getJNI(jniContextHandle, array);
       }
    }
 
    /**
-    * Tag this array so that it is explicitly enqueued before the kernel is executed.
-    * <br/>
-    * Note that <code>Kernel.put(type [])</code> calls will delegate to this call. 
-    * <br/>
+    * Tag this array so that it is explicitly enqueued before the kernel is executed. <br/>
+    * Note that <code>Kernel.put(type [])</code> calls will delegate to this call. <br/>
     * Package protected
-    * @param array It is assumed that this parameter is indeed an array (of in, float, short etc). 
+    * 
+    * @param array
+    *          It is assumed that this parameter is indeed an array (of int, float, short etc).
     * @see Kernel#put(int[] arr)
     * @see Kernel#put(short[] arr)
     * @see Kernel#put(float[] arr)
@@ -1391,7 +1425,7 @@ class KernelRunner{
 
    protected void put(Object array) {
       if (explicit
-            && (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.GPU || kernel.getExecutionMode() == Kernel.EXECUTION_MODE.CPU)) {
+            && ((kernel.getExecutionMode() == Kernel.EXECUTION_MODE.GPU) || (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.CPU))) {
          // Only makes sense when we are using OpenCL
          puts.add(array);
       }
@@ -1409,6 +1443,7 @@ class KernelRunner{
 
    /**
     * Determine the time taken to convert bytecode to OpenCL for first Kernel.execute(range) call.
+    * 
     * @return The time spent preparing the kernel for execution using GPU
     * 
     */
@@ -1418,6 +1453,7 @@ class KernelRunner{
 
    /**
     * Determine the execution time of the previous Kernel.execute(range) call.
+    * 
     * @return The time spent executing the kernel (ms)
     * 
     */
@@ -1427,6 +1463,7 @@ class KernelRunner{
 
    /**
     * Determine the accumulated execution time of all previous Kernel.execute(range) calls.
+    * 
     * @return The accumulated time spent executing this kernel (ms)
     * 
     */

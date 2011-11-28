@@ -34,7 +34,7 @@ to national security controls as identified on the Commerce Control List (curren
 of EAR).  For the most current Country Group listings, or for additional information about the EAR or your obligations
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
-*/
+ */
 package com.amd.aparapi;
 
 import java.util.ArrayList;
@@ -43,10 +43,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.amd.aparapi.ClassModel.ClassModelField;
 import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry;
-import com.amd.aparapi.ClassModel.AttributePool.RuntimeAnnotationsEntry;
 import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry.LocalVariableInfo;
+import com.amd.aparapi.ClassModel.AttributePool.RuntimeAnnotationsEntry;
+import com.amd.aparapi.ClassModel.ClassModelField;
 import com.amd.aparapi.ClassModel.ConstantPool.FieldEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodEntry;
 import com.amd.aparapi.InstructionSet.AccessArrayElement;
@@ -71,6 +71,10 @@ abstract class KernelWriter extends BlockWriter{
    final String cvtByteToChar = "char ";
 
    final String cvtByteArrayToCharStar = "char* ";
+
+   final String cvtCharToShort = "unsigned short ";
+
+   final String cvtCharArrayToShortStar = "unsigned short* ";
 
    final String cvtIntArrayToIntStar = "int* ";
 
@@ -102,10 +106,12 @@ abstract class KernelWriter extends BlockWriter{
 
    /**
     * These three convert functions are here to perform
-    * any type conversion that may be required between 
+    * any type conversion that may be required between
     * Java and OpenCL.
-    * @param _typeDesc String in the Java JNI notation, [I, etc 
-    * @return          Suitably converted string, "char*", etc
+    * 
+    * @param _typeDesc
+    *          String in the Java JNI notation, [I, etc
+    * @return Suitably converted string, "char*", etc
     */
    @Override protected String convertType(String _typeDesc, boolean useClassModel) {
       if (_typeDesc.equals("Z") || _typeDesc.equals("boolean")) {
@@ -116,6 +122,10 @@ abstract class KernelWriter extends BlockWriter{
          return (cvtByteToChar);
       } else if (_typeDesc.equals("[B") || _typeDesc.equals("byte[]")) {
          return (cvtByteArrayToCharStar);
+      } else if (_typeDesc.equals("C") || _typeDesc.equals("char")) {
+         return (cvtCharToShort);
+      } else if (_typeDesc.equals("[C") || _typeDesc.equals("char[]")) {
+         return (cvtCharArrayToShortStar);
       } else if (_typeDesc.equals("[I") || _typeDesc.equals("int[]")) {
          return (cvtIntArrayToIntStar);
       } else if (_typeDesc.equals("[F") || _typeDesc.equals("float[]")) {
@@ -148,8 +158,8 @@ abstract class KernelWriter extends BlockWriter{
       String barrierAndGetterMappings = javaToCLIdentifierMap.get(methodName + methodSignature);
 
       if (barrierAndGetterMappings != null) {
-         //this is one of the OpenCL barrier or size getter methods
-         //write the mapping and exit
+         // this is one of the OpenCL barrier or size getter methods
+         // write the mapping and exit
          write(barrierAndGetterMappings);
       } else {
 
@@ -175,7 +185,7 @@ abstract class KernelWriter extends BlockWriter{
 
          write("(");
 
-         if (intrinsicMapping == null && _methodCall instanceof VirtualMethodCall && (!isIntrinsic)) {
+         if ((intrinsicMapping == null) && (_methodCall instanceof VirtualMethodCall) && (!isIntrinsic)) {
 
             Instruction i = ((VirtualMethodCall) _methodCall).getInstanceReference();
 
@@ -196,7 +206,7 @@ abstract class KernelWriter extends BlockWriter{
             }
          }
          for (int arg = 0; arg < argc; arg++) {
-            if (intrinsicMapping == null && _methodCall instanceof VirtualMethodCall && (!isIntrinsic) || arg != 0) {
+            if (((intrinsicMapping == null) && (_methodCall instanceof VirtualMethodCall) && (!isIntrinsic)) || (arg != 0)) {
                write(", ");
             }
             writeInstruction(_methodCall.getArg(arg));
@@ -215,13 +225,13 @@ abstract class KernelWriter extends BlockWriter{
       List<String> argLines = new ArrayList<String>();
       List<String> assigns = new ArrayList<String>();
 
-      // hack 
+      // hack
       // for (java.lang.reflect.Field f:_entryPoint.getTheClass().getDeclaredFields()){
 
       entryPoint = _entryPoint;
 
       for (ClassModelField field : _entryPoint.getReferencedClassModelFields()) {
-         //Field field = _entryPoint.getClassModel().getField(f.getName());
+         // Field field = _entryPoint.getClassModel().getField(f.getName());
          StringBuilder thisStructLine = new StringBuilder();
          StringBuilder argLine = new StringBuilder();
          StringBuilder assignLine = new StringBuilder();
@@ -233,9 +243,9 @@ abstract class KernelWriter extends BlockWriter{
 
          String type = "__global";
          if (visibleAnnotations != null) {
-            //for (AnnotationInfo ai : visibleAnnotations) {
-            //   String typeDescriptor = ai.getTypeDescriptor();
-            //}
+            // for (AnnotationInfo ai : visibleAnnotations) {
+            // String typeDescriptor = ai.getTypeDescriptor();
+            // }
          }
 
          if (signature.startsWith("[")) {
@@ -250,9 +260,9 @@ abstract class KernelWriter extends BlockWriter{
          if (signature.startsWith("L")) {
             // Turn Lcom/amd/javalabs/opencl/demo/DummyOOA; into com_amd_javalabs_opencl_demo_DummyOOA for example
             className = (signature.substring(1, signature.length() - 1)).replace("/", "_");
-            //if (logger.isLoggable(Level.FINE)) {
-            //   logger.fine("Examining object parameter: " + signature + " new: " + className);
-            //}
+            // if (logger.isLoggable(Level.FINE)) {
+            // logger.fine("Examining object parameter: " + signature + " new: " + className);
+            // }
 
             argLine.append(className);
             thisStructLine.append(className);
@@ -380,7 +390,7 @@ abstract class KernelWriter extends BlockWriter{
             }
             if (totalStructSize > alignTo) {
                while (totalSize < totalStructSize) {
-                  //structBuffer.put((byte)-1);
+                  // structBuffer.put((byte)-1);
                   writeln("char _pad_" + totalSize + ";");
                   totalSize++;
                }
@@ -405,7 +415,7 @@ abstract class KernelWriter extends BlockWriter{
       out();
       writeln(";");
       // out();
-      //  newLine();
+      // newLine();
       write("}This;");
       newLine();
       write("int get_pass_id(This *this){");
@@ -429,37 +439,37 @@ abstract class KernelWriter extends BlockWriter{
          }
          write(convertType(returnType, true));
 
-         write(mm.getName()+"(");
+         write(mm.getName() + "(");
 
-         if(!mm.getMethod().isStatic()) {
-         if (mm.getMethod().getClassModel() == _entryPoint.getClassModel()
-               || mm.getMethod().getClassModel().isSuperClass(_entryPoint.getClassModel().getClassWeAreModelling())) {
-            write("This *this");
-         } else {
-            // Call to an object member or superclass of member
-            for (ClassModel c : _entryPoint.getObjectArrayFieldsClasses().values()) {
-               if (mm.getMethod().getClassModel() == c) {
-                  write("__global " + mm.getMethod().getClassModel().getClassWeAreModelling().getName().replace(".", "_")
-                        + " *this");
-                  break;
-               } else if (mm.getMethod().getClassModel().isSuperClass(c.getClassWeAreModelling())) {
-                  write("__global " + c.getClassWeAreModelling().getName().replace(".", "_") + " *this");
-                  break;
+         if (!mm.getMethod().isStatic()) {
+            if ((mm.getMethod().getClassModel() == _entryPoint.getClassModel())
+                  || mm.getMethod().getClassModel().isSuperClass(_entryPoint.getClassModel().getClassWeAreModelling())) {
+               write("This *this");
+            } else {
+               // Call to an object member or superclass of member
+               for (ClassModel c : _entryPoint.getObjectArrayFieldsClasses().values()) {
+                  if (mm.getMethod().getClassModel() == c) {
+                     write("__global " + mm.getMethod().getClassModel().getClassWeAreModelling().getName().replace(".", "_")
+                           + " *this");
+                     break;
+                  } else if (mm.getMethod().getClassModel().isSuperClass(c.getClassWeAreModelling())) {
+                     write("__global " + c.getClassWeAreModelling().getName().replace(".", "_") + " *this");
+                     break;
+                  }
                }
             }
          }
-         }
-         
+
          boolean alreadyHasFirstArg = !mm.getMethod().isStatic();
-         
+
          LocalVariableTableEntry lvte = mm.getLocalVariableTableEntry();
          for (LocalVariableInfo lvi : lvte) {
-            if (lvi.getStart() == 0 && (lvi.getVariableIndex() != 0 || mm.getMethod().isStatic())) { // full scope but skip this
+            if ((lvi.getStart() == 0) && ((lvi.getVariableIndex() != 0) || mm.getMethod().isStatic())) { // full scope but skip this
                String descriptor = lvi.getVariableDescriptor();
-               if(alreadyHasFirstArg) {
-            	   write(", ");	
+               if (alreadyHasFirstArg) {
+                  write(", ");
                }
-               
+
                // Arrays always map to __global arrays
                if (descriptor.startsWith("[")) {
                   write(" __global ");
@@ -467,7 +477,7 @@ abstract class KernelWriter extends BlockWriter{
 
                write(convertType(descriptor, true));
                write(lvi.getVariableName());
-               alreadyHasFirstArg=true;	
+               alreadyHasFirstArg = true;
             }
          }
          write(")");
@@ -527,7 +537,7 @@ abstract class KernelWriter extends BlockWriter{
    }
 
    @Override void writeInstruction(Instruction _instruction) throws CodeGenException {
-      if (_instruction instanceof I_IUSHR || _instruction instanceof I_LUSHR) {
+      if ((_instruction instanceof I_IUSHR) || (_instruction instanceof I_LUSHR)) {
          BinaryOperator binaryInstruction = (BinaryOperator) _instruction;
          Instruction parent = binaryInstruction.getParentExpr();
          boolean needsParenthesis = true;
