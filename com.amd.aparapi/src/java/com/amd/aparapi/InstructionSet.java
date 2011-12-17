@@ -977,10 +977,10 @@ class InstructionSet{
       }
 
       public void retarget(Instruction _newTarget) {
-         System.out.println("retargetting " + pc + " -> " + target.getThisPC() + " to " + _newTarget.getThisPC());
+         //System.out.println("retargetting " + pc + " -> " + target.getThisPC() + " to " + _newTarget.getThisPC());
          unhook(); // removes this from the list of branchers to target
          setTarget(_newTarget);
-         System.out.println("retargetted " + pc + " -> " + target.getThisPC());
+         //System.out.println("retargetted " + pc + " -> " + target.getThisPC());
          //  _newTarget.addBranchTarget(this);
       }
 
