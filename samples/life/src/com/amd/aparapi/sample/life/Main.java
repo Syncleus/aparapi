@@ -38,13 +38,20 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 
 package com.amd.aparapi.sample.life;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 import com.amd.aparapi.Kernel;
@@ -105,12 +112,12 @@ public class Main{
          fromBase = height * width;
          toBase = 0;
          setExplicit(true); // This gives us a performance boost
-         
+
          /** draw a line across the image **/
          for (int i = width * (height / 2) + width / 10; i < width * (height / 2 + 1) - width / 10; i++) {
             imageData[i] = LifeKernel.ALIVE;
          }
-         
+
          put(imageData); // Because we are using explicit buffer management we must put the imageData array
 
       }
@@ -158,6 +165,8 @@ public class Main{
 
    }
 
+   static boolean running = false;
+
    public static void main(String[] _args) {
 
       JFrame frame = new JFrame("Game of Life");
@@ -186,10 +195,28 @@ public class Main{
          }
       };
 
+      JPanel controlPanel = new JPanel(new FlowLayout());
+      frame.getContentPane().add(controlPanel, BorderLayout.SOUTH);
+
+      final JButton startButton = new JButton("Start");
+
+      startButton.addActionListener(new ActionListener(){
+         @Override public void actionPerformed(ActionEvent e) {
+            running = true;
+            startButton.setEnabled(false);
+         }
+      });
+      controlPanel.add(startButton);
+      controlPanel.add(new JLabel(lifeKernel.getExecutionMode().toString()));
+
+      controlPanel.add(new JLabel("  Generations/Second="));
+      JLabel generationsPerSecond = new JLabel("0.00");
+      controlPanel.add(generationsPerSecond);
+
       // Set the default size and add to the frames content pane
       viewer.setPreferredSize(new Dimension(width, height));
       frame.getContentPane().add(viewer);
-      
+
       // Swing housekeeping
       frame.pack();
       frame.setVisible(true);
@@ -197,13 +224,23 @@ public class Main{
 
       long start = System.currentTimeMillis();
       long generations = 0;
+      while (!running) {
+         try {
+            Thread.sleep(10);
+            viewer.repaint();
+         } catch (InterruptedException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+         }
+      }
       while (true) {
-         lifeKernel.nextGeneration();  // Work is performed here
-         viewer.repaint();             // Request a repaint of the viewer (causes paintComponent(Graphics) to be called later not synchronous
+
+         lifeKernel.nextGeneration(); // Work is performed here
+         viewer.repaint(); // Request a repaint of the viewer (causes paintComponent(Graphics) to be called later not synchronous
          generations++;
          long now = System.currentTimeMillis();
          if (now - start > 1000) {
-            frame.setTitle(lifeKernel.getExecutionMode() + " generations per second: " + (generations * 1000.0) / (now - start));
+            generationsPerSecond.setText(String.format("%5.2f", (generations * 1000.0) / (now - start)));
             start = now;
             generations = 0;
          }
