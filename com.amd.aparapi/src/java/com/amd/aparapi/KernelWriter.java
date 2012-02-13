@@ -43,10 +43,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry;
-import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry.LocalVariableInfo;
-import com.amd.aparapi.ClassModel.AttributePool.RuntimeAnnotationsEntry;
 import com.amd.aparapi.ClassModel.ClassModelField;
+import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry;
+import com.amd.aparapi.ClassModel.AttributePool.RuntimeAnnotationsEntry;
+import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry.LocalVariableInfo;
+import com.amd.aparapi.ClassModel.AttributePool.RuntimeAnnotationsEntry.AnnotationInfo;
 import com.amd.aparapi.ClassModel.ConstantPool.FieldEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodEntry;
 import com.amd.aparapi.InstructionSet.AccessArrayElement;
@@ -92,14 +93,47 @@ abstract class KernelWriter extends BlockWriter{
 
    final static Map<String, String> javaToCLIdentifierMap = new HashMap<String, String>();
    {
+
       javaToCLIdentifierMap.put("getGlobalId()I", "get_global_id(0)");
+      javaToCLIdentifierMap.put("getGlobalId(I)I", "get_global_id"); // no parenthesis if we are conveying args
+      javaToCLIdentifierMap.put("getGlobalX()I", "get_global_id(0)");
+      javaToCLIdentifierMap.put("getGlobalY()I", "get_global_id(1)");
+      javaToCLIdentifierMap.put("getGlobalZ()I", "get_global_id(2)");
+
       javaToCLIdentifierMap.put("getGlobalSize()I", "get_global_size(0)");
+      javaToCLIdentifierMap.put("getGlobalSize(I)I", "get_global_size"); // no parenthesis if we are conveying args
+      javaToCLIdentifierMap.put("getGlobalWidth()I", "get_global_size(0)");
+      javaToCLIdentifierMap.put("getGlobalHeight()I", "get_global_size(1)");
+      javaToCLIdentifierMap.put("getGlobalDepth()I", "get_global_size(2)");
+
       javaToCLIdentifierMap.put("getLocalId()I", "get_local_id(0)");
+      javaToCLIdentifierMap.put("getLocalId(I)I", "get_local_id"); // no parenthesis if we are conveying args
+      javaToCLIdentifierMap.put("getLocalX()I", "get_local_id(0)");
+      javaToCLIdentifierMap.put("getLocalY()I", "get_local_id(1)");
+      javaToCLIdentifierMap.put("getLocalZ()I", "get_local_id(2)");
+
       javaToCLIdentifierMap.put("getLocalSize()I", "get_local_size(0)");
+      javaToCLIdentifierMap.put("getLocalSize(I)I", "get_local_size"); // no parenthesis if we are conveying args
+      javaToCLIdentifierMap.put("getLocalWidth()I", "get_local_size(0)");
+      javaToCLIdentifierMap.put("getLocalHeight()I", "get_local_size(1)");
+      javaToCLIdentifierMap.put("getLocalDepth()I", "get_local_size(2)");
+
       javaToCLIdentifierMap.put("getNumGroups()I", "get_num_groups(0)");
+      javaToCLIdentifierMap.put("getNumGroups(I)I", "get_num_groups"); // no parenthesis if we are conveying args
+      javaToCLIdentifierMap.put("getNumGroupsX()I", "get_num_groups(0)");
+      javaToCLIdentifierMap.put("getNumGroupsY()I", "get_num_groups(1)");
+      javaToCLIdentifierMap.put("getNumGroupsZ()I", "get_num_groups(2)");
+
       javaToCLIdentifierMap.put("getGroupId()I", "get_group_id(0)");
+      javaToCLIdentifierMap.put("getGroupId(I)I", "get_group_id"); // no parenthesis if we are conveying args
+      javaToCLIdentifierMap.put("getGroupX()I", "get_group_id(0)");
+      javaToCLIdentifierMap.put("getGroupY()I", "get_group_id(1)");
+      javaToCLIdentifierMap.put("getGroupZ()I", "get_group_id(2)");
+
       javaToCLIdentifierMap.put("getPassId()I", "get_pass_id(this)");
+
       javaToCLIdentifierMap.put("localBarrier()V", "barrier(CLK_LOCAL_MEM_FENCE)");
+
       javaToCLIdentifierMap.put("globalBarrier()V", "barrier(CLK_GLOBAL_MEM_FENCE)");
 
    }
@@ -160,7 +194,19 @@ abstract class KernelWriter extends BlockWriter{
       if (barrierAndGetterMappings != null) {
          // this is one of the OpenCL barrier or size getter methods
          // write the mapping and exit
-         write(barrierAndGetterMappings);
+         if (argc > 0) {
+            write(barrierAndGetterMappings);
+            write("(");
+            for (int arg = 0; arg < argc; arg++) {
+               if ((arg != 0)) {
+                  write(", ");
+               }
+               writeInstruction(_methodCall.getArg(arg));
+            }
+            write(")");
+         } else {
+            write(barrierAndGetterMappings);
+         }
       } else {
 
          String intrinsicMapping = Kernel.getMappedMethodName(_methodEntry);
@@ -220,13 +266,16 @@ abstract class KernelWriter extends BlockWriter{
       newLine();
    }
 
+   public final static String __local = "__local";
+
+   public final static String __global = "__global";
+
+   public final static String LOCAL_ANNOTATION_NAME = "L" + Kernel.Local.class.getName().replace(".", "/") + ";";
+
    @Override void write(Entrypoint _entryPoint) throws CodeGenException {
       List<String> thisStruct = new ArrayList<String>();
       List<String> argLines = new ArrayList<String>();
       List<String> assigns = new ArrayList<String>();
-
-      // hack
-      // for (java.lang.reflect.Field f:_entryPoint.getTheClass().getDeclaredFields()){
 
       entryPoint = _entryPoint;
 
@@ -239,13 +288,18 @@ abstract class KernelWriter extends BlockWriter{
          String signature = field.getDescriptor();
 
          boolean isPointer = false;
+
+         // check the suffix 
+         String type = field.getName().endsWith(Kernel.LOCAL_SUFFIX) ? __local : __global;
          RuntimeAnnotationsEntry visibleAnnotations = field.fieldAttributePool.getRuntimeVisibleAnnotationsEntry();
 
-         String type = "__global";
          if (visibleAnnotations != null) {
-            // for (AnnotationInfo ai : visibleAnnotations) {
-            // String typeDescriptor = ai.getTypeDescriptor();
-            // }
+            for (AnnotationInfo ai : visibleAnnotations) {
+               String typeDescriptor = ai.getTypeDescriptor();
+               if (typeDescriptor.equals(LOCAL_ANNOTATION_NAME)) {
+                  type = __local;
+               }
+            }
          }
 
          if (signature.startsWith("[")) {

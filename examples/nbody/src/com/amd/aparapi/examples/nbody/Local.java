@@ -68,18 +68,16 @@ import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
 /**
- * NBody implementing demonstrating Aparapi kernels. 
+ * An NBody clone which uses local memory to cache NBody positions for execution.
  * 
- * For a description of the NBody problem. 
- * @see http://en.wikipedia.org/wiki/N-body_problem
+ * http://www.browndeertechnology.com/docs/BDT_OpenCL_Tutorial_NBody-rev3.html
  * 
- * We use JOGL to render the bodies. 
- * @see http://jogamp.org/jogl/www/
+ * @see com.amd.aparapi.examples.nbody.Main
  * 
  * @author gfrost
  *
  */
-public class Main{
+public class Local{
 
    public static class NBodyKernel extends Kernel{
       protected final float delT = .005f;
@@ -94,18 +92,20 @@ public class Main{
 
       private final float[] vxyz; // velocity component of x,y and z of bodies 
 
+      @Local private final float[] localStuff; // local memory
+
       /**
        * Constructor initializes xyz and vxyz arrays.
        * @param _bodies
        */
       public NBodyKernel(Range _range) {
          range = _range;
-         // range = Range.create(bodies);
+         localStuff = new float[range.getLocalSize(0) * 3];
+
          xyz = new float[range.getGlobalSize(0) * 3];
          vxyz = new float[range.getGlobalSize(0) * 3];
          float maxDist = 20f;
          for (int body = 0; body < range.getGlobalSize(0) * 3; body += 3) {
-
             float theta = (float) (Math.random() * Math.PI * 2);
             float phi = (float) (Math.random() * Math.PI * 2);
             float radius = (float) (Math.random() * maxDist);
@@ -116,7 +116,6 @@ public class Main{
             xyz[body + 2] = (float) (radius * Math.cos(phi));
 
             // divide into two 'spheres of bodies' by adjusting x 
-
             if (body % 2 == 0) {
                xyz[body + 0] += maxDist * 1.5;
             } else {
@@ -130,26 +129,37 @@ public class Main{
        * Here is the kernel entrypoint. Here is where we calculate the position of each body
        */
       @Override public void run() {
-         int body = getGlobalId();
-         int count = getGlobalSize(0) * 3;
-         int globalId = body * 3;
+
+         int globalId = getGlobalId(0) * 3;
 
          float accx = 0.f;
          float accy = 0.f;
          float accz = 0.f;
-
          float myPosx = xyz[globalId + 0];
          float myPosy = xyz[globalId + 1];
          float myPosz = xyz[globalId + 2];
-         for (int i = 0; i < count; i += 3) {
-            float dx = xyz[i + 0] - myPosx;
-            float dy = xyz[i + 1] - myPosy;
-            float dz = xyz[i + 2] - myPosz;
-            float invDist = rsqrt((dx * dx) + (dy * dy) + (dz * dz) + espSqr);
-            float s = mass * invDist * invDist * invDist;
-            accx = accx + s * dx;
-            accy = accy + s * dy;
-            accz = accz + s * dz;
+
+         for (int tile = 0; tile < getGlobalSize(0) / getLocalSize(0); tile++) {
+            // load one tile into local memory
+            int gidx = (tile * getLocalSize(0) + getLocalId()) * 3;
+            int lidx = getLocalId(0) * 3;
+            localStuff[lidx + 0] = xyz[gidx + 0];
+            localStuff[lidx + 1] = xyz[gidx + 1];
+            localStuff[lidx + 2] = xyz[gidx + 2];
+            // Synchronize to make sure data is available for processing
+            localBarrier();
+
+            for (int i = 0; i < getLocalSize() * 3; i += 3) {
+               float dx = localStuff[i + 0] - myPosx;
+               float dy = localStuff[i + 1] - myPosy;
+               float dz = localStuff[i + 2] - myPosz;
+               float invDist = rsqrt((dx * dx) + (dy * dy) + (dz * dz) + espSqr);
+               float s = mass * invDist * invDist * invDist;
+               accx = accx + s * dx;
+               accy = accy + s * dy;
+               accz = accz + s * dz;
+            }
+            localBarrier();
          }
          accx = accx * delT;
          accy = accy * delT;
@@ -194,7 +204,7 @@ public class Main{
 
    public static void main(String _args[]) {
 
-      final NBodyKernel kernel = new NBodyKernel(Range.create(Integer.getInteger("bodies", 8192)));
+      final NBodyKernel kernel = new NBodyKernel(Range.create(Integer.getInteger("bodies", 8192), 256));
 
       JFrame frame = new JFrame("NBody");
 
@@ -307,7 +317,7 @@ public class Main{
             gl.glEnable(GL.GL_BLEND);
             gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
             try {
-               InputStream textureStream = Main.class.getResourceAsStream("particle.jpg");
+               InputStream textureStream = Local.class.getResourceAsStream("particle.jpg");
                Texture texture = TextureIO.newTexture(textureStream, false, null);
                texture.enable(gl);
             } catch (IOException e) {

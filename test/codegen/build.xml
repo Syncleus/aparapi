@@ -2,8 +2,7 @@
 
 <project name="codegen" default="junit" basedir=".">
 
-   <!--<property name="junit.jar" value="/home/gfrost/aparapi/trunk/tools/junit/junit.jar"/>-->
-   <property name="junit.jar" value="C:\Users\gfrost\javalabs\projects\aparapi\trunk\tools\junit\junit.jar"/>
+   <property name="junit.jar" value="./junit-4.10.jar"/>
 
    <path id="classpath">
       <pathelement path="..\..\com.amd.aparapi\aparapi.jar"/>
@@ -11,28 +10,22 @@
       <pathelement path="classes"/>
    </path>
 
-   <target name="check">
+   <target name="check-junit">
+      <condition property="need.to.upload.junit">
+         <not><available file="${junit.jar}"/> </not>
+      </condition>
+   </target>
+
+   <target name="check" if="need.to.upload.junit">
+      <get dest=".">
+         <url url="http://repo1.maven.org/maven2/junit/junit/4.10/junit-4.10.jar"/>
+      </get>
       <fail message="Error:">
          <condition>
-            <not><isset property="junit.jar"/></not>
+            <not><available file="${junit.jar}"/> </not>
          </condition>
          <![CDATA[
-         You will need to edit test/codegen/build.xml
-
-         At present junit.dir is not set.  It needs to point to the junit jar file in your junit installation.
-
-         You can install/download junit from www.junit.org.
-         ]]>
-      </fail>
-      <available file="${junit.jar}" type="file" property="junit.jar.exists"/>
-      <fail message="Error:">
-         <condition>
-            <not><isset property="junit.jar.exists"/></not>
-         </condition>
-         <![CDATA[
-         You will need to edit test/codegen/build.xml
-
-         At present junit.jar is set to ${junit.jar} but that file does not exist
+         Failed to upload junit from maven repository. 
          ]]>
       </fail>
    </target>
@@ -43,7 +36,7 @@
       <delete dir="src/genjava/com"/>
    </target>
 
-   <target name="junit" depends="clean, check">
+   <target name="junit" depends="clean, check-junit, check">
       <mkdir dir="classes"/>
       <javac srcdir="src/java" destdir="classes" debug="on"  includeAntRuntime="false" classpathref="classpath" />
 

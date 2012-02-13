@@ -55,6 +55,7 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 import com.amd.aparapi.Kernel;
+import com.amd.aparapi.Range;
 
 /**
  * An example Aparapi application which demonstrates Conways 'Game Of Life'.
@@ -101,6 +102,8 @@ public class Main{
 
       private final int height;
 
+      private final Range range;
+
       private int fromBase;
 
       private int toBase;
@@ -109,6 +112,8 @@ public class Main{
          imageData = ((DataBufferInt) _image.getRaster().getDataBuffer()).getData();
          width = _width;
          height = _height;
+         range = Range.create(width * height, 256);
+         System.out.println("range = " + range);
          fromBase = height * width;
          toBase = 0;
          setExplicit(true); // This gives us a performance boost
@@ -160,7 +165,7 @@ public class Main{
          fromBase = toBase;
          toBase = swap;
 
-         execute(width * height);
+         execute(range);
       }
 
    }

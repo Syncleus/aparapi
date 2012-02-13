@@ -66,7 +66,7 @@ import com.amd.aparapi.Range;
  *
  */
 
-public class Main{
+public class Main2D{
 
    /**
     * An Aparapi Kernel implementation for creating a scaled view of the mandelbrot set.
@@ -79,12 +79,6 @@ public class Main{
 
       /** RGB buffer used to store the Mandelbrot image. This buffer holds (width * height) RGB values. */
       final private int rgb[];
-
-      /** Mandelbrot image width. */
-      final private int width;
-
-      /** Mandelbrot image height. */
-      final private int height;
 
       /** Palette used for each iteration value 0..maxIterations. */
       final private int pallette[];
@@ -107,9 +101,8 @@ public class Main{
        * @param _rgb Mandelbrot image RGB buffer
        * @param _pallette Mandelbrot image palette
        */
-      public MandelKernel(int _width, int _height, int[] _rgb, int[] _pallette) {
-         width = _width;
-         height = _height;
+      public MandelKernel(int[] _rgb, int[] _pallette) {
+
          rgb = _rgb;
          pallette = _pallette;
          maxIterations = pallette.length - 1;
@@ -119,12 +112,12 @@ public class Main{
       @Override public void run() {
 
          /** Determine which RGB value we are going to process (0..RGB.length). */
-         int gid = getGlobalId();
+         int gid = getGlobalId(1) * getGlobalSize(0) + getGlobalId(0);
 
          /** Translate the gid into an x an y value. */
-         float x = (((gid % width * scale) - ((scale / 2) * width)) / width) + offsetx;
+         float x = (((getGlobalId(0) * scale) - ((scale / 2) * getGlobalSize(0))) / getGlobalSize(0)) + offsetx;
 
-         float y = (((gid / height * scale) - ((scale / 2) * height)) / height) + offsety;
+         float y = (((getGlobalId(1) * scale) - ((scale / 2) * getGlobalSize(1))) / getGlobalSize(1)) + offsety;
 
          int count = 0;
 
@@ -159,14 +152,9 @@ public class Main{
 
       JFrame frame = new JFrame("MandelBrot");
 
-      /** Width of Mandelbrot view. */
-      final int width = 768;
-
-      /** Height of Mandelbrot view. */
-      final int height = 768;
-
       /** Mandelbrot image height. */
-      final Range range = Range.create(width * height);
+      final Range range = Range.create2D(768, 768);
+      System.out.println("range= " + range);
 
       /** Maximum iterations for Mandelbrot. */
       final int maxIterations = 256;
@@ -182,18 +170,18 @@ public class Main{
       }
 
       /** Image for Mandelbrot view. */
-      final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-      final BufferedImage offscreen = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+      final BufferedImage image = new BufferedImage(range.getGlobalSize(0), range.getGlobalSize(1), BufferedImage.TYPE_INT_RGB);
+      final BufferedImage offscreen = new BufferedImage(range.getGlobalSize(0), range.getGlobalSize(1), BufferedImage.TYPE_INT_RGB);
       // Draw Mandelbrot image
       JComponent viewer = new JComponent(){
          @Override public void paintComponent(Graphics g) {
 
-            g.drawImage(image, 0, 0, width, height, this);
+            g.drawImage(image, 0, 0, range.getGlobalSize(0), range.getGlobalSize(1), this);
          }
       };
 
       // Set the size of JComponent which displays Mandelbrot image
-      viewer.setPreferredSize(new Dimension(width, height));
+      viewer.setPreferredSize(new Dimension(range.getGlobalSize(0), range.getGlobalSize(1)));
 
       final Object doorBell = new Object();
 
@@ -218,7 +206,7 @@ public class Main{
       final int[] rgb = ((DataBufferInt) offscreen.getRaster().getDataBuffer()).getData();
       final int[] imageRgb = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
       // Create a Kernel passing the size, RGB buffer and the palette.
-      final MandelKernel kernel = new MandelKernel(width, height, rgb, pallette);
+      final MandelKernel kernel = new MandelKernel(rgb, pallette);
 
       float defaultScale = 3f;
 
@@ -256,8 +244,8 @@ public class Main{
          float x = -1f;
          float y = 0f;
          float scale = defaultScale;
-         float tox = (float) (to.x - width / 2) / width * scale;
-         float toy = (float) (to.y - height / 2) / height * scale;
+         float tox = (float) (to.x - range.getGlobalSize(0) / 2) / range.getGlobalSize(0) * scale;
+         float toy = (float) (to.y - range.getGlobalSize(1) / 2) / range.getGlobalSize(1) * scale;
 
          // This is how many frames we will display as we zoom in and out.
          int frames = 128;

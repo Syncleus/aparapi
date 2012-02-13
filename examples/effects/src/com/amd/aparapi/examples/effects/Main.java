@@ -53,6 +53,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 import com.amd.aparapi.Kernel;
+import com.amd.aparapi.Range;
 
 /**
  * An example Aparapi application which tracks the mouse and updates the color pallete of the window based on the distance from the mouse pointer. 
@@ -161,6 +162,8 @@ public class Main{
       /** Height of Mandelbrot view. */
       final int height = 1024;
 
+      final Range range = Range.create2D(width, height);
+
       /** The size of the pallette of pixel colors we choose from. */
       final int palletteSize = 128;
 
@@ -234,7 +237,7 @@ public class Main{
 
       int trailLastUpdatedPosition = 0;
 
-      kernel.execute(width * height);
+      kernel.execute(range);
       System.arraycopy(rgb, 0, imageRgb, 0, rgb.length);
       viewer.repaint();
 
@@ -268,7 +271,7 @@ public class Main{
          trailLastUpdatedPosition++;
 
          /** execute the kernel which calculates new pixel values **/
-         kernel.execute(width * height);
+         kernel.execute(range);
 
          /** copy the rgb values to the imageRgb buffer **/
          System.arraycopy(rgb, 0, imageRgb, 0, rgb.length);

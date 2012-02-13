@@ -70,6 +70,9 @@ import com.amd.aparapi.Kernel.EXECUTION_MODE;
  *
  */
 class KernelRunner{
+   /**
+    * Be careful changing the name/type of this field as it is referenced from JNI code.
+    */
    public @interface UsedByJNICode {
 
    }
@@ -305,7 +308,7 @@ class KernelRunner{
     * 
     * @author gfrost
     */
-   @UsedByJNICode public static final int ARG_APARAPI_BUF_IS_DIRECT = 1 << 20;
+   // @UsedByJNICode public static final int ARG_APARAPI_BUF_IS_DIRECT = 1 << 20;
 
    /**
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>char</code> type (array or primitive).
@@ -447,7 +450,7 @@ class KernelRunner{
        * 
        * At present only set for AparapiLocalBuffer objs, JNI multiplies this by localSize
        */
-      @Annotations.Unused @UsedByJNICode public int bytesPerLocalSize;
+      //  @Annotations.Unused @UsedByJNICode public int bytesPerLocalWidth;
 
       /**
        * Only set for array objs, not used on JNI
@@ -527,21 +530,25 @@ class KernelRunner{
     * @param maxJTPLocalSize
     * @return
     */
-   @Annotations.DocMe private native static synchronized long initJNI(Kernel _kernel, int _flags, int numProcessors,
-         int maxJTPLocalSize);
+   @Annotations.DocMe private native static synchronized long initJNI(Kernel _kernel, int _flags);
 
    private native long buildProgramJNI(long _jniContextHandle, String _source);
 
    private native int setArgsJNI(long _jniContextHandle, KernelArg[] _args, int argc);
 
-   private native int runKernelJNI(long _jniContextHandle, int _globalSize, int _localSize, boolean _needSync,
-         boolean useNullForLocalSize, int _passes);
+   private native int runKernelJNI(long _jniContextHandle, Range _range, boolean _needSync, int _passes);
 
    private native int disposeJNI(long _jniContextHandle);
 
-   private native int getLocalSizeJNI(long _jniContextHandle, int _globalSize, int localBytesPerLocalId);
+   private native String getExtensionsJNI(long _jniContextHandle);
 
-   private native String getExtensions(long _jniContextHandle);
+   private native int getMaxWorkGroupSizeJNI(long _jniContextHandle);
+
+   private native int getMaxWorkItemSizeJNI(long _jniContextHandle, int _index);
+
+   private native int getMaxComputeUnitsJNI(long _jniContextHandle);
+
+   private native int getMaxWorkItemDimensionsJNI(long _jniContextHandle);
 
    private Set<String> capabilitiesSet;
 
@@ -635,34 +642,6 @@ class KernelRunner{
       return capabilitiesSet.contains(CL_KHR_GL_SHARING);
    }
 
-   private static int numCores = Runtime.getRuntime().availableProcessors();
-
-   private static int maxJTPLocalSize = Config.JTPLocalSizeMultiplier * numCores;
-
-   static int getMaxJTPLocalSize() {
-      return maxJTPLocalSize;
-   }
-
-   /**
-    * We need to match OpenCL's algorithm for localsize.
-    * 
-    * @param _globalSize
-    *          The globalsize requested by the user (via <code>Kernel.execute(globalSize)</code>)
-    * @return The value we use for JTP execution for localSize
-    */
-   private static int getJTPLocalSizeForGlobalSize(int _globalSize) {
-      // iterate down until we find a localSize that divides _globalSize equally
-      for (int localSize = getMaxJTPLocalSize(); localSize > 0; localSize--) {
-         if (_globalSize % localSize == 0) {
-            if (logger.isLoggable(Level.FINE)) {
-               logger.fine("executeJava: picking localSize=" + localSize + " for globalSize=" + _globalSize);
-            }
-            return localSize;
-         }
-      }
-      return 0;
-   }
-
    /**
     * Execute using a Java thread pool. Either because we were explicitly asked to do so, or because we 'fall back' after discovering an OpenCL issue.
     * 
@@ -672,106 +651,270 @@ class KernelRunner{
     *          The # of passes requested by the user (via <code>Kernel.execute(globalSize, passes)</code>). Note this is usually defaulted to 1 via <code>Kernel.execute(globalSize)</code>.
     * @return
     */
-   private long executeJava(final int _globalSize, final int _passes) {
+   private long executeJava(final Range _range, final int _passes) {
       if (logger.isLoggable(Level.FINE)) {
-         logger.fine("executeJava: _globalSize=" + _globalSize);
+         logger.fine("executeJava: range = " + _range);
       }
 
       if (kernel.getExecutionMode().equals(EXECUTION_MODE.SEQ)) {
 
-         kernel.localBarrier = new CyclicBarrier(1);
-
-         kernel.setSizes(_globalSize, 1);
-
-         kernel.setNumGroups(_globalSize);
-         Kernel worker = (Kernel) kernel.clone();
-         for (int passid = 0; passid < _passes; passid++) {
-            worker.setPassId(passid);
-            for (int id = 0; id < _globalSize; id++) {
-               worker.setGroupId(id);
-               worker.setGlobalId(id);
-               worker.setLocalId(0);
-               worker.run();
-            }
-         }
-      } else {
-         // note uses of final so we can use in anonymous inner class
-         final int localSize = getJTPLocalSizeForGlobalSize(_globalSize);
-         // if (localSize == 0) return 0; // should never happen
-         final int numGroups = _globalSize / localSize;
-
-         // compute numThreadSets by multiplying localSize until bigger than numCores
-         final int numThreadSets = localSize >= numCores ? 1 : (numCores + (localSize - 1)) / localSize;
-         final int numThreads = numThreadSets * localSize;
-         // when dividing to get groupsPerThreadSet, round up
-         final int groupsPerThreadSet = (numGroups + (numThreadSets - 1)) / numThreadSets;
-         if (logger.isLoggable(Level.FINE)) {
-            logger.fine("executeJava: localSize=" + localSize + ", numThreads=" + numThreads + ", numThreadSets=" + numThreadSets
-                  + ", numGroups=" + numGroups);
+         /**
+          * SEQ mode is useful for testing trivial logic, but kernels which use SEQ mode cannot be used if the
+          * product of localSize(0..3) is >1.  So we can use multi-dim ranges but only if the local size is 1 in all dimensions. 
+          * 
+          * As a result of this barrier is only ever 1 work item wide and probably should be turned into a no-op. 
+          * 
+          * So we need to check if the range is valid here. If not we have no choice but to punt.
+          */
+         if (_range.getLocalSize(0) * _range.getLocalSize(1) * _range.getLocalSize(2) > 1) {
+            throw new IllegalStateException("Can't run range with group size >1 sequentially. Barriers would deadlock!");
          }
 
-         Thread[] threads = new Thread[numThreads];
-         // joinBarrier that says all threads are finished
-         final CyclicBarrier joinBarrier = new CyclicBarrier(numThreads + 1);
+         Kernel kernelClone = (Kernel) kernel.clone();
+         kernelClone.range = _range;
+         kernelClone.groupId[0] = 0;
+         kernelClone.groupId[1] = 0;
+         kernelClone.groupId[2] = 0;
+         kernelClone.localId[0] = 0;
+         kernelClone.localId[1] = 0;
+         kernelClone.localId[2] = 0;
+         kernelClone.localBarrier = new CyclicBarrier(1);
+         for (kernelClone.passId = 0; kernelClone.passId < _passes; kernelClone.passId++) {
 
-         // each threadSet shares a CyclicBarrier of size localSize
-         final CyclicBarrier localBarriers[] = new CyclicBarrier[numThreadSets];
-         kernel.setSizes(_globalSize, localSize);
-         kernel.setNumGroups(numGroups);
-         for (int passid = 0; passid < _passes; passid++) {
-            kernel.setPassId(passid);
-            for (int thrSetId = 0; thrSetId < numThreadSets; thrSetId++) {
-               final int startGroupId = thrSetId * groupsPerThreadSet;
-               final int endGroupId = Math.min((thrSetId + 1) * groupsPerThreadSet, numGroups);
-               // System.out.println("thrSetId=" + thrSetId + " running groups from " + startGroupId + " thru " + (endGroupId-1));
-               localBarriers[thrSetId] = new CyclicBarrier(localSize);
-
-               // each threadSet has localSize threads
-               for (int lid = 0; lid < localSize; lid++) { // for each thread in threadSet
-                  final int localId = lid;
-                  final int threadId = thrSetId * localSize + localId;
-                  final Kernel worker = (Kernel) kernel.clone();
-                  worker.setLocalId(localId);
-                  worker.localBarrier = localBarriers[thrSetId]; // barrier that the kernel has access to
-
-                  threads[threadId] = new Thread(new Runnable(){
-                     @Override public void run() {
-                        for (int groupId = startGroupId; groupId < endGroupId; groupId++) {
-                           int globalId = (groupId * localSize) + localId;
-                           worker.setGroupId(groupId);
-                           worker.setGlobalId(globalId);
-                           // System.out.println("running worker with gid=" + globalId + ", lid=" + localId
-                           // + ", groupId=" + groupId + ", threadId=" + threadId);
-                           worker.run();
-                        }
-                        try {
-                           joinBarrier.await();
-                        } catch (InterruptedException e) {
-                           // TODO Auto-generated catch block
-                           e.printStackTrace();
-                        } catch (BrokenBarrierException e) {
-                           // TODO Auto-generated catch block
-                           e.printStackTrace();
-                        }
+            if (_range.getDims() == 1) {
+               for (int id = 0; id < _range.getGlobalSize(0); id++) {
+                  kernelClone.globalId[0] = id;
+                  kernelClone.run();
+               }
+            } else if (_range.getDims() == 2) {
+               for (int x = 0; x < _range.getGlobalSize(0); x++) {
+                  kernelClone.globalId[0] = x;
+                  for (int y = 0; y < _range.getGlobalSize(1); y++) {
+                     kernelClone.globalId[1] = y;
+                     kernelClone.run();
+                  }
+               }
+            } else if (_range.getDims() == 3) {
+               for (int x = 0; x < _range.getGlobalSize(0); x++) {
+                  kernelClone.globalId[0] = x;
+                  for (int y = 0; y < _range.getGlobalSize(1); y++) {
+                     kernelClone.globalId[1] = y;
+                     for (int z = 0; z < _range.getGlobalSize(2); z++) {
+                        kernelClone.globalId[2] = z;
+                        kernelClone.run();
                      }
-                  });
-                  threads[threadId].start();
-               }
-
-               // this is where the main thread waits on the join barrier
-               try {
-                  joinBarrier.await();
-               } catch (InterruptedException e) {
-                  // TODO Auto-generated catch block
-                  e.printStackTrace();
-               } catch (BrokenBarrierException e) {
-                  // TODO Auto-generated catch block
-                  e.printStackTrace();
+                     kernelClone.run();
+                  }
                }
             }
          }
+
+      } else {
+
+         final int threads = _range.getLocalSize(0) * _range.getLocalSize(1) * _range.getLocalSize(2);
+         final int globalGroups = _range.getNumGroups(0) * _range.getNumGroups(1) * _range.getNumGroups(2);
+         final Thread threadArray[] = new Thread[threads];
+         /**
+          * This joinBarrier is the barrier that we provide for the kernel threads to rendezvous with the current dispatch thread.
+          * So this barrier is threadCount+1 wide (the +1 is for the dispatch thread)
+          */
+         final CyclicBarrier joinBarrier = new CyclicBarrier(threads + 1);
+
+         /**
+          * This localBarrier is only ever used by the kernels.  If the kernel does not use the barrier the threads 
+          * can get out of sync, we promised nothing in JTP mode.
+          *
+          * As with OpenCL all threads within a group must wait at the barrier or none.  It is a user error (possible deadlock!)
+          * if the barrier is in a conditional that is only executed by some of the threads within a group.
+          * 
+          * Kernel developer must understand this.
+          * 
+          * This barrier is threadCount wide.  We never hit the barrier from the dispatch thread.
+          */
+         final CyclicBarrier localBarrier = new CyclicBarrier(threads);
+
+         /**
+           * Note that we emulate OpenCL by creating one thread per localId (across the group).
+           * 
+           * So threadCount == range.getLocalSize(0)*range.getLocalSize(1)*range.getLocalSize(2);
+           * 
+           * For a 1D range of 12 groups of 4 we create 4 threads. One per localId(0).
+           * 
+           * We also clone the kernel 4 times. One per thread.
+           * 
+           * We create local barrier which has a width of 4
+           *         
+           *    Thread-0 handles localId(0) (global 0,4,8)
+           *    Thread-1 handles localId(1) (global 1,5,7)
+           *    Thread-2 handles localId(2) (global 2,6,10)
+           *    Thread-3 handles localId(3) (global 3,7,11)
+           *    
+           * This allows all threads to synchronize using the local barrier.
+           * 
+           * Initially the use of local buffers seems broken as the buffers appears to be per Kernel.
+           * Thankfully Kernel.clone() performs a shallow clone of all buffers (local and global)
+           * So each of the cloned kernels actually still reference the same underlying local/global buffers. 
+           * 
+           * If the kernel uses local buffers but does not use barriers then it is possible for different groups
+           * to see mutations from each other (unlike OpenCL), however if the kernel does not us barriers then it 
+           * cannot assume any coherence in OpenCL mode either (the failure mode will be different but still wrong) 
+           * 
+           * So even JTP mode use of local buffers will need to use barriers. Not for the same reason as OpenCL but to keep groups in lockstep.
+           * 
+           **/
+
+         for (int id = 0; id < threads; id++) {
+            final int threadId = id;
+
+            /**
+             *  We clone one kernel for each thread.
+             *  
+             *  They will all share references to the same range, localBarrier and global/local buffers because the clone is shallow.
+             *  We need clones so that each thread can assign 'state' (localId/globalId/groupId) without worrying 
+             *  about other threads.   
+             */
+            final Kernel kernelClone = (Kernel) kernel.clone();
+            kernelClone.range = _range;
+            kernelClone.localBarrier = localBarrier;
+
+            threadArray[threadId] = new Thread(new Runnable(){
+               @Override public void run() {
+                  for (int globalGroupId = 0; globalGroupId < globalGroups; globalGroupId++) {
+
+                     if (_range.getDims() == 1) {
+                        kernelClone.localId[0] = threadId % _range.getLocalSize(0);
+                        kernelClone.globalId[0] = threadId + globalGroupId * threads;
+                        kernelClone.groupId[0] = globalGroupId;
+                     } else if (_range.getDims() == 2) {
+
+                        /**
+                         * Consider a 12x4 grid of 4*2 local groups
+                         * <pre>
+                         *                                             threads = 4*2 = 8
+                         *                                             localWidth=4
+                         *                                             localHeight=2
+                         *                                             globalWidth=12
+                         *                                             globalHeight=4
+                         * 
+                         *    00 01 02 03 | 04 05 06 07 | 08 09 10 11  
+                         *    12 13 14 15 | 16 17 18 19 | 20 21 22 23
+                         *    ------------+-------------+------------
+                         *    24 25 26 27 | 28 29 30 31 | 32 33 34 35
+                         *    36 37 38 39 | 40 41 42 43 | 44 45 46 47  
+                         *    
+                         *    00 01 02 03 | 00 01 02 03 | 00 01 02 03  threadIds : [0..7]*6
+                         *    04 05 06 07 | 04 05 06 07 | 04 05 06 07
+                         *    ------------+-------------+------------
+                         *    00 01 02 03 | 00 01 02 03 | 00 01 02 03
+                         *    04 05 06 07 | 04 05 06 07 | 04 05 06 07  
+                         *    
+                         *    00 00 00 00 | 01 01 01 01 | 02 02 02 02  groupId[0] : 0..6 
+                         *    00 00 00 00 | 01 01 01 01 | 02 02 02 02   
+                         *    ------------+-------------+------------
+                         *    00 00 00 00 | 01 01 01 01 | 02 02 02 02  
+                         *    00 00 00 00 | 01 01 01 01 | 02 02 02 02
+                         *    
+                         *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  groupId[1] : 0..6 
+                         *    00 00 00 00 | 00 00 00 00 | 00 00 00 00   
+                         *    ------------+-------------+------------
+                         *    01 01 01 01 | 01 01 01 01 | 01 01 01 01 
+                         *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
+                         *         
+                         *    00 01 02 03 | 08 09 10 11 | 16 17 18 19  globalThreadIds == threadId + groupId * threads;
+                         *    04 05 06 07 | 12 13 14 15 | 20 21 22 23
+                         *    ------------+-------------+------------
+                         *    24 25 26 27 | 32[33]34 35 | 40 41 42 43
+                         *    28 29 30 31 | 36 37 38 39 | 44 45 46 47   
+                         *          
+                         *    00 01 02 03 | 00 01 02 03 | 00 01 02 03  localX = threadId % localWidth; (for globalThreadId 33 = threadId = 01 : 01%4 =1)
+                         *    00 01 02 03 | 00 01 02 03 | 00 01 02 03   
+                         *    ------------+-------------+------------
+                         *    00 01 02 03 | 00[01]02 03 | 00 01 02 03 
+                         *    00 01 02 03 | 00 01 02 03 | 00 01 02 03
+                         *     
+                         *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  localY = threadId /localWidth  (for globalThreadId 33 = threadId = 01 : 01/4 =0)
+                         *    01 01 01 01 | 01 01 01 01 | 01 01 01 01   
+                         *    ------------+-------------+------------
+                         *    00 00 00 00 | 00[00]00 00 | 00 00 00 00 
+                         *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
+                         *     
+                         *    00 01 02 03 | 04 05 06 07 | 08 09 10 11  globalX=
+                         *    00 01 02 03 | 04 05 06 07 | 08 09 10 11     groupsPerLineWidth=globalWidth/localWidth (=12/4 =3)
+                         *    ------------+-------------+------------     groupInset =groupId%groupsPerLineWidth (=4%3 = 1)
+                         *    00 01 02 03 | 04[05]06 07 | 08 09 10 11 
+                         *    00 01 02 03 | 04 05 06 07 | 08 09 10 11     globalX = groupInset*localWidth+localX (= 1*4+1 = 5)
+                         *     
+                         *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  globalY
+                         *    01 01 01 01 | 01 01 01 01 | 01 01 01 01      
+                         *    ------------+-------------+------------
+                         *    02 02 02 02 | 02[02]02 02 | 02 02 02 02 
+                         *    03 03 03 03 | 03 03 03 03 | 03 03 03 03
+                         *    
+                         * </pre>
+                         * Assume we are trying to locate the id's for #33 
+                         *
+                         */
+
+                        kernelClone.localId[0] = threadId % _range.getLocalSize(0); // threadId % localWidth =  (for 33 = 1 % 4 = 1)
+                        kernelClone.localId[1] = threadId / _range.getLocalSize(0); // threadId / localWidth = (for 33 = 1 / 4 == 0)
+
+                        int groupInset = globalGroupId % _range.getNumGroups(0); // 4%3 = 1
+                        kernelClone.globalId[0] = groupInset * _range.getLocalSize(0) + kernelClone.localId[0]; // 1*4+1=5
+
+                        int completeLines = (globalGroupId / _range.getNumGroups(0)) * _range.getLocalSize(1);// (4/3) * 2
+                        kernelClone.globalId[1] = completeLines + kernelClone.localId[1]; // 2+0 = 2
+                        kernelClone.groupId[0] = globalGroupId % _range.getNumGroups(0);
+                        kernelClone.groupId[1] = globalGroupId / _range.getNumGroups(0);
+                     } else if (_range.getDims() == 3) {
+
+                        //Same as 2D actually turns out that localId[0] is identical for all three dims so could be hoisted out of conditional code
+
+                        kernelClone.localId[0] = threadId % _range.getLocalSize(0);
+
+                        kernelClone.localId[1] = (threadId / _range.getLocalSize(0)) % _range.getLocalSize(1);
+
+                        // the thread id's span WxHxD so threadId/(WxH) should yield the local depth  
+                        kernelClone.localId[2] = threadId / (_range.getLocalSize(0) * _range.getLocalSize(1));
+
+                        kernelClone.globalId[0] = (globalGroupId % _range.getNumGroups(0)) * _range.getLocalSize(0)
+                              + kernelClone.localId[0];
+
+                        kernelClone.globalId[1] = ((globalGroupId / _range.getNumGroups(0)) * _range.getLocalSize(1))
+                              % _range.getGlobalSize(1) + kernelClone.localId[1];
+
+                        kernelClone.globalId[2] = (globalGroupId / (_range.getNumGroups(0) * _range.getNumGroups(1)))
+                              * _range.getLocalSize(2) + kernelClone.localId[2];
+
+                        kernelClone.groupId[0] = globalGroupId % _range.getNumGroups(0);
+                        kernelClone.groupId[1] = (globalGroupId / _range.getNumGroups(0)) % _range.getNumGroups(1);
+                        kernelClone.groupId[2] = globalGroupId / (_range.getNumGroups(0) * _range.getNumGroups(1));
+                     }
+                     kernelClone.run();
+
+                  }
+                  await(joinBarrier); // This thread will rendezvous with dispatch thread here. This is effectively a join.                  
+               }
+            });
+            threadArray[threadId].setName("aparapi-" + threadId + "/" + threads);
+            threadArray[threadId].start();
+
+         }
+         await(joinBarrier); // This dispatch thread waits for all worker threads here. 
+
       } // execution mode == JTP
       return 0;
+   }
+
+   private static void await(CyclicBarrier _barrier) {
+      try {
+         _barrier.await();
+      } catch (InterruptedException e) {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      } catch (BrokenBarrierException e) {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
    }
 
    private KernelArg[] args = null;
@@ -1036,12 +1179,8 @@ class KernelRunner{
       }
    }
 
-   // this routine now also finds out how many perLocalItem bytes are specified for this kernel
-   private int localBytesPerLocalId = 0;
-
    private boolean updateKernelArrayRefs() throws AparapiException {
       boolean needsSync = false;
-      localBytesPerLocalId = 0;
 
       for (int i = 0; i < argc; i++) {
          KernelArg arg = args[i];
@@ -1089,37 +1228,59 @@ class KernelRunner{
 
    // private int numAvailableProcessors = Runtime.getRuntime().availableProcessors();
 
-   private Kernel executeOpenCL(final String _entrypointName, final int _globalSize, final int _passes) throws AparapiException {
+   private Kernel executeOpenCL(final String _entrypointName, final Range _range, final int _passes) throws AparapiException {
+      if (_range.getDims() > getMaxWorkItemDimensionsJNI(jniContextHandle)) {
+         throw new RangeException("Range dim size " + _range.getDims() + " > device "
+               + getMaxWorkItemDimensionsJNI(jniContextHandle));
+      }
+      if (_range.getWorkGroupSize() > getMaxWorkGroupSizeJNI(jniContextHandle)) {
+         throw new RangeException("Range workgroup size " + _range.getWorkGroupSize() + " > device "
+               + getMaxWorkGroupSizeJNI(jniContextHandle));
+      }
+      /*
+            if (_range.getGlobalSize(0) > getMaxWorkItemSizeJNI(jniContextHandle, 0)) {
+               throw new RangeException("Range globalsize 0 " + _range.getGlobalSize(0) + " > device "
+                     + getMaxWorkItemSizeJNI(jniContextHandle, 0));
+            }
+            if (_range.getDims() > 1) {
+               if (_range.getGlobalSize(1) > getMaxWorkItemSizeJNI(jniContextHandle, 1)) {
+                  throw new RangeException("Range globalsize 1 " + _range.getGlobalSize(1) + " > device "
+                        + getMaxWorkItemSizeJNI(jniContextHandle, 1));
+               }
+               if (_range.getDims() > 2) {
+                  if (_range.getGlobalSize(2) > getMaxWorkItemSizeJNI(jniContextHandle, 2)) {
+                     throw new RangeException("Range globalsize 2 " + _range.getGlobalSize(2) + " > device "
+                           + getMaxWorkItemSizeJNI(jniContextHandle, 2));
+                  }
+               }
+            }
+      */
+
+      if (logger.isLoggable(Level.FINE)) {
+         logger.fine("maxComputeUnits=" + this.getMaxComputeUnitsJNI(jniContextHandle));
+         logger.fine("maxWorkGroupSize=" + this.getMaxWorkGroupSizeJNI(jniContextHandle));
+         logger.fine("maxWorkItemDimensions=" + this.getMaxWorkItemDimensionsJNI(jniContextHandle));
+         logger.fine("maxWorkItemSize(0)=" + getMaxWorkItemSizeJNI(jniContextHandle, 0));
+         if (_range.getDims() > 1) {
+            logger.fine("maxWorkItemSize(1)=" + getMaxWorkItemSizeJNI(jniContextHandle, 1));
+            if (_range.getDims() > 2) {
+               logger.fine("maxWorkItemSize(2)=" + getMaxWorkItemSizeJNI(jniContextHandle, 2));
+            }
+         }
+      }
 
       // Read the array refs after kernel may have changed them
       // We need to do this as input to computing the localSize
       assert args != null : "args should not be null";
       boolean needSync = updateKernelArrayRefs();
-
-      // note: the above will also recompute the value localBytesPerLocalId
-
-      int localSize = getLocalSizeJNI(jniContextHandle, _globalSize, localBytesPerLocalId);
-      if (localSize == 0) {
-         // should fall back to java?
-         logger.warning("getLocalSizeJNI failed, reverting java");
-         kernel.setFallbackExecutionMode();
-         return execute(_entrypointName, _globalSize, _passes);
-      }
-      assert localSize <= _globalSize : "localSize = " + localSize;
-
-      // Call back to kernel for last minute changes
-      kernel.setSizes(_globalSize, localSize);
-
       if (needSync && logger.isLoggable(Level.FINE)) {
          logger.fine("Need to resync arrays on " + kernel.getClass().getName());
       }
-
       // native side will reallocate array buffers if necessary
-      if (runKernelJNI(jniContextHandle, _globalSize, localSize, needSync, kernel.useNullForLocalSize, _passes) != 0) {
-         //System.out.println("CL exec seems to have failed");
+      if (runKernelJNI(jniContextHandle, _range, needSync, _passes) != 0) {
          logger.warning("### CL exec seems to have failed. Trying to revert to Java ###");
          kernel.setFallbackExecutionMode();
-         return execute(_entrypointName, _globalSize, _passes);
+         return execute(_entrypointName, _range, _passes);
       }
 
       if (usesOopConversion == true) {
@@ -1127,42 +1288,41 @@ class KernelRunner{
       }
 
       if (logger.isLoggable(Level.FINE)) {
-         logger.fine("executeOpenCL completed. _globalSize=" + _globalSize);
+         logger.fine("executeOpenCL completed. " + _range);
       }
       return kernel;
    }
 
-   synchronized Kernel execute(Kernel.Entry entry, final int _globalSize, final int _passes) {
+   synchronized Kernel execute(Kernel.Entry entry, final Range _range, final int _passes) {
       System.out.println("execute(Kernel.Entry, size) not implemented");
       return (kernel);
    }
 
-   synchronized private Kernel fallBackAndExecute(String _entrypointName, final int _globalSize, final int _passes) {
+   synchronized private Kernel fallBackAndExecute(String _entrypointName, final Range _range, final int _passes) {
 
       kernel.setFallbackExecutionMode();
-      return execute(_entrypointName, _globalSize, _passes);
+      return execute(_entrypointName, _range, _passes);
    }
 
-   synchronized private Kernel warnFallBackAndExecute(String _entrypointName, final int _globalSize, final int _passes,
+   synchronized private Kernel warnFallBackAndExecute(String _entrypointName, final Range _range, final int _passes,
          Exception _exception) {
       if (logger.isLoggable(Level.WARNING)) {
          logger.warning("Reverting to Java Thread Pool (JTP) for " + kernel.getClass() + ": " + _exception.getMessage());
          _exception.printStackTrace();
       }
-      return fallBackAndExecute(_entrypointName, _globalSize, _passes);
+      return fallBackAndExecute(_entrypointName, _range, _passes);
    }
 
-   synchronized private Kernel warnFallBackAndExecute(String _entrypointName, final int _globalSize, final int _passes,
-         String _excuse) {
+   synchronized private Kernel warnFallBackAndExecute(String _entrypointName, final Range _range, final int _passes, String _excuse) {
       logger.warning("Reverting to Java Thread Pool (JTP) for " + kernel.getClass() + ": " + _excuse);
-      return fallBackAndExecute(_entrypointName, _globalSize, _passes);
+      return fallBackAndExecute(_entrypointName, _range, _passes);
    }
 
-   synchronized Kernel execute(String _entrypointName, final int _globalSize, final int _passes) {
+   synchronized Kernel execute(String _entrypointName, final Range _range, final int _passes) {
 
       long executeStartTime = System.currentTimeMillis();
-      if (_globalSize == 0) {
-         throw new IllegalStateException("global size can't be 0");
+      if (_range == null) {
+         throw new IllegalStateException("range can't be null");
       }
 
       if (kernel.getExecutionMode().isOpenCL()) {
@@ -1173,7 +1333,7 @@ class KernelRunner{
                entryPoint = classModel.getEntrypoint(_entrypointName, kernel);
             } catch (Exception exception) {
 
-               return warnFallBackAndExecute(_entrypointName, _globalSize, _passes, exception);
+               return warnFallBackAndExecute(_entrypointName, _range, _passes, exception);
             }
             if ((entryPoint != null) && !entryPoint.shouldFallback()) {
 
@@ -1184,12 +1344,12 @@ class KernelRunner{
                jniFlags |= (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU) ? JNI_FLAG_USE_GPU : 0);
                // Init the device to check capabilities before emitting the
                // code that requires the capabilities.
-               jniContextHandle = initJNI(kernel, jniFlags, Runtime.getRuntime().availableProcessors(), getMaxJTPLocalSize());
+               jniContextHandle = initJNI(kernel, jniFlags);
                if (jniContextHandle == 0) {
-                  return warnFallBackAndExecute(_entrypointName, _globalSize, _passes, "initJNI failed to return a valid handle");
+                  return warnFallBackAndExecute(_entrypointName, _range, _passes, "initJNI failed to return a valid handle");
                }
 
-               String extensions = getExtensions(jniContextHandle);
+               String extensions = getExtensionsJNI(jniContextHandle);
                capabilitiesSet = new HashSet<String>();
                StringTokenizer strTok = new StringTokenizer(extensions);
                while (strTok.hasMoreTokens()) {
@@ -1201,12 +1361,12 @@ class KernelRunner{
 
                if (entryPoint.requiresDoublePragma() && !hasFP64Support()) {
 
-                  return warnFallBackAndExecute(_entrypointName, _globalSize, _passes, "FP64 required but not supported");
+                  return warnFallBackAndExecute(_entrypointName, _range, _passes, "FP64 required but not supported");
                }
 
                if (entryPoint.requiresByteAddressableStorePragma() && !hasByteAddressableStoreSupport()) {
 
-                  return warnFallBackAndExecute(_entrypointName, _globalSize, _passes,
+                  return warnFallBackAndExecute(_entrypointName, _range, _passes,
                         "Byte addressable stores required but not supported");
                }
 
@@ -1215,24 +1375,16 @@ class KernelRunner{
 
                if (entryPoint.requiresAtomic32Pragma() && !all32AtomicsAvailable) {
 
-                  return warnFallBackAndExecute(_entrypointName, _globalSize, _passes, "32 bit Atomics required but not supported");
+                  return warnFallBackAndExecute(_entrypointName, _range, _passes, "32 bit Atomics required but not supported");
                }
 
-               final StringBuilder openCLStringBuilder = new StringBuilder();
-               KernelWriter openCLWriter = new KernelWriter(){
-                  @Override public void write(String _string) {
-                     openCLStringBuilder.append(_string);
-                  }
-               };
-
-               // Emit the OpenCL source into a string
+               String openCL = null;
                try {
-                  openCLWriter.write(entryPoint);
-
+                  openCL = KernelWriter.writeToString(entryPoint);
                } catch (CodeGenException codeGenException) {
-                  return warnFallBackAndExecute(_entrypointName, _globalSize, _passes, codeGenException);
+                  return warnFallBackAndExecute(_entrypointName, _range, _passes, codeGenException);
                }
-               String openCL = openCLStringBuilder.toString();
+
                if (Config.enableShowGeneratedOpenCL) {
                   System.out.println(openCL);
                }
@@ -1241,9 +1393,8 @@ class KernelRunner{
                }
 
                // Send the string to OpenCL to compile it
-               if (buildProgramJNI(jniContextHandle, openCLStringBuilder.toString()) == 0) {
-
-                  return warnFallBackAndExecute(_entrypointName, _globalSize, _passes, "OpenCL compile failed");
+               if (buildProgramJNI(jniContextHandle, openCL) == 0) {
+                  return warnFallBackAndExecute(_entrypointName, _range, _passes, "OpenCL compile failed");
                }
 
                args = new KernelArg[entryPoint.getReferencedFields().size()];
@@ -1256,9 +1407,15 @@ class KernelRunner{
                      args[i].name = field.getName();
                      args[i].field = field;
                      args[i].isStatic = (field.getModifiers() & Modifier.STATIC) == Modifier.STATIC;
-
                      Class<?> type = field.getType();
                      if (type.isArray()) {
+
+                        if (field.getAnnotation(com.amd.aparapi.Kernel.Local.class) != null
+                              || args[i].name.endsWith(Kernel.LOCAL_SUFFIX)) {
+                           args[i].type |= ARG_LOCAL;
+                        } else {
+                           args[i].type |= ARG_GLOBAL;
+                        }
                         args[i].array = null; // will get updated in updateKernelArrayRefs
                         args[i].type |= ARG_ARRAY;
                         if (isExplicit()) {
@@ -1269,7 +1426,7 @@ class KernelRunner{
                         args[i].type |= entryPoint.getArrayFieldAssignments().contains(field.getName()) ? (ARG_WRITE | ARG_READ)
                               : 0;
                         args[i].type |= entryPoint.getArrayFieldAccesses().contains(field.getName()) ? ARG_READ : 0;
-                        args[i].type |= ARG_GLOBAL;
+                        // args[i].type |= ARG_GLOBAL;
                         args[i].type |= type.isAssignableFrom(float[].class) ? ARG_FLOAT : 0;
 
                         args[i].type |= type.isAssignableFrom(int[].class) ? ARG_INT : 0;
@@ -1351,26 +1508,26 @@ class KernelRunner{
                conversionTime = System.currentTimeMillis() - executeStartTime;
 
                try {
-                  executeOpenCL(_entrypointName, _globalSize, _passes);
+                  executeOpenCL(_entrypointName, _range, _passes);
                } catch (AparapiException e) {
-                  warnFallBackAndExecute(_entrypointName, _globalSize, _passes, e);
+                  warnFallBackAndExecute(_entrypointName, _range, _passes, e);
                }
             } else {
-               warnFallBackAndExecute(_entrypointName, _globalSize, _passes, "failed to locate entrypoint");
+               warnFallBackAndExecute(_entrypointName, _range, _passes, "failed to locate entrypoint");
             }
 
          } else {
 
             try {
-               executeOpenCL(_entrypointName, _globalSize, _passes);
+               executeOpenCL(_entrypointName, _range, _passes);
             } catch (AparapiException e) {
 
-               warnFallBackAndExecute(_entrypointName, _globalSize, _passes, e);
+               warnFallBackAndExecute(_entrypointName, _range, _passes, e);
             }
          }
 
       } else {
-         executeJava(_globalSize, _passes);
+         executeJava(_range, _passes);
       }
       if (Config.enableExecutionModeReporting) {
          System.out.println(kernel.getClass().getCanonicalName() + ":" + kernel.getExecutionMode());

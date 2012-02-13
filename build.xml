@@ -35,6 +35,7 @@
          <fileset dir="test" includes="*/build.xml"/>
       </subant>
       <delete dir="examples\nbody\jogamp"/> <!-- we handle the jogamp delete here, save downloading each build -->
+      <delete file="test\codegen\junit-4.10.jar"/> <!-- we handle the junit delete here, save downloading each build -->
       <ant dir="com.amd.aparapi.jni" target="clean"/> 
       <ant dir="com.amd.aparapi" target="clean"/> 
    </target>

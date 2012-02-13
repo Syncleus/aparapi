@@ -8,7 +8,7 @@
       <delete file="aparapi.jar"/>
    </target>
 
-   <target name="build">
+   <target name="build" depends="clean">
       <mkdir dir="classes"/>
       <javac destdir="classes" debug="on" includeAntRuntime="false" >
          <src path="src/java"/>

@@ -117,8 +117,6 @@ class MethodModel{
    private boolean methodIsGetter;
 
    private boolean methodIsSetter;
-   
-   
 
    // Only setters can use putfield
    private boolean usesPutfield;

@@ -2090,9 +2090,9 @@ class ClassModel{
       }
 
       public boolean isStatic() {
-    	  return (Access.STATIC.bitIsSet(methodAccessFlags));
+         return (Access.STATIC.bitIsSet(methodAccessFlags));
       }
-      
+
       AttributePool getAttributePool() {
          return (methodAttributePool);
       }

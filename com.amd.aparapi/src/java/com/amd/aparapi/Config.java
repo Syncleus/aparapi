@@ -175,6 +175,7 @@ class Config{
    static String instructionListenerClassName = System.getProperty(propPkgName + ".instructionListenerClass");
 
    static public InstructionListener instructionListener = null;
+
    {
 
       if (instructionListenerClassName != null && !instructionListenerClassName.equals("")) {
