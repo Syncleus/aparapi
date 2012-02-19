@@ -35,7 +35,7 @@
          <fileset dir="test" includes="*/build.xml"/>
       </subant>
       <delete dir="examples\nbody\jogamp"/> <!-- we handle the jogamp delete here, save downloading each build -->
-      <delete file="test\codegen\junit-4.10.jar"/> <!-- we handle the junit delete here, save downloading each build -->
+      <delete file="test\codegen\.libs\junit-4.10.jar"/> <!-- we handle the junit delete here, save downloading each build -->
       <ant dir="com.amd.aparapi.jni" target="clean"/> 
       <ant dir="com.amd.aparapi" target="clean"/> 
    </target>
@@ -70,7 +70,7 @@
       <copy todir="${dist}" file="LICENSE.TXT"/>
 
       <!-- Copy aparapi.jar to dist -->
-      <copy todir="${dist}" file="com.amd.aparapi/aparapi.jar"/>
+      <copy todir="${dist}" file="com.amd.aparapi/dist/aparapi.jar"/>
 
       <!-- Create javadoc in dist -->
       <javadoc packagenames="com.amd.aparapi.*" access="public" destdir="${dist}/api" >
@@ -79,7 +79,7 @@
 
       <!-- Copy aparapi sjhared lib to dist -->
       <copy todir="${dist}">
-         <fileset dir="com.amd.aparapi.jni" includes="**.dll,**.so" />
+         <fileset dir="com.amd.aparapi.jni" includes="**.dll,**.so,**.dylib" />
       </copy>
 
       <mkdir dir="${dist}/samples"/>
@@ -87,7 +87,7 @@
          <fileset dir="samples"/>
       </copy>
 
-      <replace dir="${dist}/samples" includes="**/build.xml,**/*.bat,**/*.sh" token="../../com.amd.aparapi/aparapi.jar" value="../../aparapi.jar"/>
+      <replace dir="${dist}/samples" includes="**/build.xml,**/*.bat,**/*.sh" token="../../com.amd.aparapi/dist/aparapi.jar" value="../../aparapi.jar"/>
       <replace dir="${dist}/samples" includes="**/*.bat,**/*.sh" token="../../com.amd.aparapi.jni" value="../.."/>
 
       <zip destfile="${dist}.zip" basedir="${dist}" />
