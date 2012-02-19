@@ -4,7 +4,7 @@
    <property name="jogamp-jar-url" value="http://jogamp.org/deployment/archive/rc/gluegen_28-joal_17-jogl_41-jocl_25/jar/"/>
 
    <path id="compiler.class.path">
-      <pathelement path="../../com.amd.aparapi/aparapi.jar"/>
+      <pathelement path="../../com.amd.aparapi/dist/aparapi.jar"/>
       <pathelement path="jogamp/jogl.all.jar"/>
       <pathelement path="jogamp/gluegen-rt.jar"/>
    </path>
@@ -150,7 +150,7 @@
    <target name="run-jtp">
       <java classname="com.amd.aparapi.examples.nbody.Main" fork="true">
          <classpath refid="runtime.class.path"/>
-         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni;jogamp"/>
+         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist;jogamp"/>
          <sysproperty key="com.amd.aparapi.executionMode" value="JTP"/>
          <sysproperty key="bodies" value="16384"/>
          <sysproperty key="height" value="800"/>
@@ -161,7 +161,7 @@
    <target name="run-gpu">
       <java classname="com.amd.aparapi.examples.nbody.Main" fork="true">
          <classpath refid="runtime.class.path"/>
-         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni;jogamp"/>
+         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist;jogamp"/>
          <sysproperty key="com.amd.aparapi.executionMode" value="GPU"/>
          <sysproperty key="bodies" value="16384"/>
          <sysproperty key="height" value="800"/>

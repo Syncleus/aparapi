@@ -3,7 +3,7 @@
 <project name="effects" default="build" basedir=".">
 
    <path id="compiler.class.path">
-      <pathelement path="../../com.amd.aparapi/aparapi.jar"/>
+      <pathelement path="../../com.amd.aparapi/dist/aparapi.jar"/>
    </path>
 
    <path id="runtime.class.path" cache="true">
@@ -27,7 +27,7 @@
    <target name="run-gpu" >
       <java classname="com.amd.aparapi.examples.effects.Main" fork="true">
          <classpath refid="runtime.class.path"/>
-         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni"/>
+         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist"/>
          <sysproperty key="com.amd.aparapi.executionMode" value="GPU"/>
       </java>
    </target>
@@ -35,7 +35,7 @@
    <target name="run-jtp" >
       <java classname="com.amd.aparapi.examples.effects.Main" fork="true">
          <classpath refid="runtime.class.path"/>
-         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni"/>
+         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist"/>
          <sysproperty key="com.amd.aparapi.executionMode" value="JTP"/>
       </java>
    </target>
