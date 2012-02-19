@@ -1,11 +1,22 @@
 <?xml version="1.0"?>
 
 <!--
-You should not have to edit this file. First consider editing the properties in build.properties.
+		You should not have to edit this file
+		First consider editing the properties in build.properties
 -->
-
 <project name="com.amd.aparapi.jni" default="build" basedir=".">
 
+  <!-- 
+		DO NOT EDIT BELOW THIS LINE 
+  -->
+  <echo>OS Name:    ${os.name}</echo>
+  <echo>OS Version: ${os.version}</echo>
+  <echo>OS Arch:    ${os.arch}</echo>
+
+  <property name="build.compiler" value="javac1.6"/>
+  <property name="ant.build.javac.source" value="1.6"/>
+  <property name="ant.build.javac.target" value="1.6"/>
+	
    <property environment="env" />
    <!-- we need env.PATH for msvc only -->
 
@@ -249,13 +260,13 @@ You should not have to edit this file. First consider editing the properties in 
          At present amd.app.sdk.dir is set (to ${amd.app.sdk.dir}) but that dir does not exist
          ]]>
       </fail>
-
    </target>
-
-
 
    <target name="clean" depends="check">
       <delete dir="include" />
+   	  <delete dir="${basedir}/dist" />
+   	  <!-- Legacy cleanup -->
+   	  <delete file="libaparapi_${x86_or_x86_64}.dylib" />
       <delete file="libaparapi_${x86_or_x86_64}.so" />
       <delete file="aparapi_${x86_or_x86_64}.dll" />
       <delete file="aparapi.dll" />
@@ -265,16 +276,15 @@ You should not have to edit this file. First consider editing the properties in 
       <delete file="aparapi.exp" />
    </target>
 
-
-
    <target name="javah">
       <mkdir dir="include" />
-      <javah classpath="..\com.amd.aparapi\aparapi.jar" destdir="include" force="true">
+      <javah classpath="..\com.amd.aparapi\dist\aparapi.jar" destdir="include" force="true">
          <class name="com.amd.aparapi.KernelRunner" />
       </javah>
    </target>
 
    <target name="gcc" if="use.gcc">
+   	  <mkdir dir="${basedir}/dist/linux/${os.arch}"/>
       <echo message="linuxcc ${os.arch}" />
       <exec executable="g++">
          <arg value="-O3" />
@@ -286,7 +296,7 @@ You should not have to edit this file. First consider editing the properties in 
          <arg value="-I${amd.app.sdk.dir}/include" />
          <arg value="-shared" />
          <arg value="-o" />
-         <arg value="libaparapi_${x86_or_x86_64}.so" />
+         <arg value="${basedir}/dist/linux/${os.arch}/libaparapi_${x86_or_x86_64}.jnilib" />
          <arg value="src/cpp/aparapi.cpp" />
          <arg value="-L${amd.app.sdk.dir}/lib/${x86_or_x86_64}" />
          <arg value="-lOpenCL" />
@@ -294,6 +304,7 @@ You should not have to edit this file. First consider editing the properties in 
    </target>
 
    <target name="gcc_mac" if="use.gcc_mac">
+   	  <mkdir dir="${basedir}/dist/mac/${os.arch}"/>
       <echo message="gcc ${os.arch}" />
       <exec executable="g++">
          <arg value="-O3" />
@@ -304,15 +315,16 @@ You should not have to edit this file. First consider editing the properties in 
          <arg value="-Iinclude" />
          <arg value="-shared" />
          <arg value="-o" />
-         <arg value="libaparapi_${x86_or_x86_64}.dylib" />
+         <arg value="${basedir}/dist/mac/${os.arch}/libaparapi_${x86_or_x86_64}.jnilib" />
          <arg value="src/cpp/aparapi.cpp" />
          <arg value="-framework" />
          <arg value="OpenCL" />
       </exec>
    </target>
 
-
    <target name="msvc" if="use.msvc">
+   	  <mkdir dir="${basedir}/dist/windows/${os.arch}"/>
+   	  <echo message="msvc ${os.arch}" />
       <exec executable="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe">
          <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE" />
          <arg value="/nologo" />
@@ -331,11 +343,13 @@ You should not have to edit this file. First consider editing the properties in 
          <arg value="/libpath:${msvc.sdk.dir}\lib\${optional.x64.subdir}" />
          <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
          <arg value="OpenCL.lib" />
-         <arg value="/out:aparapi_${x86_or_x86_64}.dll" />
+         <arg value="/out:${basedir}\dist\windows\${os.arch}\aparapi_${x86_or_x86_64}.jnilib" />
       </exec>
    </target>
 
    <target name="mingw" if="use.mingw">
+   	  <mkdir dir="${basedir}/dist/windows/${os.arch}"/>
+   	  <echo message="mingw ${os.arch}" /> 
       <exec executable="${mingw.dir}/bin/g++">
          <env key="PATH" path="${env.PATH};${mingw.dir}/bin" />
          <arg value="-Wall" />
@@ -347,14 +361,13 @@ You should not have to edit this file. First consider editing the properties in 
          <arg value="-I${amd.app.sdk.dir}\include" />
          <arg value="-shared" />
          <arg value="-o" />
-         <arg value="aparapi_${x86_or_x86_64}.dll" />
+         <arg value="${basedir}\dist\windows\${os.arch}\aparapi_${x86_or_x86_64}.jnilib" />
          <arg value="src\cpp\aparapi.cpp" />
          <arg value="-L${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
          <arg value="-lOpenCL" />
       </exec>
    </target>
 
-
-   <target name="build" depends="check, javah, msvc, mingw, gcc, gcc_mac" />
+   <target name="build" depends="clean, javah, msvc, mingw, gcc, gcc_mac" />
 
 </project>
