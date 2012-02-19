@@ -6,6 +6,7 @@ Aparapi Contributors.  Thanks to all.
 
 Witold Bolt provided patch for issue #5. Added and tested Mac OS support. Oct 12th 2011 
 kenneth@hexad.dk provided patch for issue #11 (correcting conversion of Java Nan and Infinity values to OpenCL equiv). Oct 28th 2011
-kenneth@hexad.dk provides patch for issue #12 (handling of Kernel static fields) Oct 28th 2011.
-Ryan Lamothe provides patch for issue #3 (support of char - mapped to unsigned short) Nov 28th 2011.
-
+kenneth@hexad.dk provided patch for issue #12 (handling of Kernel static fields) Oct 28th 2011.
+Ryan LaMothe provided patch for issue #3 (support of char - mapped to unsigned short) Nov 28th 2011.
+Ryan LaMothe provided patch for issue #22 ( Integrate FindBugs into the Ant build scripts) Feb 18th 2012.
+Ryan LaMothe provided patch for issue #37 ( Add Kernel and JNI build support for Applets and JNLP JWS) Feb 18th 2012.
