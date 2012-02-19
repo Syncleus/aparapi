@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <project name="nbody" default="build" basedir=".">
-   <property name="jogamp-jar-url" value="http://jogamp.org/deployment/archive/rc/gluegen_28-joal_17-jogl_41-jocl_25/jar/"/>
+   <property name="jogamp-jar-url" value="http://jogamp.org/deployment/archive/rc/gluegen_28-joal_17-jogl_41-jocl_25/jar"/>
 
    <path id="compiler.class.path">
       <pathelement path="../../com.amd.aparapi/dist/aparapi.jar"/>
@@ -65,7 +65,20 @@
       <unzip src="jogamp/gluegen-rt-natives-linux-amd64.jar" dest="jogamp"/>
       <delete dir="jogamp/META-INF"/>
    </target>
-
+   
+   <target name="getjogl-mac-universal" if="use.mac.universal">
+      <delete dir="jogamp"/>
+	  <get dest="jogamp">
+	     <url url="${jogamp-jar-url}/jogl-all-natives-macosx-universal.jar"/> 
+	     <url url="${jogamp-jar-url}/gluegen-rt-natives-macosx-universal.jar"/> 
+	     <url url="${jogamp-jar-url}/jogl.all.jar"/> 
+	     <url url="${jogamp-jar-url}/gluegen-rt.jar"/> 
+	  </get>
+	  <unzip src="jogamp/jogl-all-natives-macosx-universal.jar" dest="jogamp"/>
+	  <unzip src="jogamp/gluegen-rt-natives-macosx-universal.jar" dest="jogamp"/>
+	  <delete dir="jogamp/META-INF"/>
+   </target>
+	
    <target name="checkos">
       <condition property="use.win32">
          <and>
@@ -129,9 +142,25 @@
             <not><available file="jogamp/gluegen-rt.jar"/> </not>
          </and>
       </condition>
+   	  <condition property="use.mac.universal">
+   	     <and>
+   	        <os family="mac" />
+   	        <not>
+   	           <or>
+   	              <os arch="x86" />
+   	              <os arch="i386" />
+   	           </or>
+   	        </not>
+   	        <not><available file="jogamp/jogl-all-natives-macosx-universal.jar"/> </not>
+   	        <not><available file="jogamp/gluegen-rt-natives-macosx-universal.jar"/> </not>
+   	        <not><available file="jogamp/jogl.all.jar"/> </not>
+   	        <not><available file="jogamp/gluegen-rt.jar"/> </not>
+   	     </and>
+   	  </condition>
    </target>
 
-   <target name="getjogl" depends="checkos, getjogl-windows-i586, getjogl-windows-amd64, getjogl-linux-i586, getjogl-linux-amd64"/>
+   <target name="getjogl" depends="checkos, getjogl-windows-i586, getjogl-windows-amd64, 
+   	getjogl-linux-i586, getjogl-linux-amd64, getjogl-mac-universal"/>
 
    <target name="build" depends="clean, getjogl">
       <mkdir dir="classes"/>
