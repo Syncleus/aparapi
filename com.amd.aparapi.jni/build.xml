@@ -284,7 +284,7 @@
    </target>
 
    <target name="gcc" if="use.gcc">
-   	  <mkdir dir="${basedir}/dist/linux/${os.arch}"/>
+   	  <mkdir dir="${basedir}/dist"/>
       <echo message="linuxcc ${os.arch}" />
       <exec executable="g++">
          <arg value="-O3" />
@@ -296,7 +296,7 @@
          <arg value="-I${amd.app.sdk.dir}/include" />
          <arg value="-shared" />
          <arg value="-o" />
-         <arg value="${basedir}/dist/linux/${os.arch}/libaparapi_${x86_or_x86_64}.jnilib" />
+         <arg value="${basedir}/dist/libaparapi_${x86_or_x86_64}.so" />
          <arg value="src/cpp/aparapi.cpp" />
          <arg value="-L${amd.app.sdk.dir}/lib/${x86_or_x86_64}" />
          <arg value="-lOpenCL" />
@@ -304,7 +304,7 @@
    </target>
 
    <target name="gcc_mac" if="use.gcc_mac">
-   	  <mkdir dir="${basedir}/dist/mac/${os.arch}"/>
+   	  <mkdir dir="${basedir}/dist"/>
       <echo message="gcc ${os.arch}" />
       <exec executable="g++">
          <arg value="-O3" />
@@ -315,7 +315,7 @@
          <arg value="-Iinclude" />
          <arg value="-shared" />
          <arg value="-o" />
-         <arg value="${basedir}/dist/mac/${os.arch}/libaparapi_${x86_or_x86_64}.jnilib" />
+         <arg value="${basedir}/dist/libaparapi_${x86_or_x86_64}.dylib" />
          <arg value="src/cpp/aparapi.cpp" />
          <arg value="-framework" />
          <arg value="OpenCL" />
@@ -323,7 +323,7 @@
    </target>
 
    <target name="msvc" if="use.msvc">
-   	  <mkdir dir="${basedir}/dist/windows/${os.arch}"/>
+   	  <mkdir dir="${basedir}\dist"/>
    	  <echo message="msvc ${os.arch}" />
       <exec executable="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe">
          <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE" />
@@ -343,12 +343,12 @@
          <arg value="/libpath:${msvc.sdk.dir}\lib\${optional.x64.subdir}" />
          <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
          <arg value="OpenCL.lib" />
-         <arg value="/out:${basedir}\dist\windows\${os.arch}\aparapi_${x86_or_x86_64}.jnilib" />
+         <arg value="/out:${basedir}\dist\aparapi_${x86_or_x86_64}.dll" />
       </exec>
    </target>
 
    <target name="mingw" if="use.mingw">
-   	  <mkdir dir="${basedir}/dist/windows/${os.arch}"/>
+   	  <mkdir dir="${basedir}\dist"/>
    	  <echo message="mingw ${os.arch}" /> 
       <exec executable="${mingw.dir}/bin/g++">
          <env key="PATH" path="${env.PATH};${mingw.dir}/bin" />
@@ -361,7 +361,7 @@
          <arg value="-I${amd.app.sdk.dir}\include" />
          <arg value="-shared" />
          <arg value="-o" />
-         <arg value="${basedir}\dist\windows\${os.arch}\aparapi_${x86_or_x86_64}.jnilib" />
+         <arg value="${basedir}\dist\aparapi_${x86_or_x86_64}.dll" />
          <arg value="src\cpp\aparapi.cpp" />
          <arg value="-L${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
          <arg value="-lOpenCL" />
