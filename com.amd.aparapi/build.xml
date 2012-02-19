@@ -2,18 +2,79 @@
 
 <project name="com.amd.aparapi" default="build" basedir=".">
 
-   <target name="clean">
-      <delete dir="api"/>
-      <delete dir="classes"/>
-      <delete file="aparapi.jar"/>
-   </target>
+	<!-- 
+			USER CONFIGURABLE PROPERTIES 
+	-->	
+	<property name="findbugs.zip.version" value="2.0.0"/>
+	<property name="findbugs.zip.name" value="findbugs-${findbugs.zip.version}.zip"/>
+	<property name="findbugs.root" value="${basedir}/.libs"/>
+	<property name="findbugs.home" value="${findbugs.root}/findbugs-${findbugs.zip.version}"/>
+	<property name="findbugs.base.url" value="http://downloads.sourceforge.net/project/findbugs/findbugs"/>
+	
+	<!-- 
+			DO NOT EDIT BELOW THIS LINE 
+	-->
+	<echo>OS Name:    ${os.name}</echo>
+	<echo>OS Version: ${os.version}</echo>
+	<echo>OS Arch:    ${os.arch}</echo>
 
-   <target name="build" depends="clean">
-      <mkdir dir="classes"/>
-      <javac destdir="classes" debug="on" includeAntRuntime="false" >
-         <src path="src/java"/>
-      </javac>
-      <jar jarfile="aparapi.jar" basedir="classes"/>
-   </target>
+	<property name="build.compiler" value="javac1.6"/>
+	<property name="ant.build.javac.source" value="1.6"/>
+	<property name="ant.build.javac.target" value="1.6"/>
+
+	<available property="findbugs.installed" file="${findbugs.home}"/>
+
+	<target name="install.findbugs" unless="findbugs.installed">
+		<!-- Cleanup all existing FindBugs installations -->
+		<delete failonerror="false" includeEmptyDirs="true">
+			<fileset dir="${findbugs.root}" includes="findbugs*/"/>
+		</delete>
+		<!-- Download and unzip requested FindBugs version -->
+		<get src="${findbugs.base.url}/${findbugs.zip.version}/${findbugs.zip.name}" dest="${basedir}/${findbugs.zip.name}"/>
+		<unzip src="${findbugs.zip.name}" dest="${findbugs.root}" />
+		<delete file="${basedir}/${findbugs.zip.name}"/>
+	</target>
+	
+	<target name="execute.findbugs" depends="install.findbugs,build" description="Execute FindBugs">
+		<!-- If successfully downloaded and unzipped set some additional properties -->
+		<path id="findbugs.lib">
+			<pathelement location="${findbugs.home}/lib/findbugs-ant.jar"/>
+		</path>
+		<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="findbugs.lib"/>
+		<!-- Clean-up existing results -->
+		<delete dir="${basedir}/findbugs"/>
+		<mkdir dir="${basedir}/findbugs"/>
+		<!-- Execute FindBugs -->
+		<findbugs home="${findbugs.home}"
+			output="xml"
+			effort="max"
+			reportlevel="low"
+			outputfile="${basedir}/findbugs/aparapi.xml">
+			<sourcePath path="${basedir}/src/java" />
+			<class location="${basedir}/classes" />
+		</findbugs>
+	</target>
+	
+   	<target name="clean">
+    	<delete dir="api"/>
+      	<delete dir="classes"/>
+   		<delete dir="dist"/>
+   		<delete dir="findbugs"/>
+      	<delete file="aparapi.jar"/>
+   	</target>
+
+   	<target name="build" depends="clean" description="Build Aparapi">
+      	<mkdir dir="classes"/>
+   		<mkdir dir="dist"/>
+   		<javac debug="true"
+   			   debuglevel="lines,vars,source"
+   			   srcdir="${basedir}/src/java"
+   			   destdir="${basedir}/classes"
+   			   includeantruntime="false">
+   			<compilerarg value="-Xlint"/>
+   			<compilerarg value="-Xlint:-path"/>
+   		</javac>
+      	<jar jarfile="${basedir}/dist/aparapi.jar" basedir="${basedir}/classes"/>
+   	</target>
 
 </project>
