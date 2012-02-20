@@ -401,7 +401,7 @@ abstract class KernelWriter extends BlockWriter{
       }
 
       if (Config.enableDoubles || _entryPoint.requiresDoublePragma()) {
-         writePragma("cl_amd_fp64", true);
+         writePragma("cl_khr_fp64", true);
          newLine();
       }
 

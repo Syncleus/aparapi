@@ -323,8 +323,6 @@ class KernelRunner{
 
    static final String CL_KHR_FP64 = "cl_khr_fp64";
 
-   static final String CL_AMD_FP64 = "cl_amd_fp64";
-
    static final String CL_KHR_SELECT_FPROUNDING_MODE = "cl_khr_select_fprounding_mode";
 
    static final String CL_KHR_GLOBAL_INT32_BASE_ATOMICS = "cl_khr_global_int32_base_atomics";
@@ -562,7 +560,7 @@ class KernelRunner{
       if (capabilitiesSet == null) {
          throw new IllegalStateException("Capabilities queried before they were initialized");
       }
-      return (capabilitiesSet.contains(CL_KHR_FP64) || capabilitiesSet.contains(CL_AMD_FP64));
+      return (capabilitiesSet.contains(CL_KHR_FP64));
    }
 
    boolean hasSelectFPRoundingModeSupport() {
