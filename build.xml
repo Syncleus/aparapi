@@ -77,9 +77,9 @@
          <fileset dir="com.amd.aparapi/src/java" defaultexcludes="yes"/>
       </javadoc>
 
-      <!-- Copy aparapi sjhared lib to dist -->
+      <!-- Copy aparapi shared lib to dist -->
       <copy todir="${dist}">
-         <fileset dir="com.amd.aparapi.jni" includes="**.dll,**.so,**.dylib" />
+         <fileset dir="com.amd.aparapi.jni/dist" includes="**.dll,**.so,**.dylib" />
       </copy>
 
       <mkdir dir="${dist}/samples"/>
@@ -88,7 +88,7 @@
       </copy>
 
       <replace dir="${dist}/samples" includes="**/build.xml,**/*.bat,**/*.sh" token="../../com.amd.aparapi/dist/aparapi.jar" value="../../aparapi.jar"/>
-      <replace dir="${dist}/samples" includes="**/*.bat,**/*.sh" token="../../com.amd.aparapi.jni" value="../.."/>
+      <replace dir="${dist}/samples" includes="**/*.bat,**/*.sh" token="../../com.amd.aparapi.jni/dist" value="../.."/>
 
       <zip destfile="${dist}.zip" basedir="${dist}" />
 
