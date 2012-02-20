@@ -43,4 +43,7 @@ package com.amd.aparapi;
       super(msg);
    }
 
+   CodeGenException(Throwable t) {
+      super(t);
+   }
 }

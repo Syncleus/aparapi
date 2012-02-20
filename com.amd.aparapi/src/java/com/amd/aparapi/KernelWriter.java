@@ -632,7 +632,13 @@ abstract class KernelWriter extends BlockWriter{
             openCLStringBuilder.append(_string);
          }
       };
-      openCLWriter.write(_entrypoint);
+      try {
+         openCLWriter.write(_entrypoint);
+      } catch (CodeGenException codeGenException) {
+         throw codeGenException;
+      } catch (Throwable t) {
+         throw new CodeGenException(t);
+      }
       return (openCLStringBuilder.toString());
    }
 }

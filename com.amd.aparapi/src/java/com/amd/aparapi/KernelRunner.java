@@ -731,7 +731,7 @@ class KernelRunner{
           */
          final CyclicBarrier localBarrier = new CyclicBarrier(threads);
          for (int passId = 0; passId < _passes; passId++) {
-           
+
             /**
               * Note that we emulate OpenCL by creating one thread per localId (across the group).
               * 
