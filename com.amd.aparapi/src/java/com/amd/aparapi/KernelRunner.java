@@ -43,6 +43,7 @@ import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.BrokenBarrierException;
@@ -354,7 +355,16 @@ class KernelRunner{
     * @author gfrost
     */
    @UsedByJNICode public static final int JNI_FLAG_ENABLE_PROFILING = 1 << 0;
-
+   
+   /**
+    * This 'bit' indicates that we wish to store profiling information in a CSV file from JNI code.
+    * 
+    * 
+    * @see com.amd.aparapi.annotations.UsedByJNICode
+    * 
+    * @author gfrost
+    */
+   @UsedByJNICode public static final int JNI_FLAG_ENABLE_PROFILING_CSV = 1 << 1;
    /**
     * This 'bit' indicates that we want to execute on the GPU.
     * 
@@ -366,7 +376,7 @@ class KernelRunner{
     * 
     * @author gfrost
     */
-   @UsedByJNICode public static final int JNI_FLAG_USE_GPU = 1 << 1;
+   @UsedByJNICode public static final int JNI_FLAG_USE_GPU = 1 << 2;
 
    /**
     * This 'bit' indicates that we wish to enable verbose JNI layer messages to stderr.<br/>
@@ -377,7 +387,7 @@ class KernelRunner{
     * @author gfrost
     */
 
-   @UsedByJNICode @Annotations.Experimental public static final int JNI_FLAG_ENABLE_VERBOSE_JNI = 1 << 2;
+   @UsedByJNICode @Annotations.Experimental public static final int JNI_FLAG_ENABLE_VERBOSE_JNI = 1 << 3;
 
    /**
     * Each field (or captured field in the case of an anonymous inner class) referenced by any bytecode reachable from the users Kernel.run(), will
@@ -547,6 +557,8 @@ class KernelRunner{
    private native int getMaxComputeUnitsJNI(long _jniContextHandle);
 
    private native int getMaxWorkItemDimensionsJNI(long _jniContextHandle);
+   
+   private native List<ProfileInfo> getProfileInfoJNI(long _jniContextHandle);
 
    private Set<String> capabilitiesSet;
 
@@ -1339,7 +1351,7 @@ class KernelRunner{
 
                int jniFlags = 0;
                jniFlags |= (Config.enableProfiling ? JNI_FLAG_ENABLE_PROFILING : 0);
-
+               jniFlags |= (Config.enableProfilingCSV ? JNI_FLAG_ENABLE_PROFILING_CSV|JNI_FLAG_ENABLE_PROFILING : 0);
                jniFlags |= (Config.enableVerboseJNI ? JNI_FLAG_ENABLE_VERBOSE_JNI : 0);
                jniFlags |= (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU) ? JNI_FLAG_USE_GPU : 0);
                // Init the device to check capabilities before emitting the
@@ -1565,6 +1577,16 @@ class KernelRunner{
          getJNI(jniContextHandle, array);
       }
    }
+   
+   protected List<ProfileInfo> getProfileInfo() {
+      if (((kernel.getExecutionMode() == Kernel.EXECUTION_MODE.GPU) || (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.CPU))) {
+         // Only makes sense when we are using OpenCL
+         return(getProfileInfoJNI(jniContextHandle));
+      }else{
+         return(null);
+      }
+   }
+
 
    /**
     * Tag this array so that it is explicitly enqueued before the kernel is executed. <br/>

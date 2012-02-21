@@ -41,6 +41,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -2022,6 +2023,20 @@ public abstract class Kernel implements Cloneable{
       }
       kernelRunner.get(array);
       return (this);
+   }
+   
+   /**
+    * Enqueue a request to return this buffer from the GPU. This method blocks until the array is available. 
+    * @param array
+    * @return This kernel so that we can use the 'fluent' style API
+    */
+   public List<ProfileInfo> getProfileInfo() {
+      if (kernelRunner == null) {
+         kernelRunner = new KernelRunner(this);
+
+      }
+      return(kernelRunner.getProfileInfo());
+      
    }
 
 }
