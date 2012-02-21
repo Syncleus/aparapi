@@ -48,11 +48,13 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 import com.amd.aparapi.Kernel;
+import com.amd.aparapi.ProfileInfo;
 import com.amd.aparapi.Range;
 
 /**
@@ -225,6 +227,9 @@ public class Main{
       // Set the default scale and offset, execute the kernel and force a repaint of the viewer.
       kernel.setScaleAndOffset(defaultScale, -1f, 0f);
       kernel.execute(range);
+     
+    
+     
       System.arraycopy(rgb, 0, imageRgb, 0, rgb.length);
       viewer.repaint();
 
@@ -271,6 +276,15 @@ public class Main{
                // Set the scale and offset, execute the kernel and force a repaint of the viewer.
                kernel.setScaleAndOffset(scale, x, y);
                kernel.execute(range);
+               
+               /**
+             
+               for (ProfileInfo p:kernel.getProfileInfo()){
+                  System.out.print(" "+p.getType()+" "+p.getLabel()+" "+(p.getEnd()-p.getStart())/1000+"us");
+               }
+               System.out.println();
+                **/
+             
                System.arraycopy(rgb, 0, imageRgb, 0, rgb.length);
                viewer.repaint();
             }
