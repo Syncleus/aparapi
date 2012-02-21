@@ -46,6 +46,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -55,6 +56,7 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 import com.amd.aparapi.Kernel;
+import com.amd.aparapi.ProfileInfo;
 import com.amd.aparapi.Range;
 
 /**
@@ -166,6 +168,7 @@ public class Main{
          toBase = swap;
 
          execute(range);
+
       }
 
    }
@@ -190,6 +193,13 @@ public class Main{
          @Override public void paintComponent(Graphics g) {
             if (lifeKernel.isExplicit()) {
                lifeKernel.get(lifeKernel.imageData); // We only pull the imageData when we intend to use it.
+               List<ProfileInfo> profileInfo = lifeKernel.getProfileInfo();
+               if (profileInfo != null) {
+                  for (ProfileInfo p : profileInfo) {
+                     System.out.print(" " + p.getType() + " " + p.getLabel() + " " + (p.getEnd() - p.getStart()) / 1000 + "us");
+                  }
+                  System.out.println();
+               }
             }
             // We copy one half of the offscreen buffer to the viewer, we copy the half that we just mutated.
             if (lifeKernel.fromBase == 0) {
