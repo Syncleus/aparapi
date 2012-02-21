@@ -288,7 +288,6 @@ jfieldID  Range::localIsDerivedFieldID=0;
 
 class ProfileInfo{
    public:
-      char label[128]; 
       cl_ulong queued;
       cl_ulong submit;
       cl_ulong start;
@@ -659,6 +658,9 @@ class JNIContext{
 jboolean isValid(){
    return(valid);
 }
+jboolean isProfilingCSVEnabled(){
+   return((flags&com_amd_aparapi_KernelRunner_JNI_FLAG_ENABLE_PROFILING_CSV)==com_amd_aparapi_KernelRunner_JNI_FLAG_ENABLE_PROFILING_CSV?JNI_TRUE:JNI_FALSE);
+}
 jboolean isProfilingEnabled(){
    return((flags&com_amd_aparapi_KernelRunner_JNI_FLAG_ENABLE_PROFILING)==com_amd_aparapi_KernelRunner_JNI_FLAG_ENABLE_PROFILING?JNI_TRUE:JNI_FALSE);
 }
@@ -733,8 +735,10 @@ void dispose(JNIEnv *jenv){
       delete []executeEvents; executeEvents = NULL;
 
       if (isProfilingEnabled()) {
-         if (profileFile != NULL && profileFile != stderr) {
-            fclose(profileFile);
+         if (isProfilingCSVEnabled()) {
+            if (profileFile != NULL && profileFile != stderr) {
+               fclose(profileFile);
+            }
          }
          delete[] readEventArgs; readEventArgs=0;
          delete[] writeEventArgs; writeEventArgs=0;
@@ -1196,6 +1200,15 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
       }
    }  // for each arg
 
+   cl_event endOfTxfersMarker;
+
+   status = clEnqueueMarker(jniContext->commandQueues[0] /** change if we enable multiple gpus **/, &endOfTxfersMarker);
+   if (status != CL_SUCCESS) {
+      PRINT_CL_ERR(status, "clEnqueueMarker endOfTxfers");
+      jniContext->unpinAll(jenv);
+      return status;
+   }
+
    // We will need to revisit the execution of multiple devices.  
    // POssibly cloning the range per device and mutating each to handle a unique subrange (of global) and
    // maybe even pushing the offset into the range class.
@@ -1414,7 +1427,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
 
    jniContext->unpinAll(jenv);
 
-   if (jniContext->isProfilingEnabled()) {
+   if (jniContext->isProfilingCSVEnabled()) {
       writeProfileInfo(jniContext);
    }
 
@@ -1495,7 +1508,7 @@ JNIEXPORT jlong JNICALL Java_com_amd_aparapi_KernelRunner_buildProgramJNI(JNIEnv
       ASSERT_CL("clCreateCommandQueue()");
    }
 
-   if (jniContext->isProfilingEnabled()) {
+   if (jniContext->isProfilingCSVEnabled()) {
       // compute profile filename
 #if defined (_WIN32)
       jint pid = GetCurrentProcessId();
@@ -1618,9 +1631,9 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_setArgsJNI(JNIEnv *jenv
          if (jniContext->isVerbose()){
             fprintf(stderr, "in setArgs arg %d %s type %08x\n", i, arg->name, arg->type);
             if (arg->isLocal()){
-                 fprintf(stderr, "in setArgs arg %d %s is local\n", i, arg->name);
+               fprintf(stderr, "in setArgs arg %d %s is local\n", i, arg->name);
             }else{
-                 fprintf(stderr, "in setArgs arg %d %s is *not* local\n", i, arg->name);
+               fprintf(stderr, "in setArgs arg %d %s is *not* local\n", i, arg->name);
             }
          }
 
@@ -1668,48 +1681,60 @@ JNIEXPORT jstring JNICALL Java_com_amd_aparapi_KernelRunner_getExtensionsJNI(JNI
    return jextensions;
 }
 
+KernelArg* getArgForBuffer(JNIEnv* jenv, JNIContext* jniContext, jobject buffer) {
+   cl_int status = CL_SUCCESS;
+   KernelArg *returnArg= NULL;
+
+   if (jniContext != NULL){
+      for (jint i=0; returnArg == NULL && i<jniContext->argc; i++){ 
+         KernelArg *arg= jniContext->args[i];
+         if (arg->isArray()){
+            jboolean isSame = jenv->IsSameObject(buffer, arg->value.ref.javaArray);
+            if (isSame){
+               returnArg = arg;
+            }
+         }
+      }
+      if (returnArg==NULL){
+         if (jniContext->isVerbose()){
+            fprintf(stderr, "attempt to get arg for buffer that does not appear to be referenced from kernel\n");
+         }
+      }
+   }
+   return returnArg;
+}
+
 // Called as a result of Kernel.get(someArray)
 JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jobject buffer) {
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
    if (jniContext != NULL){
-      jboolean foundArg = false;
-      for (jint i=0; i<jniContext->argc; i++){ 
-         KernelArg *arg= jniContext->args[i];
-         if (arg->isArray()){
-            jboolean isSame = jenv->IsSameObject(buffer, arg->value.ref.javaArray);
-            // only do this if the array that we are passed is indeed an arg we are tracking
-            if (isSame){
-               foundArg = true;
-               //fprintf(stderr, "get of %s\n", arg->name);
-
+      KernelArg *arg= getArgForBuffer(jenv, jniContext, buffer);
+      if (arg != NULL){
 #ifdef VERBOSE_EXPLICIT
-               fprintf(stderr, "explicitly reading buffer %d %s\n", i, arg->name);
+         fprintf(stderr, "explicitly reading buffer %d %s\n", i, arg->name);
 #endif
-               arg->pin(jenv);
+         arg->pin(jenv);
 
-               status = clEnqueueReadBuffer(jniContext->commandQueues[0], arg->value.ref.mem, CL_FALSE, 0, 
-                     arg->sizeInBytes,arg->value.ref.addr , 0, NULL, &jniContext->readEvents[0]);
-               if (status != CL_SUCCESS) {
-                  PRINT_CL_ERR(status, "clEnqueueReadBuffer()");
-                  return status;
-               }
-               status = clWaitForEvents(1, jniContext->readEvents);
-               if (status != CL_SUCCESS) {
-                  PRINT_CL_ERR(status, "clWaitForEvents");
-                  return status;
-               }
-               clReleaseEvent(jniContext->readEvents[0]);
-               if (status != CL_SUCCESS) {
-                  PRINT_CL_ERR(status, "clReleaseEvent() read event");
-                  return status;
-               }
-               // since this is an explicit buffer get, we expect the buffer to have changed so we commit
-               arg->unpinCommit(jenv);
-            }
+         status = clEnqueueReadBuffer(jniContext->commandQueues[0], arg->value.ref.mem, CL_FALSE, 0, 
+               arg->sizeInBytes,arg->value.ref.addr , 0, NULL, &jniContext->readEvents[0]);
+         if (status != CL_SUCCESS) {
+            PRINT_CL_ERR(status, "clEnqueueReadBuffer()");
+            return status;
          }
-      }
-      if (!foundArg){
+         status = clWaitForEvents(1, jniContext->readEvents);
+         if (status != CL_SUCCESS) {
+            PRINT_CL_ERR(status, "clWaitForEvents");
+            return status;
+         }
+         clReleaseEvent(jniContext->readEvents[0]);
+         if (status != CL_SUCCESS) {
+            PRINT_CL_ERR(status, "clReleaseEvent() read event");
+            return status;
+         }
+         // since this is an explicit buffer get, we expect the buffer to have changed so we commit
+         arg->unpinCommit(jenv);
+      }else{
          if (jniContext->isVerbose()){
             fprintf(stderr, "attempt to request to get a buffer that does not appear to be referenced from kernel\n");
          }
@@ -1717,6 +1742,140 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getJNI(JNIEnv *jenv, jo
    }
    return 0;
 }
+
+jobject createList(JNIEnv *jenv, JNIContext *jniContext){
+   jclass listClass = jenv->FindClass("java/util/ArrayList");
+   if (listClass == NULL ||  jenv->ExceptionCheck()) {
+      jenv->ExceptionDescribe(); /* write to console */\
+         jenv->ExceptionClear();\
+         fprintf(stderr, "bummer! class\n");
+      return(NULL);
+   }
+
+   jmethodID constructor= jenv->GetMethodID(listClass,"<init>","()V");
+   if (constructor == NULL || jenv->ExceptionCheck()) {
+      jenv->ExceptionDescribe(); /* write to console */\
+         jenv->ExceptionClear();\
+         fprintf(stderr, "bummer getting constructor! \n");
+      return(NULL);
+   }
+   jobject listInstance = jenv->NewObject(listClass, constructor);
+   if (listInstance == NULL || jenv->ExceptionCheck()) {
+      jenv->ExceptionDescribe(); /* write to console */\
+         jenv->ExceptionClear();\
+         fprintf(stderr, "bummer invoking constructor! \n");
+      return(NULL);
+   }
+   return(listInstance);
+} 
+
+void add(JNIEnv *jenv, JNIContext *jniContext, jobject list, jobject profileItem){
+   jclass listClass = jenv->FindClass("java/util/ArrayList");
+   if (listClass == NULL ||  jenv->ExceptionCheck()) {
+      jenv->ExceptionDescribe(); /* write to console */\
+         jenv->ExceptionClear();\
+         fprintf(stderr, "bummer! list class\n");
+      return;
+   }
+   jmethodID methodId= jenv->GetMethodID(listClass,"add","(Ljava/lang/Object;)Z");
+   if (methodId == NULL || jenv->ExceptionCheck()) {
+      jenv->ExceptionDescribe(); /* write to console */\
+         jenv->ExceptionClear();\
+         fprintf(stderr, "bummer getting add method! \n");
+      return;
+   }
+   jenv->CallVoidMethod(list, methodId, profileItem);
+   if (jenv->ExceptionCheck()) {
+      jenv->ExceptionDescribe(); /* write to console */\
+         jenv->ExceptionClear();\
+         fprintf(stderr, "bummer  callin add\n");
+      return;
+   }
+}
+
+jobject createProfileInfo(JNIEnv *jenv, jstring label, ProfileInfo &profileInfo, jint type){
+   jclass profileInfoClass = jenv->FindClass("com/amd/aparapi/ProfileInfo");
+   if (profileInfoClass == NULL ||  jenv->ExceptionCheck()) {
+      jenv->ExceptionDescribe(); /* write to console */\
+         jenv->ExceptionClear();\
+         fprintf(stderr, "bummer! class\n");
+      return(NULL);
+   }
+   jmethodID constructor= jenv->GetMethodID(profileInfoClass,"<init>","(Ljava/lang/String;IJJJJ)V");
+   if (constructor == NULL || jenv->ExceptionCheck()) {
+      jenv->ExceptionDescribe(); /* write to console */\
+         jenv->ExceptionClear();\
+         fprintf(stderr, "bummer getting constructor! \n");
+      return(NULL);
+   }
+   jlong start=profileInfo.start;
+   jlong end = profileInfo.end;
+   jlong queued = profileInfo.queued;
+   jlong submit= profileInfo.submit;
+   jobject profileInstance = jenv->NewObject(profileInfoClass, constructor, label, type, start, end, queued, submit);
+   if (profileInstance == NULL || jenv->ExceptionCheck()) {
+      jenv->ExceptionDescribe(); /* write to console */\
+         jenv->ExceptionClear();\
+         fprintf(stderr, "bummer invoking constructor! \n");
+      return(NULL);
+   }
+   return(profileInstance);
+
+}
+
+JNIEXPORT jobject JNICALL Java_com_amd_aparapi_KernelRunner_getProfileInfoJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
+   cl_int status = CL_SUCCESS;
+   JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
+   jobject returnList = NULL;
+   if (jniContext != NULL && jniContext->isProfilingEnabled()){
+      returnList = createList(jenv, jniContext);
+
+      for (jint i=0; i<jniContext->argc; i++){ 
+         KernelArg *arg= jniContext->args[i];
+         if (arg->isArray()){
+            if (arg->isRead()){
+               jobject writeProfileInfo = createProfileInfo(jenv, jenv->NewStringUTF(arg->name), arg->value.ref.write, 0);
+               add(jenv, jniContext, returnList, writeProfileInfo);
+            }
+         }
+      }
+
+      jobject executeProfileInfo = createProfileInfo(jenv, NULL, jniContext->exec, 1);
+      add(jenv, jniContext, returnList, executeProfileInfo);
+
+      for (jint i=0; i<jniContext->argc; i++){ 
+         KernelArg *arg= jniContext->args[i];
+         if (arg->isArray()){
+            if (arg->isWrite()){
+               jobject readProfileInfo = createProfileInfo(jenv, jenv->NewStringUTF(arg->name), arg->value.ref.read, 2);
+               add(jenv, jniContext, returnList, readProfileInfo);
+            }
+         }
+      }
+      /*
+         fprintf(stderr, " write end   =%lu\n", arg->value.ref.write.end);
+         fprintf(stderr, " write start =%lu\n", arg->value.ref.write.start);
+         fprintf(stderr, " write submit=%lu\n", arg->value.ref.write.submit);
+         fprintf(stderr, " write queued=%lu\n", arg->value.ref.write.queued);
+         fprintf(stderr, " write =======%lu\n", arg->value.ref.write.end-arg->value.ref.write.start);
+
+         fprintf(stderr, " exec  end   =%lu\n", jniContext->exec.end);
+         fprintf(stderr, " exec  start =%lu\n", jniContext->exec.start);
+         fprintf(stderr, " exec  submit=%lu\n", jniContext->exec.submit);
+         fprintf(stderr, " exec  queued=%lu\n", jniContext->exec.queued);
+         fprintf(stderr, " exec  =======%lu\n", jniContext->exec.end-jniContext->exec.start);
+
+         fprintf(stderr, " read  end   =%lu\n", arg->value.ref.read.end);
+         fprintf(stderr, " read  start =%lu\n", arg->value.ref.read.start);
+         fprintf(stderr, " read  submit=%lu\n", arg->value.ref.read.submit);
+         fprintf(stderr, " read  queued=%lu\n", arg->value.ref.read.queued);
+         fprintf(stderr, " read  =======%lu\n", arg->value.ref.read.end-arg->value.ref.read.start);
+         */
+
+   }
+   return returnList;
+}
+
 
 JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getMaxComputeUnitsJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
    cl_int status = CL_SUCCESS;
