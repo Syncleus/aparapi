@@ -288,6 +288,8 @@ jfieldID  Range::localIsDerivedFieldID=0;
 
 class ProfileInfo{
    public:
+      jint type; //0 write, 1 execute, 2 read
+      char *name;
       cl_ulong queued;
       cl_ulong submit;
       cl_ulong start;
@@ -880,7 +882,7 @@ jint writeProfileInfo(JNIContext* jniContext){
 }
 
 // Should failed profiling abort the run and return early?
-cl_int profile(ProfileInfo *profileInfo, cl_event *event){
+cl_int profile(ProfileInfo *profileInfo, cl_event *event, jint type, char* name){
    cl_int status = CL_SUCCESS;
    status = clGetEventProfilingInfo(*event, CL_PROFILING_COMMAND_QUEUED, sizeof(profileInfo->queued), &(profileInfo->queued), NULL);
    ASSERT_CL( "clGetEventProfiliningInfo() QUEUED");
@@ -890,6 +892,8 @@ cl_int profile(ProfileInfo *profileInfo, cl_event *event){
    ASSERT_CL( "clGetEventProfiliningInfo() START");
    status = clGetEventProfilingInfo(*event, CL_PROFILING_COMMAND_END, sizeof(profileInfo->end), &(profileInfo->end), NULL);
    ASSERT_CL( "clGetEventProfiliningInfo() END");
+   profileInfo->type = type;
+   profileInfo->name = name;
    return status;
 }
 
@@ -1357,7 +1361,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
 
       for (int i=0; i< readEventCount; i++){
          if (jniContext->isProfilingEnabled()) {
-            status = profile(&jniContext->args[jniContext->readEventArgs[i]]->value.ref.read, &jniContext->readEvents[i]);
+            status = profile(&jniContext->args[jniContext->readEventArgs[i]]->value.ref.read, &jniContext->readEvents[i], 0,jniContext->args[jniContext->readEventArgs[i]]->name);
             if (status != CL_SUCCESS) {
                jniContext->unpinAll(jenv);
                return status;
@@ -1381,7 +1385,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
    }
 
    if (jniContext->isProfilingEnabled()) {
-      status = profile(&jniContext->exec, &jniContext->executeEvents[0]);
+      status = profile(&jniContext->exec, &jniContext->executeEvents[0], 1, NULL);
       if (status != CL_SUCCESS) {
          jniContext->unpinAll(jenv);
          return status;
@@ -1415,7 +1419,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
 
    for (int i=0; i< writeEventCount; i++){
       if (jniContext->isProfilingEnabled()) {
-         profile(&jniContext->args[jniContext->writeEventArgs[i]]->value.ref.write, &jniContext->writeEvents[i]);
+         profile(&jniContext->args[jniContext->writeEventArgs[i]]->value.ref.write, &jniContext->writeEvents[i], 2, jniContext->args[jniContext->writeEventArgs[i]]->name);
       }
       status = clReleaseEvent(jniContext->writeEvents[i]);
       if (status != CL_SUCCESS) {
@@ -1743,135 +1747,103 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getJNI(JNIEnv *jenv, jo
    return 0;
 }
 
-jobject createList(JNIEnv *jenv, JNIContext *jniContext){
-   jclass listClass = jenv->FindClass("java/util/ArrayList");
-   if (listClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); /* write to console */\
-         jenv->ExceptionClear();\
-         fprintf(stderr, "bummer! class\n");
+jobject createInstance(JNIEnv *jenv, char* className, char *signature, ... ){
+   jclass theClass = jenv->FindClass(className);
+   if (theClass == NULL ||  jenv->ExceptionCheck()) {
+      jenv->ExceptionDescribe();
+      jenv->ExceptionClear();
+      fprintf(stderr, "bummer! getting '%s'\n", className);
       return(NULL);
    }
 
-   jmethodID constructor= jenv->GetMethodID(listClass,"<init>","()V");
+   jmethodID constructor= jenv->GetMethodID(theClass,"<init>",signature);
    if (constructor == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); /* write to console */\
-         jenv->ExceptionClear();\
-         fprintf(stderr, "bummer getting constructor! \n");
+      jenv->ExceptionDescribe(); 
+      jenv->ExceptionClear();
+      fprintf(stderr, "bummer getting constructor from '%s' with signature! '%s' \n", className, signature);
       return(NULL);
    }
-   jobject listInstance = jenv->NewObject(listClass, constructor);
-   if (listInstance == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); /* write to console */\
-         jenv->ExceptionClear();\
-         fprintf(stderr, "bummer invoking constructor! \n");
-      return(NULL);
+   va_list argp;
+   va_start(argp, signature);
+   jobject instance = jenv->NewObjectV(theClass, constructor, argp);
+   if (instance == NULL || jenv->ExceptionCheck()) {
+      jenv->ExceptionDescribe(); 
+      jenv->ExceptionClear();
+      fprintf(stderr, "bummer invoking constructor from '%s' with signature! '%s' \n", className, signature);
    }
-   return(listInstance);
+   va_end(argp);
+   return(instance);
 } 
 
-void add(JNIEnv *jenv, JNIContext *jniContext, jobject list, jobject profileItem){
-   jclass listClass = jenv->FindClass("java/util/ArrayList");
-   if (listClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); /* write to console */\
-         jenv->ExceptionClear();\
-         fprintf(stderr, "bummer! list class\n");
+void callVoid(JNIEnv *jenv, jobject instance, char *methodName, char *methodSignature, ...){
+   jclass theClass = jenv->GetObjectClass(instance);
+   if (theClass == NULL ||  jenv->ExceptionCheck()) {
+      jenv->ExceptionDescribe(); 
+      jenv->ExceptionClear();
+      fprintf(stderr, "bummer! getting class from instance\n");
       return;
    }
-   jmethodID methodId= jenv->GetMethodID(listClass,"add","(Ljava/lang/Object;)Z");
+   jmethodID methodId= jenv->GetMethodID(theClass,methodName,methodSignature);
    if (methodId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); /* write to console */\
-         jenv->ExceptionClear();\
-         fprintf(stderr, "bummer getting add method! \n");
+      jenv->ExceptionDescribe(); 
+      jenv->ExceptionClear();
+      fprintf(stderr, "bummer getting method '%s %s' from instance \n", methodName, methodSignature);
       return;
    }
-   jenv->CallVoidMethod(list, methodId, profileItem);
+   va_list argp;
+   va_start(argp, methodSignature);
+   jenv->CallVoidMethodV(instance, methodId, argp);
    if (jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); /* write to console */\
-         jenv->ExceptionClear();\
-         fprintf(stderr, "bummer  callin add\n");
-      return;
+      jenv->ExceptionDescribe(); /* write to console */
+      jenv->ExceptionClear();
+      fprintf(stderr, "bummer  calling '%s %s'\n", methodName, methodSignature);
    }
+   va_end(argp);
+   return;
 }
 
-jobject createProfileInfo(JNIEnv *jenv, jstring label, ProfileInfo &profileInfo, jint type){
-   jclass profileInfoClass = jenv->FindClass("com/amd/aparapi/ProfileInfo");
-   if (profileInfoClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); /* write to console */\
-         jenv->ExceptionClear();\
-         fprintf(stderr, "bummer! class\n");
-      return(NULL);
-   }
-   jmethodID constructor= jenv->GetMethodID(profileInfoClass,"<init>","(Ljava/lang/String;IJJJJ)V");
-   if (constructor == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); /* write to console */\
-         jenv->ExceptionClear();\
-         fprintf(stderr, "bummer getting constructor! \n");
-      return(NULL);
-   }
-   jlong start=profileInfo.start;
-   jlong end = profileInfo.end;
-   jlong queued = profileInfo.queued;
-   jlong submit= profileInfo.submit;
-   jobject profileInstance = jenv->NewObject(profileInfoClass, constructor, label, type, start, end, queued, submit);
-   if (profileInstance == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); /* write to console */\
-         jenv->ExceptionClear();\
-         fprintf(stderr, "bummer invoking constructor! \n");
-      return(NULL);
-   }
+jobject createProfileInfo(JNIEnv *jenv, ProfileInfo &profileInfo){
+   jobject profileInstance = createInstance(jenv, "com/amd/aparapi/ProfileInfo", "(Ljava/lang/String;IJJJJ)V", 
+       ((jstring)(profileInfo.name==NULL?NULL:jenv->NewStringUTF(profileInfo.name))),
+       ((jint)profileInfo.type), 
+       ((jlong)profileInfo.start),
+       ((jlong)profileInfo.end),
+       ((jlong)profileInfo.queued),
+       ((jlong)profileInfo.submit));
    return(profileInstance);
-
 }
 
 JNIEXPORT jobject JNICALL Java_com_amd_aparapi_KernelRunner_getProfileInfoJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
    jobject returnList = NULL;
-   if (jniContext != NULL && jniContext->isProfilingEnabled()){
-      returnList = createList(jenv, jniContext);
+   if (jniContext != NULL){
+      returnList = createInstance(jenv, "java/util/ArrayList", "()V");
+      if (jniContext->isProfilingEnabled()){
 
-      for (jint i=0; i<jniContext->argc; i++){ 
-         KernelArg *arg= jniContext->args[i];
-         if (arg->isArray()){
-            if (arg->isRead()){
-               jobject writeProfileInfo = createProfileInfo(jenv, jenv->NewStringUTF(arg->name), arg->value.ref.write, 0);
-               add(jenv, jniContext, returnList, writeProfileInfo);
+         for (jint i=0; i<jniContext->argc; i++){ 
+            KernelArg *arg= jniContext->args[i];
+            if (arg->isArray()){
+               if (arg->isRead()){
+                  jobject writeProfileInfo = createProfileInfo(jenv,  arg->value.ref.write);
+                  callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", writeProfileInfo);
+               }
+            }
+         }
+
+         jobject executeProfileInfo = createProfileInfo(jenv, jniContext->exec);
+         callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", executeProfileInfo);
+
+         for (jint i=0; i<jniContext->argc; i++){ 
+            KernelArg *arg= jniContext->args[i];
+            if (arg->isArray()){
+               if (arg->isWrite()){
+                  jobject readProfileInfo = createProfileInfo(jenv,  arg->value.ref.read);
+                  callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", readProfileInfo);
+               }
             }
          }
       }
-
-      jobject executeProfileInfo = createProfileInfo(jenv, NULL, jniContext->exec, 1);
-      add(jenv, jniContext, returnList, executeProfileInfo);
-
-      for (jint i=0; i<jniContext->argc; i++){ 
-         KernelArg *arg= jniContext->args[i];
-         if (arg->isArray()){
-            if (arg->isWrite()){
-               jobject readProfileInfo = createProfileInfo(jenv, jenv->NewStringUTF(arg->name), arg->value.ref.read, 2);
-               add(jenv, jniContext, returnList, readProfileInfo);
-            }
-         }
-      }
-      /*
-         fprintf(stderr, " write end   =%lu\n", arg->value.ref.write.end);
-         fprintf(stderr, " write start =%lu\n", arg->value.ref.write.start);
-         fprintf(stderr, " write submit=%lu\n", arg->value.ref.write.submit);
-         fprintf(stderr, " write queued=%lu\n", arg->value.ref.write.queued);
-         fprintf(stderr, " write =======%lu\n", arg->value.ref.write.end-arg->value.ref.write.start);
-
-         fprintf(stderr, " exec  end   =%lu\n", jniContext->exec.end);
-         fprintf(stderr, " exec  start =%lu\n", jniContext->exec.start);
-         fprintf(stderr, " exec  submit=%lu\n", jniContext->exec.submit);
-         fprintf(stderr, " exec  queued=%lu\n", jniContext->exec.queued);
-         fprintf(stderr, " exec  =======%lu\n", jniContext->exec.end-jniContext->exec.start);
-
-         fprintf(stderr, " read  end   =%lu\n", arg->value.ref.read.end);
-         fprintf(stderr, " read  start =%lu\n", arg->value.ref.read.start);
-         fprintf(stderr, " read  submit=%lu\n", arg->value.ref.read.submit);
-         fprintf(stderr, " read  queued=%lu\n", arg->value.ref.read.queued);
-         fprintf(stderr, " read  =======%lu\n", arg->value.ref.read.end-arg->value.ref.read.start);
-         */
-
    }
    return returnList;
 }
