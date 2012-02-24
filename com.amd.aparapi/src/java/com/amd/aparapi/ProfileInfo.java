@@ -39,9 +39,9 @@ package com.amd.aparapi;
 
 public class ProfileInfo{
    private enum TYPE {
-      W,
+      R,
       X,
-      R
+      W
    }; // 0 = write, 1 = execute, 2 = read
 
    TYPE type;
