@@ -288,6 +288,7 @@ jfieldID  Range::localIsDerivedFieldID=0;
 
 class ProfileInfo{
    public:
+      boolean valid;
       jint type; //0 write, 1 execute, 2 read
       char *name;
       cl_ulong queued;
@@ -894,6 +895,7 @@ cl_int profile(ProfileInfo *profileInfo, cl_event *event, jint type, char* name)
    ASSERT_CL( "clGetEventProfiliningInfo() END");
    profileInfo->type = type;
    profileInfo->name = name;
+   profileInfo->valid = true;
    return status;
 }
 
@@ -1004,6 +1006,10 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
          fprintf(stderr, "got type for arg %d, %s, type=%08x\n", i, arg->name, arg->type);
       }
       if (!arg->isPrimitive() && !arg->isLocal()) {
+         if (jniContext->isProfilingEnabled()){
+            arg->value.ref.read.valid = false;
+            arg->value.ref.write.valid = false;
+         }
          // pin the arrays so that GC does not move them during the call
 
          // get the C memory address for the region being transferred
@@ -1731,6 +1737,14 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getJNI(JNIEnv *jenv, jo
             PRINT_CL_ERR(status, "clWaitForEvents");
             return status;
          }
+         if (jniContext->isProfilingEnabled()){
+            status = profile(&arg->value.ref.read, &jniContext->readEvents[0], 0,arg->name);
+            if (status != CL_SUCCESS) {
+               PRINT_CL_ERR(status, "profile ");
+               return status;
+            }
+         }
+
          clReleaseEvent(jniContext->readEvents[0]);
          if (status != CL_SUCCESS) {
             PRINT_CL_ERR(status, "clReleaseEvent() read event");
@@ -1804,12 +1818,12 @@ void callVoid(JNIEnv *jenv, jobject instance, char *methodName, char *methodSign
 
 jobject createProfileInfo(JNIEnv *jenv, ProfileInfo &profileInfo){
    jobject profileInstance = createInstance(jenv, "com/amd/aparapi/ProfileInfo", "(Ljava/lang/String;IJJJJ)V", 
-       ((jstring)(profileInfo.name==NULL?NULL:jenv->NewStringUTF(profileInfo.name))),
-       ((jint)profileInfo.type), 
-       ((jlong)profileInfo.start),
-       ((jlong)profileInfo.end),
-       ((jlong)profileInfo.queued),
-       ((jlong)profileInfo.submit));
+         ((jstring)(profileInfo.name==NULL?NULL:jenv->NewStringUTF(profileInfo.name))),
+         ((jint)profileInfo.type), 
+         ((jlong)profileInfo.start),
+         ((jlong)profileInfo.end),
+         ((jlong)profileInfo.queued),
+         ((jlong)profileInfo.submit));
    return(profileInstance);
 }
 
@@ -1824,7 +1838,7 @@ JNIEXPORT jobject JNICALL Java_com_amd_aparapi_KernelRunner_getProfileInfoJNI(JN
          for (jint i=0; i<jniContext->argc; i++){ 
             KernelArg *arg= jniContext->args[i];
             if (arg->isArray()){
-               if (arg->isRead()){
+               if (arg->isWrite() && arg->value.ref.write.valid){
                   jobject writeProfileInfo = createProfileInfo(jenv,  arg->value.ref.write);
                   callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", writeProfileInfo);
                }
@@ -1837,7 +1851,7 @@ JNIEXPORT jobject JNICALL Java_com_amd_aparapi_KernelRunner_getProfileInfoJNI(JN
          for (jint i=0; i<jniContext->argc; i++){ 
             KernelArg *arg= jniContext->args[i];
             if (arg->isArray()){
-               if (arg->isWrite()){
+               if (arg->isRead() && arg->value.ref.read.valid){
                   jobject readProfileInfo = createProfileInfo(jenv,  arg->value.ref.read);
                   callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", readProfileInfo);
                }
