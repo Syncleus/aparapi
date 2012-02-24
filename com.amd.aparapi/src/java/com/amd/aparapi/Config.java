@@ -72,6 +72,7 @@ class Config{
     *  
     */
    static final boolean enableProfiling = Boolean.getBoolean(propPkgName + ".enableProfiling");
+
    /**
     * Allows the user to turn on OpenCL profiling for the JNI/OpenCL layer, this information will be written to CSV file
     * 
@@ -79,6 +80,7 @@ class Config{
     *  
     */
    static final boolean enableProfilingCSV = Boolean.getBoolean(propPkgName + ".enableProfilingCSV");
+
    /**
     * Allows the user to request that verbose JNI messages be dumped to stderr.
     * 

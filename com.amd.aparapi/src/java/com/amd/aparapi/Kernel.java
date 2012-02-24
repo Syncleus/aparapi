@@ -2024,7 +2024,7 @@ public abstract class Kernel implements Cloneable{
       kernelRunner.get(array);
       return (this);
    }
-   
+
    /**
     * Enqueue a request to return this buffer from the GPU. This method blocks until the array is available. 
     * @param array
@@ -2035,8 +2035,8 @@ public abstract class Kernel implements Cloneable{
          kernelRunner = new KernelRunner(this);
 
       }
-      return(kernelRunner.getProfileInfo());
-      
+      return (kernelRunner.getProfileInfo());
+
    }
 
 }
