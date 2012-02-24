@@ -227,9 +227,7 @@ public class Main{
       // Set the default scale and offset, execute the kernel and force a repaint of the viewer.
       kernel.setScaleAndOffset(defaultScale, -1f, 0f);
       kernel.execute(range);
-     
-    
-     
+
       System.arraycopy(rgb, 0, imageRgb, 0, rgb.length);
       viewer.repaint();
 
@@ -276,15 +274,14 @@ public class Main{
                // Set the scale and offset, execute the kernel and force a repaint of the viewer.
                kernel.setScaleAndOffset(scale, x, y);
                kernel.execute(range);
-               
-               /**
-             
-               for (ProfileInfo p:kernel.getProfileInfo()){
-                  System.out.print(" "+p.getType()+" "+p.getLabel()+" "+(p.getEnd()-p.getStart())/1000+"us");
+               List<ProfileInfo> profileInfo = kernel.getProfileInfo();
+               if (profileInfo != null) {
+                  for (ProfileInfo p : profileInfo) {
+                     System.out.print(" " + p.getType() + " " + p.getLabel() + " " +(p.getStart()/1000)+" .. " +(p.getEnd()/1000)+ " "+ (p.getEnd() - p.getStart()) / 1000 + "us");
+                  }
+                  System.out.println();
                }
-               System.out.println();
-                **/
-             
+
                System.arraycopy(rgb, 0, imageRgb, 0, rgb.length);
                viewer.repaint();
             }
