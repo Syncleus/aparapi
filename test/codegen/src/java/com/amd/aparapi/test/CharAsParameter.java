@@ -1,6 +1,6 @@
 package com.amd.aparapi.test;
 
-public class CharAsParameter {
+public class CharAsParameter{
 
    public char doIt(char x) {
       return x;

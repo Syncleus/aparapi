@@ -14,7 +14,7 @@ public class MathMax extends Kernel{
    }
 }
 /**{OpenCL{
-#pragma OPENCL EXTENSION cl_amd_fp64 : enable
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 typedef struct This_s{
    

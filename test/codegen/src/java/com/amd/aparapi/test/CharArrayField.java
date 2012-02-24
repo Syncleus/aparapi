@@ -1,6 +1,6 @@
 package com.amd.aparapi.test;
 
-public class CharArrayField {
+public class CharArrayField{
    public void run() {
       out[0] = 0;
    }

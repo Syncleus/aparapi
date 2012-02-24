@@ -91,7 +91,7 @@ public class CodeGenJUnitBase{
             }
             assertTrue(_class.getSimpleName(), same);
          } else {
-            assertTrue("Expected exception " + _expectedExceptionType +" Instead we got {\n"+actual+"\n}", false);
+            assertTrue("Expected exception " + _expectedExceptionType + " Instead we got {\n" + actual + "\n}", false);
          }
 
       } catch (Throwable t) {

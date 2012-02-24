@@ -2,10 +2,11 @@ package com.amd.aparapi.test;
 
 public class ArrayTortureIssue35{
    int[] a = new int[1];
+
    int[] b = new int[1];
 
    public void run() {
-       a[b[0]++] = 1;
+      a[b[0]++] = 1;
    }
 }
 /**{OpenCL{

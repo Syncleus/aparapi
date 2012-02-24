@@ -2,14 +2,13 @@ package com.amd.aparapi.test;
 
 import com.amd.aparapi.Kernel;
 
-public class CharType extends Kernel {
-  @Override
-  public void run() {
-    final char c = Character.MAX_VALUE;
-    this.out[0] = c;
-  }
+public class CharType extends Kernel{
+   @Override public void run() {
+      final char c = Character.MAX_VALUE;
+      this.out[0] = c;
+   }
 
-  int out[] = new int[1];
+   int out[] = new int[1];
 }
 
 /**{OpenCL{

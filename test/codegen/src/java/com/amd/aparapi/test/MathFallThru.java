@@ -17,7 +17,7 @@ public class MathFallThru extends Kernel{
    int intout[] = new int[1];
 }
 /**{OpenCL{
-#pragma OPENCL EXTENSION cl_amd_fp64 : enable
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 typedef struct This_s{
    __global long *longout;

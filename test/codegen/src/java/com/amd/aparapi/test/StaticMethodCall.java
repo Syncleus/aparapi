@@ -4,11 +4,11 @@ import com.amd.aparapi.Kernel;
 
 public class StaticMethodCall extends Kernel{
    public static int add(int i, int j) {
-      return i+j;
+      return i + j;
    }
-	
+
    public void run() {
-      out[0] = add(1,2);
+      out[0] = add(1, 2);
    }
 
    int out[] = new int[1];
