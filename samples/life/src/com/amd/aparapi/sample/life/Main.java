@@ -196,7 +196,7 @@ public class Main{
                List<ProfileInfo> profileInfo = lifeKernel.getProfileInfo();
                if (profileInfo != null) {
                   for (ProfileInfo p : profileInfo) {
-                     System.out.print(" " + p.getType() + " " + p.getLabel() + " " + (p.getEnd() - p.getStart()) / 1000 + "us");
+                     System.out.print(" " + p.getType() + " " + p.getLabel() + " " +(p.getStart()/1000)+" .. " +(p.getEnd()/1000)+ " "+ (p.getEnd() - p.getStart()) / 1000 + "us");
                   }
                   System.out.println();
                }
