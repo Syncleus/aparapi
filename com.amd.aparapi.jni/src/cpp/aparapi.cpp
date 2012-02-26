@@ -503,7 +503,8 @@ class JNIContext{
       cl_event* writeEvents;
       jint* writeEventArgs;
       jboolean firstRun;
-      ProfileInfo exec;
+      jint passes;
+      ProfileInfo *exec;
       FILE* profileFile;
       // these map to camelCase form of CL_DEVICE_XXX_XXX  For example CL_DEVICE_MAX_COMPUTE_UNITS == maxComputeUnits
       cl_uint maxComputeUnits;
@@ -523,6 +524,8 @@ class JNIContext{
          flags(_flags),
          platform(NULL),
          profileBaseTime(0),
+         passes(0),
+         exec(NULL),
          deviceType(((flags&com_amd_aparapi_KernelRunner_JNI_FLAG_USE_GPU)==com_amd_aparapi_KernelRunner_JNI_FLAG_USE_GPU)?CL_DEVICE_TYPE_GPU:CL_DEVICE_TYPE_CPU),
          profileFile(NULL), 
          valid(JNI_FALSE){
@@ -828,26 +831,28 @@ jint writeProfileInfo(JNIContext* jniContext){
       }
    }
 
-   if (jniContext->profileBaseTime == 0){
-      jniContext->profileBaseTime = jniContext->exec.queued;
+   for (jint pass=0; pass<jniContext->passes; pass++){
+      if (jniContext->profileBaseTime == 0){
+         jniContext->profileBaseTime = jniContext->exec[pass].queued;
 
-      // Write the base time as the first item in the csv
-      //fprintf(jniContext->profileFile, "%llu,", jniContext->profileBaseTime);
+         // Write the base time as the first item in the csv
+         //fprintf(jniContext->profileFile, "%llu,", jniContext->profileBaseTime);
+      }
+
+      // Initialize the base time for this sample if necessary
+      if (currSampleBaseTime == -1) {
+         currSampleBaseTime = jniContext->exec[pass].queued;
+      } 
+
+      // exec 
+      fprintf(jniContext->profileFile, "%d exec[%d],", pos++, pass);
+
+      fprintf(jniContext->profileFile, "%lu,%lu,%lu,%lu,",  
+            (jniContext->exec[pass].queued - currSampleBaseTime)/1000, 
+            (jniContext->exec[pass].submit - currSampleBaseTime)/1000, 
+            (jniContext->exec[pass].start - currSampleBaseTime)/1000, 
+            (jniContext->exec[pass].end - currSampleBaseTime)/1000);
    }
-
-   // Initialize the base time for this sample if necessary
-   if (currSampleBaseTime == -1) {
-      currSampleBaseTime = jniContext->exec.queued;
-   } 
-
-   // exec 
-   fprintf(jniContext->profileFile, "%d exec,", pos++);
-
-   fprintf(jniContext->profileFile, "%lu,%lu,%lu,%lu,",  
-         (jniContext->exec.queued - currSampleBaseTime)/1000, 
-         (jniContext->exec.submit - currSampleBaseTime)/1000, 
-         (jniContext->exec.start - currSampleBaseTime)/1000, 
-         (jniContext->exec.end - currSampleBaseTime)/1000);
 
    // 
    if ( jniContext->argc == 0 ) {
@@ -1228,6 +1233,12 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
 
    // To support multiple passes we add a 'secret' final arg called 'passid' and just schedule multiple enqueuendrange kernels.  Each of which having a separate value of passid
    //
+   //
+   if (jniContext->exec){      // delete the last set
+      delete jniContext->exec;
+   } 
+   jniContext->passes = passes;
+   jniContext->exec = new ProfileInfo[passes];
 
    for (int passid=0; passid<passes; passid++){
       for (int dev =0; dev < jniContext->deviceIdc; dev++){ // this will always be 1 until we reserect multi-dim support
@@ -1239,10 +1250,10 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
             return status;
          }
 
-         // four options here due to passid
-         if (passid == 0 && passes==1){
+         // two options here due to passid
+         if (passid == 0){
             //fprintf(stderr, "setting passid to %d of %d first and last\n", passid, passes);
-            // there is one pass and this is it
+            // there may be 1 or more passes
             // enqueue depends on write enqueues 
             // we don't block but and we populate the executeEvents
             status = clEnqueueNDRangeKernel(
@@ -1254,47 +1265,35 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
                   writeEventCount,
                   writeEventCount?jniContext->writeEvents:NULL,
                   &jniContext->executeEvents[dev]);
-         }else if (passid == 0){
-            //fprintf(stderr, "setting passid to %d of %d first not last\n", passid, passes);
-            // this is the first of multiple passes
-            // enqueue depends on write enqueues 
-            // we block but do not populate executeEvents (only the last pass does this)
-            status = clEnqueueNDRangeKernel(
-                  jniContext->commandQueues[dev],
-                  jniContext->kernel,
-                  range.dims,
-                  range.offsets,
-                  range.globalDims,
-                  range.localDims,
-                  writeEventCount,
-                  writeEventCount?jniContext->writeEvents:NULL,
-                  &jniContext->executeEvents[dev]);
-
-         }else if (passid < passes-1){
-            // we are in some middle pass (neither first or last) 
-            // we don't depend on write enqueues
-            // we block and do not supply executeEvents (only the last pass does this)
-            //fprintf(stderr, "setting passid to %d of %d not first not last\n", passid, passes);
-            status = clEnqueueNDRangeKernel(
-                  jniContext->commandQueues[dev], 
-                  jniContext->kernel,
-                  range.dims,
-                  range.offsets,
-                  range.globalDims,
-                  range.localDims,
-                  0,    // wait for this event count
-                  NULL, // list of events to wait for
-                  &jniContext->executeEvents[dev]);
          }else{
-            // we are the last pass of >1
+            // we are in some passid >0 pass 
+            // maybe middle or last!
             // we don't depend on write enqueues
-            // we block and supply executeEvents
-            //fprintf(stderr, "setting passid to %d of %d  last\n", passid, passes);
+            // we block and do supply executeEvents 
+            //fprintf(stderr, "setting passid to %d of %d not first not last\n", passid, passes);
+            //
+            // We must capture any profile info for passid-1  so we must wait for the last execution to complete
+            if (jniContext->isProfilingEnabled()) {
+               if (passid ==1 ){
+                  status = clWaitForEvents(1, &jniContext->executeEvents[dev]);
+                  if (status != CL_SUCCESS) {
+                     PRINT_CL_ERR(status, "clWaitForEvents() execute event");
+                     jniContext->unpinAll(jenv);
+                     return status;
+                  }
+               }
+               // Now we can profile info for passid-1 
+               status = profile(&jniContext->exec[passid-1], &jniContext->executeEvents[dev], 1, NULL);
+               if (status != CL_SUCCESS) {
+                  jniContext->unpinAll(jenv);
+                  return status;
+               }
+            }
             status = clEnqueueNDRangeKernel(
                   jniContext->commandQueues[dev], 
                   jniContext->kernel,
                   range.dims,
-                  range.offsets, 
+                  range.offsets,
                   range.globalDims,
                   range.localDims,
                   0,    // wait for this event count
@@ -1310,21 +1309,23 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
             return status;
          }
       }
-      if (passid < passes-1){
-         // we need to wait for the executions to complete...
-         status = clWaitForEvents(jniContext->deviceIdc,  jniContext->executeEvents);
-         if (status != CL_SUCCESS) {
-            PRINT_CL_ERR(status, "clWaitForEvents() execute events mid pass");
-            jniContext->unpinAll(jenv);
-            return status;
-         }
-
-         for (int dev = 0; dev < jniContext->deviceIdc; dev++){
-            status = clReleaseEvent(jniContext->executeEvents[dev]);
+      if (0){  // I dont think we need this
+         if (passid < passes-1){
+            // we need to wait for the executions to complete...
+            status = clWaitForEvents(jniContext->deviceIdc,  jniContext->executeEvents);
             if (status != CL_SUCCESS) {
-               PRINT_CL_ERR(status, "clReleaseEvent() read event");
+               PRINT_CL_ERR(status, "clWaitForEvents() execute events mid pass");
                jniContext->unpinAll(jenv);
                return status;
+            }
+
+            for (int dev = 0; dev < jniContext->deviceIdc; dev++){
+               status = clReleaseEvent(jniContext->executeEvents[dev]);
+               if (status != CL_SUCCESS) {
+                  PRINT_CL_ERR(status, "clReleaseEvent() read event");
+                  jniContext->unpinAll(jenv);
+                  return status;
+               }
             }
          }
       }
@@ -1391,7 +1392,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
    }
 
    if (jniContext->isProfilingEnabled()) {
-      status = profile(&jniContext->exec, &jniContext->executeEvents[0], 1, NULL);
+      status = profile(&jniContext->exec[passes-1], &jniContext->executeEvents[0], 1, NULL); // multi gpu ?
       if (status != CL_SUCCESS) {
          jniContext->unpinAll(jenv);
          return status;
@@ -1845,8 +1846,10 @@ JNIEXPORT jobject JNICALL Java_com_amd_aparapi_KernelRunner_getProfileInfoJNI(JN
             }
          }
 
-         jobject executeProfileInfo = createProfileInfo(jenv, jniContext->exec);
-         callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", executeProfileInfo);
+         for (jint pass=0; pass<jniContext->passes; pass++){
+            jobject executeProfileInfo = createProfileInfo(jenv, jniContext->exec[pass]);
+            callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", executeProfileInfo);
+         }
 
          for (jint i=0; i<jniContext->argc; i++){ 
             KernelArg *arg= jniContext->args[i];

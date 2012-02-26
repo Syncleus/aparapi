@@ -559,7 +559,7 @@ class KernelRunner{
 
    private native int getMaxWorkItemDimensionsJNI(long _jniContextHandle);
 
-   private native List<ProfileInfo> getProfileInfoJNI(long _jniContextHandle);
+   private synchronized native List<ProfileInfo> getProfileInfoJNI(long _jniContextHandle);
 
    private Set<String> capabilitiesSet;
 
