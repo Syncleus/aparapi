@@ -63,8 +63,8 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 import com.amd.aparapi.Kernel;
-import com.amd.aparapi.Range;
 import com.amd.aparapi.ProfileInfo;
+import com.amd.aparapi.Range;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
@@ -281,12 +281,12 @@ public class Main{
                   kernel.get(kernel.xyz);
                }
                List<ProfileInfo> profileInfo = kernel.getProfileInfo();
-               if (profileInfo != null && profileInfo.size()>0) {
+               if (profileInfo != null && profileInfo.size() > 0) {
                   for (ProfileInfo p : profileInfo) {
                      System.out.print(" " + p.getType() + " " + p.getLabel() + (p.getEnd() - p.getStart()) / 1000 + "us");
                   }
                   System.out.println();
-               } 
+               }
             }
             kernel.render(gl);
 
