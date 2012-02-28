@@ -88,11 +88,11 @@ public class Main{
       /** Mandelbrot image height. */
       final private int height;
 
-      /** Palette used for each iteration value 0..maxIterations. */
-      final private int pallette[];
+      /** Maximum iterations for Mandelbrot. */
+      final private int maxIterations = 64;
 
-      /** Maximum iterations we will check for. */
-      final private int maxIterations;
+      /** Palette which maps iteration values to RGB values. */
+      @Constant final private int pallette[] = new int[maxIterations + 1];
 
       /** Mutable values of scale, offsetx and offsety so that we can modify the zoom level and position of a view. */
       private float scale = .0f;
@@ -109,12 +109,17 @@ public class Main{
        * @param _rgb Mandelbrot image RGB buffer
        * @param _pallette Mandelbrot image palette
        */
-      public MandelKernel(int _width, int _height, int[] _rgb, int[] _pallette) {
+      public MandelKernel(int _width, int _height, int[] _rgb) {
+         //Initialize palette values
+         for (int i = 0; i < maxIterations; i++) {
+            float h = i / (float) maxIterations;
+            float b = 1.0f - h * h;
+            pallette[i] = Color.HSBtoRGB(h, 1f, b);
+         }
+
          width = _width;
          height = _height;
          rgb = _rgb;
-         pallette = _pallette;
-         maxIterations = pallette.length - 1;
 
       }
 
@@ -170,19 +175,6 @@ public class Main{
       /** Mandelbrot image height. */
       final Range range = Range.create(width * height);
 
-      /** Maximum iterations for Mandelbrot. */
-      final int maxIterations = 256;
-
-      /** Palette which maps iteration values to RGB values. */
-      final int pallette[] = new int[maxIterations + 1];
-
-      //Initialize palette values
-      for (int i = 0; i < maxIterations; i++) {
-         float h = i / (float) maxIterations;
-         float b = 1.0f - h * h;
-         pallette[i] = Color.HSBtoRGB(h, 1f, b);
-      }
-
       /** Image for Mandelbrot view. */
       final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
       final BufferedImage offscreen = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -220,7 +212,7 @@ public class Main{
       final int[] rgb = ((DataBufferInt) offscreen.getRaster().getDataBuffer()).getData();
       final int[] imageRgb = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
       // Create a Kernel passing the size, RGB buffer and the palette.
-      final MandelKernel kernel = new MandelKernel(width, height, rgb, pallette);
+      final MandelKernel kernel = new MandelKernel(width, height, rgb);
 
       float defaultScale = 3f;
 
@@ -275,9 +267,10 @@ public class Main{
                kernel.setScaleAndOffset(scale, x, y);
                kernel.execute(range);
                List<ProfileInfo> profileInfo = kernel.getProfileInfo();
-               if (profileInfo != null) {
+               if (profileInfo != null && profileInfo.size() > 0) {
                   for (ProfileInfo p : profileInfo) {
-                     System.out.print(" " + p.getType() + " " + p.getLabel() + " " +(p.getStart()/1000)+" .. " +(p.getEnd()/1000)+ " "+ (p.getEnd() - p.getStart()) / 1000 + "us");
+                     System.out.print(" " + p.getType() + " " + p.getLabel() + " " + (p.getStart() / 1000) + " .. "
+                           + (p.getEnd() / 1000) + " " + (p.getEnd() - p.getStart()) / 1000 + "us");
                   }
                   System.out.println();
                }
