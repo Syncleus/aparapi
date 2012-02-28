@@ -816,14 +816,6 @@ jint writeProfileInfo(JNIContext* jniContext){
          if (currSampleBaseTime == -1) {
             currSampleBaseTime = arg->value.ref.write.queued;
          } 
-
-         if (jniContext->profileBaseTime == 0){
-            jniContext->profileBaseTime = arg->value.ref.write.queued;
-
-            // Write the base time as the first item in the csv
-            //fprintf(jniContext->profileFile, "%llu,", jniContext->profileBaseTime);
-         }
-
          fprintf(jniContext->profileFile, "%d write %s,", pos++, arg->name);
 
          fprintf(jniContext->profileFile, "%lu,%lu,%lu,%lu,",  
@@ -835,12 +827,6 @@ jint writeProfileInfo(JNIContext* jniContext){
    }
 
    for (jint pass=0; pass<jniContext->passes; pass++){
-      if (jniContext->profileBaseTime == 0){
-         jniContext->profileBaseTime = jniContext->exec[pass].queued;
-
-         // Write the base time as the first item in the csv
-         //fprintf(jniContext->profileFile, "%llu,", jniContext->profileBaseTime);
-      }
 
       // Initialize the base time for this sample if necessary
       if (currSampleBaseTime == -1) {
@@ -864,12 +850,6 @@ jint writeProfileInfo(JNIContext* jniContext){
       for (int i=0; i< jniContext->argc; i++){
          KernelArg *arg=jniContext->args[i];
          if (arg->isBackedByArray() && arg->isMutableByKernel()){
-            if (jniContext->profileBaseTime == 0){
-               jniContext->profileBaseTime = arg->value.ref.read.queued;
-
-               // Write the base time as the first item in the csv
-               //fprintf(jniContext->profileFile, "%llu,", jniContext->profileBaseTime);               
-            }
 
             // Initialize the base time for this sample
             if (currSampleBaseTime == -1) {
@@ -891,7 +871,7 @@ jint writeProfileInfo(JNIContext* jniContext){
 }
 
 // Should failed profiling abort the run and return early?
-cl_int profile(ProfileInfo *profileInfo, cl_event *event, jint type, char* name){
+cl_int profile(ProfileInfo *profileInfo, cl_event *event, jint type, char* name, cl_ulong profileBaseTime ){
    cl_int status = CL_SUCCESS;
    status = clGetEventProfilingInfo(*event, CL_PROFILING_COMMAND_QUEUED, sizeof(profileInfo->queued), &(profileInfo->queued), NULL);
    ASSERT_CL( "clGetEventProfiliningInfo() QUEUED");
@@ -901,6 +881,11 @@ cl_int profile(ProfileInfo *profileInfo, cl_event *event, jint type, char* name)
    ASSERT_CL( "clGetEventProfiliningInfo() START");
    status = clGetEventProfilingInfo(*event, CL_PROFILING_COMMAND_END, sizeof(profileInfo->end), &(profileInfo->end), NULL);
    ASSERT_CL( "clGetEventProfiliningInfo() END");
+
+   profileInfo->queued -= profileBaseTime;
+   profileInfo->submit -= profileBaseTime;
+   profileInfo->start -= profileBaseTime;
+   profileInfo->end -= profileBaseTime;
    profileInfo->type = type;
    profileInfo->name = name;
    profileInfo->valid = true;
@@ -987,6 +972,33 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
 
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
+
+
+    if (jniContext->firstRun && jniContext->isProfilingEnabled()){
+         cl_event firstEvent;
+         status = clEnqueueMarker(jniContext->commandQueues[0] /** change if we enable multiple gpus **/, &firstEvent);
+         if (status != CL_SUCCESS) {
+            PRINT_CL_ERR(status, "clEnqueueMarker endOfTxfers");
+            return 0L;
+         }
+         status = clWaitForEvents(1, &firstEvent);
+         if (status != CL_SUCCESS) {
+            PRINT_CL_ERR(status, "clWaitForEvents");
+            return 0L;
+         }
+         status = clGetEventProfilingInfo(firstEvent, CL_PROFILING_COMMAND_QUEUED, sizeof(jniContext->profileBaseTime), &(jniContext->profileBaseTime), NULL);
+         if (status != CL_SUCCESS) {
+            PRINT_CL_ERR(status, "clGetEventProfilingInfo");
+            return 0L;
+         }
+         clReleaseEvent(firstEvent);
+         if (status != CL_SUCCESS) {
+            PRINT_CL_ERR(status, "clReleaseEvent() read event");
+            return 0L;
+         }
+         fprintf(stderr, "profileBaseTime %lu \n", jniContext->profileBaseTime);
+      }
+
    if (jniContext->isVerbose()){
       timer.start();
    }
@@ -1125,9 +1137,9 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
                jniContext->writeEventArgs[writeEventCount]=i;
             }
 
-         if (arg->isConstant()){
+            if (arg->isConstant()){
                fprintf(stderr, "writing constant buffer %s\n", arg->name);
-         }
+            }
 
             status = clEnqueueWriteBuffer(jniContext->commandQueues[0], arg->value.ref.mem, CL_FALSE, 0, 
                   arg->sizeInBytes, arg->value.ref.addr, 0, NULL, &(jniContext->writeEvents[writeEventCount++]));
@@ -1223,17 +1235,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
       }
    }  // for each arg
 
-   if (0){
 
-   cl_event endOfTxfersMarker;
-
-   status = clEnqueueMarker(jniContext->commandQueues[0] /** change if we enable multiple gpus **/, &endOfTxfersMarker);
-   if (status != CL_SUCCESS) {
-      PRINT_CL_ERR(status, "clEnqueueMarker endOfTxfers");
-      jniContext->unpinAll(jenv);
-      return status;
-   }
-   }
 
    // We will need to revisit the execution of multiple devices.  
    // POssibly cloning the range per device and mutating each to handle a unique subrange (of global) and
@@ -1294,7 +1296,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
                   }
                }
                // Now we can profile info for passid-1 
-               status = profile(&jniContext->exec[passid-1], &jniContext->executeEvents[dev], 1, NULL);
+               status = profile(&jniContext->exec[passid-1], &jniContext->executeEvents[dev], 1, NULL, jniContext->profileBaseTime);
                if (status != CL_SUCCESS) {
                   jniContext->unpinAll(jenv);
                   return status;
@@ -1401,7 +1403,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
 
       for (int i=0; i< readEventCount; i++){
          if (jniContext->isProfilingEnabled()) {
-            status = profile(&jniContext->args[jniContext->readEventArgs[i]]->value.ref.read, &jniContext->readEvents[i], 0,jniContext->args[jniContext->readEventArgs[i]]->name);
+            status = profile(&jniContext->args[jniContext->readEventArgs[i]]->value.ref.read, &jniContext->readEvents[i], 0,jniContext->args[jniContext->readEventArgs[i]]->name, jniContext->profileBaseTime);
             if (status != CL_SUCCESS) {
                jniContext->unpinAll(jenv);
                return status;
@@ -1425,7 +1427,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
    }
 
    if (jniContext->isProfilingEnabled()) {
-      status = profile(&jniContext->exec[passes-1], &jniContext->executeEvents[0], 1, NULL); // multi gpu ?
+      status = profile(&jniContext->exec[passes-1], &jniContext->executeEvents[0], 1, NULL, jniContext->profileBaseTime); // multi gpu ?
       if (status != CL_SUCCESS) {
          jniContext->unpinAll(jenv);
          return status;
@@ -1459,7 +1461,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
 
    for (int i=0; i< writeEventCount; i++){
       if (jniContext->isProfilingEnabled()) {
-         profile(&jniContext->args[jniContext->writeEventArgs[i]]->value.ref.write, &jniContext->writeEvents[i], 2, jniContext->args[jniContext->writeEventArgs[i]]->name);
+         profile(&jniContext->args[jniContext->writeEventArgs[i]]->value.ref.write, &jniContext->writeEvents[i], 2, jniContext->args[jniContext->writeEventArgs[i]]->name, jniContext->profileBaseTime);
       }
       status = clReleaseEvent(jniContext->writeEvents[i]);
       if (status != CL_SUCCESS) {
@@ -1490,7 +1492,9 @@ JNIEXPORT jlong JNICALL Java_com_amd_aparapi_KernelRunner_initJNI(JNIEnv *jenv, 
       jint flags) {
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = new JNIContext(jenv, kernelObject, flags);
+
    if (jniContext->isValid()){
+     
       return((jlong)jniContext);
    }else{
       return(0L);
@@ -1774,7 +1778,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getJNI(JNIEnv *jenv, jo
             return status;
          }
          if (jniContext->isProfilingEnabled()){
-            status = profile(&arg->value.ref.read, &jniContext->readEvents[0], 0,arg->name);
+            status = profile(&arg->value.ref.read, &jniContext->readEvents[0], 0,arg->name, jniContext->profileBaseTime);
             if (status != CL_SUCCESS) {
                PRINT_CL_ERR(status, "profile ");
                return status;
