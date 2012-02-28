@@ -299,7 +299,7 @@ class KernelRunner{
     * 
     * @author gfrost
     */
-   @UsedByJNICode public static final int ARG_APARAPI_BUF_HAS_ARRAY = 1 << 19;
+   // @UsedByJNICode public static final int ARG_APARAPI_BUF_HAS_ARRAY = 1 << 19;
 
    /**
     * TODO:
@@ -1426,6 +1426,9 @@ class KernelRunner{
                         if (field.getAnnotation(com.amd.aparapi.Kernel.Local.class) != null
                               || args[i].name.endsWith(Kernel.LOCAL_SUFFIX)) {
                            args[i].type |= ARG_LOCAL;
+                        } else if (field.getAnnotation(com.amd.aparapi.Kernel.Constant.class) != null
+                              || args[i].name.endsWith(Kernel.CONSTANT_SUFFIX)) {
+                           args[i].type |= ARG_CONSTANT;
                         } else {
                            args[i].type |= ARG_GLOBAL;
                         }

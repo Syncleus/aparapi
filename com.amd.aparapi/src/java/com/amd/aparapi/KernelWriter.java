@@ -270,7 +270,11 @@ abstract class KernelWriter extends BlockWriter{
 
    public final static String __global = "__global";
 
+   public final static String __constant = "__constant";
+
    public final static String LOCAL_ANNOTATION_NAME = "L" + Kernel.Local.class.getName().replace(".", "/") + ";";
+
+   public final static String CONSTANT_ANNOTATION_NAME = "L" + Kernel.Constant.class.getName().replace(".", "/") + ";";
 
    @Override void write(Entrypoint _entryPoint) throws CodeGenException {
       List<String> thisStruct = new ArrayList<String>();
@@ -290,7 +294,8 @@ abstract class KernelWriter extends BlockWriter{
          boolean isPointer = false;
 
          // check the suffix 
-         String type = field.getName().endsWith(Kernel.LOCAL_SUFFIX) ? __local : __global;
+         String type = field.getName().endsWith(Kernel.LOCAL_SUFFIX) ? __local
+               : (field.getName().endsWith(Kernel.CONSTANT_SUFFIX) ? __constant : __global);
          RuntimeAnnotationsEntry visibleAnnotations = field.fieldAttributePool.getRuntimeVisibleAnnotationsEntry();
 
          if (visibleAnnotations != null) {
@@ -298,6 +303,8 @@ abstract class KernelWriter extends BlockWriter{
                String typeDescriptor = ai.getTypeDescriptor();
                if (typeDescriptor.equals(LOCAL_ANNOTATION_NAME)) {
                   type = __local;
+               } else if (typeDescriptor.equals(CONSTANT_ANNOTATION_NAME)) {
+                  type = __constant;
                }
             }
          }

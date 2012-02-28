@@ -170,6 +170,26 @@ public abstract class Kernel implements Cloneable{
    }
 
    /**
+    *  We can use this Annotation to 'tag' intended constant buffers. 
+    *  
+    *  So we can either annotate the buffer
+    *  <pre><code>
+    *  &#64Constant int[] buffer = new int[1024];
+    *  </code></pre>
+    *   Or use a special suffix 
+    *  <pre><code>
+    *  int[] buffer_$constant$ = new int[1024];
+    *  </code></pre>
+    *  
+    *  @see LOCAL_SUFFIX
+    * 
+    * 
+    */
+   public @Retention(RetentionPolicy.RUNTIME) @interface Constant {
+
+   }
+
+   /**
     *  We can use this suffix to 'tag' intended local buffers. 
     *  
     *  
@@ -184,6 +204,22 @@ public abstract class Kernel implements Cloneable{
     */
 
    final static String LOCAL_SUFFIX = "_$local$";
+
+   /**
+    *  We can use this suffix to 'tag' intended constant buffers. 
+    *  
+    *  
+    *  So either name the buffer 
+    *  <pre><code>
+    *  int[] buffer_$constant$ = new int[1024];
+    *  </code></pre>
+    *  Or use the Annotation form 
+    *  <pre><code>
+    *  &#64Constant int[] buffer = new int[1024];
+    *  </code></pre>
+    */
+
+   final static String CONSTANT_SUFFIX = "_$constant$";
 
    private static Logger logger = Logger.getLogger(Config.getLoggerName());
 
