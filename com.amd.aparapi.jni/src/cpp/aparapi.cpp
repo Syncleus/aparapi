@@ -370,7 +370,7 @@ class KernelArg{
          jenv->ReleasePrimitiveArrayCritical((jarray)value.ref.javaArray, value.ref.addr, 0);
       }
       void unpin(JNIEnv *jenv){
-         if (isWrite()){
+         if (isMutableByKernel()){
             // we only need to commit if the buffer has been written to
             // we use mode=0 in that case (rather than JNI_COMMIT) because that frees any copy buffer if it exists
             // in most cases this array will have been pinned so this will not be an issue
@@ -383,16 +383,19 @@ class KernelArg{
       }
       void pin(JNIEnv *jenv){
          value.ref.addr = jenv->GetPrimitiveArrayCritical((jarray)value.ref.javaArray,&value.ref.isCopy);
+         if (value.ref.isCopy){
+            fprintf(stderr, "buffer %s is a copy!\n", name);
+         }
          value.ref.isPinned = JNI_TRUE;
       }
 
       int isArray(){
          return(type&com_amd_aparapi_KernelRunner_ARG_ARRAY);
       }
-      int isRead(){
+      int isReadByKernel(){
          return(type&com_amd_aparapi_KernelRunner_ARG_READ);
       }
-      int isWrite(){
+      int isMutableByKernel(){
          return(type&com_amd_aparapi_KernelRunner_ARG_WRITE);
       }
       int isExplicit(){
@@ -443,21 +446,21 @@ class KernelArg{
       int isAparapiBuf(){
          return (type&com_amd_aparapi_KernelRunner_ARG_APARAPI_BUF);
       }
-      int isAparapiBufHasArray(){
-         return (type&com_amd_aparapi_KernelRunner_ARG_APARAPI_BUF_HAS_ARRAY);
-      }
+      //int isAparapiBufHasArray(){
+      //   return (type&com_amd_aparapi_KernelRunner_ARG_APARAPI_BUF_HAS_ARRAY);
+      //}
       int isBackedByArray(){
-         return ( (isArray() && isGlobal()) || ((isGlobal() || isConstant()) && isAparapiBufHasArray()));
+         return ( (isArray() && (isGlobal() || isConstant())));
       }
-      int mustReadBuffer(){
-         return(((isArray() && isGlobal())||((isAparapiBuf()&&isGlobal())))&&(isImplicit()&&isWrite()));
+      int needToEnqueueRead(){
+         return(((isArray() && isGlobal()) || ((isAparapiBuf()&&isGlobal()))) && (isImplicit()&&isMutableByKernel()));
       }
-      int mustWriteBuffer(){
-         return ((isImplicit()&&isRead()&&!isConstant())||(isExplicit()&&isExplicitWrite()));
+      int needToEnqueueWrite(){
+         return ((isImplicit()&&isReadByKernel())||(isExplicit()&&isExplicitWrite()));
       }
-      void syncType(JNIEnv* jenv){
-         type = jenv->GetIntField(javaArg, typeFieldID);
-      }
+      //void syncType(JNIEnv* jenv){
+      //   type = jenv->GetIntField(javaArg, typeFieldID);
+      //}
       void syncSizeInBytes(JNIEnv* jenv){
          sizeInBytes = jenv->GetIntField(javaArg, sizeInBytesFieldID);
       }
@@ -807,7 +810,7 @@ jint writeProfileInfo(JNIContext* jniContext){
    // A read by a user kernel means the OpenCL layer wrote to the kernel and vice versa
    for (int i=0; i< jniContext->argc; i++){
       KernelArg *arg=jniContext->args[i];
-      if (arg->isBackedByArray() && arg->isRead()){
+      if (arg->isBackedByArray() && arg->isReadByKernel()){
 
          // Initialize the base time for this sample
          if (currSampleBaseTime == -1) {
@@ -860,7 +863,7 @@ jint writeProfileInfo(JNIContext* jniContext){
    } else { 
       for (int i=0; i< jniContext->argc; i++){
          KernelArg *arg=jniContext->args[i];
-         if (arg->isBackedByArray() && arg->isWrite()){
+         if (arg->isBackedByArray() && arg->isMutableByKernel()){
             if (jniContext->profileBaseTime == 0){
                jniContext->profileBaseTime = arg->value.ref.read.queued;
 
@@ -913,7 +916,7 @@ jint updateNonPrimitiveReferences(JNIEnv *jenv, jobject jobj, JNIContext* jniCon
    if (jniContext != NULL){
       for (jint i=0; i<jniContext->argc; i++){ 
          KernelArg *arg=jniContext->args[i];
-         arg->syncType(jenv); // make sure that the JNI arg reflects the latest type info from the instance 
+         //arg->syncType(jenv); // make sure that the JNI arg reflects the latest type info from the instance 
 
          if (jniContext->isVerbose()){
             fprintf(stderr, "got type for %s: %08x\n", arg->name, arg->type);
@@ -1006,7 +1009,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
    for (int i=0; i< jniContext->argc; i++){
       KernelArg *arg = jniContext->args[i];
       // TODO: see if we can get rid of this read 
-      arg->syncType(jenv);
+      //arg->syncType(jenv);
       if (jniContext->isVerbose()){
          fprintf(stderr, "got type for arg %d, %s, type=%08x\n", i, arg->name, arg->type);
       }
@@ -1052,9 +1055,9 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
             // if either this is the first run or user changed input array
             // or gc moved something, then we create buffers/args
             cl_uint mask = CL_MEM_USE_HOST_PTR;
-            if (arg->isRead() && arg->isWrite()) mask |= CL_MEM_READ_WRITE;
-            else if (arg->isRead() && !arg->isWrite()) mask |= CL_MEM_READ_ONLY;
-            else if (arg->isWrite()) mask |= CL_MEM_WRITE_ONLY;
+            if (arg->isReadByKernel() && arg->isMutableByKernel()) mask |= CL_MEM_READ_WRITE;
+            else if (arg->isReadByKernel() && !arg->isMutableByKernel()) mask |= CL_MEM_READ_ONLY;
+            else if (arg->isMutableByKernel()) mask |= CL_MEM_WRITE_ONLY;
             arg->value.ref.memMask = mask;
             if (jniContext->isVerbose()){
                strcpy(arg->value.ref.memSpec,"CL_MEM_USE_HOST_PTR");
@@ -1072,6 +1075,10 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
                PRINT_CL_ERR(status, "clCreateBuffer");
                jniContext->unpinAll(jenv);
                return status;
+            }
+
+            if (arg->isConstant()){
+               fprintf(stderr, "setting constant arg for %s\n", arg->name);
             }
 
             status = clSetKernelArg(jniContext->kernel, kernelArgPos++, sizeof(cl_mem), (void *)&(arg->value.ref.mem));                  
@@ -1107,7 +1114,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
          // we only enqueue a write if we know the kernel actually reads the buffer or if there is an explicit write pending
          // the default behavior for Constant buffers is also that there is no write enqueued unless explicit
 
-         if (arg->mustWriteBuffer()){
+         if (arg->needToEnqueueWrite() && !arg->isConstant()){
 #ifdef VERBOSE_EXPLICIT
             if (arg->isExplicit() && arg->isExplicitWrite()){
                fprintf(stderr, "writing explicit buffer %d %s\n", i, arg->name);
@@ -1120,6 +1127,10 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
             if (jniContext->isProfilingEnabled()) {
                jniContext->writeEventArgs[writeEventCount]=i;
             }
+
+         if (arg->isConstant()){
+               fprintf(stderr, "writing constant buffer %s\n", arg->name);
+         }
 
             status = clEnqueueWriteBuffer(jniContext->commandQueues[0], arg->value.ref.mem, CL_FALSE, 0, 
                   arg->sizeInBytes, arg->value.ref.addr, 0, NULL, &(jniContext->writeEvents[writeEventCount++]));
@@ -1215,6 +1226,8 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
       }
    }  // for each arg
 
+   if (0){
+
    cl_event endOfTxfersMarker;
 
    status = clEnqueueMarker(jniContext->commandQueues[0] /** change if we enable multiple gpus **/, &endOfTxfersMarker);
@@ -1222,6 +1235,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
       PRINT_CL_ERR(status, "clEnqueueMarker endOfTxfers");
       jniContext->unpinAll(jenv);
       return status;
+   }
    }
 
    // We will need to revisit the execution of multiple devices.  
@@ -1331,12 +1345,33 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
       }
    }
 
-   int readEventCount = 0;
+   // We will use readEventCount to track the number of reads. It will never be > jniContext->argc which is the size of readEvents[] and readEventArgs[]
+   // readEvents[] will be populated with the event's that we will wait on below.  
+   // readArgEvents[] will map the readEvent to the arg that originated it
+   // So if we had
+   //    arg[0]  read_write array
+   //    arg[1]  read array
+   //    arg[2]  write array
+   //    arg[3]  primitive
+   //    arg[4]  read array
+   // At the end of the next loop 
+   //    readCount=3
+   //    readEvent[0] = new read event for arg0
+   //    readArgEvent[0] = 0
+   //    readEvent[1] = new read event for arg1
+   //    readArgEvent[1] = 1
+   //    readEvent[2] = new read event for arg4
+   //    readArgEvent[2] = 4
+
+   int readEventCount = 0; 
 
    for (int i=0; i< jniContext->argc; i++){
       KernelArg *arg = jniContext->args[i];
 
-      if (arg->mustReadBuffer()){
+      if (arg->needToEnqueueRead()){
+         if (arg->isConstant()){
+            fprintf(stderr, "reading %s\n", arg->name);
+         }
          if (jniContext->isProfilingEnabled()) {
             jniContext->readEventArgs[readEventCount]=i;
          }
@@ -1345,12 +1380,13 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
          }
 
          status = clEnqueueReadBuffer(jniContext->commandQueues[0], arg->value.ref.mem, CL_FALSE, 0, 
-               arg->sizeInBytes,arg->value.ref.addr , jniContext->deviceIdc, jniContext->executeEvents, &(jniContext->readEvents[readEventCount++]));
+               arg->sizeInBytes,arg->value.ref.addr , jniContext->deviceIdc, jniContext->executeEvents, &(jniContext->readEvents[readEventCount]));
          if (status != CL_SUCCESS) {
             PRINT_CL_ERR(status, "clEnqueueReadBuffer()");
             jniContext->unpinAll(jenv);
             return status;
          }
+         readEventCount++;
       }
    }
 
@@ -1643,6 +1679,8 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_setArgsJNI(JNIEnv *jenv
             fprintf(stderr, "in setArgs arg %d %s type %08x\n", i, arg->name, arg->type);
             if (arg->isLocal()){
                fprintf(stderr, "in setArgs arg %d %s is local\n", i, arg->name);
+            }else if (arg->isConstant()){
+               fprintf(stderr, "in setArgs arg %d %s is constant\n", i, arg->name);
             }else{
                fprintf(stderr, "in setArgs arg %d %s is *not* local\n", i, arg->name);
             }
@@ -1839,7 +1877,7 @@ JNIEXPORT jobject JNICALL Java_com_amd_aparapi_KernelRunner_getProfileInfoJNI(JN
          for (jint i=0; i<jniContext->argc; i++){ 
             KernelArg *arg= jniContext->args[i];
             if (arg->isArray()){
-               if (arg->isWrite() && arg->value.ref.write.valid){
+               if (arg->isMutableByKernel() && arg->value.ref.write.valid){
                   jobject writeProfileInfo = createProfileInfo(jenv,  arg->value.ref.write);
                   callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", writeProfileInfo);
                }
@@ -1854,7 +1892,7 @@ JNIEXPORT jobject JNICALL Java_com_amd_aparapi_KernelRunner_getProfileInfoJNI(JN
          for (jint i=0; i<jniContext->argc; i++){ 
             KernelArg *arg= jniContext->args[i];
             if (arg->isArray()){
-               if (arg->isRead() && arg->value.ref.read.valid){
+               if (arg->isReadByKernel() && arg->value.ref.read.valid){
                   jobject readProfileInfo = createProfileInfo(jenv,  arg->value.ref.read);
                   callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", readProfileInfo);
                }
