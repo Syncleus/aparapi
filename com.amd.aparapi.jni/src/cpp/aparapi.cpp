@@ -1077,9 +1077,6 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
                return status;
             }
 
-            if (arg->isConstant()){
-               fprintf(stderr, "setting constant arg for %s\n", arg->name);
-            }
 
             status = clSetKernelArg(jniContext->kernel, kernelArgPos++, sizeof(cl_mem), (void *)&(arg->value.ref.mem));                  
             if (status != CL_SUCCESS) {
