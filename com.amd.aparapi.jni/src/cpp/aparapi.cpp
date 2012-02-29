@@ -988,7 +988,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
          }
          status = clGetEventProfilingInfo(firstEvent, CL_PROFILING_COMMAND_QUEUED, sizeof(jniContext->profileBaseTime), &(jniContext->profileBaseTime), NULL);
          if (status != CL_SUCCESS) {
-            PRINT_CL_ERR(status, "clGetEventProfilingInfo");
+			 PRINT_CL_ERR(status, "clGetEventProfilingInfo#1");
             return 0L;
          }
          clReleaseEvent(firstEvent);
@@ -996,7 +996,9 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
             PRINT_CL_ERR(status, "clReleaseEvent() read event");
             return 0L;
          }
-         fprintf(stderr, "profileBaseTime %lu \n", jniContext->profileBaseTime);
+		 if (jniContext->isVerbose()){
+            fprintf(stderr, "profileBaseTime %lu \n", jniContext->profileBaseTime);
+		 }
       }
 
    if (jniContext->isVerbose()){
