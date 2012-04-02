@@ -33,7 +33,7 @@
    direct product is subject to national security controls as identified on the Commerce Control List (currently 
    found in Supplement 1 to Part 774 of EAR).  For the most current Country Group listings, or for additional 
    information about the EAR or your obligations under those regulations, please refer to the U.S. Bureau of Industry
-   and Security’s website at http://www.bis.doc.gov/. 
+   and SecurityÂ’s website at http://www.bis.doc.gov/. 
    */
 
 #include <stdio.h>
@@ -288,7 +288,7 @@ jfieldID  Range::localIsDerivedFieldID=0;
 
 class ProfileInfo{
    public:
-      boolean valid;
+      jboolean valid;
       jint type; //0 write, 1 execute, 2 read
       char *name;
       cl_ulong queued;
