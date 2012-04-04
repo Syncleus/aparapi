@@ -1,22 +1,22 @@
 <?xml version="1.0"?>
 
 <!--
-		You should not have to edit this file
-		First consider editing the properties in build.properties
+You should not have to edit this file
+First consider editing the properties in build.properties
 -->
 <project name="com.amd.aparapi.jni" default="build" basedir=".">
 
-  <!-- 
-		DO NOT EDIT BELOW THIS LINE 
-  -->
-  <echo>OS Name:    ${os.name}</echo>
-  <echo>OS Version: ${os.version}</echo>
-  <echo>OS Arch:    ${os.arch}</echo>
+   <!-- 
+   DO NOT EDIT BELOW THIS LINE 
+   -->
+   <echo>OS Name:    ${os.name}</echo>
+   <echo>OS Version: ${os.version}</echo>
+   <echo>OS Arch:    ${os.arch}</echo>
 
-  <property name="build.compiler" value="javac1.6"/>
-  <property name="ant.build.javac.source" value="1.6"/>
-  <property name="ant.build.javac.target" value="1.6"/>
-	
+   <property name="build.compiler" value="javac1.6"/>
+   <property name="ant.build.javac.source" value="1.6"/>
+   <property name="ant.build.javac.target" value="1.6"/>
+
    <property environment="env" />
    <!-- we need env.PATH for msvc only -->
 
@@ -264,9 +264,9 @@
 
    <target name="clean" depends="check">
       <delete dir="include" />
-   	  <delete dir="${basedir}/dist" />
-   	  <!-- Legacy cleanup -->
-   	  <delete file="libaparapi_${x86_or_x86_64}.dylib" />
+      <delete dir="${basedir}/dist" />
+      <!-- Legacy cleanup -->
+      <delete file="libaparapi_${x86_or_x86_64}.dylib" />
       <delete file="libaparapi_${x86_or_x86_64}.so" />
       <delete file="aparapi_${x86_or_x86_64}.dll" />
       <delete file="aparapi.dll" />
@@ -284,7 +284,7 @@
    </target>
 
    <target name="gcc" if="use.gcc">
-   	  <mkdir dir="${basedir}/dist"/>
+      <mkdir dir="${basedir}/dist"/>
       <echo message="linuxcc ${os.arch}" />
       <exec executable="g++">
          <arg value="-O3" />
@@ -304,11 +304,14 @@
    </target>
 
    <target name="gcc_mac" if="use.gcc_mac">
-   	  <mkdir dir="${basedir}/dist"/>
-      <echo message="gcc ${os.arch}" />
-      <exec executable="g++">
+      <mkdir dir="${basedir}/dist"/>
+      <echo message="clang++ ${os.arch}" />
+      <exec executable="clang++">
          <arg value="-O3" />
          <arg value="-g" />
+         <arg value="-m64" />
+         <arg value="-Wno-format" />
+         <arg value="-Wno-deprecated-writable-strings" />
          <arg value="-fPIC" />
          <arg value="-I/System/Library/Frameworks/JavaVM.framework/Headers" />
          <arg value="-I/System/Library/Frameworks/OpenCL.framework/Headers" />
@@ -323,8 +326,8 @@
    </target>
 
    <target name="msvc" if="use.msvc">
-   	  <mkdir dir="${basedir}\dist"/>
-   	  <echo message="msvc ${os.arch}" />
+      <mkdir dir="${basedir}\dist"/>
+      <echo message="msvc ${os.arch}" />
       <exec executable="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe">
          <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE" />
          <arg value="/nologo" />
@@ -348,8 +351,8 @@
    </target>
 
    <target name="mingw" if="use.mingw">
-   	  <mkdir dir="${basedir}\dist"/>
-   	  <echo message="mingw ${os.arch}" /> 
+      <mkdir dir="${basedir}\dist"/>
+      <echo message="mingw ${os.arch}" /> 
       <exec executable="${mingw.dir}/bin/g++">
          <env key="PATH" path="${env.PATH};${mingw.dir}/bin" />
          <arg value="-Wall" />

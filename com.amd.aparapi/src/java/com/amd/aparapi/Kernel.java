@@ -1991,6 +1991,20 @@ public abstract class Kernel implements Cloneable{
       return (this);
    }
 
+  /**
+    * Tag this array so that it is explicitly enqueued before the kernel is executed
+    * @param array
+    * @return This kernel so that we can use the 'fluent' style API
+    */
+   public Kernel put(char[] array) {
+      if (kernelRunner == null) {
+         kernelRunner = new KernelRunner(this);
+      }
+      kernelRunner.put(array);
+      return (this);
+   }
+
+
    /**
     * Enqueue a request to return this buffer from the GPU. This method blocks until the array is available. 
     * @param array
@@ -2066,13 +2080,24 @@ public abstract class Kernel implements Cloneable{
     * @param array
     * @return This kernel so that we can use the 'fluent' style API
     */
-   public List<ProfileInfo> getProfileInfo() {
+   public Kernel get(char[] array) {
       if (kernelRunner == null) {
          kernelRunner = new KernelRunner(this);
 
       }
-      return (kernelRunner.getProfileInfo());
+      kernelRunner.get(array);
+      return (this);
+   }
 
+   /**
+    * Get the profiling information from the last successful call to Kernel.execute().
+    * @return A list of ProfileInfo records
+    */
+   public List<ProfileInfo> getProfileInfo() {
+      if (kernelRunner == null) {
+         kernelRunner = new KernelRunner(this);
+      }
+      return (kernelRunner.getProfileInfo());
    }
 
 }

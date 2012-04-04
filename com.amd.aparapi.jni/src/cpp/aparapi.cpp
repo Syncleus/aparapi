@@ -1319,7 +1319,10 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
 
          if (status != CL_SUCCESS) {
             PRINT_CL_ERR(status, "clEnqueueNDRangeKernel()");
-            fprintf(stderr, "after clEnqueueNDRangeKernel, globalSize_0=%d localSize_0=%d\n", (int)range.globalDims[0], range.localDims[0] );
+            for(int i = 0; i<range.dims;i++) {
+                fprintf(stderr, "after clEnqueueNDRangeKernel, globalSize[%d] = %d, localSize[%d] = %d\n",
+                       i, (int)range.globalDims[i], i, (int)range.localDims[i]);
+            }
             jniContext->unpinAll(jenv);
             return status;
          }
