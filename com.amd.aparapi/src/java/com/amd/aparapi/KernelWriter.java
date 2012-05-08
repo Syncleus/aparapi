@@ -43,11 +43,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.amd.aparapi.ClassModel.ClassModelField;
 import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry;
-import com.amd.aparapi.ClassModel.AttributePool.RuntimeAnnotationsEntry;
 import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry.LocalVariableInfo;
+import com.amd.aparapi.ClassModel.AttributePool.RuntimeAnnotationsEntry;
 import com.amd.aparapi.ClassModel.AttributePool.RuntimeAnnotationsEntry.AnnotationInfo;
+import com.amd.aparapi.ClassModel.ClassModelField;
 import com.amd.aparapi.ClassModel.ConstantPool.FieldEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodEntry;
 import com.amd.aparapi.InstructionSet.AccessArrayElement;

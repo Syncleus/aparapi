@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+
+<project name="extension" default="build" basedir=".">
+   <target name="build" depends="clean">
+      <mkdir dir="classes"/>
+      <javac srcdir="src" destdir="classes" debug="on" includeantruntime="false" >
+         <classpath>
+            <pathelement path="../../com.amd.aparapi/dist/aparapi.jar"/>
+         </classpath>
+      </javac>
+      <copy todir="classes/com\amd\aparapi\sample\extension" file="src\com\amd\aparapi\sample\extension\mandel.cl"/>
+      <copy todir="classes/com\amd\aparapi\sample\extension" file="src\com\amd\aparapi\sample\extension\mandel2.cl"/>
+      <copy todir="classes/com\amd\aparapi\sample\extension" file="src\com\amd\aparapi\sample\extension\squarer.cl"/>
+      <jar jarfile="${ant.project.name}.jar" basedir="classes"/>
+
+   </target>
+
+   <target name="clean">
+      <delete dir="classes"/>
+      <delete file="${ant.project.name}.jar"/>
+   </target>
+
+
+</project>

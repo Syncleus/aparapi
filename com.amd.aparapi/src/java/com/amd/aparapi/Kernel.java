@@ -327,10 +327,9 @@ public abstract class Kernel implements Cloneable{
 
             }
          } catch (UnsatisfiedLinkError e) {
-            logger
-                  .warning("Check your environment. Failed to load aparapi native library "
-                        + libName
-                        + " or possibly failed to locate opencl native library (opencl.dll/opencl.so). Ensure that both are in your PATH (windows) or in LD_LIBRARY_PATH (linux).");
+            logger.warning("Check your environment. Failed to load aparapi native library "
+                  + libName
+                  + " or possibly failed to locate opencl native library (opencl.dll/opencl.so). Ensure that both are in your PATH (windows) or in LD_LIBRARY_PATH (linux).");
 
             openCLAvailable = false;
          }
@@ -1991,11 +1990,11 @@ public abstract class Kernel implements Cloneable{
       return (this);
    }
 
-  /**
-    * Tag this array so that it is explicitly enqueued before the kernel is executed
-    * @param array
-    * @return This kernel so that we can use the 'fluent' style API
-    */
+   /**
+     * Tag this array so that it is explicitly enqueued before the kernel is executed
+     * @param array
+     * @return This kernel so that we can use the 'fluent' style API
+     */
    public Kernel put(char[] array) {
       if (kernelRunner == null) {
          kernelRunner = new KernelRunner(this);
@@ -2003,7 +2002,6 @@ public abstract class Kernel implements Cloneable{
       kernelRunner.put(array);
       return (this);
    }
-
 
    /**
     * Enqueue a request to return this buffer from the GPU. This method blocks until the array is available. 

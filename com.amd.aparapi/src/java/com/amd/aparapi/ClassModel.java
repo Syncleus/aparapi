@@ -471,8 +471,8 @@ class ClassModel{
          }
       }
       if (inMethod) {
-         methodDescription = new MethodDescription(className, methodName, stringStack.toArray(new String[0])[0], methodStack
-               .toArray(new String[0]));
+         methodDescription = new MethodDescription(className, methodName, stringStack.toArray(new String[0])[0],
+               methodStack.toArray(new String[0]));
       } else {
          System.out.println("can't convert to a description");
       }

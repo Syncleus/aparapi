@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="aparapi" default="help" basedir=".">
+<project name="aparapi" default="build" basedir=".">
    <property environment="env" />
 
    <condition property="x86_or_x86_64" value="x86" else="x86_64"> <or><os arch="x86" /><os arch="i386"/></or> </condition>

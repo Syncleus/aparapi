@@ -44,15 +44,15 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.amd.aparapi.ClassModel.ClassModelMethod;
-import com.amd.aparapi.ClassModel.ConstantPool;
 import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry;
 import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry.LocalVariableInfo;
+import com.amd.aparapi.ClassModel.ClassModelMethod;
+import com.amd.aparapi.ClassModel.ConstantPool;
 import com.amd.aparapi.ClassModel.ConstantPool.FieldEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodReferenceEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodReferenceEntry.Arg;

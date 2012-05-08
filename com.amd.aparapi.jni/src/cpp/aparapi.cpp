@@ -33,174 +33,16 @@
    direct product is subject to national security controls as identified on the Commerce Control List (currently 
    found in Supplement 1 to Part 774 of EAR).  For the most current Country Group listings, or for additional 
    information about the EAR or your obligations under those regulations, please refer to the U.S. Bureau of Industry
-   and Securitys website at http://www.bis.doc.gov/. 
+   and Security?s website at http://www.bis.doc.gov/. 
    */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
-#ifndef __APPLE__
-#include <malloc.h>
-#endif
-
-#include <sys/types.h>
-#ifndef _WIN32
-#include <unistd.h>
-#endif
-
-#ifndef __APPLE__
-#include <CL/cl.h>
-#else
-#include <cl.h>
-#endif
-
-#include <jni.h>
-
-#define JNIExceptionChecker(){\
-   fprintf(stderr, "line %d\n", __LINE__);\
-   if ((jenv)->ExceptionOccurred()) {\
-      (jenv)->ExceptionDescribe(); /* write to console */\
-      (jenv)->ExceptionClear();\
-   }\
-}
-
-
-#if defined (_WIN32)
-#include "windows.h"
-#define alignedMalloc(size, alignment)\
-   _aligned_malloc(size, alignment)
-#else
-#define alignedMalloc(size, alignment)\
-   memalign(alignment, size)
-#endif
-
-
-class MicrosecondTimer{
-
-#if defined (_WIN32)
-   private:
-      __int64 freq;
-      __int64 startValue;
-   public:
-      void start(){
-         QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
-         QueryPerformanceCounter((LARGE_INTEGER*)&startValue);
-      }
-      void end(char *msg){
-         __int64 endValue;
-         QueryPerformanceCounter((LARGE_INTEGER*)&endValue);
-         int us = (int)((endValue-startValue)* 1000000.0 / freq);
-         fprintf(stderr, "%s=%d\n", msg, us);
-      }
-
-#else
-   public:
-      void start(){
-      }
-      void end(char *msg){
-      }
-
-#endif
-};
-
-MicrosecondTimer timer;
-
-
+#include "common.h"
+#include "jniHelper.h"
+#include "clHelper.h"
+#define APARAPI_SOURCE
+#include "aparapi.h"
 #include "com_amd_aparapi_KernelRunner.h"
+#define JNI_JAVA(type, className, methodName) JNIEXPORT type JNICALL Java_com_amd_aparapi_##className##_##methodName
 
-#define CHECK_NO_RETURN(condition, msg) if(condition){\
-   fprintf(stderr, "!!!!!!! %s failed !!!!!!!\n", msg);\
-}
-
-#define CHECK(condition, msg) if(condition){\
-   fprintf(stderr, "!!!!!!! %s failed !!!!!!!\n", msg);\
-   return 0;\
-}
-
-
-#define ASSERT_CL_NO_RETURN(msg) if (status != CL_SUCCESS){\
-   fprintf(stderr, "!!!!!!! %s failed: %s\n", msg, CLErrString(status));\
-}
-
-#define ASSERT_CL(msg) if (status != CL_SUCCESS){\
-   ASSERT_CL_NO_RETURN(msg)\
-   return 0;\
-}
-
-#define PRINT_CL_ERR(status, msg) fprintf(stderr, "!!!!!!! %s failed %s\n", msg, CLErrString(status));
-
-#define ASSERT_FIELD(id) CHECK_NO_RETURN(id##FieldID == 0, "No such field as " #id)
-
-
-
-static const char *CLErrString(cl_int status) {
-   static struct { cl_int code; const char *msg; } error_table[] = {
-      { CL_SUCCESS, "success" },
-      { CL_DEVICE_NOT_FOUND, "device not found", },
-      { CL_DEVICE_NOT_AVAILABLE, "device not available", },
-      { CL_COMPILER_NOT_AVAILABLE, "compiler not available", },
-      { CL_MEM_OBJECT_ALLOCATION_FAILURE, "mem object allocation failure", },
-      { CL_OUT_OF_RESOURCES, "out of resources", },
-      { CL_OUT_OF_HOST_MEMORY, "out of host memory", },
-      { CL_PROFILING_INFO_NOT_AVAILABLE, "profiling not available", },
-      { CL_MEM_COPY_OVERLAP, "memcopy overlaps", },
-      { CL_IMAGE_FORMAT_MISMATCH, "image format mismatch", },
-      { CL_IMAGE_FORMAT_NOT_SUPPORTED, "image format not supported", },
-      { CL_BUILD_PROGRAM_FAILURE, "build program failed", },
-      { CL_MAP_FAILURE, "map failed", },
-      { CL_INVALID_VALUE, "invalid value", },
-      { CL_INVALID_DEVICE_TYPE, "invalid device type", },
-      { CL_INVALID_PLATFORM, "invlaid platform",},
-      { CL_INVALID_DEVICE, "invalid device",},
-      { CL_INVALID_CONTEXT, "invalid context",},
-      { CL_INVALID_QUEUE_PROPERTIES, "invalid queue properties",},
-      { CL_INVALID_COMMAND_QUEUE, "invalid command queue",},
-      { CL_INVALID_HOST_PTR, "invalid host ptr",},
-      { CL_INVALID_MEM_OBJECT, "invalid mem object",},
-      { CL_INVALID_IMAGE_FORMAT_DESCRIPTOR, "invalid image format descriptor ",},
-      { CL_INVALID_IMAGE_SIZE, "invalid image size",},
-      { CL_INVALID_SAMPLER, "invalid sampler",},
-      { CL_INVALID_BINARY, "invalid binary",},
-      { CL_INVALID_BUILD_OPTIONS, "invalid build options",},
-      { CL_INVALID_PROGRAM, "invalid program ",},
-      { CL_INVALID_PROGRAM_EXECUTABLE, "invalid program executable",},
-      { CL_INVALID_KERNEL_NAME, "invalid kernel name",},
-      { CL_INVALID_KERNEL_DEFINITION, "invalid definition",},
-      { CL_INVALID_KERNEL, "invalid kernel",},
-      { CL_INVALID_ARG_INDEX, "invalid arg index",},
-      { CL_INVALID_ARG_VALUE, "invalid arg value",},
-      { CL_INVALID_ARG_SIZE, "invalid arg size",},
-      { CL_INVALID_KERNEL_ARGS, "invalid kernel args",},
-      { CL_INVALID_WORK_DIMENSION , "invalid work dimension",},
-      { CL_INVALID_WORK_GROUP_SIZE, "invalid work group size",},
-      { CL_INVALID_WORK_ITEM_SIZE, "invalid work item size",},
-      { CL_INVALID_GLOBAL_OFFSET, "invalid global offset",},
-      { CL_INVALID_EVENT_WAIT_LIST, "invalid event wait list",},
-      { CL_INVALID_EVENT, "invalid event",},
-      { CL_INVALID_OPERATION, "invalid operation",},
-      { CL_INVALID_GL_OBJECT, "invalid gl object",},
-      { CL_INVALID_BUFFER_SIZE, "invalid buffer size",},
-      { CL_INVALID_MIP_LEVEL, "invalid mip level",},
-      { CL_INVALID_GLOBAL_WORK_SIZE, "invalid global work size",},
-      { 0, NULL },
-   };
-   static char unknown[25];
-   int ii;
-
-   for (ii = 0; error_table[ii].msg != NULL; ii++) {
-      if (error_table[ii].code == status) {
-         return error_table[ii].msg;
-      }
-   }
-#ifdef _WIN32
-   _snprintf(unknown, sizeof unknown, "unknown error %d", status);
-#else
-   snprintf(unknown, sizeof(unknown), "unknown error %d", status);
-#endif
-   return unknown;
-}
 class Range{
    public:
       static jclass rangeClazz;
@@ -356,7 +198,11 @@ class KernelArg{
             isStatic = jenv->GetBooleanField(argObj, isStaticFieldID);
             jstring nameString  = (jstring)jenv->GetObjectField(argObj, nameFieldID);
             const char *nameChars = jenv->GetStringUTFChars(nameString, NULL);
+#ifdef _WIN32
+            name=_strdup(nameChars);
+#else
             name=strdup(nameChars);
+#endif
             jenv->ReleaseStringUTFChars(nameString, nameChars);
          }
 
@@ -696,7 +542,7 @@ void dispose(JNIEnv *jenv){
       context = (cl_context)0;
    }
    if (commandQueues){
-      for (int dev=0; dev<deviceIdc; dev++){
+      for (unsigned dev=0; dev<deviceIdc; dev++){
          status = clReleaseCommandQueue((cl_command_queue)commandQueues[dev]);
          ASSERT_CL_NO_RETURN("clReleaseCommandQueue()");
          commandQueues[dev] = (cl_command_queue)0;
@@ -775,8 +621,8 @@ void unpinAll(JNIEnv* jenv) {
 
 
 
-
-JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_disposeJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
+JNI_JAVA(jint, KernelRunner, disposeJNI)
+   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
    if (jniContext != NULL){
@@ -789,14 +635,14 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_disposeJNI(JNIEnv *jenv
 
 void idump(char *str, void *ptr, int size){
    int * iptr = (int *)ptr;
-   for (int i=0; i<size/sizeof(int); i++){
+   for (unsigned i=0; i<size/sizeof(int); i++){
       fprintf(stderr, "%s%4d %d\n", str, i, iptr[i]);
    }
 }
 
 void fdump(char *str, void *ptr, int size){
    float * fptr = (float *)ptr;
-   for (int i=0; i<size/sizeof(float); i++){
+   for (unsigned i=0; i<size/sizeof(float); i++){
       fprintf(stderr, "%s%4d %6.2f\n", str, i, fptr[i]);
    }
 }
@@ -968,8 +814,8 @@ jint updateNonPrimitiveReferences(JNIEnv *jenv, jobject jobj, JNIContext* jniCon
 
 
 
-JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *jenv,
-      jobject jobj, jlong jniContextHandle, jobject _range, jboolean needSync, jint passes) {
+JNI_JAVA(jint, KernelRunner, runKernelJNI)
+   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jobject _range, jboolean needSync, jint passes) {
 
    Range range(jenv, _range);
 
@@ -1004,9 +850,6 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
 		 }
       }
 
-   if (jniContext->isVerbose()){
-      timer.start();
-   }
 
    // Need to capture array refs
    if (jniContext->firstRun || needSync) {
@@ -1259,7 +1102,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
    jniContext->exec = new ProfileInfo[passes];
 
    for (int passid=0; passid<passes; passid++){
-      for (int dev =0; dev < jniContext->deviceIdc; dev++){ // this will always be 1 until we reserect multi-dim support
+      for (unsigned dev =0; dev < jniContext->deviceIdc; dev++){ // this will always be 1 until we reserect multi-dim support
          //size_t offset = 1; // (size_t)((range.globalDims[0]/jniContext->deviceIdc)*dev);
          status = clSetKernelArg(jniContext->kernel, kernelArgPos, sizeof(passid), &(passid));
          if (status != CL_SUCCESS) {
@@ -1340,7 +1183,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
                return status;
             }
 
-            for (int dev = 0; dev < jniContext->deviceIdc; dev++){
+            for (unsigned dev = 0; dev < jniContext->deviceIdc; dev++){
                status = clReleaseEvent(jniContext->executeEvents[dev]);
                if (status != CL_SUCCESS) {
                   PRINT_CL_ERR(status, "clReleaseEvent() read event");
@@ -1457,7 +1300,7 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
       return executeStatus;
    }
 
-   for (int dev=0; dev<jniContext->deviceIdc; dev++){
+   for (unsigned int dev=0; dev<jniContext->deviceIdc; dev++){
 
       status = clReleaseEvent(jniContext->executeEvents[dev]);
       if (status != CL_SUCCESS) {
@@ -1486,9 +1329,6 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
    }
 
    jniContext->firstRun = false;
-   if (jniContext->isVerbose()){
-      timer.end("elapsed");
-   }
 
    //fprintf(stderr, "About to return %d from exec\n", status);
    return(status);
@@ -1496,8 +1336,8 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_runKernelJNI(JNIEnv *je
 
 
 // we return the JNIContext from here 
-JNIEXPORT jlong JNICALL Java_com_amd_aparapi_KernelRunner_initJNI(JNIEnv *jenv, jclass clazz, jobject kernelObject, 
-      jint flags) {
+JNI_JAVA(jlong, KernelRunner, initJNI)
+   (JNIEnv *jenv, jclass clazz, jobject kernelObject, jint flags) {
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = new JNIContext(jenv, kernelObject, flags);
 
@@ -1510,41 +1350,18 @@ JNIEXPORT jlong JNICALL Java_com_amd_aparapi_KernelRunner_initJNI(JNIEnv *jenv, 
 }
 
 
-JNIEXPORT jlong JNICALL Java_com_amd_aparapi_KernelRunner_buildProgramJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jstring source) {
+JNI_JAVA(jlong, KernelRunner, buildProgramJNI)
+   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jstring source) {
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
    if (jniContext == NULL){
       return 0;
    }
 
    cl_int status = CL_SUCCESS;
-   const char *sourceChars = jenv->GetStringUTFChars(source, NULL);
-   CHECK(sourceChars == NULL, "jenv->GetStringUTFChars() returned null" );
-
-   size_t sourceSize[] = { strlen(sourceChars) };
-   jniContext->program = clCreateProgramWithSource( jniContext->context, 1, &sourceChars, sourceSize, &status); 
-   jenv->ReleaseStringUTFChars(source, sourceChars);
-   ASSERT_CL("clCreateProgramWithSource()");
-
-   status = clBuildProgram(jniContext->program, jniContext->deviceIdc, jniContext->deviceIds, NULL, NULL, NULL);
+   
+   jniContext->program = CLHelper::compile(jenv, jniContext->context,  jniContext->deviceIdc, jniContext->deviceIds, source, NULL, &status);
 
    if(status == CL_BUILD_PROGRAM_FAILURE) {
-      cl_int logStatus;
-      size_t buildLogSize = 0;
-      status = clGetProgramBuildInfo(jniContext->program, jniContext->deviceIds[0], 
-            CL_PROGRAM_BUILD_LOG, buildLogSize, NULL, &buildLogSize);
-      ASSERT_CL("clGetProgramBuildInfo()");
-      char * buildLog = new char[buildLogSize];
-      CHECK(buildLog == NULL, "Failed to allocate host memory. (buildLog)");
-      memset(buildLog, 0, buildLogSize);
-      status = clGetProgramBuildInfo (jniContext->program, jniContext->deviceIds[0], 
-            CL_PROGRAM_BUILD_LOG, buildLogSize, buildLog, NULL);
-      ASSERT_CL("clGetProgramBuildInfo()");
-
-      fprintf(stderr, "clBuildProgram failed");
-      fprintf(stderr, "\n************************************************\n");
-      fprintf(stderr, "%s", buildLog);
-      fprintf(stderr, "\n************************************************\n\n\n");
-      delete []buildLog;
       return(0);
    }
 
@@ -1557,7 +1374,7 @@ JNIEXPORT jlong JNICALL Java_com_amd_aparapi_KernelRunner_buildProgramJNI(JNIEnv
    }
 
    jniContext->commandQueues= new cl_command_queue[jniContext->deviceIdc];
-   for (int dev=0; dev < jniContext->deviceIdc; dev++){
+   for (unsigned  dev=0; dev < jniContext->deviceIdc; dev++){
       jniContext->commandQueues[dev]=clCreateCommandQueue(jniContext->context, (cl_device_id)jniContext->deviceIds[dev],
             queue_props,
             &status);
@@ -1613,7 +1430,8 @@ JNIEXPORT jlong JNICALL Java_com_amd_aparapi_KernelRunner_buildProgramJNI(JNIEnv
 
 
 // this is called once when the arg list is first determined for this kernel
-JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_setArgsJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jobjectArray argArray, jint argc) {
+JNI_JAVA(jint, KernelRunner, setArgsJNI)
+   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jobjectArray argArray, jint argc) {
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
    cl_int status = CL_SUCCESS;
    if (jniContext != NULL){      
@@ -1723,18 +1541,13 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_setArgsJNI(JNIEnv *jenv
 
 
 
-JNIEXPORT jstring JNICALL Java_com_amd_aparapi_KernelRunner_getExtensionsJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
+JNI_JAVA(jstring, KernelRunner, getExtensionsJNI)
+    (JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
    jstring jextensions = NULL;
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
    if (jniContext != NULL){
-      size_t retvalsize = 0;
       cl_int status = CL_SUCCESS;
-      status = clGetDeviceInfo(jniContext->deviceIds[0], CL_DEVICE_EXTENSIONS, 0, NULL, &retvalsize);
-      ASSERT_CL("clGetDeviceInfo()");
-      char* extensions = new char[retvalsize];
-      clGetDeviceInfo(jniContext->deviceIds[0], CL_DEVICE_EXTENSIONS, retvalsize, extensions, NULL);
-      jextensions = jenv->NewStringUTF(extensions);
-      delete [] extensions;
+      jextensions = CLHelper::getExtensions(jenv, jniContext->deviceIds[0], &status);
    }
    return jextensions;
 }
@@ -1763,7 +1576,8 @@ KernelArg* getArgForBuffer(JNIEnv* jenv, JNIContext* jniContext, jobject buffer)
 }
 
 // Called as a result of Kernel.get(someArray)
-JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jobject buffer) {
+JNI_JAVA(jint, KernelRunner, getJNI)
+   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jobject buffer) {
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
    if (jniContext != NULL){
@@ -1809,63 +1623,9 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getJNI(JNIEnv *jenv, jo
    return 0;
 }
 
-jobject createInstance(JNIEnv *jenv, char* className, char *signature, ... ){
-   jclass theClass = jenv->FindClass(className);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe();
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting '%s'\n", className);
-      return(NULL);
-   }
-
-   jmethodID constructor= jenv->GetMethodID(theClass,"<init>",signature);
-   if (constructor == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting constructor from '%s' with signature! '%s' \n", className, signature);
-      return(NULL);
-   }
-   va_list argp;
-   va_start(argp, signature);
-   jobject instance = jenv->NewObjectV(theClass, constructor, argp);
-   if (instance == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer invoking constructor from '%s' with signature! '%s' \n", className, signature);
-   }
-   va_end(argp);
-   return(instance);
-} 
-
-void callVoid(JNIEnv *jenv, jobject instance, char *methodName, char *methodSignature, ...){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return;
-   }
-   jmethodID methodId= jenv->GetMethodID(theClass,methodName,methodSignature);
-   if (methodId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting method '%s %s' from instance \n", methodName, methodSignature);
-      return;
-   }
-   va_list argp;
-   va_start(argp, methodSignature);
-   jenv->CallVoidMethodV(instance, methodId, argp);
-   if (jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); /* write to console */
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer  calling '%s %s'\n", methodName, methodSignature);
-   }
-   va_end(argp);
-   return;
-}
 
 jobject createProfileInfo(JNIEnv *jenv, ProfileInfo &profileInfo){
-   jobject profileInstance = createInstance(jenv, "com/amd/aparapi/ProfileInfo", "(Ljava/lang/String;IJJJJ)V", 
+   jobject profileInstance = JNIHelper::createInstance(jenv, "com/amd/aparapi/ProfileInfo", "(Ljava/lang/String;IJJJJ)V", 
          ((jstring)(profileInfo.name==NULL?NULL:jenv->NewStringUTF(profileInfo.name))),
          ((jint)profileInfo.type), 
          ((jlong)profileInfo.start),
@@ -1875,12 +1635,13 @@ jobject createProfileInfo(JNIEnv *jenv, ProfileInfo &profileInfo){
    return(profileInstance);
 }
 
-JNIEXPORT jobject JNICALL Java_com_amd_aparapi_KernelRunner_getProfileInfoJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
+JNI_JAVA(jobject, KernelRunner, getProfileInfoJNI)
+   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
    jobject returnList = NULL;
    if (jniContext != NULL){
-      returnList = createInstance(jenv, "java/util/ArrayList", "()V");
+      returnList = JNIHelper::createInstance(jenv, "java/util/ArrayList", "()V");
       if (jniContext->isProfilingEnabled()){
 
          for (jint i=0; i<jniContext->argc; i++){ 
@@ -1888,14 +1649,14 @@ JNIEXPORT jobject JNICALL Java_com_amd_aparapi_KernelRunner_getProfileInfoJNI(JN
             if (arg->isArray()){
                if (arg->isMutableByKernel() && arg->value.ref.write.valid){
                   jobject writeProfileInfo = createProfileInfo(jenv,  arg->value.ref.write);
-                  callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", writeProfileInfo);
+                  JNIHelper::callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", writeProfileInfo);
                }
             }
          }
 
          for (jint pass=0; pass<jniContext->passes; pass++){
             jobject executeProfileInfo = createProfileInfo(jenv, jniContext->exec[pass]);
-            callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", executeProfileInfo);
+            JNIHelper::callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", executeProfileInfo);
          }
 
          for (jint i=0; i<jniContext->argc; i++){ 
@@ -1903,7 +1664,7 @@ JNIEXPORT jobject JNICALL Java_com_amd_aparapi_KernelRunner_getProfileInfoJNI(JN
             if (arg->isArray()){
                if (arg->isReadByKernel() && arg->value.ref.read.valid){
                   jobject readProfileInfo = createProfileInfo(jenv,  arg->value.ref.read);
-                  callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", readProfileInfo);
+                  JNIHelper::callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", readProfileInfo);
                }
             }
          }
@@ -1913,7 +1674,8 @@ JNIEXPORT jobject JNICALL Java_com_amd_aparapi_KernelRunner_getProfileInfoJNI(JN
 }
 
 
-JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getMaxComputeUnitsJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
+JNI_JAVA(jint, KernelRunner, getMaxComputeUnitsJNI)
+   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
    if (jniContext != NULL){
@@ -1923,7 +1685,8 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getMaxComputeUnitsJNI(J
    }
 }
 
-JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getMaxWorkItemDimensionsJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
+JNI_JAVA(jint, KernelRunner, getMaxWorkItemDimensionsJNI)
+   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
    if (jniContext != NULL){
@@ -1933,7 +1696,8 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getMaxWorkItemDimension
    }
 }
 
-JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getMaxWorkGroupSizeJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
+JNI_JAVA(jint, KernelRunner, getMaxWorkGroupSizeJNI)
+   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
    if (jniContext != NULL){
@@ -1943,10 +1707,11 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getMaxWorkGroupSizeJNI(
    }
 }
 
-JNIEXPORT jint JNICALL Java_com_amd_aparapi_KernelRunner_getMaxWorkItemSizeJNI(JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jint _index) {
+JNI_JAVA(jint, KernelRunner, getMaxWorkItemSizeJNI)
+   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jint _index) {
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
-   if (jniContext != NULL && _index >=0 && _index <= jniContext->maxWorkItemDimensions){
+   if (jniContext != NULL && _index >=0 && _index <= (int)(jniContext->maxWorkItemDimensions)){
       return(jniContext->maxWorkItemSizes[_index]);
    }else{
       return(0);
