@@ -417,6 +417,9 @@ public class MandelExample{
       float offsetx = .0f;
 
       float offsety = .0f;
+      OpenCLDevice device = OpenCLDevice.first(OpenCLDevice.FirstGPU);
+      System.out.println("max memory = "+device.getGlobalMemSize());
+      System.out.println("max mem alloc size = "+device.getMaxMemAllocSize());
       gpuMandelBrot = OpenCLDevice.best(MandelBrot.class);
       javaMandelBrot = new JavaMandelBrot();
       javaMandelBrotMultiThread = new JavaMandelBrotMultiThread();

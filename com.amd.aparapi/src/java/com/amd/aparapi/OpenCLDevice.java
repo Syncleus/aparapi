@@ -34,6 +34,8 @@ public class OpenCLDevice{
 
    private long globalMemSize;
 
+   private long maxMemAllocSize;
+
    private int maxWorkGroupSize;
 
    private int[] maxWorkItemSize = new int[] {
@@ -79,6 +81,14 @@ public class OpenCLDevice{
 
    public void setLocalMemSize(long _localMemSize) {
       localMemSize = _localMemSize;
+   }
+
+   public long getMaxMemAllocSize() {
+      return maxMemAllocSize;
+   }
+
+   public void setMaxMemAllocSize(long _maxMemAllocSize) {
+      maxMemAllocSize = _maxMemAllocSize;
    }
 
    public long getGlobalMemSize() {
@@ -387,7 +397,23 @@ public class OpenCLDevice{
       }
    };
 
-   public static <T extends OpenCL<T>> T first(Class<T> _interface, DeviceFilter _deviceFilter) {
+   public static OpenCLDevice first(DeviceFilter _deviceFilter) {
+      OpenCLDevice device = null;
+      for (OpenCLPlatform p : OpenCLPlatform.getPlatforms()) {
+         for (OpenCLDevice d : p.getDevices()) {
+            if (_deviceFilter.match(d)) {
+               device = d;
+               break;
+            }
+         }
+         if (device != null) {
+            break;
+         }
+      }
+      return (device);
+   }
+
+    public static <T extends OpenCL<T>> T first(Class<T> _interface, DeviceFilter _deviceFilter) {
       OpenCLDevice device = null;
       for (OpenCLPlatform p : OpenCLPlatform.getPlatforms()) {
          for (OpenCLDevice d : p.getDevices()) {
@@ -403,7 +429,8 @@ public class OpenCLDevice{
       return (device.create(_interface));
    }
 
-   public static <T extends OpenCL<T>> T best(Class<T> _interface, DeviceComparitor _deviceComparitor) {
+
+   public static OpenCLDevice best(DeviceComparitor _deviceComparitor) {
       OpenCLDevice device = null;
       for (OpenCLPlatform p : OpenCLPlatform.getPlatforms()) {
          for (OpenCLDevice d : p.getDevices()) {
@@ -414,6 +441,15 @@ public class OpenCLDevice{
             }
          }
       }
+      return(device);
+   }
+
+   public static OpenCLDevice best() {
+      return(best(Best));
+   }
+
+   public static <T extends OpenCL<T>> T best(Class<T> _interface, DeviceComparitor _deviceComparitor) {
+      OpenCLDevice device = best();
       return (device.create(_interface));
    }
 
