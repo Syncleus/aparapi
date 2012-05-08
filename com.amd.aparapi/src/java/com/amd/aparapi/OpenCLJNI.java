@@ -6,6 +6,7 @@ public class OpenCLJNI{
 
    static {
       String arch = System.getProperty("os.arch");
+      //System.out.println("arch = "+arch);
 
       String libName = null;
       try {
@@ -30,7 +31,7 @@ public class OpenCLJNI{
 
       }
 
-      Runtime.getRuntime().loadLibrary("aparapi_x86_64");
+      Runtime.getRuntime().loadLibrary(libName);
    }
 
    static final OpenCLJNI jni = new OpenCLJNI();
