@@ -66,7 +66,7 @@ First consider editing the properties in build.properties
 
       <echo message=" amd.app.sdk.dir ${amd.app.sdk.dir}"/>
 
-      <available property="msvc.64.9.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 10.0" type="dir"/>
+      <available property="msvc.64.9.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 10.0\vc\bin" type="dir"/>
       <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 10.0">
          <and>
             <not>
@@ -83,7 +83,7 @@ First consider editing the properties in build.properties
          </and>
       </condition>
 
-      <available property="msvc.64.10.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 10.0" type="dir"/>
+      <available property="msvc.64.10.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 10.0\vc\bin" type="dir"/>
       <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 10.0">
          <and>
             <not>
@@ -100,7 +100,7 @@ First consider editing the properties in build.properties
          </and>
       </condition>
 
-      <available property="msvc.32.10.0.exists" file="c:/Program Files/Microsoft Visual Studio 10.0" type="dir"/>
+      <available property="msvc.32.10.0.exists" file="c:/Program Files/Microsoft Visual Studio 10.0\vc\bin" type="dir"/>
       <condition property="msvc.dir" value="c:/Program Files/Microsoft Visual Studio 10.0">
          <and>
             <or>
@@ -115,7 +115,7 @@ First consider editing the properties in build.properties
          </and>
       </condition>
 
-      <available property="msvc.32.9.0.exists" file="c:/Program Files/Microsoft Visual Studio 9.0" type="dir"/>
+      <available property="msvc.32.9.0.exists" file="c:/Program Files/Microsoft Visual Studio 9.0\vc\bin" type="dir"/>
       <condition property="msvc.dir" value="c:/Program Files/Microsoft Visual Studio 9.0">
          <and>
             <or>
