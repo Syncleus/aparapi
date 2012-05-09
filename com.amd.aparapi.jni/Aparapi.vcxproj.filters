@@ -18,17 +18,17 @@
     <ClCompile Include="src\cpp\aparapi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\cpp\jni.cpp">
+    <ClCompile Include="src\cpp\jniHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\cpp\jniHelper.cpp">
+    <ClCompile Include="src\cpp\clHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cpp\opencljni.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\com_amd_aparapi_JNI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\com_amd_aparapi_KernelRunner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -39,6 +39,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\cpp\common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cpp\opencljni.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cpp\clHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\com_amd_aparapi_OpenCLJNI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

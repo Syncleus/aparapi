@@ -34,6 +34,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>aparapi_x86</TargetName>
+    <OutDir>.\dist\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -41,7 +43,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;_USRDLL;APARAPI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Gary\aparapi.googlecode.com\branches\AddExtensionMechanism\com.amd.aparapi.jni\include;C:\Program Files\AMD APP\include;C:\Program Files\Java\jdk1.6.0_26\include;C:\Program Files\Java\jdk1.6.0_26\include\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;C:\Program Files\AMD APP\include;C:\Program Files\Java\jdk1.6.0_26\include;C:\Program Files\Java\jdk1.6.0_26\include\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -74,15 +76,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\cpp\aparapi.cpp" />
-    <ClCompile Include="src\cpp\jni.cpp" />
+    <ClCompile Include="src\cpp\clHelper.cpp" />
     <ClCompile Include="src\cpp\jniHelper.cpp" />
+    <ClCompile Include="src\cpp\opencljni.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\com_amd_aparapi_JNI.h" />
     <ClInclude Include="include\com_amd_aparapi_KernelRunner.h" />
+    <ClInclude Include="include\com_amd_aparapi_OpenCLJNI.h" />
     <ClInclude Include="src\cpp\aparapi.h" />
+    <ClInclude Include="src\cpp\clHelper.h" />
     <ClInclude Include="src\cpp\common.h" />
     <ClInclude Include="src\cpp\jniHelper.h" />
+    <ClInclude Include="src\cpp\opencljni.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

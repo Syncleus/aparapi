@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Aparapi", "Aparapi.vcxproj", "{F0194884-D4F7-25AC-C03E-4D9229BB60CE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Aparapi", "Aparapi.vcxproj", "{E4CF3A3C-B1C9-5DA6-5FDB-66C42857393E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +9,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F0194884-D4F7-25AC-C03E-4D9229BB60CE}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F0194884-D4F7-25AC-C03E-4D9229BB60CE}.Debug|Win32.Build.0 = Debug|Win32
-		{F0194884-D4F7-25AC-C03E-4D9229BB60CE}.Release|Win32.ActiveCfg = Release|Win32
-		{F0194884-D4F7-25AC-C03E-4D9229BB60CE}.Release|Win32.Build.0 = Release|Win32
+		{E4CF3A3C-B1C9-5DA6-5FDB-66C42857393E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E4CF3A3C-B1C9-5DA6-5FDB-66C42857393E}.Debug|Win32.Build.0 = Debug|Win32
+		{E4CF3A3C-B1C9-5DA6-5FDB-66C42857393E}.Release|Win32.ActiveCfg = Release|Win32
+		{E4CF3A3C-B1C9-5DA6-5FDB-66C42857393E}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
