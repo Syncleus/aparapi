@@ -59,9 +59,13 @@ public class Range{
 
    @KernelRunner.UsedByJNICode private int dims;
 
-   @KernelRunner.UsedByJNICode private boolean valid;
+   @KernelRunner.UsedByJNICode private boolean valid = true;
 
    @KernelRunner.UsedByJNICode private boolean localIsDerived = false;
+
+   private Device device = null;
+
+   private int maxWorkGroupSize;
 
    /**
     * Get the localSize (of the group) given the requested dimension
@@ -90,6 +94,23 @@ public class Range{
    private static final int MAX_GROUP_SIZE = Math.max(Runtime.getRuntime().availableProcessors() * THREADS_PER_CORE,
          MAX_OPENCL_GROUP_SIZE);
 
+   private int[] maxWorkItemSize = new int[] {
+         MAX_GROUP_SIZE,
+         MAX_GROUP_SIZE,
+         MAX_GROUP_SIZE
+   };
+
+   public Range(Device _device, int _dims) {
+      device = _device;
+      dims = _dims;
+      if (device != null) {
+         maxWorkItemSize = device.getMaxWorkItemSize();
+         maxWorkGroupSize = device.getMaxWorkGroupSize();
+      } else {
+         maxWorkGroupSize = MAX_GROUP_SIZE;
+      }
+   }
+
    /** 
     * Create a one dimensional range <code>0.._globalWidth</code> which is processed in groups of size _localWidth.
     * <br/>
@@ -99,25 +120,29 @@ public class Range{
     * @param _localWidth the size of the group we wish to process.
     * @return A new Range with the requested dimensions
     */
-   public static Range create(int _globalWidth, int _localWidth) {
-      Range range = new Range();
-      range.dims = 1;
+   public static Range create(Device _device, int _globalWidth, int _localWidth) {
+      Range range = new Range(_device, 1);
+
       range.globalSize_0 = _globalWidth;
       range.localSize_0 = _localWidth;
-      range.valid = range.localSize_0 > 0 && range.localSize_0 < MAX_GROUP_SIZE && range.globalSize_0 % range.localSize_0 == 0;
+
+      range.valid = range.localSize_0 > 0 && range.localSize_0 <= range.maxWorkItemSize[0]
+            && range.localSize_0 <= range.maxWorkGroupSize && range.globalSize_0 % range.localSize_0 == 0;
+
       return (range);
    }
 
    /**
     * Determine the set of factors for a given value.
     * @param _value The value we wish to factorize. 
+    * @param _max an upper bound on the value that can be chosen
     * @return and array of factors of _value
     */
 
-   private static int[] getFactors(int _value) {
+   private static int[] getFactors(int _value, int _max) {
       int factors[] = new int[MAX_GROUP_SIZE];
       int factorIdx = 0;
-      for (int possibleFactor = 1; possibleFactor <= MAX_GROUP_SIZE; possibleFactor++) {
+      for (int possibleFactor = 1; possibleFactor <= _max; possibleFactor++) {
          if (_value % possibleFactor == 0) {
             factors[factorIdx++] = possibleFactor;
          }
@@ -137,16 +162,31 @@ public class Range{
     * @param _globalWidth the overall range we wish to process
     * @return A new Range with the requested dimensions
     */
-   public static Range create(int _globalWidth) {
-      Range withoutLocal = create(_globalWidth, 1);
-      withoutLocal.localIsDerived = true;
-      int[] factors = getFactors(withoutLocal.globalSize_0);
+   public static Range create(Device _device, int _globalWidth) {
+      Range withoutLocal = create(_device, _globalWidth, 1);
+      if (withoutLocal.valid) {
+         withoutLocal.localIsDerived = true;
+         int[] factors = getFactors(withoutLocal.globalSize_0, withoutLocal.maxWorkItemSize[0]);
 
-      withoutLocal.localSize_0 = factors[factors.length - 1];
+         withoutLocal.localSize_0 = factors[factors.length - 1];
 
-      withoutLocal.valid = withoutLocal.localSize_0 > 0 && withoutLocal.localSize_0 < MAX_GROUP_SIZE
-            && withoutLocal.globalSize_0 % withoutLocal.localSize_0 == 0;
+         withoutLocal.valid = withoutLocal.localSize_0 > 0 && withoutLocal.localSize_0 <= withoutLocal.maxWorkItemSize[0]
+               && withoutLocal.localSize_0 <= withoutLocal.maxWorkGroupSize
+               && withoutLocal.globalSize_0 % withoutLocal.localSize_0 == 0;
+      }
       return (withoutLocal);
+   }
+
+   public static Range create(int _globalWidth, int _localWidth) {
+      Range range = create(null, _globalWidth, _localWidth);
+
+      return (range);
+   }
+
+   public static Range create(int _globalWidth) {
+      Range range = create(null, _globalWidth);
+
+      return (range);
    }
 
    /** 
@@ -157,14 +197,15 @@ public class Range{
     *  @param _globalWidth the overall range we wish to process
     * @return
     */
-   public static Range create2D(int _globalWidth, int _globalHeight, int _localWidth, int _localHeight) {
-      Range range = new Range();
-      range.dims = 2;
+   public static Range create2D(Device _device, int _globalWidth, int _globalHeight, int _localWidth, int _localHeight) {
+      Range range = new Range(_device, 2);
       range.globalSize_0 = _globalWidth;
       range.localSize_0 = _localWidth;
       range.globalSize_1 = _globalHeight;
       range.localSize_1 = _localHeight;
-      range.valid = range.localSize_0 > 0 && range.localSize_1 > 0 && range.localSize_0 * range.localSize_1 < MAX_GROUP_SIZE
+
+      range.valid = range.localSize_0 > 0 && range.localSize_1 > 0 && range.localSize_0 <= range.maxWorkItemSize[0]
+            && range.localSize_1 <= range.maxWorkItemSize[1] && range.localSize_0 * range.localSize_1 <= range.maxWorkGroupSize
             && range.globalSize_0 % range.localSize_0 == 0 && range.globalSize_1 % range.localSize_1 == 0;
 
       return (range);
@@ -185,45 +226,61 @@ public class Range{
     * @param _globalWidth the overall range we wish to process
     * @return
     */
-   public static Range create2D(int _globalWidth, int _globalHeight) {
-      Range withoutLocal = create2D(_globalWidth, _globalHeight, 1, 1);
-      withoutLocal.localIsDerived = true;
-      int[] widthFactors = getFactors(_globalWidth);
-      int[] heightFactors = getFactors(_globalHeight);
+   public static Range create2D(Device _device, int _globalWidth, int _globalHeight) {
+      Range withoutLocal = create2D(_device, _globalWidth, _globalHeight, 1, 1);
+      if (withoutLocal.valid) {
+         withoutLocal.localIsDerived = true;
+         int[] widthFactors = getFactors(_globalWidth, withoutLocal.maxWorkItemSize[0]);
+         int[] heightFactors = getFactors(_globalHeight, withoutLocal.maxWorkItemSize[1]);
 
-      withoutLocal.localSize_0 = 1;
-      withoutLocal.localSize_1 = 1;
-      int max = 1;
-      int perimeter = 0;
-      for (int w : widthFactors) {
-         for (int h : heightFactors) {
-            int size = w * h;
-            if (size > MAX_GROUP_SIZE) {
-               break;
-            }
+         withoutLocal.localSize_0 = 1;
+         withoutLocal.localSize_1 = 1;
+         int max = 1;
+         int perimeter = 0;
 
-            if (size > max) {
-               max = size;
-               perimeter = w + h;
-               withoutLocal.localSize_0 = w;
-               withoutLocal.localSize_1 = h;
-            } else if (size == max) {
-               int localPerimeter = w + h;
-               if (localPerimeter < perimeter) {// is this the shortest perimeter so far
-                  perimeter = localPerimeter;
+         for (int w : widthFactors) {
+            for (int h : heightFactors) {
+               int size = w * h;
+               if (size > withoutLocal.maxWorkGroupSize) {
+                  break;
+               }
+
+               if (size > max) {
+                  max = size;
+                  perimeter = w + h;
                   withoutLocal.localSize_0 = w;
                   withoutLocal.localSize_1 = h;
+               } else if (size == max) {
+                  int localPerimeter = w + h;
+                  if (localPerimeter < perimeter) {// is this the shortest perimeter so far
+                     perimeter = localPerimeter;
+                     withoutLocal.localSize_0 = w;
+                     withoutLocal.localSize_1 = h;
+                  }
                }
             }
          }
+
+         withoutLocal.valid = withoutLocal.localSize_0 > 0 && withoutLocal.localSize_1 > 0
+               && withoutLocal.localSize_0 <= withoutLocal.maxWorkItemSize[0]
+               && withoutLocal.localSize_1 <= withoutLocal.maxWorkItemSize[1]
+               && withoutLocal.localSize_0 * withoutLocal.localSize_1 <= withoutLocal.maxWorkGroupSize
+               && withoutLocal.globalSize_0 % withoutLocal.localSize_0 == 0
+               && withoutLocal.globalSize_1 % withoutLocal.localSize_1 == 0;
       }
-
-      withoutLocal.valid = withoutLocal.localSize_0 > 0 && withoutLocal.localSize_1 > 0
-            && withoutLocal.localSize_0 * withoutLocal.localSize_1 < MAX_GROUP_SIZE
-            && withoutLocal.globalSize_0 % withoutLocal.localSize_0 == 0
-            && withoutLocal.globalSize_1 % withoutLocal.localSize_1 == 0;
-
       return (withoutLocal);
+   }
+
+   public static Range create2D(int _globalWidth, int _globalHeight, int _localWidth, int _localHeight) {
+      Range range = create2D(null, _globalWidth, _globalHeight, _localWidth, _localHeight);
+
+      return (range);
+   }
+
+   public static Range create2D(int _globalWidth, int _globalHeight) {
+      Range range = create2D(null, _globalWidth, _globalHeight);
+
+      return (range);
    }
 
    /** 
@@ -240,10 +297,9 @@ public class Range{
     * @param _localDepth the depth of the 3D group we wish to process
     * @return
     */
-   public static Range create3D(int _globalWidth, int _globalHeight, int _globalDepth, int _localWidth, int _localHeight,
-         int _localDepth) {
-      Range range = new Range();
-      range.dims = 3;
+   public static Range create3D(Device _device, int _globalWidth, int _globalHeight, int _globalDepth, int _localWidth,
+         int _localHeight, int _localDepth) {
+      Range range = new Range(_device, 3);
       range.globalSize_0 = _globalWidth;
       range.localSize_0 = _localWidth;
       range.globalSize_1 = _globalHeight;
@@ -251,15 +307,16 @@ public class Range{
       range.globalSize_2 = _globalDepth;
       range.localSize_2 = _localDepth;
       range.valid = range.localSize_0 > 0 && range.localSize_1 > 0 && range.localSize_2 > 0
-            && range.localSize_0 * range.localSize_1 * range.localSize_2 < MAX_GROUP_SIZE
-            && range.globalSize_0 % range.localSize_0 == 0 && range.globalSize_1 % range.localSize_1 == 0
-            && range.globalSize_2 % range.localSize_2 == 0;
+            && range.localSize_0 * range.localSize_1 * range.localSize_2 <= range.maxWorkGroupSize
+            && range.localSize_0 <= range.maxWorkItemSize[0] && range.localSize_1 <= range.maxWorkItemSize[1]
+            && range.localSize_2 <= range.maxWorkItemSize[2] && range.globalSize_0 % range.localSize_0 == 0
+            && range.globalSize_1 % range.localSize_1 == 0 && range.globalSize_2 % range.localSize_2 == 0;
 
       return (range);
    }
 
    /** 
-    * Create a two dimensional range <code>0.._globalWidth * 0.._globalHeight *0../_globalDepth</code> 
+    * Create a three dimensional range <code>0.._globalWidth * 0.._globalHeight *0../_globalDepth</code> 
     * choosing suitable values for <code>localWidth</code>, <code>localHeight</code> and <code>localDepth</code>.
     * <p>
      * Note that for this range to be valid  <code>_globalWidth > 0 &&  _globalHeight >0 _globalDepth >0 && _localWidth>0 && _localHeight>0 && _localDepth>0 && _localWidth*_localHeight*_localDepth < MAX_GROUP_SIZE && _globalWidth%_localWidth==0 && _globalHeight%_localHeight==0 && _globalDepth%_localDepth==0</code>.
@@ -276,52 +333,68 @@ public class Range{
     * @param _globalDepth the depth of the 3D grid we wish to process
     * @return
     */
-   public static Range create3D(int _globalWidth, int _globalHeight, int _globalDepth) {
-      Range withoutLocal = create3D(_globalWidth, _globalHeight, _globalDepth, 1, 1, 1);
-      withoutLocal.localIsDerived = true;
-      int[] widthFactors = getFactors(_globalWidth);
-      int[] heightFactors = getFactors(_globalHeight);
-      int[] depthFactors = getFactors(_globalDepth);
+   public static Range create3D(Device _device, int _globalWidth, int _globalHeight, int _globalDepth) {
+      Range withoutLocal = create3D(_device, _globalWidth, _globalHeight, _globalDepth, 1, 1, 1);
+      if (withoutLocal.valid) {
+         withoutLocal.localIsDerived = true;
+         int[] widthFactors = getFactors(_globalWidth, withoutLocal.maxWorkItemSize[0]);
+         int[] heightFactors = getFactors(_globalHeight, withoutLocal.maxWorkItemSize[1]);
+         int[] depthFactors = getFactors(_globalDepth, withoutLocal.maxWorkItemSize[2]);
 
-      withoutLocal.localSize_0 = 1;
-      withoutLocal.localSize_1 = 1;
-      withoutLocal.localSize_2 = 1;
-      int max = 1;
-      int perimeter = 0;
-      for (int w : widthFactors) {
-         for (int h : heightFactors) {
-            for (int d : depthFactors) {
-               int size = w * h * d;
-               if (size > MAX_GROUP_SIZE) {
-                  break;
-               }
-               if (size > max) {
-                  max = size;
-                  perimeter = w + h + d;
-                  withoutLocal.localSize_0 = w;
-                  withoutLocal.localSize_1 = h;
-                  withoutLocal.localSize_2 = d;
-               } else if (size == max) {
-                  int localPerimeter = w + h + d;
-                  if (localPerimeter < perimeter) { // is this the shortest perimeter so far
-                     perimeter = localPerimeter;
+         withoutLocal.localSize_0 = 1;
+         withoutLocal.localSize_1 = 1;
+         withoutLocal.localSize_2 = 1;
+         int max = 1;
+         int perimeter = 0;
+         for (int w : widthFactors) {
+            for (int h : heightFactors) {
+               for (int d : depthFactors) {
+                  int size = w * h * d;
+                  if (size > withoutLocal.maxWorkGroupSize) {
+                     break;
+                  }
+                  if (size > max) {
+                     max = size;
+                     perimeter = w + h + d;
                      withoutLocal.localSize_0 = w;
                      withoutLocal.localSize_1 = h;
                      withoutLocal.localSize_2 = d;
+                  } else if (size == max) {
+                     int localPerimeter = w + h + d;
+                     if (localPerimeter < perimeter) { // is this the shortest perimeter so far
+                        perimeter = localPerimeter;
+                        withoutLocal.localSize_0 = w;
+                        withoutLocal.localSize_1 = h;
+                        withoutLocal.localSize_2 = d;
+                     }
                   }
                }
             }
          }
+
+         withoutLocal.valid = withoutLocal.localSize_0 > 0 && withoutLocal.localSize_1 > 0 && withoutLocal.localSize_2 > 0
+               && withoutLocal.localSize_0 * withoutLocal.localSize_1 * withoutLocal.localSize_2 <= withoutLocal.maxWorkGroupSize
+               && withoutLocal.localSize_0 <= withoutLocal.maxWorkItemSize[0]
+               && withoutLocal.localSize_1 <= withoutLocal.maxWorkItemSize[1]
+               && withoutLocal.localSize_2 <= withoutLocal.maxWorkItemSize[2]
+               && withoutLocal.globalSize_0 % withoutLocal.localSize_0 == 0
+               && withoutLocal.globalSize_1 % withoutLocal.localSize_1 == 0
+               && withoutLocal.globalSize_2 % withoutLocal.localSize_2 == 0;
       }
-
-      withoutLocal.valid = withoutLocal.localSize_0 > 0 && withoutLocal.localSize_1 > 0 && withoutLocal.localSize_2 > 0
-            && withoutLocal.localSize_0 * withoutLocal.localSize_1 * withoutLocal.localSize_2 < MAX_GROUP_SIZE
-            && withoutLocal.globalSize_0 % withoutLocal.localSize_0 == 0
-            && withoutLocal.globalSize_1 % withoutLocal.localSize_1 == 0
-            && withoutLocal.globalSize_2 % withoutLocal.localSize_2 == 0;
-
       return (withoutLocal);
 
+   }
+
+   public static Range create3D(int _globalWidth, int _globalHeight, int _globalDepth) {
+      Range range = create3D(null, _globalWidth, _globalHeight, _globalDepth);
+
+      return (range);
+   }
+
+   public static Range create3D(int _globalWidth, int _globalHeight, int _globalDepth, int _localWidth, int _localHeight,
+         int _localDepth) {
+      Range range = create3D(null, _globalWidth, _globalHeight, _globalDepth, _localWidth, _localHeight, _localDepth);
+      return (range);
    }
 
    /**

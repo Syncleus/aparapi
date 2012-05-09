@@ -61,6 +61,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import com.amd.aparapi.Device;
 import com.amd.aparapi.OpenCL;
 import com.amd.aparapi.OpenCLAdapter;
 import com.amd.aparapi.OpenCLDevice;
@@ -337,7 +338,7 @@ public class MandelExample{
       final int height = 768;
 
       /** Mandelbrot image height. */
-      final Range range = Range.create2D(width, height);
+   
 
       /** Image for Mandelbrot view. */
       final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -417,10 +418,15 @@ public class MandelExample{
       float offsetx = .0f;
 
       float offsety = .0f;
-      OpenCLDevice device = OpenCLDevice.first(OpenCLDevice.FirstGPU);
-      System.out.println("max memory = "+device.getGlobalMemSize());
-      System.out.println("max mem alloc size = "+device.getMaxMemAllocSize());
-      gpuMandelBrot = OpenCLDevice.best(MandelBrot.class);
+      Device device = Device.firstGPU();
+      if (device instanceof OpenCLDevice) {
+         OpenCLDevice openclDevice = (OpenCLDevice) device;
+         
+         System.out.println("max memory = " + openclDevice.getGlobalMemSize());
+         System.out.println("max mem alloc size = " + openclDevice.getMaxMemAllocSize());
+         gpuMandelBrot = openclDevice.create(MandelBrot.class);
+      }
+     
       javaMandelBrot = new JavaMandelBrot();
       javaMandelBrotMultiThread = new JavaMandelBrotMultiThread();
       mandelBrot = javaMandelBrot;
@@ -428,7 +434,7 @@ public class MandelExample{
       scale = defaultScale;
       offsetx = -1f;
       offsety = 0f;
-
+      final Range range = device.createRange2D(width, height);
       mandelBrot.createMandleBrot(range, scale, offsetx, offsety, imageRgb);
       viewer.repaint();
 

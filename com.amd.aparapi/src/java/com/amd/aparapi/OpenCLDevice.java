@@ -13,32 +13,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OpenCLDevice implements Device{
-  
+public class OpenCLDevice extends Device{
 
    private OpenCLPlatform platform;
 
    private long deviceId;
 
-   private TYPE type = TYPE.UNKNOWN;
-
-   private int maxComputeUnits;
-
-   private int maxWorkItemDimensions;
+   int maxComputeUnits;
 
    private long localMemSize;
 
    private long globalMemSize;
 
    private long maxMemAllocSize;
-
-   private int maxWorkGroupSize;
-
-   private int[] maxWorkItemSize = new int[] {
-         0,
-         0,
-         0
-   };
 
    OpenCLDevice(OpenCLPlatform _platform, long _deviceId, TYPE _type) {
       platform = _platform;
@@ -47,28 +34,12 @@ public class OpenCLDevice implements Device{
 
    }
 
-   public TYPE getType() {
-      return type;
-   }
-
-   public void setType(TYPE type) {
-      this.type = type;
-   }
-
    public int getMaxComputeUnits() {
       return maxComputeUnits;
    }
 
    public void setMaxComputeUnits(int _maxComputeUnits) {
       maxComputeUnits = _maxComputeUnits;
-   }
-
-   public int getMaxWorkItemDimensions() {
-      return maxWorkItemDimensions;
-   }
-
-   public void setMaxWorkItemDimensions(int _maxWorkItemDimensions) {
-      maxWorkItemDimensions = _maxWorkItemDimensions;
    }
 
    public long getLocalMemSize() {
@@ -93,22 +64,6 @@ public class OpenCLDevice implements Device{
 
    public void setGlobalMemSize(long _globalMemSize) {
       globalMemSize = _globalMemSize;
-   }
-
-   public int getMaxWorkGroupSize() {
-      return maxWorkGroupSize;
-   }
-
-   public void setMaxWorkGroupSize(int _maxWorkGroupSize) {
-      maxWorkGroupSize = _maxWorkGroupSize;
-   }
-
-   public int[] getMaxWorkItemSize() {
-      return maxWorkItemSize;
-   }
-
-   public void setMaxWorkItemSize(int[] maxWorkItemSize) {
-      this.maxWorkItemSize = maxWorkItemSize;
    }
 
    public String toString() {
@@ -363,37 +318,7 @@ public class OpenCLDevice implements Device{
       OpenCLDevice best(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs);
    }
 
-   public static DeviceComparitor Best = new DeviceComparitor(){
-      @Override public OpenCLDevice best(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs) {
-         if (_deviceLhs.getType() != _deviceRhs.getType()) {
-            if (_deviceLhs.getType() == TYPE.GPU) {
-               return (_deviceLhs);
-            } else {
-               return (_deviceRhs);
-            }
-         }
-         if (_deviceLhs.maxComputeUnits > _deviceRhs.maxComputeUnits) {
-            return (_deviceLhs);
-         } else {
-            return (_deviceRhs);
-         }
-
-      }
-   };
-
-   public static DeviceFilter FirstGPU = new DeviceFilter(){
-      @Override public boolean match(OpenCLDevice _device) {
-         return (_device.getType() == OpenCLDevice.TYPE.GPU);
-      }
-   };
-
-   public static DeviceFilter FirstCPU = new DeviceFilter(){
-      @Override public boolean match(OpenCLDevice _device) {
-         return (_device.getType() == OpenCLDevice.TYPE.CPU);
-      }
-   };
-
-   public static OpenCLDevice first(DeviceFilter _deviceFilter) {
+   public static OpenCLDevice selectFirst(DeviceFilter _deviceFilter) {
       OpenCLDevice device = null;
       for (OpenCLPlatform p : OpenCLPlatform.getPlatforms()) {
          for (OpenCLDevice d : p.getDevices()) {
@@ -409,24 +334,7 @@ public class OpenCLDevice implements Device{
       return (device);
    }
 
-    public static <T extends OpenCL<T>> T first(Class<T> _interface, DeviceFilter _deviceFilter) {
-      OpenCLDevice device = null;
-      for (OpenCLPlatform p : OpenCLPlatform.getPlatforms()) {
-         for (OpenCLDevice d : p.getDevices()) {
-            if (_deviceFilter.match(d)) {
-               device = d;
-               break;
-            }
-         }
-         if (device != null) {
-            break;
-         }
-      }
-      return (device.create(_interface));
-   }
-
-
-   public static OpenCLDevice best(DeviceComparitor _deviceComparitor) {
+   public static OpenCLDevice selectBest(DeviceComparitor _deviceComparitor) {
       OpenCLDevice device = null;
       for (OpenCLPlatform p : OpenCLPlatform.getPlatforms()) {
          for (OpenCLDevice d : p.getDevices()) {
@@ -437,28 +345,7 @@ public class OpenCLDevice implements Device{
             }
          }
       }
-      return(device);
-   }
-
-   public static OpenCLDevice best() {
-      return(best(Best));
-   }
-
-   public static <T extends OpenCL<T>> T best(Class<T> _interface, DeviceComparitor _deviceComparitor) {
-      OpenCLDevice device = best();
-      return (device.create(_interface));
-   }
-
-   public static <T extends OpenCL<T>> T firstGPU(Class<T> _interface) {
-      return (first(_interface, FirstGPU));
-   }
-
-   public static <T extends OpenCL<T>> T firstCPU(Class<T> _interface) {
-      return (first(_interface, FirstCPU));
-   }
-
-   public static <T extends OpenCL<T>> T best(Class<T> _interface) {
-      return (best(_interface, Best));
+      return (device);
    }
 
    public OpenCLProgram createProgram(String source) {

@@ -1,5 +1,6 @@
 package com.amd.aparapi.sample.extension;
 
+import com.amd.aparapi.Device;
 import com.amd.aparapi.OpenCL;
 import com.amd.aparapi.OpenCLDevice;
 import com.amd.aparapi.Range;
@@ -51,17 +52,23 @@ public class SquareExample{
       float[] out = new float[size];
       Range range = Range.create(size);
 
-      SquarerWithResource squarer = OpenCLDevice.firstGPU(SquarerWithResource.class);
-      squarer.square(range, in, out);
+      Device device = Device.best();
 
-      for (int i = 0; i < size; i++) {
-         System.out.println(in[i] + " " + out[i]);
-      }
+      if (device instanceof OpenCLDevice) {
+         OpenCLDevice openclDevice = (OpenCLDevice) device;
 
-      squarer.square(range, out, in);
+         SquarerWithResource squarer = openclDevice.create(SquarerWithResource.class);
+         squarer.square(range, in, out);
 
-      for (int i = 0; i < size; i++) {
-         System.out.println(in[i] + " " + out[i]);
+         for (int i = 0; i < size; i++) {
+            System.out.println(in[i] + " " + out[i]);
+         }
+
+         squarer.square(range, out, in);
+
+         for (int i = 0; i < size; i++) {
+            System.out.println(in[i] + " " + out[i]);
+         }
       }
    }
 
