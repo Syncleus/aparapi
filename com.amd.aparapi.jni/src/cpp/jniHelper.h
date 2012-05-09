@@ -33,7 +33,7 @@
    direct product is subject to national security controls as identified on the Commerce Control List (currently 
    found in Supplement 1 to Part 774 of EAR).  For the most current Country Group listings, or for additional 
    information about the EAR or your obligations under those regulations, please refer to the U.S. Bureau of Industry
-   and Security’s website at http://www.bis.doc.gov/. 
+   and Securityï¿½s website at http://www.bis.doc.gov/. 
    */
 
 #ifndef JNIHELPER_H
@@ -47,7 +47,7 @@ class JNIHelper{
       static jlong callLong(JNIEnv *jenv, jobject instance, char *methodName, char *methodSignature, ...);
       static jobject callObject(JNIEnv *jenv, jobject instance, char *methodName, char *methodSignature, ...);
 
-      static jobject JNIHelper::createInstance(JNIEnv *jenv, char *className, char *signature, ... );
+      static jobject createInstance(JNIEnv *jenv, char *className, char *signature, ... );
 
       static jobject getStaticFieldObject(JNIEnv *jenv, char *className, char *fieldName, char *signature);
 
