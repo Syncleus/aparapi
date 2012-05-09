@@ -404,7 +404,7 @@ void putArgs(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queu
       }else{
          // check of argBits == memInstance.argBits
          // we need to pin it
-         jboolean isCopy;
+        // jboolean isCopy;
          void *ptr  =  OpenCLMem::pin(jenv, (jarray)arg,&argBits); 
          void *oldPtr = OpenCLMem::getAddress(jenv, memInstance);
          if (ptr !=oldPtr){
