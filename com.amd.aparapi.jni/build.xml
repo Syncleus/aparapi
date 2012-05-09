@@ -22,7 +22,57 @@ First consider editing the properties in build.properties
 
    <property file="build.properties" />
 
-   <target name="check">
+   <target name="sdk.setup">
+      <available property="win32.amd.app.sdk.present" file="C:/Program Files/AMD APP" type="dir"/>
+
+      <condition property="amd.app.sdk.dir" value="C:/Program Files/AMD APP">
+         <and>
+            <os family="windows" />
+            <isset property="win32.amd.app.sdk.present" />
+            <!--<not>
+               <isset property="msvc.sdk.dir" />
+            </not>-->
+         </and>
+      </condition>
+
+      <available property="win64.amd.app.sdk.present" file="C:/Program Files (x86)/AMD APP" type="dir"/>
+      <condition property="amd.app.sdk.dir" value="C:/Program Files (x86)/AMD APP">
+         <and>
+            <os family="windows" />
+            <isset property="win64.amd.app.sdk.present" />
+            <not>
+               <isset property="win32.amd.app.sdk.present" />
+            </not>
+         </and>
+      </condition>
+
+
+      <available property="linux.amd.app.sdk.present" file="/opt/AMDAPP" type="dir"/>
+      <condition property="amd.app.sdk.dir" value="/opt/AMDAPP">
+         <and>
+            <os family="unix" />
+            <not>
+               <os family="mac" />
+            </not>
+            <isset property="linux.amd.app.sdk.present" />
+            <not>
+               <isset property="win32.amd.app.sdk.present" />
+            </not>
+            <not>
+               <isset property="win64.amd.app.sdk.present" />
+            </not>
+         </and>
+      </condition>
+
+      <echo message=" amd.app.sdk.dir ${amd.app.sdk.dir}"/>
+   </target>
+
+   <target name="check" depends="sdk.setup">
+
+
+
+
+
       <fail message="Error:">
          <condition>
             <and>
