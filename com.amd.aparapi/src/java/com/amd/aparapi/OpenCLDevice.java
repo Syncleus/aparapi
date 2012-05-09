@@ -13,12 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OpenCLDevice{
-   static public enum TYPE {
-      UNKNOWN,
-      GPU,
-      CPU
-   };
+public class OpenCLDevice implements Device{
+  
 
    private OpenCLPlatform platform;
 
