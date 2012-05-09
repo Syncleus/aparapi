@@ -40,39 +40,39 @@ public class OpenCLJNI{
       return (jni);
    }
 
-   public final static long INT_BIT = 1 << 0;
+   public final static int INT_BIT = 1 << 0;
 
-   public final static long FLOAT_BIT = 1 << 1;
+   public final static int FLOAT_BIT = 1 << 1;
 
-   public final static long DOUBLE_BIT = 1 << 2;
+   public final static int DOUBLE_BIT = 1 << 2;
 
-   public final static long SHORT_BIT = 1 << 3;
+   public final static int SHORT_BIT = 1 << 3;
 
-   public final static long ARRAY_BIT = 1 << 4;
+   public final static int ARRAY_BIT = 1 << 4;
 
-   public final static long GLOBAL_BIT = 1 << 5;
+   public final static int GLOBAL_BIT = 1 << 5;
 
-   public final static long LOCAL_BIT = 1 << 6;
+   public final static int LOCAL_BIT = 1 << 6;
 
-   public final static long CONST_BIT = 1 << 7;
+   public final static int CONST_BIT = 1 << 7;
 
-   public final static long PRIMITIVE_BIT = 1 << 8;
+   public final static int PRIMITIVE_BIT = 1 << 8;
 
-   public final static long LONG_BIT = 1 << 9;
+   public final static int LONG_BIT = 1 << 9;
 
-   public final static long READONLY_BIT = 1 << 10;
+   public final static int READONLY_BIT = 1 << 10;
 
-   public final static long WRITEONLY_BIT = 1 << 11;
+   public final static int WRITEONLY_BIT = 1 << 11;
 
-   public final static long READWRITE_BIT = 1 << 12;
+   public final static int READWRITE_BIT = 1 << 12;
 
-   public final static long MEM_DIRTY_BIT = 1 << 13;
+   public final static int MEM_DIRTY_BIT = 1 << 13;
 
-   public final static long MEM_COPY_BIT = 1 << 14;
+   public final static int MEM_COPY_BIT = 1 << 14;
 
-   public final static long MEM_ENQUEUED_BIT = 1 << 15;
+   public final static int MEM_ENQUEUED_BIT = 1 << 15;
 
-   public final static long ARG_BIT = 1 << 16;
+   public final static int ARG_BIT = 1 << 16;
 
    native public List<OpenCLPlatform> getPlatforms();
 
