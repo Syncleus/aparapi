@@ -13,65 +13,172 @@ First consider editing the properties in build.properties
    <echo>OS Version: ${os.version}</echo>
    <echo>OS Arch:    ${os.arch}</echo>
 
-   <property name="build.compiler" value="javac1.6"/>
-   <property name="ant.build.javac.source" value="1.6"/>
-   <property name="ant.build.javac.target" value="1.6"/>
+   <!--<property name="build.compiler" value="javac1.6"/>-->
+   <!--  <property name="ant.build.javac.source" value="1.6"/>-->
+   <!-- <property name="ant.build.javac.target" value="1.6"/> -->
 
    <property environment="env" />
    <!-- we need env.PATH for msvc only -->
 
-   <property file="build.properties" />
+   <!--<property file="build.properties" />-->
 
-   <target name="sdk.setup">
-      <available property="win32.amd.app.sdk.present" file="C:/Program Files/AMD APP" type="dir"/>
+   <target name="init">
+      <available property="win32.amd.app.sdk.exists" file="C:/Program Files/AMD APP" type="dir"/>
 
       <condition property="amd.app.sdk.dir" value="C:/Program Files/AMD APP">
          <and>
             <os family="windows" />
-            <isset property="win32.amd.app.sdk.present" />
-            <!--<not>
-               <isset property="msvc.sdk.dir" />
-            </not>-->
+            <isset property="win32.amd.app.sdk.exists" />
+            <not>
+               <isset property="amd.app.sdk.dir" />
+            </not>
          </and>
       </condition>
 
-      <available property="win64.amd.app.sdk.present" file="C:/Program Files (x86)/AMD APP" type="dir"/>
+      <available property="win64.amd.app.sdk.exists" file="C:/Program Files (x86)/AMD APP" type="dir"/>
       <condition property="amd.app.sdk.dir" value="C:/Program Files (x86)/AMD APP">
          <and>
             <os family="windows" />
-            <isset property="win64.amd.app.sdk.present" />
+            <isset property="win64.amd.app.sdk.exists" />
             <not>
-               <isset property="win32.amd.app.sdk.present" />
+               <isset property="win32.amd.app.sdk.exists" />
             </not>
          </and>
       </condition>
 
 
-      <available property="linux.amd.app.sdk.present" file="/opt/AMDAPP" type="dir"/>
+      <available property="linux.amd.app.sdk.exists" file="/opt/AMDAPP" type="dir"/>
       <condition property="amd.app.sdk.dir" value="/opt/AMDAPP">
          <and>
             <os family="unix" />
             <not>
                <os family="mac" />
             </not>
-            <isset property="linux.amd.app.sdk.present" />
+            <isset property="linux.amd.app.sdk.exists" />
             <not>
-               <isset property="win32.amd.app.sdk.present" />
+               <isset property="win32.amd.app.sdk.exists" />
             </not>
             <not>
-               <isset property="win64.amd.app.sdk.present" />
+               <isset property="win64.amd.app.sdk.exists" />
             </not>
          </and>
       </condition>
 
       <echo message=" amd.app.sdk.dir ${amd.app.sdk.dir}"/>
+
+      <available property="msvc.64.9.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 10.0" type="dir"/>
+      <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 10.0">
+         <and>
+            <not>
+               <or>
+                  <os arch="x86" />
+                  <os arch="i386" />
+               </or>
+            </not>
+            <os family="windows" />
+            <isset property="msvc.64.9.0.exists" />
+            <not>
+               <isset property="msvc.dir" />
+            </not>
+         </and>
+      </condition>
+
+      <available property="msvc.64.10.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 10.0" type="dir"/>
+      <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 10.0">
+         <and>
+            <not>
+               <or>
+                  <os arch="x86" />
+                  <os arch="i386" />
+               </or>
+            </not>
+            <os family="windows" />
+            <isset property="msvc.64.10.0.exists" />
+            <not>
+               <isset property="msvc.dir" />
+            </not>
+         </and>
+      </condition>
+
+      <available property="msvc.32.10.0.exists" file="c:/Program Files/Microsoft Visual Studio 10.0" type="dir"/>
+      <condition property="msvc.dir" value="c:/Program Files/Microsoft Visual Studio 10.0">
+         <and>
+            <or>
+               <os arch="x86" />
+               <os arch="i386" />
+            </or>
+            <os family="windows" />
+            <isset property="msvc.32.10.0.exists" />
+            <not>
+               <isset property="msvc.dir" />
+            </not>
+         </and>
+      </condition>
+
+      <available property="msvc.32.9.0.exists" file="c:/Program Files/Microsoft Visual Studio 9.0" type="dir"/>
+      <condition property="msvc.dir" value="c:/Program Files/Microsoft Visual Studio 9.0">
+         <and>
+            <or>
+               <os arch="x86" />
+               <os arch="i386" />
+            </or>
+            <os family="windows" />
+            <isset property="msvc.32.9.0.exists" />
+            <not>
+               <isset property="msvc.dir" />
+            </not>
+         </and>
+      </condition>
+
+      <available property="msvc.sdk.7.1.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.1" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v7.1">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.7.1.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+         </and>
+      </condition>
+
+      <available property="msvc.sdk.7.0.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.0" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v7.0">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.7.0.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+         </and>
+      </condition>
+
+      <available property="msvc.sdk.6.0A.exists" file="C:/Program Files/Microsoft SDKs/Windows/v6.0A" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v6.0A">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.6.0A.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+         </and>
+      </condition>
+
+      <available property="msvc.sdk.7.0A.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.0A" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v7.0A">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.7.0A.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+         </and>
+      </condition>
+
+      <echo message=" msvc.dir ${msvc.dir}"/>
+      <echo message=" msvc.sdk.dir ${msvc.sdk.dir}"/>
    </target>
 
-   <target name="check" depends="sdk.setup">
-
-
-
-
+   <target name="check" depends="init">
 
       <fail message="Error:">
          <condition>
