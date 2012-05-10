@@ -164,7 +164,6 @@ public class MandelSimple{
          System.out.println("max mem alloc size = " + openclDevice.getMaxMemAllocSize());
          mandelBrot = openclDevice.create(Mandel.class);
 
-       
          float defaultScale = 3f;
          scale = defaultScale;
          offsetx = -1f;

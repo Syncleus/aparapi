@@ -216,6 +216,9 @@ class KernelArg{
          jenv->ReleasePrimitiveArrayCritical((jarray)value.ref.javaArray, value.ref.addr, 0);
       }
       void unpin(JNIEnv *jenv){
+		 //if  (value.ref.isPinned == JNI_FALSE){		 
+         //   fprintf(stderr, "why are we unpinning buffer %s! isPinned = JNI_TRUE\n", name);
+		 //}
          if (isMutableByKernel()){
             // we only need to commit if the buffer has been written to
             // we use mode=0 in that case (rather than JNI_COMMIT) because that frees any copy buffer if it exists
@@ -228,10 +231,17 @@ class KernelArg{
          value.ref.isPinned = JNI_FALSE;
       }
       void pin(JNIEnv *jenv){
+		 //if  (value.ref.isPinned == JNI_TRUE){			 
+         //   fprintf(stderr, "why are we pinning buffer %s! isPinned = JNI_TRUE\n", name);
+		 //}
+		 void *ptr = value.ref.addr;
          value.ref.addr = jenv->GetPrimitiveArrayCritical((jarray)value.ref.javaArray,&value.ref.isCopy);
-         if (value.ref.isCopy){
-            fprintf(stderr, "buffer %s is a copy!\n", name);
-         }
+		 //if (ptr != value.ref.addr){
+         //   fprintf(stderr, "buffer %s has moved!\n", name);
+		 //}
+         //if (value.ref.isCopy){
+         //   fprintf(stderr, "buffer %s is a copy!\n", name);
+         //}
          value.ref.isPinned = JNI_TRUE;
       }
 
@@ -302,11 +312,18 @@ class KernelArg{
          return(((isArray() && isGlobal()) || ((isAparapiBuf()&&isGlobal()))) && (isImplicit()&&isMutableByKernel()));
       }
       int needToEnqueueWrite(){
+		//  if (isExplicitWrite()){
+		//	  fprintf(stderr, "%s isExplicitWrite()\n", name);
+		//  }
+		 //  if (isExplicit()){
+			//  fprintf(stderr, "%s isExplicit()\n", name);
+		//  }
+		//  fprintf(stderr, "%s neetToEnqueueWrite = %d\n", name, returnValue);
          return ((isImplicit()&&isReadByKernel())||(isExplicit()&&isExplicitWrite()));
       }
-      //void syncType(JNIEnv* jenv){
-      //   type = jenv->GetIntField(javaArg, typeFieldID);
-      //}
+      void syncType(JNIEnv* jenv){
+         type = jenv->GetIntField(javaArg, typeFieldID);
+      }
       void syncSizeInBytes(JNIEnv* jenv){
          sizeInBytes = jenv->GetIntField(javaArg, sizeInBytesFieldID);
       }
@@ -497,7 +514,7 @@ class JNIContext{
 #ifndef __APPLE__
                         fprintf(stderr, "platform %s version %s is not OpenCL 1.1 skipping!\n", platformVendorName, platformVersionName);
 #else
-                        fprintf(stderr, "platform %s version %s is neither OpenCL 1.1 or OpenCL 1.0 skipping!\n", platformVendorName, platformVersionName);
+                        fprintf(stderr, "platform %s version %s is neither OpenCL 1.2, OpenCL 1.1 or OpenCL 1.0 skipping!\n", platformVendorName, platformVersionName);
 #endif
 
                      }
@@ -750,7 +767,7 @@ jint updateNonPrimitiveReferences(JNIEnv *jenv, jobject jobj, JNIContext* jniCon
    if (jniContext != NULL){
       for (jint i=0; i<jniContext->argc; i++){ 
          KernelArg *arg=jniContext->args[i];
-         //arg->syncType(jenv); // make sure that the JNI arg reflects the latest type info from the instance 
+         arg->syncType(jenv); // make sure that the JNI arg reflects the latest type info from the instance.  For example if the buffer is tagged as explicit and needs to be pushed
 
          if (jniContext->isVerbose()){
             fprintf(stderr, "got type for %s: %08x\n", arg->name, arg->type);
@@ -868,8 +885,8 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
 
    for (int i=0; i< jniContext->argc; i++){
       KernelArg *arg = jniContext->args[i];
-      // TODO: see if we can get rid of this read 
-      //arg->syncType(jenv);
+      arg->syncType(jenv); // make sure that the JNI arg reflects the latest type info from the instance.  For example if the buffer is tagged as explicit and needs to be pushed
+
       if (jniContext->isVerbose()){
          fprintf(stderr, "got type for arg %d, %s, type=%08x\n", i, arg->name, arg->type);
       }
@@ -905,11 +922,11 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
          // if we see that isCopy was returned by getPrimitiveArrayCritical, treat that as a move
          bool objectMoved = (arg->value.ref.addr != prevAddr) || arg->value.ref.isCopy;
 
-#ifdef VERBOSE_EXPLICIT
-         if (arg->isExplicit() && arg->isExplicitWrite()){
-            fprintf(stderr, "explicit write of %s\n",  arg->name);
+         if (jniContext->isVerbose()){
+            if (arg->isExplicit() && arg->isExplicitWrite()){
+               fprintf(stderr, "explicit write of %s\n",  arg->name);
+            }
          }
-#endif
 
          if (jniContext->firstRun || (arg->value.ref.mem == 0) || objectMoved ){
             // if either this is the first run or user changed input array
@@ -972,11 +989,11 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
          // the default behavior for Constant buffers is also that there is no write enqueued unless explicit
 
          if (arg->needToEnqueueWrite() && !arg->isConstant()){
-#ifdef VERBOSE_EXPLICIT
-            if (arg->isExplicit() && arg->isExplicitWrite()){
-               fprintf(stderr, "writing explicit buffer %d %s\n", i, arg->name);
+            if (jniContext->isVerbose()){
+               if (arg->isExplicit() && arg->isExplicitWrite()){
+                  fprintf(stderr, "writing explicit buffer %d %s\n", i, arg->name);
+               }
             }
-#endif
             if (jniContext->isVerbose()){
                fprintf(stderr, "%s writing buffer %d %s\n",  (arg->isExplicit() ? "explicitly" : ""), 
                      i, arg->name);
@@ -997,9 +1014,9 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
                return status;
             }
             if (arg->isExplicit() && arg->isExplicitWrite()){
-#ifdef VERBOSE_EXPLICIT
-               fprintf(stderr, "clearing explicit buffer bit %d %s\n", i, arg->name);
-#endif
+               if (jniContext->isVerbose()){
+                  fprintf(stderr, "clearing explicit buffer bit %d %s\n", i, arg->name);
+               }
                arg->clearExplicitBufferBit(jenv);
             }
          }
@@ -1269,6 +1286,8 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
       }
    } else {
       // if readEventCount == 0 then we don't need any reads so we just wait for the executions to complete
+
+	   
       status = clWaitForEvents(jniContext->deviceIdc, jniContext->executeEvents);
       if (status != CL_SUCCESS) {
          PRINT_CL_ERR(status, "clWaitForEvents() execute event");
@@ -1445,12 +1464,11 @@ JNI_JAVA(jint, KernelRunner, setArgsJNI)
 
          jobject argObj = jenv->GetObjectArrayElement(argArray, i);
          KernelArg* arg = jniContext->args[i] = new KernelArg(jenv, argObj);
-
-#ifdef VERBOSE_EXPLICIT
-         if (arg->isExplicit()){
-            fprintf(stderr, "%s is explicit!\n", arg->name);
+         if (jniContext->isVerbose()){
+            if (arg->isExplicit()){
+               fprintf(stderr, "%s is explicit!\n", arg->name);
+            }
          }
-#endif
 
          if (arg->isPrimitive()) {
             // for primitives, we cache the fieldID for that field in the kernel's arg object
@@ -1562,8 +1580,15 @@ KernelArg* getArgForBuffer(JNIEnv* jenv, JNIContext* jniContext, jobject buffer)
          if (arg->isArray()){
             jboolean isSame = jenv->IsSameObject(buffer, arg->value.ref.javaArray);
             if (isSame){
+		       if (jniContext->isVerbose()){
+                  fprintf(stderr, "matched arg '%s'\n", arg->name);
+               }
                returnArg = arg;
-            }
+            }else{
+				 if (jniContext->isVerbose()){
+                  fprintf(stderr, "unmatched arg '%s'\n", arg->name);
+               }
+			}
          }
       }
       if (returnArg==NULL){
@@ -1583,13 +1608,16 @@ JNI_JAVA(jint, KernelRunner, getJNI)
    if (jniContext != NULL){
       KernelArg *arg= getArgForBuffer(jenv, jniContext, buffer);
       if (arg != NULL){
-#ifdef VERBOSE_EXPLICIT
-         fprintf(stderr, "explicitly reading buffer %d %s\n", i, arg->name);
-#endif
+         if (jniContext->isVerbose()){
+           fprintf(stderr, "explicitly reading buffer %s\n", arg->name);
+         }
          arg->pin(jenv);
 
          status = clEnqueueReadBuffer(jniContext->commandQueues[0], arg->value.ref.mem, CL_FALSE, 0, 
                arg->sizeInBytes,arg->value.ref.addr , 0, NULL, &jniContext->readEvents[0]);
+		 if (jniContext->isVerbose()){
+		    fprintf(stderr, "explicitly read %s ptr=%lx len=%d\n", arg->name, arg->value.ref.addr,arg->sizeInBytes );
+		 }
          if (status != CL_SUCCESS) {
             PRINT_CL_ERR(status, "clEnqueueReadBuffer()");
             return status;
@@ -1613,7 +1641,8 @@ JNI_JAVA(jint, KernelRunner, getJNI)
             return status;
          }
          // since this is an explicit buffer get, we expect the buffer to have changed so we commit
-         arg->unpinCommit(jenv);
+         arg->unpin(jenv); // was unpinCommit
+
       }else{
          if (jniContext->isVerbose()){
             fprintf(stderr, "attempt to request to get a buffer that does not appear to be referenced from kernel\n");

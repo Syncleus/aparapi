@@ -338,7 +338,6 @@ public class MandelExample{
       final int height = 768;
 
       /** Mandelbrot image height. */
-   
 
       /** Image for Mandelbrot view. */
       final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -421,12 +420,12 @@ public class MandelExample{
       Device device = Device.best();
       if (device instanceof OpenCLDevice) {
          OpenCLDevice openclDevice = (OpenCLDevice) device;
-         
+
          System.out.println("max memory = " + openclDevice.getGlobalMemSize());
          System.out.println("max mem alloc size = " + openclDevice.getMaxMemAllocSize());
          gpuMandelBrot = openclDevice.create(MandelBrot.class);
       }
-     
+
       javaMandelBrot = new JavaMandelBrot();
       javaMandelBrotMultiThread = new JavaMandelBrotMultiThread();
       mandelBrot = javaMandelBrot;
