@@ -63,7 +63,7 @@ public class SquareExample{
          for (int i = 0; i < size; i++) {
             System.out.println(in[i] + " " + out[i]);
          }
-
+         
          squarer.square(range, out, in);
 
          for (int i = 0; i < size; i++) {

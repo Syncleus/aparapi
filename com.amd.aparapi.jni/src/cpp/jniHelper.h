@@ -40,6 +40,51 @@
 #define JNIHELPER_H
 
 #include <jni.h>
+#define JavaLangPackage(name) "java/lang/" name
+#define JavaUtilPackage(name) "java/util/" name
+#define AparapiPackage(name) "com/amd/aparapi/" name
+
+#define ProfileInfoClass AparapiPackage("ProfileInfo")
+#define OpenCLKernelClass AparapiPackage("OpenCLKernel")
+#define OpenCLPlatformClass AparapiPackage("OpenCLPlatform")
+#define OpenCLDeviceClass AparapiPackage("OpenCLDevice")
+#define OpenCLProgramClass AparapiPackage("OpenCLProgram")
+#define OpenCLArgClass AparapiPackage("OpenCLArg")
+#define OpenCLMemClass AparapiPackage("OpenCLMem")
+#define StringClass JavaLangPackage("String")
+#define ObjectClass JavaLangPackage("Object")
+#define ListClass JavaUtilPackage("List")
+#define ArrayListClass JavaUtilPackage("ArrayList")
+#define DeviceTypeClass AparapiPackage("Device$TYPE") 
+#define OpenCLDeviceClass AparapiPackage("OpenCLDevice") 
+
+#define ARG(name) "L" name ";"
+
+#define ProfileInfoClassArg ARG(ProfileInfoClass)
+#define OpenCLKernelClassArg ARG(OpenCLKernelClass)
+#define OpenCLPlatformClassArg ARG(OpenCLPlatformClass)
+#define OpenCLDeviceClassArg ARG(OpenCLDeviceClass)
+#define OpenCLProgramClassArg ARG(OpenCLProgramClass)
+#define OpenCLArgClassArg ARG(OpenCLArgClass)
+#define OpenCLMemClassArg ARG(OpenCLMemClass)
+#define StringClassArg ARG(StringClass)
+#define ObjectClassArg ARG(ObjectClass)
+#define ListClassArg ARG(ListClass)
+#define ArrayListClassArg ARG(ArrayListClass)
+#define DeviceTypeClassArg ARG(DeviceTypeClass)
+#define OpenCLDeviceClassArg ARG(OpenCLDeviceClass)
+#define LongArg "J"
+#define IntArg "I"
+#define ArrayArg(name) "[" ARG(name)
+
+#define Args(name) "(" name ")"
+
+#define ArgsVoidReturn(name) Args(name)"V"
+#define ArgsBooleanReturn(name) Args(name)"Z"
+
+#define VoidReturn  ArgsVoidReturn("")
+
+#define JNI_JAVA(type, className, methodName) JNIEXPORT type JNICALL Java_com_amd_aparapi_##className##_##methodName
 
 class JNIHelper{
    public:

@@ -151,12 +151,5 @@ jstring CLHelper::getExtensions(JNIEnv *jenv, cl_device_id deviceId, cl_int *sta
    return jextensions;
 }
 
-/*
-Program::Program(cl_context context, cl_device_id deviceId, cl_command_queue commandQueue, cl_program program):
-   context(context),
-   deviceId(deviceId),
-   commandQueue(commandQueue),
-   program(program){
-}
-*/
+
 

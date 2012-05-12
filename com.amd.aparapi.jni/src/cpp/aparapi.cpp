@@ -41,7 +41,7 @@
 #define APARAPI_SOURCE
 #include "aparapi.h"
 #include "com_amd_aparapi_KernelRunner.h"
-#define JNI_JAVA(type, className, methodName) JNIEXPORT type JNICALL Java_com_amd_aparapi_##className##_##methodName
+
 
 class Range{
    public:
@@ -1654,7 +1654,7 @@ JNI_JAVA(jint, KernelRunner, getJNI)
 
 
 jobject createProfileInfo(JNIEnv *jenv, ProfileInfo &profileInfo){
-   jobject profileInstance = JNIHelper::createInstance(jenv, "com/amd/aparapi/ProfileInfo", "(Ljava/lang/String;IJJJJ)V", 
+   jobject profileInstance = JNIHelper::createInstance(jenv, ProfileInfoClass , ArgsVoidReturn(StringClassArg IntArg LongArg LongArg LongArg LongArg), 
          ((jstring)(profileInfo.name==NULL?NULL:jenv->NewStringUTF(profileInfo.name))),
          ((jint)profileInfo.type), 
          ((jlong)profileInfo.start),
@@ -1670,7 +1670,7 @@ JNI_JAVA(jobject, KernelRunner, getProfileInfoJNI)
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
    jobject returnList = NULL;
    if (jniContext != NULL){
-      returnList = JNIHelper::createInstance(jenv, "java/util/ArrayList", "()V");
+      returnList = JNIHelper::createInstance(jenv, ArrayListClass, VoidReturn );
       if (jniContext->isProfilingEnabled()){
 
          for (jint i=0; i<jniContext->argc; i++){ 
@@ -1678,14 +1678,14 @@ JNI_JAVA(jobject, KernelRunner, getProfileInfoJNI)
             if (arg->isArray()){
                if (arg->isMutableByKernel() && arg->value.ref.write.valid){
                   jobject writeProfileInfo = createProfileInfo(jenv,  arg->value.ref.write);
-                  JNIHelper::callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", writeProfileInfo);
+                  JNIHelper::callVoid(jenv, returnList, "add", ArgsBooleanReturn(ObjectClassArg), writeProfileInfo);
                }
             }
          }
 
          for (jint pass=0; pass<jniContext->passes; pass++){
             jobject executeProfileInfo = createProfileInfo(jenv, jniContext->exec[pass]);
-            JNIHelper::callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", executeProfileInfo);
+            JNIHelper::callVoid(jenv, returnList, "add", ArgsBooleanReturn(ObjectClassArg), executeProfileInfo);
          }
 
          for (jint i=0; i<jniContext->argc; i++){ 
@@ -1693,7 +1693,7 @@ JNI_JAVA(jobject, KernelRunner, getProfileInfoJNI)
             if (arg->isArray()){
                if (arg->isReadByKernel() && arg->value.ref.read.valid){
                   jobject readProfileInfo = createProfileInfo(jenv,  arg->value.ref.read);
-                  JNIHelper::callVoid(jenv, returnList, "add", "(Ljava/lang/Object;)Z", readProfileInfo);
+                  JNIHelper::callVoid(jenv, returnList, "add", ArgsBooleanReturn(ObjectClassArg), readProfileInfo);
                }
             }
          }
