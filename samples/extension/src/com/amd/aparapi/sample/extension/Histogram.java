@@ -20,8 +20,8 @@ public class Histogram{
    }
 
    public static void main(String[] args) {
-      final int WIDTH = 1024*16;
-      final int HEIGHT = 1024*8;
+      final int WIDTH = 1024*4;
+      final int HEIGHT = 1024*4;
       final int BIN_SIZE = 256;
       final int GROUP_SIZE = 128;
       final int SUB_HISTOGRAM_COUNT = ((WIDTH * HEIGHT) / (GROUP_SIZE * BIN_SIZE));
@@ -47,35 +47,25 @@ public class Histogram{
          OpenCLDevice openclDevice = (OpenCLDevice) device;
 
          HistogramKernel histogram = openclDevice.create(HistogramKernel.class);
+       //  histogram.histogram256(range, data, sharedArray, binResult);
+
+        // Arrays.fill(binResult, 0);
          
          long start= System.currentTimeMillis();
-
-         histogram.histogram256(range, data, sharedArray, binResult);
-         
-         Arrays.fill(binResult, 0);
- histogram.histogram256(range, data, sharedArray, binResult);
-         
-         Arrays.fill(binResult, 0);
-          start= System.currentTimeMillis();
          histogram.histogram256(range, data, sharedArray, binResult);
          // Calculate final histogram bin 
          for(int i = 0; i < SUB_HISTOGRAM_COUNT; ++i)
-         
              for(int j = 0; j < BIN_SIZE; ++j)
-             
                  histo[j] += binResult[i * BIN_SIZE + j];
-             
         
          System.out.println("opencl "+(System.currentTimeMillis()-start));
-         
-         
          
          start = System.currentTimeMillis();
          for (int i=0; i<WIDTH * HEIGHT; i++){
             refHisto[data[i]]++;
          }
          System.out.println("java "+(System.currentTimeMillis()-start));
-         for (int i = 0; i < 256; i++) {
+         for (int i = 0; i < 128; i++) {
             System.out.println(i + " " + histo[i]+" "+refHisto[i]);
          }
 

@@ -11,6 +11,8 @@
       <copy todir="classes/com\amd\aparapi\sample\extension" file="src\com\amd\aparapi\sample\extension\mandel.cl"/>
       <copy todir="classes/com\amd\aparapi\sample\extension" file="src\com\amd\aparapi\sample\extension\mandel2.cl"/>
       <copy todir="classes/com\amd\aparapi\sample\extension" file="src\com\amd\aparapi\sample\extension\squarer.cl"/>
+      <copy todir="classes/com\amd\aparapi\sample\extension" file="src\com\amd\aparapi\sample\extension\squarer.cl"/>
+      <copy todir="classes/com\amd\aparapi\sample\extension" file="src\com\amd\aparapi\sample\extension\HistogramKernel.cl"/>
       <jar jarfile="${ant.project.name}.jar" basedir="classes"/>
 
    </target>

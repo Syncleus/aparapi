@@ -42,6 +42,9 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -52,6 +55,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLException;
+import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.fixedfunc.GLLightingFunc;
 import javax.media.opengl.glu.GLU;
@@ -232,9 +236,11 @@ public class Main{
 
       controlPanel.add(positionUpdatesPerMicroSecondTextField);
       GLCapabilities caps = new GLCapabilities(null);
+      final GLProfile profile = caps.getGLProfile();
       caps.setDoubleBuffered(true);
       caps.setHardwareAccelerated(true);
       final GLCanvas canvas = new GLCanvas(caps);
+     
       Dimension dimension = new Dimension(Integer.getInteger("width", 742), Integer.getInteger("height", 742));
       canvas.setPreferredSize(dimension);
 
@@ -342,12 +348,35 @@ public class Main{
 
       panel.add(canvas, BorderLayout.CENTER);
       frame.getContentPane().add(panel, BorderLayout.CENTER);
+      final FPSAnimator animator = new FPSAnimator(canvas, 100);
+      frame.addWindowListener(new WindowAdapter(){
 
-      frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+     
+         @Override public void windowClosed(WindowEvent e) {
+            System.out.println("closed");
+            animator.stop();
+            GLProfile.shutdown();
+            System.exit(1);
+            
+         }
+
+         @Override public void windowClosing(WindowEvent e) {
+            System.out.println("closing");
+            animator.stop();
+            GLProfile.shutdown();
+          //  System.exit(1);
+            
+         }
+
+        
+         
+      });
+
+      //frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
       frame.pack();
       frame.setVisible(true);
 
-      FPSAnimator animator = new FPSAnimator(canvas, 100);
+     
       animator.start();
 
    }
