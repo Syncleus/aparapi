@@ -20,7 +20,7 @@ public class Histogram{
    }
 
    public static void main(String[] args) {
-      final int WIDTH = 1024*4;
+      final int WIDTH = 1024*8;
       final int HEIGHT = 1024*4;
       final int BIN_SIZE = 256;
       final int GROUP_SIZE = 128;
@@ -41,7 +41,7 @@ public class Histogram{
    
       Range range = Range.create((WIDTH * HEIGHT)/BIN_SIZE, GROUP_SIZE);
 
-      Device device = Device.best();
+      Device device = Device.firstCPU();
 
       if (device instanceof OpenCLDevice) {
          OpenCLDevice openclDevice = (OpenCLDevice) device;
