@@ -539,7 +539,7 @@ class KernelRunner{
     * @param maxJTPLocalSize
     * @return
     */
-   @Annotations.DocMe private native static synchronized long initJNI(Kernel _kernel, int _flags);
+   @Annotations.DocMe private native static synchronized long initJNI(Kernel _kernel, OpenCLDevice device,  int _flags);
 
    private native long buildProgramJNI(long _jniContextHandle, String _source);
 
@@ -551,13 +551,13 @@ class KernelRunner{
 
    private native String getExtensionsJNI(long _jniContextHandle);
 
-   private native int getMaxWorkGroupSizeJNI(long _jniContextHandle);
+ //  private native @Deprecated int getMaxWorkGroupSizeJNI(long _jniContextHandle);
+   
+  // private native @Deprecated int getMaxWorkItemSizeJNI(long _jniContextHandle, int _index);
 
-   private native int getMaxWorkItemSizeJNI(long _jniContextHandle, int _index);
+  // private native @Deprecated int getMaxComputeUnitsJNI(long _jniContextHandle);
 
-   private native int getMaxComputeUnitsJNI(long _jniContextHandle);
-
-   private native int getMaxWorkItemDimensionsJNI(long _jniContextHandle);
+  //private native @Deprecated int getMaxWorkItemDimensionsJNI(long _jniContextHandle);
 
    private synchronized native List<ProfileInfo> getProfileInfoJNI(long _jniContextHandle);
 
@@ -1242,7 +1242,8 @@ class KernelRunner{
    // private int numAvailableProcessors = Runtime.getRuntime().availableProcessors();
 
    private Kernel executeOpenCL(final String _entrypointName, final Range _range, final int _passes) throws AparapiException {
-      if (_range.getDims() > getMaxWorkItemDimensionsJNI(jniContextHandle)) {
+      /*
+     if (_range.getDims() > getMaxWorkItemDimensionsJNI(jniContextHandle)) {
          throw new RangeException("Range dim size " + _range.getDims() + " > device "
                + getMaxWorkItemDimensionsJNI(jniContextHandle));
       }
@@ -1250,7 +1251,7 @@ class KernelRunner{
          throw new RangeException("Range workgroup size " + _range.getWorkGroupSize() + " > device "
                + getMaxWorkGroupSizeJNI(jniContextHandle));
       }
-      /*
+      
             if (_range.getGlobalSize(0) > getMaxWorkItemSizeJNI(jniContextHandle, 0)) {
                throw new RangeException("Range globalsize 0 " + _range.getGlobalSize(0) + " > device "
                      + getMaxWorkItemSizeJNI(jniContextHandle, 0));
@@ -1267,7 +1268,7 @@ class KernelRunner{
                   }
                }
             }
-      */
+      
 
       if (logger.isLoggable(Level.FINE)) {
          logger.fine("maxComputeUnits=" + this.getMaxComputeUnitsJNI(jniContextHandle));
@@ -1281,7 +1282,7 @@ class KernelRunner{
             }
          }
       }
-
+*/
       // Read the array refs after kernel may have changed them
       // We need to do this as input to computing the localSize
       assert args != null : "args should not be null";
@@ -1337,9 +1338,12 @@ class KernelRunner{
       if (_range == null) {
          throw new IllegalStateException("range can't be null");
       }
-
-      if (kernel.getExecutionMode().isOpenCL()) {
+    
+      /* for backward compatibility reasons we still honor execution mode, but only if the Range *does not* contain a device specification */
+      Device device = _range.getDevice();
+      if ((kernel.getExecutionMode().isOpenCL() && device == null) || (device instanceof OpenCLDevice) ) {
          // System.out.println("OpenCL");
+         
          if (entryPoint == null) {
             try {
                ClassModel classModel = new ClassModel(kernel.getClass());
@@ -1349,15 +1353,38 @@ class KernelRunner{
                return warnFallBackAndExecute(_entrypointName, _range, _passes, exception);
             }
             if ((entryPoint != null) && !entryPoint.shouldFallback()) {
-
+             
+               if (device != null && device instanceof OpenCLDevice){
+                  throw new IllegalStateException("range's device is not suitable for OpenCL ");
+               }
+               OpenCLDevice openCLDevice = (OpenCLDevice) device; // still might be null! 
+               
                int jniFlags = 0;
+               if (openCLDevice == null){
+                  if (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU)){ 
+                     // We just treat as before by getting first GPU device
+                     openCLDevice = (OpenCLDevice)OpenCLDevice.firstGPU();
+                     jniFlags |= JNI_FLAG_USE_GPU; // this flag might be redundant now. 
+                  }else{
+                     // We fetch the first CPU device 
+                     openCLDevice = (OpenCLDevice)OpenCLDevice.firstCPU();
+                  }
+               }else{
+                  if (openCLDevice.getType()==Device.TYPE.GPU){
+                     jniFlags |= JNI_FLAG_USE_GPU; // this flag might be redundant now. 
+                  }
+               }
+             
                jniFlags |= (Config.enableProfiling ? JNI_FLAG_ENABLE_PROFILING : 0);
                jniFlags |= (Config.enableProfilingCSV ? JNI_FLAG_ENABLE_PROFILING_CSV | JNI_FLAG_ENABLE_PROFILING : 0);
                jniFlags |= (Config.enableVerboseJNI ? JNI_FLAG_ENABLE_VERBOSE_JNI : 0);
-               jniFlags |= (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU) ? JNI_FLAG_USE_GPU : 0);
+               // jniFlags |= (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU) ? JNI_FLAG_USE_GPU : 0);
                // Init the device to check capabilities before emitting the
                // code that requires the capabilities.
-               jniContextHandle = initJNI(kernel, jniFlags);
+               
+               
+               
+               jniContextHandle = initJNI(kernel, openCLDevice, jniFlags); // openCLDevice will not be null here
                if (jniContextHandle == 0) {
                   return warnFallBackAndExecute(_entrypointName, _range, _passes, "initJNI failed to return a valid handle");
                }

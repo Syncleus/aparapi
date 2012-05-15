@@ -301,7 +301,7 @@ public abstract class Kernel implements Cloneable{
        * This is meant to be used for debugging a kernel.
        */
       SEQ;
-      static boolean openCLAvailable;
+     /* static boolean openCLAvailable;
 
       static {
          String arch = System.getProperty("os.arch");
@@ -334,15 +334,15 @@ public abstract class Kernel implements Cloneable{
             openCLAvailable = false;
          }
       }
-
+*/
       static EXECUTION_MODE getDefaultExecutionMode() {
-         EXECUTION_MODE defaultExecutionMode = openCLAvailable ? GPU : JTP;
+         EXECUTION_MODE defaultExecutionMode = OpenCLJNI.getJNI().isOpenCLAvailable() ? GPU : JTP;
          String executionMode = Config.executionMode;
          if (executionMode != null) {
             try {
                EXECUTION_MODE requestedExecutionMode = valueOf(executionMode.toUpperCase());
                logger.fine("requested execution mode = " + requestedExecutionMode);
-               if ((openCLAvailable && requestedExecutionMode.isOpenCL()) || !requestedExecutionMode.isOpenCL()) {
+               if (( OpenCLJNI.getJNI().isOpenCLAvailable() && requestedExecutionMode.isOpenCL()) || !requestedExecutionMode.isOpenCL()) {
                   defaultExecutionMode = requestedExecutionMode;
                }
             } catch (Throwable t) {

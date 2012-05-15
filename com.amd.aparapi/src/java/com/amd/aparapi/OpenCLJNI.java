@@ -1,37 +1,38 @@
 package com.amd.aparapi;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 public class OpenCLJNI{
+   private static Logger logger = Logger.getLogger(Config.getLoggerName());
 
+   static boolean openCLAvailable = false;
    static {
       String arch = System.getProperty("os.arch");
-      //System.out.println("arch = "+arch);
+      logger.fine("arch = " + arch);
+      String aparapiLibraryName = null;
 
-      String libName = null;
-      try {
-
-         if (arch.equals("amd64") || arch.equals("x86_64")) {
-            libName = "aparapi_x86_64";
-         } else if (arch.equals("x86") || arch.equals("i386")) {
-            libName = "aparapi_x86";
-         }
-         if (libName != null) {
-            System.out.println("loading " + libName);
-            Runtime.getRuntime().loadLibrary(libName);
-         } else {
-            System.out.println("Expected property os.arch to contain amd64 or x86 but found " + arch
-                  + " don't know which library to load.");
-         }
-      } catch (UnsatisfiedLinkError e) {
-         System.out
-               .println("Check your environment. Failed to load aparapi native library "
-                     + libName
-                     + " or possibly failed to locate opencl native library (opencl.dll/opencl.so). Ensure that both are in your PATH (windows) or in LD_LIBRARY_PATH (linux).");
-
+      if (arch.equals("amd64") || arch.equals("x86_64")) {
+         aparapiLibraryName = "aparapi_x86_64";
+      } else if (arch.equals("x86") || arch.equals("i386")) {
+         aparapiLibraryName = "aparapi_x86";
+      } else {
+         logger.warning("Expected property os.arch to contain amd64, x86_64, x86 or i386 but instead found " + arch
+               + " as a result we don't know which aparapi to attempt to load.");
       }
+      if (aparapiLibraryName != null) {
+         logger.fine("attempting to load aparapi shared lib " + aparapiLibraryName);
+         try {
+            Runtime.getRuntime().loadLibrary(aparapiLibraryName);
+            openCLAvailable = true;
+         } catch (UnsatisfiedLinkError e) {
+            System.out
+                  .println("Check your environment. Failed to load aparapi native library "
+                        + aparapiLibraryName
+                        + " or possibly failed to locate opencl native library (opencl.dll/opencl.so). Ensure that both are in your PATH (windows) or in LD_LIBRARY_PATH (linux).");
 
-      Runtime.getRuntime().loadLibrary(libName);
+         }
+      }
    }
 
    static final OpenCLJNI jni = new OpenCLJNI();
@@ -47,6 +48,7 @@ public class OpenCLJNI{
    public final static int DOUBLE_BIT = 1 << 2;
 
    public final static int SHORT_BIT = 1 << 3;
+   
 
    public final static int ARRAY_BIT = 1 << 4;
 
@@ -74,6 +76,8 @@ public class OpenCLJNI{
 
    public final static int ARG_BIT = 1 << 16;
 
+   public final static int BYTE_BIT = 1 << 17;
+   
    native public List<OpenCLPlatform> getPlatforms();
 
    native public OpenCLProgram createProgram(OpenCLDevice context, String openCLSource);
@@ -85,5 +89,9 @@ public class OpenCLJNI{
    native public void remap(OpenCLProgram program, OpenCLMem mem, long address);
 
    native public void getMem(OpenCLProgram program, OpenCLMem mem);
+   
+   public boolean isOpenCLAvailable(){
+      return(openCLAvailable);
+   }
 
 }

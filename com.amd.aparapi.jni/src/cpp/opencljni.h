@@ -39,4 +39,78 @@
 #ifndef OPENCLJNI_H
 #define OPENCLJNI_H
 
+#include "common.h"
+#include "jniHelper.h"
+#include "clHelper.h"
+
+#define isset(bits, token) (((bits) & com_amd_aparapi_OpenCLJNI_##token##_BIT) ==com_amd_aparapi_OpenCLJNI_##token##_BIT) 
+#define set(bits, token) (bits) |= com_amd_aparapi_OpenCLJNI_##token##_BIT 
+#define reset(bits, token) (bits) &= ~com_amd_aparapi_OpenCLJNI_##token##_BIT 
+
+class OpenCLBits{
+   public:
+      static void describeBits(JNIEnv *jenv, jlong bits);
+};
+
+
+class OpenCLDevice{
+   public:
+      static jobject getPlatformInstance(JNIEnv *jenv, jobject deviceInstance);
+      static cl_device_id getDeviceId(JNIEnv *jenv, jobject deviceInstance);
+};
+class OpenCLPlatform{
+   public:
+      static cl_platform_id getPlatformId(JNIEnv *jenv, jobject platformInstance);
+};
+class OpenCLProgram{
+   public:
+      static jobject create(JNIEnv *jenv, cl_program program, cl_command_queue queue, cl_context context, jobject deviceInstance, jstring source, jstring log);
+      static cl_context getContext(JNIEnv *jenv, jobject programInstance);
+      static cl_program getProgram(JNIEnv *jenv, jobject programInstance);
+      static cl_command_queue getCommandQueue(JNIEnv *jenv, jobject programInstance);
+};
+class OpenCLKernel{
+   public:
+      static jobject create(JNIEnv *jenv, cl_kernel kernel, jobject programInstance, jstring name, jobject args);
+      static cl_kernel getKernel(JNIEnv *jenv, jobject kernelInstance);
+      static jobject getProgramInstance(JNIEnv *jenv, jobject kernelInstance);
+      static jobjectArray getArgsArray(JNIEnv *jenv, jobject kernelInstance);
+};
+
+class OpenCLMem{
+   public:
+      static jobject create(JNIEnv *jenv);
+      static cl_uint bitsToOpenCLMask(jlong argBits );
+      static jsize getArraySizeInBytes(JNIEnv *jenv, jarray array, jlong argBits);
+      static void *pin(JNIEnv *jenv, jarray array, jlong *memBits);
+      static void unpin(JNIEnv *jenv, jarray array, void *ptr, jlong *memBits);
+      static jobject create(JNIEnv *jenv, cl_context context,  jlong argBits, jarray array);
+      static jlong getBits(JNIEnv *jenv, jobject memInstance);
+      static void setBits(JNIEnv *jenv, jobject memInstance, jlong bits);
+      static void *getAddress(JNIEnv *jenv, jobject memInstance);
+      static void setAddress(JNIEnv *jenv, jobject memInstance, void *address);
+      static void setInstance(JNIEnv *jenv, jobject memInstance, jobject instance);
+      static void setSizeInBytes(JNIEnv *jenv, jobject memInstance, jint sizeInBytes);
+      static size_t getSizeInBytes(JNIEnv *jenv, jobject memInstance);
+      static jobject getInstance(JNIEnv *jenv, jobject memInstance);
+      static cl_mem getMem(JNIEnv *jenv, jobject memInstance, jlong argBits);
+      static void setMem(JNIEnv *jenv, jobject memInstance, jlong argBits, cl_mem mem);
+      static void describe(JNIEnv *jenv, jobject memInstance);
+};
+
+class OpenCLArg{
+   public:
+      static jlong getBits(JNIEnv *jenv, jobject argInstance);
+      static void setBits(JNIEnv *jenv, jobject argInstance, jlong bits);
+      static jobject getMemInstance(JNIEnv *jenv, jobject argInstance);
+      static void setMemInstance(JNIEnv *jenv, jobject argInstance, jobject memInstance);
+      static void describe(JNIEnv *jenv, jobject argDef, jint argIndex);
+};
+class OpenCLRange{
+   public:
+      static jint getDims(JNIEnv *jenv, jobject rangeInstance);
+      static void fill(JNIEnv *jenv, jobject rangeInstance, jint dims, size_t* offsets, size_t* globalDims, size_t* localDims);
+};
+
+
 #endif // OPENCLJNI_H

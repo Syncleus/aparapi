@@ -185,6 +185,8 @@ public class OpenCLDevice extends Device{
                   bits |= OpenCLJNI.INT_BIT | OpenCLJNI.ARRAY_BIT;
                } else if (parameterTypes[arg].isAssignableFrom(double[].class)) {
                   bits |= OpenCLJNI.DOUBLE_BIT | OpenCLJNI.ARRAY_BIT;
+               } else if (parameterTypes[arg].isAssignableFrom(byte[].class)) {
+                  bits |= OpenCLJNI.BYTE_BIT | OpenCLJNI.ARRAY_BIT;
                } else if (parameterTypes[arg].isAssignableFrom(short[].class)) {
                   bits |= OpenCLJNI.SHORT_BIT | OpenCLJNI.ARRAY_BIT;
                } else if (parameterTypes[arg].isAssignableFrom(long[].class)) {
@@ -197,6 +199,8 @@ public class OpenCLDevice extends Device{
                   bits |= OpenCLJNI.INT_BIT | OpenCLJNI.PRIMITIVE_BIT;
                } else if (parameterTypes[arg].isAssignableFrom(double.class)) {
                   bits |= OpenCLJNI.DOUBLE_BIT | OpenCLJNI.PRIMITIVE_BIT;
+               } else if (parameterTypes[arg].isAssignableFrom(byte.class)) {
+                  bits |= OpenCLJNI.BYTE_BIT | OpenCLJNI.PRIMITIVE_BIT;
                } else if (parameterTypes[arg].isAssignableFrom(short.class)) {
                   bits |= OpenCLJNI.SHORT_BIT | OpenCLJNI.PRIMITIVE_BIT;
                } else if (parameterTypes[arg].isAssignableFrom(long.class)) {

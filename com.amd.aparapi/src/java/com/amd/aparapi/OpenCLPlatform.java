@@ -31,7 +31,12 @@ public class OpenCLPlatform{
    }
 
    public static List<OpenCLPlatform> getPlatforms() {
-      return (OpenCLJNI.getJNI().getPlatforms());
+      if (OpenCLJNI.getJNI().isOpenCLAvailable()){
+         return (OpenCLJNI.getJNI().getPlatforms());
+      }else{
+         return(new ArrayList<OpenCLPlatform>());
+      }
+      
    }
 
 }

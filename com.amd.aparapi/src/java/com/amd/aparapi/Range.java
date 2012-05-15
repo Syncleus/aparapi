@@ -462,4 +462,8 @@ public class Range{
       return (valid);
    }
 
+    Device getDevice() {
+      return(device);
+   }
+
 }

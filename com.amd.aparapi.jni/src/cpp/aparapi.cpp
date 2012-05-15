@@ -41,6 +41,7 @@
 #define APARAPI_SOURCE
 #include "aparapi.h"
 #include "com_amd_aparapi_KernelRunner.h"
+#include "opencljni.h"
 
 
 class Range{
@@ -347,17 +348,18 @@ class JNIContext{
    private: 
       jint flags;
       jboolean valid;
-      cl_platform_id platform;
-      cl_platform_id* platforms;
-      cl_uint platformc;
+      //cl_platform_id platform;
+      //cl_platform_id* platforms;
+      //cl_uint platformc;
    public:
       jobject kernelObject;
+      jobject openCLDeviceObject;
       jclass kernelClass;
-      cl_uint deviceIdc;
-      cl_device_id* deviceIds;
+      //cl_uint deviceIdc;
+      cl_device_id deviceId;
       cl_int deviceType;
       cl_context context;
-      cl_command_queue* commandQueues;
+      cl_command_queue commandQueue;
       cl_program program;
       cl_kernel kernel;
       jint argc;
@@ -373,22 +375,23 @@ class JNIContext{
       ProfileInfo *exec;
       FILE* profileFile;
       // these map to camelCase form of CL_DEVICE_XXX_XXX  For example CL_DEVICE_MAX_COMPUTE_UNITS == maxComputeUnits
-      cl_uint maxComputeUnits;
-      cl_uint maxWorkItemDimensions;
-      size_t *maxWorkItemSizes;
-      size_t maxWorkGroupSize;
-      cl_ulong globalMemSize;
-      cl_ulong localMemSize;
+     // cl_uint maxComputeUnits;
+     // cl_uint maxWorkItemDimensions;
+     // size_t *maxWorkItemSizes;
+     // size_t maxWorkGroupSize;
+     // cl_ulong globalMemSize;
+     // cl_ulong localMemSize;
 
       static JNIContext* getJNIContext(jlong jniContextHandle){
          return((JNIContext*)jniContextHandle);
       }
 
-      JNIContext(JNIEnv *jenv, jobject _kernelObject, jint _flags): 
+      JNIContext(JNIEnv *jenv, jobject _kernelObject, jobject _openCLDeviceObject, jint _flags): 
          kernelObject(jenv->NewGlobalRef(_kernelObject)),
          kernelClass((jclass)jenv->NewGlobalRef(jenv->GetObjectClass(_kernelObject))), 
+         openCLDeviceObject(jenv->NewGlobalRef(_openCLDeviceObject)),
          flags(_flags),
-         platform(NULL),
+       //  platform(NULL),
          profileBaseTime(0),
          passes(0),
          exec(NULL),
@@ -397,138 +400,25 @@ class JNIContext{
          valid(JNI_FALSE){
             cl_int status = CL_SUCCESS;
 
-            // create the context using the mechanism described here
-            // http://developer.amd.com/support/KnowledgeBase/Lists/KnowledgeBase/DispForm.aspx?ID=71
-
-            // We may have one or more available platforms so determine how many we have 
-            status = clGetPlatformIDs(0, NULL, &platformc);
-
-            if (status == CL_SUCCESS && platformc >0) {
-               platforms = new cl_platform_id[platformc];
-               status = clGetPlatformIDs(platformc, platforms, NULL);
-               if (status == CL_SUCCESS){
-                  // iterate through platforms looking for an OpenCL 1.[12] platform supporting required device (GPU|CPU)
-                  // note that we exit the loop when we find a match so we find the first match
-                  for (unsigned i = 0; platform == NULL && i < platformc; ++i) {
-                     char platformVendorName[512];  
-                     char platformVersionName[512];
-                     status = clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, sizeof(platformVendorName), platformVendorName, NULL);
-                     status = clGetPlatformInfo(platforms[i], CL_PLATFORM_VERSION, sizeof(platformVersionName), platformVersionName, NULL);
-                     if (isVerbose()){
-                        fprintf(stderr, "platform name    %d %s\n", i, platformVendorName); 
-                        fprintf(stderr, "platform version %d %s\n", i, platformVersionName); 
-                     }
-                     // platformVendorName = "Advanced Micro Devices, Inc."||"NVIDIA Corporation"
-                     // platformVersionName = "OpenCL 1.1 AMD-APP-SDK-v2.5 (684.213)"|"OpenCL 1.1 CUDA 4.0.1"
-#ifndef __APPLE__
-                     // Here we check if the platformVersionName starts with "OpenCL 1.1" (10 chars!) 
-                     if (   !strncmp(platformVersionName, "OpenCL 1.1", 10)
-                         || !strncmp(platformVersionName, "OpenCL 1.2", 10)) { //}
-#else 
-                     // Here we check if the platformVersionName starts with "OpenCL 1.1" or "OpenCL 1.0" (10 chars!) 
-                     if (   !strncmp(platformVersionName, "OpenCL 1.1", 10)
-                         || !strncmp(platformVersionName, "OpenCL 1.0", 10)
-                         || !strncmp(platformVersionName, "OpenCL 1.2", 10)) { // }
-#endif
-                     // Get the # of devices
-                     status = clGetDeviceIDs(platforms[i], deviceType, 0, NULL, &deviceIdc);
-                     // now check if this platform supports the requested device type (GPU or CPU)
-                     if (status == CL_SUCCESS && deviceIdc >0 ){
-                        if (deviceIdc >1){
-                           if (isVerbose()){
-                              fprintf(stderr, "Warning attempt to use %d devices\n", deviceIdc);
-                           }
-                           deviceIdc = 1; // Hack to work around issue #18 (multiple device error)
-                           if (isVerbose()){
-                              fprintf(stderr, "Locking deviceIdc to %d to work around issue #18\n", deviceIdc);
-                           }
-                        }
-                        platform = platforms[i];
-                        if (isVerbose()){
-                           fprintf(stderr, "platform %s supports requested device type\n", platformVendorName);
-                        }
-
-                        deviceIds = new cl_device_id[deviceIdc];
-                        status = clGetDeviceIDs(platform, deviceType, deviceIdc, deviceIds, NULL);
-                        ASSERT_CL_NO_RETURN("clGetDeviceIDs()"); 
-                        if (status == CL_SUCCESS){
-
-                           status = clGetDeviceInfo(deviceIds[0], CL_DEVICE_MAX_COMPUTE_UNITS,  sizeof(maxComputeUnits), &maxComputeUnits, NULL);
-                           ASSERT_CL_NO_RETURN( "clGetDeviceInfo(CL_DEVICE_MAX_COMPUTE_UNITS).");
-
-                           status = clGetDeviceInfo(deviceIds[0], CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,  sizeof(maxWorkItemDimensions), &maxWorkItemDimensions, NULL);
-                           ASSERT_CL_NO_RETURN( "clGetDeviceInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS).");
-
-                           maxWorkItemSizes = (size_t *)malloc(sizeof(size_t)*maxWorkItemDimensions);
-                           status = clGetDeviceInfo(deviceIds[0], CL_DEVICE_MAX_WORK_ITEM_SIZES,  sizeof(size_t)*maxWorkItemDimensions, maxWorkItemSizes, NULL);
-
-                           ASSERT_CL_NO_RETURN( "clGetDeviceInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES).");
-
-                           status = clGetDeviceInfo(deviceIds[0], CL_DEVICE_MAX_WORK_GROUP_SIZE,  sizeof(maxWorkGroupSize), &maxWorkGroupSize, NULL);
-                           ASSERT_CL_NO_RETURN( "clGetDeviceInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE).");
-
-                           status = clGetDeviceInfo(deviceIds[0], CL_DEVICE_GLOBAL_MEM_SIZE,  sizeof(globalMemSize), &globalMemSize, NULL);
-                           ASSERT_CL_NO_RETURN( "clGetDeviceInfo(CL_DEVICE_GLOBAL_MEM_SIZE).");
-
-                           status = clGetDeviceInfo(deviceIds[0], CL_DEVICE_LOCAL_MEM_SIZE,  sizeof(localMemSize), &localMemSize, NULL);
-
-                           ASSERT_CL_NO_RETURN( "clGetDeviceInfo(CL_DEVICE_LOCAL_MEM_SIZE).");
+            // The device is passed to us.  So just extract the device Id, platform Id etc and create a context.
+            //
+            jobject platformInstance = OpenCLDevice::getPlatformInstance(jenv, openCLDeviceObject);
+            cl_platform_id platformId = OpenCLPlatform::getPlatformId(jenv, platformInstance);
+            deviceId = OpenCLDevice::getDeviceId(jenv, openCLDeviceObject);
+            cl_device_type deviceType;
+            clGetDeviceInfo(deviceId, CL_DEVICE_TYPE,  sizeof(deviceType), &deviceType, NULL);
+      //fprintf(stderr, "device[%d] CL_DEVICE_TYPE = %x\n", deviceId, deviceType);
 
 
-                           if (isVerbose()){
-                              fprintf(stderr, "device[%p]: Type: ", deviceIds[0]);
-                              if (deviceType & CL_DEVICE_TYPE_DEFAULT) {
-                                 //  deviceType &= ~CL_DEVICE_TYPE_DEFAULT;
-                                 fprintf(stderr, "Default ");
-                              }else if (deviceType & CL_DEVICE_TYPE_CPU) {
-                                 // deviceType &= ~CL_DEVICE_TYPE_CPU;
-                                 fprintf(stderr, "CPU ");
-                              }else if (deviceType & CL_DEVICE_TYPE_GPU) {
-                                 // deviceType &= ~CL_DEVICE_TYPE_GPU;
-                                 fprintf(stderr, "GPU ");
-                              }else if (deviceType & CL_DEVICE_TYPE_ACCELERATOR) {
-                                 // deviceType &= ~CL_DEVICE_TYPE_ACCELERATOR;
-                                 fprintf(stderr, "Accelerator ");
-                              }else{
-                                 fprintf(stderr, "Unknown (0x%llx) ", deviceType);
-                              }
-                              fprintf(stderr, "\n");
-                           }
-                           cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platform, 0 };
-                           cl_context_properties* cprops = (NULL == platform) ? NULL : cps;
-                           context = clCreateContextFromType( cprops, deviceType, NULL, NULL, &status);
-                           ASSERT_CL_NO_RETURN("clCreateContextFromType()");
-                           if (status == CL_SUCCESS){
+      cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platformId, 0 };
+      cl_context_properties* cprops = (NULL == platformId) ? NULL : cps;
+      context = clCreateContextFromType( cprops, deviceType, NULL, NULL, &status); 
 
-                              valid = JNI_TRUE;
-                           }
-                        }
-                     }else{
-                        if (isVerbose()){
-                           fprintf(stderr, "platform %s does not support requested device type skipping!\n", platformVendorName);
-                        }
-                     }
-
-                  }else{
-                     if (isVerbose()){
-#ifndef __APPLE__
-                        fprintf(stderr, "platform %s version %s is not OpenCL 1.1 skipping!\n", platformVendorName, platformVersionName);
-#else
-                        fprintf(stderr, "platform %s version %s is neither OpenCL 1.2, OpenCL 1.1 or OpenCL 1.0 skipping!\n", platformVendorName, platformVersionName);
-#endif
-
-                     }
-                  }
-               }
-
-            } 
-         }else{
-            if (isVerbose()){
-               fprintf(stderr, "no opencl platforms available!\n");
+            ASSERT_CL_NO_RETURN("clCreateContextFromType()");
+            if (status == CL_SUCCESS){
+               valid = JNI_TRUE;
             }
          }
-
-}
 
 jboolean isValid(){
    return(valid);
@@ -558,14 +448,6 @@ void dispose(JNIEnv *jenv){
       ASSERT_CL_NO_RETURN("clReleaseContext()");
       context = (cl_context)0;
    }
-   if (commandQueues){
-      for (unsigned dev=0; dev<deviceIdc; dev++){
-         status = clReleaseCommandQueue((cl_command_queue)commandQueues[dev]);
-         ASSERT_CL_NO_RETURN("clReleaseCommandQueue()");
-         commandQueues[dev] = (cl_command_queue)0;
-      }
-      delete[] commandQueues; commandQueues = NULL;
-   }
    if (program != 0){
       status = clReleaseProgram((cl_program)program);
       ASSERT_CL_NO_RETURN("clReleaseProgram()");
@@ -575,12 +457,6 @@ void dispose(JNIEnv *jenv){
       status = clReleaseKernel((cl_kernel)kernel);
       ASSERT_CL_NO_RETURN("clReleaseKernel()");
       kernel = (cl_kernel)0;
-   }
-   if (platforms){
-      delete []platforms; platforms=NULL;
-   }
-   if (deviceIds){
-      delete [] deviceIds; deviceIds=NULL;
    }
    if (argc> 0){
       for (int i=0; i< argc; i++){
@@ -842,7 +718,7 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
 
     if (jniContext->firstRun && jniContext->isProfilingEnabled()){
          cl_event firstEvent;
-         status = clEnqueueMarker(jniContext->commandQueues[0] /** change if we enable multiple gpus **/, &firstEvent);
+         status = clEnqueueMarker(jniContext->commandQueue, &firstEvent);
          if (status != CL_SUCCESS) {
             PRINT_CL_ERR(status, "clEnqueueMarker endOfTxfers");
             return 0L;
@@ -1006,7 +882,7 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
                fprintf(stderr, "writing constant buffer %s\n", arg->name);
             }
 
-            status = clEnqueueWriteBuffer(jniContext->commandQueues[0], arg->value.ref.mem, CL_FALSE, 0, 
+            status = clEnqueueWriteBuffer(jniContext->commandQueue, arg->value.ref.mem, CL_FALSE, 0, 
                   arg->sizeInBytes, arg->value.ref.addr, 0, NULL, &(jniContext->writeEvents[writeEventCount++]));
             if (status != CL_SUCCESS) {
                PRINT_CL_ERR(status, "clEnqueueWriteBuffer");
@@ -1119,7 +995,6 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
    jniContext->exec = new ProfileInfo[passes];
 
    for (int passid=0; passid<passes; passid++){
-      for (unsigned dev =0; dev < jniContext->deviceIdc; dev++){ // this will always be 1 until we reserect multi-dim support
          //size_t offset = 1; // (size_t)((range.globalDims[0]/jniContext->deviceIdc)*dev);
          status = clSetKernelArg(jniContext->kernel, kernelArgPos, sizeof(passid), &(passid));
          if (status != CL_SUCCESS) {
@@ -1135,14 +1010,14 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             // enqueue depends on write enqueues 
             // we don't block but and we populate the executeEvents
             status = clEnqueueNDRangeKernel(
-                  jniContext->commandQueues[dev],
+                  jniContext->commandQueue,
                   jniContext->kernel,
                   range.dims,
                   range.offsets, range.globalDims,
                   range.localDims,
                   writeEventCount,
                   writeEventCount?jniContext->writeEvents:NULL,
-                  &jniContext->executeEvents[dev]);
+                  &jniContext->executeEvents[0]);
          }else{
             // we are in some passid >0 pass 
             // maybe middle or last!
@@ -1153,7 +1028,7 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             // We must capture any profile info for passid-1  so we must wait for the last execution to complete
             if (jniContext->isProfilingEnabled()) {
                if (passid ==1 ){
-                  status = clWaitForEvents(1, &jniContext->executeEvents[dev]);
+                  status = clWaitForEvents(1, &jniContext->executeEvents[0]);
                   if (status != CL_SUCCESS) {
                      PRINT_CL_ERR(status, "clWaitForEvents() execute event");
                      jniContext->unpinAll(jenv);
@@ -1161,14 +1036,14 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
                   }
                }
                // Now we can profile info for passid-1 
-               status = profile(&jniContext->exec[passid-1], &jniContext->executeEvents[dev], 1, NULL, jniContext->profileBaseTime);
+               status = profile(&jniContext->exec[passid-1], &jniContext->executeEvents[0], 1, NULL, jniContext->profileBaseTime);
                if (status != CL_SUCCESS) {
                   jniContext->unpinAll(jenv);
                   return status;
                }
             }
             status = clEnqueueNDRangeKernel(
-                  jniContext->commandQueues[dev], 
+                  jniContext->commandQueue, 
                   jniContext->kernel,
                   range.dims,
                   range.offsets,
@@ -1176,7 +1051,7 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
                   range.localDims,
                   0,    // wait for this event count
                   NULL, // list of events to wait for
-                  &jniContext->executeEvents[dev]);
+                  &jniContext->executeEvents[0]);
          }
 
 
@@ -1189,24 +1064,21 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             jniContext->unpinAll(jenv);
             return status;
          }
-      }
       if (0){  // I dont think we need this
          if (passid < passes-1){
             // we need to wait for the executions to complete...
-            status = clWaitForEvents(jniContext->deviceIdc,  jniContext->executeEvents);
+            status = clWaitForEvents(1,  jniContext->executeEvents);
             if (status != CL_SUCCESS) {
                PRINT_CL_ERR(status, "clWaitForEvents() execute events mid pass");
                jniContext->unpinAll(jenv);
                return status;
             }
 
-            for (unsigned dev = 0; dev < jniContext->deviceIdc; dev++){
-               status = clReleaseEvent(jniContext->executeEvents[dev]);
-               if (status != CL_SUCCESS) {
-                  PRINT_CL_ERR(status, "clReleaseEvent() read event");
-                  jniContext->unpinAll(jenv);
-                  return status;
-               }
+            status = clReleaseEvent(jniContext->executeEvents[0]);
+            if (status != CL_SUCCESS) {
+               PRINT_CL_ERR(status, "clReleaseEvent() read event");
+               jniContext->unpinAll(jenv);
+               return status;
             }
          }
       }
@@ -1246,8 +1118,8 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             fprintf(stderr, "reading buffer %d %s\n", i, arg->name);
          }
 
-         status = clEnqueueReadBuffer(jniContext->commandQueues[0], arg->value.ref.mem, CL_FALSE, 0, 
-               arg->sizeInBytes,arg->value.ref.addr , jniContext->deviceIdc, jniContext->executeEvents, &(jniContext->readEvents[readEventCount]));
+         status = clEnqueueReadBuffer(jniContext->commandQueue, arg->value.ref.mem, CL_FALSE, 0, 
+               arg->sizeInBytes,arg->value.ref.addr , 1, jniContext->executeEvents, &(jniContext->readEvents[readEventCount]));
          if (status != CL_SUCCESS) {
             PRINT_CL_ERR(status, "clEnqueueReadBuffer()");
             jniContext->unpinAll(jenv);
@@ -1288,7 +1160,7 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
       // if readEventCount == 0 then we don't need any reads so we just wait for the executions to complete
 
 	   
-      status = clWaitForEvents(jniContext->deviceIdc, jniContext->executeEvents);
+      status = clWaitForEvents(1, jniContext->executeEvents);
       if (status != CL_SUCCESS) {
          PRINT_CL_ERR(status, "clWaitForEvents() execute event");
          jniContext->unpinAll(jenv);
@@ -1319,14 +1191,12 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
       return executeStatus;
    }
 
-   for (unsigned int dev=0; dev<jniContext->deviceIdc; dev++){
 
-      status = clReleaseEvent(jniContext->executeEvents[dev]);
-      if (status != CL_SUCCESS) {
-         PRINT_CL_ERR(status, "clReleaseEvent() execute event");
-         jniContext->unpinAll(jenv);
-         return status;
-      }
+   status = clReleaseEvent(jniContext->executeEvents[0]);
+   if (status != CL_SUCCESS) {
+      PRINT_CL_ERR(status, "clReleaseEvent() execute event");
+      jniContext->unpinAll(jenv);
+      return status;
    }
 
    for (int i=0; i< writeEventCount; i++){
@@ -1356,9 +1226,9 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
 
 // we return the JNIContext from here 
 JNI_JAVA(jlong, KernelRunner, initJNI)
-   (JNIEnv *jenv, jclass clazz, jobject kernelObject, jint flags) {
+   (JNIEnv *jenv, jclass clazz, jobject kernelObject, jobject openCLDeviceObject, jint flags) {
    cl_int status = CL_SUCCESS;
-   JNIContext* jniContext = new JNIContext(jenv, kernelObject, flags);
+   JNIContext* jniContext = new JNIContext(jenv, kernelObject, openCLDeviceObject, flags);
 
    if (jniContext->isValid()){
      
@@ -1378,7 +1248,7 @@ JNI_JAVA(jlong, KernelRunner, buildProgramJNI)
 
    cl_int status = CL_SUCCESS;
    
-   jniContext->program = CLHelper::compile(jenv, jniContext->context,  jniContext->deviceIdc, jniContext->deviceIds, source, NULL, &status);
+   jniContext->program = CLHelper::compile(jenv, jniContext->context,  1, &jniContext->deviceId, source, NULL, &status);
 
    if(status == CL_BUILD_PROGRAM_FAILURE) {
       return(0);
@@ -1392,13 +1262,10 @@ JNI_JAVA(jlong, KernelRunner, buildProgramJNI)
       queue_props |= CL_QUEUE_PROFILING_ENABLE;
    }
 
-   jniContext->commandQueues= new cl_command_queue[jniContext->deviceIdc];
-   for (unsigned  dev=0; dev < jniContext->deviceIdc; dev++){
-      jniContext->commandQueues[dev]=clCreateCommandQueue(jniContext->context, (cl_device_id)jniContext->deviceIds[dev],
-            queue_props,
-            &status);
-      ASSERT_CL("clCreateCommandQueue()");
-   }
+   jniContext->commandQueue= clCreateCommandQueue(jniContext->context, (cl_device_id)jniContext->deviceId,
+       queue_props,
+       &status);
+   ASSERT_CL("clCreateCommandQueue()");
 
    if (jniContext->isProfilingCSVEnabled()) {
       // compute profile filename
@@ -1542,7 +1409,7 @@ JNI_JAVA(jint, KernelRunner, setArgsJNI)
 
       }
       // we will need an executeEvent buffer for all devices
-      jniContext->executeEvents = new cl_event[jniContext->deviceIdc];
+      jniContext->executeEvents = new cl_event[1];
 
       // We will need *at most* jniContext->argc read/write events
       jniContext->readEvents = new cl_event[jniContext->argc];
@@ -1565,7 +1432,7 @@ JNI_JAVA(jstring, KernelRunner, getExtensionsJNI)
    JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
    if (jniContext != NULL){
       cl_int status = CL_SUCCESS;
-      jextensions = CLHelper::getExtensions(jenv, jniContext->deviceIds[0], &status);
+      jextensions = CLHelper::getExtensions(jenv, jniContext->deviceId, &status);
    }
    return jextensions;
 }
@@ -1613,7 +1480,7 @@ JNI_JAVA(jint, KernelRunner, getJNI)
          }
          arg->pin(jenv);
 
-         status = clEnqueueReadBuffer(jniContext->commandQueues[0], arg->value.ref.mem, CL_FALSE, 0, 
+         status = clEnqueueReadBuffer(jniContext->commandQueue, arg->value.ref.mem, CL_FALSE, 0, 
                arg->sizeInBytes,arg->value.ref.addr , 0, NULL, &jniContext->readEvents[0]);
 		 if (jniContext->isVerbose()){
 		    fprintf(stderr, "explicitly read %s ptr=%lx len=%d\n", arg->name, arg->value.ref.addr,arg->sizeInBytes );
@@ -1703,6 +1570,7 @@ JNI_JAVA(jobject, KernelRunner, getProfileInfoJNI)
 }
 
 
+/*
 JNI_JAVA(jint, KernelRunner, getMaxComputeUnitsJNI)
    (JNIEnv *jenv, jobject jobj, jlong jniContextHandle) {
    cl_int status = CL_SUCCESS;
@@ -1746,3 +1614,4 @@ JNI_JAVA(jint, KernelRunner, getMaxWorkItemSizeJNI)
       return(0);
    }
 }
+*/
