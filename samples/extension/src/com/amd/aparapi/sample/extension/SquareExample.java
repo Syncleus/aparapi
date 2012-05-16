@@ -44,12 +44,12 @@ public class SquareExample{
    public static void main(String[] args) {
 
       int size = 32;
-      int[] v = new int[size];
       float[] in = new float[size];
       for (int i = 0; i < size; i++) {
          in[i] = i;
       }
-      float[] out = new float[size];
+      float[] squares = new float[size];
+      float[] quads = new float[size];
       Range range = Range.create(size);
 
       Device device = Device.best();
@@ -58,16 +58,16 @@ public class SquareExample{
          OpenCLDevice openclDevice = (OpenCLDevice) device;
 
          SquarerWithResource squarer = openclDevice.create(SquarerWithResource.class);
-         squarer.square(range, in, out);
+         squarer.square(range, in, squares);
 
          for (int i = 0; i < size; i++) {
-            System.out.println(in[i] + " " + out[i]);
+            System.out.println(in[i] + " " + squares[i]);
          }
          
-         squarer.square(range, out, in);
+         squarer.square(range, squares, quads);
 
          for (int i = 0; i < size; i++) {
-            System.out.println(in[i] + " " + out[i]);
+            System.out.println(in[i] + " " +squares[i] + " "+ quads[i]);
          }
       }
    }

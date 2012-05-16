@@ -42,58 +42,62 @@
 #include "com_amd_aparapi_OpenCLJNI.h"
 
 
-void OpenCLBits::describeBits(JNIEnv *jenv, jlong bits){
+void OpenCLArgDescriptor::describeBits(JNIEnv *jenv, jlong bits){
    fprintf(stderr, " %lx ", bits);
-   if (isset(bits, READONLY)){
+   if (argisset(bits, READONLY)){
       fprintf(stderr, "readonly ");
    }
-   if (isset(bits, WRITEONLY)){
+   if (argisset(bits, WRITEONLY)){
       fprintf(stderr, "writeonly ");
    }
-   if (isset(bits, READWRITE)){
+   if (argisset(bits, READWRITE)){
       fprintf(stderr, "readwrite ");
    }
-   if (isset(bits, ARRAY)){
+   if (argisset(bits, ARRAY)){
       fprintf(stderr, "array ");
    }
-   if (isset(bits, PRIMITIVE)){
+   if (argisset(bits, PRIMITIVE)){
       fprintf(stderr, "primitive ");
    }
-   if (isset(bits, FLOAT)){
+   if (argisset(bits, FLOAT)){
       fprintf(stderr, "float ");
    }
-   if (isset(bits, BYTE)){
+   if (argisset(bits, BYTE)){
       fprintf(stderr, "byte ");
    }
-   if (isset(bits, SHORT)){
+   if (argisset(bits, SHORT)){
       fprintf(stderr, "short ");
    }
-   if (isset(bits, LONG)){
+   if (argisset(bits, LONG)){
       fprintf(stderr, "long ");
    }
-   if (isset(bits, DOUBLE)){
+   if (argisset(bits, DOUBLE)){
       fprintf(stderr, "double ");
    }
-   if (isset(bits, INT)){
+   if (argisset(bits, INT)){
       fprintf(stderr, "int ");
    }
-   if (isset(bits, MEM_COPY)){
-      fprintf(stderr, "copy ");
-   }
-   if (isset(bits, GLOBAL)){
+   if (argisset(bits, GLOBAL)){
       fprintf(stderr, "global ");
    }
-   if (isset(bits, LOCAL)){
+   if (argisset(bits, LOCAL)){
       fprintf(stderr, "local ");
    }
-   if (isset(bits, MEM_DIRTY)){
+   if (argisset(bits, ISARG)){
+      fprintf(stderr, "isarg ");
+   }
+}
+
+void OpenCLMem::describeBits(JNIEnv *jenv, jlong bits){
+   fprintf(stderr, " %lx ", bits);
+   if (memisset(bits, COPY)){
+      fprintf(stderr, "copy ");
+   }
+   if (memisset(bits, DIRTY)){
       fprintf(stderr, "dirty ");
    }
-   if (isset(bits, MEM_ENQUEUED)){
+   if (memisset(bits, ENQUEUED)){
       fprintf(stderr, "enqueued ");
-   }
-   if (isset(bits, ARG)){
-      fprintf(stderr, "arg ");
    }
 }
 
@@ -136,7 +140,7 @@ jobject OpenCLKernel::getProgramInstance(JNIEnv *jenv, jobject kernelInstance){
 }
 
 jobjectArray OpenCLKernel::getArgsArray(JNIEnv *jenv, jobject kernelInstance){
-   return(reinterpret_cast<jobjectArray> (JNIHelper::getInstanceFieldObject(jenv, kernelInstance, "args", ArrayArg(OpenCLArgClass) )));
+   return(reinterpret_cast<jobjectArray> (JNIHelper::getInstanceFieldObject(jenv, kernelInstance, "args", ArrayArg(OpenCLArgDescriptorClass) )));
 }
 
 jobject OpenCLMem::create(JNIEnv *jenv){
@@ -144,60 +148,67 @@ jobject OpenCLMem::create(JNIEnv *jenv){
 }
 cl_uint OpenCLMem::bitsToOpenCLMask(jlong argBits ){
    cl_uint mask =  CL_MEM_USE_HOST_PTR;
-   if (isset(argBits, READONLY)){
+   if (argisset(argBits, READONLY)){
       mask|= CL_MEM_READ_ONLY;
-   }else if (isset(argBits, READWRITE)){
+   }else if (argisset(argBits, READWRITE)){
       mask|= CL_MEM_READ_WRITE;
-   } else if (isset(argBits, WRITEONLY)){
+   } else if (argisset(argBits, WRITEONLY)){
       mask|= CL_MEM_WRITE_ONLY;
    }
    return(mask);
 }
 
+jsize OpenCLMem::getPrimitiveSizeInBytes(JNIEnv *jenv, jlong argBits){
+   jsize sizeInBytes = 0;
+   if (argisset(argBits, DOUBLE) || argisset(argBits, LONG)){
+      sizeInBytes = 8;
+   }else if (argisset(argBits, FLOAT) || argisset(argBits, INT)){
+      sizeInBytes = 4;
+   }else if (argisset(argBits, SHORT)){
+      sizeInBytes = 2;
+   }else if (argisset(argBits, BYTE)){
+      sizeInBytes = 1;
+   }
+   return(sizeInBytes);
+}
+
 jsize OpenCLMem::getArraySizeInBytes(JNIEnv *jenv, jarray array, jlong argBits){
    jsize arrayLen = jenv->GetArrayLength(array);
-   jsize sizeInBytes = 0;
-   if (isset(argBits, FLOAT) || isset(argBits, INT)){
-      sizeInBytes = arrayLen *4;
-   }else if (isset(argBits, DOUBLE) || isset(argBits, LONG)){
-      sizeInBytes = arrayLen *8;
-   }else if (isset(argBits, SHORT)){
-      sizeInBytes = arrayLen *2;
-   }else if (isset(argBits, BYTE)){
-      sizeInBytes = arrayLen * 1;
-   }
+   jsize sizeInBytes = getPrimitiveSizeInBytes(jenv, argBits) * arrayLen;
    fprintf(stderr, "size of new Mem arg is %d\n", sizeInBytes);
    return(sizeInBytes);
 }
+
 void *OpenCLMem::pin(JNIEnv *jenv, jarray array, jlong *memBits){
    jboolean isCopy;
-   void *ptr = jenv->GetPrimitiveArrayCritical(array,&isCopy); 
+   void *ptr = jenv->GetPrimitiveArrayCritical(array, &isCopy); 
    if (memBits != NULL){
-      if(0){OpenCLBits::describeBits(jenv, *memBits);fprintf(stderr, " before  \n");}
+      if(0){OpenCLMem::describeBits(jenv, *memBits);fprintf(stderr, " before  \n");}
       if (isCopy){
-         set(*memBits, MEM_COPY);
+         memset(*memBits, COPY);
       }else{
-         reset(*memBits, MEM_COPY);
+         memreset(*memBits, COPY);
       }
-      if(0){OpenCLBits::describeBits(jenv, *memBits);fprintf(stderr, " after \n");}
+      if(0){OpenCLMem::describeBits(jenv, *memBits);fprintf(stderr, " after \n");}
    }
    return(ptr);
 }
 
 void OpenCLMem::unpin(JNIEnv *jenv, jarray array, void *ptr, jlong *memBits){
-   if (isset(*memBits, WRITEONLY)){
+   if (argisset(*memBits, WRITEONLY)){
       jenv->ReleasePrimitiveArrayCritical(array, ptr,JNI_ABORT);
    }else{
       jenv->ReleasePrimitiveArrayCritical(array, ptr, 0);
    }
 }
 
-
-jobject OpenCLMem::create(JNIEnv *jenv, cl_context context,  jlong argBits, jarray array){
+jobject OpenCLMem::create(JNIEnv *jenv, cl_context context, jlong argBits, jarray array){
    jsize sizeInBytes = getArraySizeInBytes(jenv, array, argBits);
 
+   jlong memBits = 0;
+
    cl_int status = CL_SUCCESS;
-   void *ptr = OpenCLMem::pin(jenv, array, &argBits); 
+   void *ptr = OpenCLMem::pin(jenv, array, &memBits); 
    cl_mem mem=clCreateBuffer(context, bitsToOpenCLMask(argBits),  sizeInBytes, ptr, &status);
    if (status != CL_SUCCESS){
       fprintf(stderr, "buffer creation failed!\n");
@@ -208,8 +219,8 @@ jobject OpenCLMem::create(JNIEnv *jenv, cl_context context,  jlong argBits, jarr
    OpenCLMem::setAddress(jenv, memInstance, ptr);
    OpenCLMem::setInstance(jenv, memInstance, array);
    OpenCLMem::setSizeInBytes(jenv, memInstance, sizeInBytes);
-   OpenCLMem::setBits(jenv, memInstance, argBits);
-   OpenCLMem::setMem(jenv, memInstance, argBits, mem);
+   OpenCLMem::setBits(jenv, memInstance, memBits);
+   OpenCLMem::setMem(jenv, memInstance, mem);
    fprintf(stderr, "initiated mem object!\n");
    return(memInstance);
 }
@@ -238,52 +249,38 @@ jobject OpenCLMem::getInstance(JNIEnv *jenv, jobject memInstance){
    return(JNIHelper::getInstanceFieldObject(jenv, memInstance, "instance", ObjectClassArg));
 }
 
-cl_mem OpenCLMem::getMem(JNIEnv *jenv, jobject memInstance, jlong argBits){
-   cl_mem mem = 0;
-
-   if (isset(argBits, READONLY)){
-      mem = (cl_mem)JNIHelper::getInstanceFieldLong(jenv, memInstance, "readOnlyMemId");
-   } else if (isset(argBits, READWRITE)){
-      mem = (cl_mem)JNIHelper::getInstanceFieldLong(jenv, memInstance, "readWriteMemId");
-   } else if (isset(argBits, WRITEONLY)){
-      mem = (cl_mem)JNIHelper::getInstanceFieldLong(jenv, memInstance, "writeOnlyMemId");
-   }
+cl_mem OpenCLMem::getMem(JNIEnv *jenv, jobject memInstance){
+   cl_mem mem = (cl_mem)JNIHelper::getInstanceFieldLong(jenv, memInstance, "memId");
    return(mem);
 }
 
-void OpenCLMem::setMem(JNIEnv *jenv, jobject memInstance, jlong argBits, cl_mem mem){
-   if (isset(argBits, READONLY)){
-      JNIHelper::setInstanceFieldLong(jenv, memInstance, "readOnlyMemId", (jlong)mem);
-   } else if (isset(argBits, READWRITE)){
-      JNIHelper::setInstanceFieldLong(jenv, memInstance, "readWriteMemId", (jlong)mem);
-   } else if (isset(argBits, WRITEONLY)){
-      JNIHelper::setInstanceFieldLong(jenv, memInstance, "writeOnlyMemId", (jlong)mem);
-   }
+void OpenCLMem::setMem(JNIEnv *jenv, jobject memInstance, cl_mem mem){
+      JNIHelper::setInstanceFieldLong(jenv, memInstance, "memId", (jlong)mem);
 }
 
 void OpenCLMem::describe(JNIEnv *jenv, jobject memInstance){
    jlong memBits = OpenCLMem::getBits(jenv, memInstance);
-   OpenCLBits::describeBits(jenv, memBits);
+   OpenCLMem::describeBits(jenv, memBits);
    fprintf(stderr, "\n");
 }
 
 
-jlong OpenCLArg::getBits(JNIEnv *jenv, jobject argInstance){
+jlong OpenCLArgDescriptor::getBits(JNIEnv *jenv, jobject argInstance){
    return(JNIHelper::getInstanceFieldLong(jenv, argInstance, "bits"));
 }
-void OpenCLArg::setBits(JNIEnv *jenv, jobject argInstance, jlong bits){
+void OpenCLArgDescriptor::setBits(JNIEnv *jenv, jobject argInstance, jlong bits){
    JNIHelper::setInstanceFieldLong(jenv, argInstance, "bits", bits);
 }
-jobject OpenCLArg::getMemInstance(JNIEnv *jenv, jobject argInstance){
+jobject OpenCLArgDescriptor::getMemInstance(JNIEnv *jenv, jobject argInstance){
    return(JNIHelper::getInstanceFieldObject(jenv, argInstance, "memVal", OpenCLMemClassArg));
 }
-void OpenCLArg::setMemInstance(JNIEnv *jenv, jobject argInstance, jobject memInstance){
+void OpenCLArgDescriptor::setMemInstance(JNIEnv *jenv, jobject argInstance, jobject memInstance){
    JNIHelper::setInstanceFieldObject(jenv, argInstance, "memVal", OpenCLMemClassArg,memInstance);
 }
-void OpenCLArg::describe(JNIEnv *jenv, jobject argDef, jint argIndex){
-   jlong argBits = OpenCLArg::getBits(jenv, argDef);
+void OpenCLArgDescriptor::describe(JNIEnv *jenv, jobject argDef, jint argIndex){
+   jlong argBits = OpenCLArgDescriptor::getBits(jenv, argDef);
    fprintf(stderr, " %d ", argIndex);
-   OpenCLBits::describeBits(jenv, argBits);
+   OpenCLArgDescriptor::describeBits(jenv, argBits);
    fprintf(stderr, "\n");
 }
 jint OpenCLRange::getDims(JNIEnv *jenv, jobject rangeInstance){
@@ -369,17 +366,17 @@ JNI_JAVA(jobject, OpenCLJNI, createKernel)
 void putArgs(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue commandQueue, cl_event *events, jint *eventc, jint argIndex, jobject argDef, jobject arg){
    if(1){
       fprintf(stderr, "putArgs ");
-      OpenCLArg::describe(jenv, argDef, argIndex);
+      OpenCLArgDescriptor::describe(jenv, argDef, argIndex);
    }
    cl_int status = CL_SUCCESS;
-   jlong argBits = OpenCLArg::getBits(jenv, argDef);
-   if (isset(argBits, ARRAY) && isset(argBits, GLOBAL)){ 
+   jlong argBits = OpenCLArgDescriptor::getBits(jenv, argDef);
+   if (argisset(argBits, ARRAY) && argisset(argBits, GLOBAL)){ 
       fprintf(stderr, "GLOBAL\n");
-      jobject memInstance = OpenCLArg::getMemInstance(jenv, argDef);
+      jobject memInstance = OpenCLArgDescriptor::getMemInstance(jenv, argDef);
       if (memInstance == NULL){
          // first call?
          memInstance = OpenCLMem::create(jenv, context, argBits, (jarray)arg);
-         OpenCLArg::setMemInstance(jenv, argDef, memInstance);
+         OpenCLArgDescriptor::setMemInstance(jenv, argDef, memInstance);
       }else{
          // check of argBits == memInstance.argBits
          // we need to pin it
@@ -388,20 +385,20 @@ void putArgs(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queu
          void *oldPtr = OpenCLMem::getAddress(jenv, memInstance);
          if (ptr !=oldPtr){
             fprintf(stderr, "ptr moved from %lx to %lx\n", oldPtr, ptr);
-            cl_mem mem = OpenCLMem::getMem(jenv, memInstance, argBits);
+            cl_mem mem = OpenCLMem::getMem(jenv, memInstance);
             status = clReleaseMemObject(mem); 
             memInstance = OpenCLMem::create(jenv, context, argBits, (jarray)arg);
-            OpenCLArg::setMemInstance(jenv, argDef, memInstance);
+            OpenCLArgDescriptor::setMemInstance(jenv, argDef, memInstance);
          }
-         OpenCLArg::setBits(jenv, argDef, argBits);
+         OpenCLArgDescriptor::setBits(jenv, argDef, argBits);
       }
-      cl_mem mem = OpenCLMem::getMem(jenv, memInstance, argBits);
+      cl_mem mem = OpenCLMem::getMem(jenv, memInstance);
       cl_int status = CL_SUCCESS;
-      if (isset(argBits, READONLY)|isset(argBits, READWRITE)){ // kernel reads this so enqueue a write
+      if (argisset(argBits, READONLY)|argisset(argBits, READWRITE)){ // kernel reads this so enqueue a write
          void *ptr= OpenCLMem::getAddress(jenv, memInstance);
          size_t sizeInBytes= OpenCLMem::getSizeInBytes(jenv, memInstance);
          jlong memBits = OpenCLMem::getBits(jenv, memInstance);
-         set(memBits, MEM_ENQUEUED);
+         memset(memBits, ENQUEUED);
          OpenCLMem::setBits(jenv, memInstance, memBits);
          status = clEnqueueWriteBuffer(commandQueue, mem, CL_FALSE, 0, sizeInBytes, ptr, *eventc, (*eventc)==0?NULL:events, &events[*eventc]);
          if (status != CL_SUCCESS) {
@@ -417,7 +414,7 @@ void putArgs(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queu
       }else{
          if(0)fprintf(stderr, "set arg  = %d!\n", argIndex);
       }
-   } else if (isset(argBits, ARRAY) && isset(argBits, LOCAL)){ 
+   } else if (argisset(argBits, ARRAY) && argisset(argBits, LOCAL)){ 
       fprintf(stderr, "LOCAL\n");
 
       jsize sizeInBytes = OpenCLMem::getArraySizeInBytes(jenv, (jarray)arg, argBits);
@@ -429,9 +426,9 @@ void putArgs(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queu
       }else{
          if(0)fprintf(stderr, "set arg  = %d!\n", argIndex);
       }
-   }else if (isset(argBits, PRIMITIVE)){
+   }else if (argisset(argBits, PRIMITIVE)){
       fprintf(stderr, "PRIMITIVE\n");
-      if (isset(argBits, INT)){
+      if (argisset(argBits, INT)){
          cl_int value = JNIHelper::getInstanceFieldInt(jenv, arg, "value");
          status = clSetKernelArg(kernel, argIndex, sizeof(value), (void *)&(value));          
          if (status != CL_SUCCESS) {
@@ -439,7 +436,7 @@ void putArgs(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queu
          }else{
             if(0)fprintf(stderr, "set arg  = %d to %d!\n", argIndex, value);
          }
-      }else if (isset(argBits, FLOAT)){
+      }else if (argisset(argBits, FLOAT)){
          cl_float value = JNIHelper::getInstanceFieldFloat(jenv, arg, "value");
          status = clSetKernelArg(kernel, argIndex, sizeof(value), (void *)&(value));          
          if (status != CL_SUCCESS) {
@@ -448,7 +445,7 @@ void putArgs(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queu
             if(0)fprintf(stderr, "set arg  = %d to %f!\n", argIndex, value);
          }
 
-      }else if (isset(argBits, DOUBLE)){
+      }else if (argisset(argBits, DOUBLE)){
          cl_double value = JNIHelper::getInstanceFieldDouble(jenv, arg, "value");
          status = clSetKernelArg(kernel, argIndex, sizeof(value), (void *)&(value));          
          if (status != CL_SUCCESS) {
@@ -467,20 +464,20 @@ void putArgs(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queu
 void getArgs(JNIEnv *jenv, cl_context context, cl_command_queue commandQueue, cl_event *events, jint *eventc, jint argIndex, jobject argDef, jobject arg){
    if (0){
       fprintf(stderr, "post ");
-      OpenCLArg::describe(jenv, argDef, argIndex);
+      OpenCLArgDescriptor::describe(jenv, argDef, argIndex);
    }
-   jlong argBits = OpenCLArg::getBits(jenv, argDef);
-   if (isset(argBits, ARRAY) && isset(argBits, GLOBAL)){
-      jobject memInstance = OpenCLArg::getMemInstance(jenv, argDef);
+   jlong argBits = OpenCLArgDescriptor::getBits(jenv, argDef);
+   if (argisset(argBits, ARRAY) && argisset(argBits, GLOBAL)){
+      jobject memInstance = OpenCLArgDescriptor::getMemInstance(jenv, argDef);
       if (memInstance == NULL){
          fprintf(stderr, "mem instance not set\n");
       }else{
          if(0)fprintf(stderr, "retrieved mem instance\n");
       }
       void *ptr= OpenCLMem::getAddress(jenv, memInstance);
-      if (isset(argBits, WRITEONLY)|isset(argBits, READWRITE)){
+      if (argisset(argBits, WRITEONLY)|argisset(argBits, READWRITE)){
 
-         cl_mem mem = OpenCLMem::getMem(jenv, memInstance, argBits);
+         cl_mem mem = OpenCLMem::getMem(jenv, memInstance);
 
          size_t sizeInBytes= OpenCLMem::getSizeInBytes(jenv, memInstance);
          if (0){
@@ -502,8 +499,8 @@ void getArgs(JNIEnv *jenv, cl_context context, cl_command_queue commandQueue, cl
       OpenCLMem::unpin(jenv, (jarray)arrayInstance, ptr, &argBits);
 
 
-      reset(argBits, MEM_ENQUEUED); //<----- BAD
-      reset(argBits, MEM_COPY); //<----
+      memreset(argBits, ENQUEUED); //<----- BAD 
+      memreset(argBits, COPY); //<----
       OpenCLMem::setBits(jenv, memInstance, argBits); // WHAT? GRF
    }
 }
@@ -527,15 +524,15 @@ JNI_JAVA(void, OpenCLJNI, invoke)
       jint writes=0;
       for (jsize argIndex=0; argIndex<argc; argIndex++){
          jobject argDef = jenv->GetObjectArrayElement(argDefsArray, argIndex);
-         jlong argBits = OpenCLArg::getBits(jenv, argDef);
-         if (isset(argBits, READONLY)){
+         jlong argBits = OpenCLArgDescriptor::getBits(jenv, argDef);
+         if (argisset(argBits, READONLY)){
             reads++;
          }
-         if (isset(argBits, READWRITE)){
+         if (argisset(argBits, READWRITE)){
             reads++;
             writes++;
          }
-         if (isset(argBits, WRITEONLY)){
+         if (argisset(argBits, WRITEONLY)){
             writes++;
          }
       }

@@ -43,15 +43,16 @@
 #include "jniHelper.h"
 #include "clHelper.h"
 
-#define isset(bits, token) (((bits) & com_amd_aparapi_OpenCLJNI_##token##_BIT) ==com_amd_aparapi_OpenCLJNI_##token##_BIT) 
-#define set(bits, token) (bits) |= com_amd_aparapi_OpenCLJNI_##token##_BIT 
-#define reset(bits, token) (bits) &= ~com_amd_aparapi_OpenCLJNI_##token##_BIT 
+#include "com_amd_aparapi_OpenCLArgDescriptor.h"
+#include "com_amd_aparapi_OpenCLMem.h"
 
-class OpenCLBits{
-   public:
-      static void describeBits(JNIEnv *jenv, jlong bits);
-};
+#define argisset(bits, token) (((bits) & com_amd_aparapi_OpenCLArgDescriptor_ARG_##token##_BIT) ==com_amd_aparapi_OpenCLArgDescriptor_ARG_##token##_BIT) 
+#define argset(bits, token) (bits) |= com_amd_aparapi_OpenCLArgDescriptor_ARG_##token##_BIT 
+#define argreset(bits, token) (bits) &= ~com_amd_aparapi_OpenCLArgDescriptor_ARG_##token##_BIT 
 
+#define memisset(bits, token) (((bits) & com_amd_aparapi_OpenCLMem_MEM_##token##_BIT) ==com_amd_aparapi_OpenCLMem_MEM_##token##_BIT) 
+#define memset(bits, token) (bits) |= com_amd_aparapi_OpenCLMem_MEM_##token##_BIT 
+#define memreset(bits, token) (bits) &= ~com_amd_aparapi_OpenCLMem_MEM_##token##_BIT 
 
 class OpenCLDevice{
    public:
@@ -81,6 +82,7 @@ class OpenCLMem{
    public:
       static jobject create(JNIEnv *jenv);
       static cl_uint bitsToOpenCLMask(jlong argBits );
+      static jsize getPrimitiveSizeInBytes(JNIEnv *jenv, jlong argBits);
       static jsize getArraySizeInBytes(JNIEnv *jenv, jarray array, jlong argBits);
       static void *pin(JNIEnv *jenv, jarray array, jlong *memBits);
       static void unpin(JNIEnv *jenv, jarray array, void *ptr, jlong *memBits);
@@ -93,17 +95,19 @@ class OpenCLMem{
       static void setSizeInBytes(JNIEnv *jenv, jobject memInstance, jint sizeInBytes);
       static size_t getSizeInBytes(JNIEnv *jenv, jobject memInstance);
       static jobject getInstance(JNIEnv *jenv, jobject memInstance);
-      static cl_mem getMem(JNIEnv *jenv, jobject memInstance, jlong argBits);
-      static void setMem(JNIEnv *jenv, jobject memInstance, jlong argBits, cl_mem mem);
+      static cl_mem getMem(JNIEnv *jenv, jobject memInstance);
+      static void setMem(JNIEnv *jenv, jobject memInstance, cl_mem mem);
+      static void describeBits(JNIEnv *jenv, jlong bits);
       static void describe(JNIEnv *jenv, jobject memInstance);
 };
 
-class OpenCLArg{
+class OpenCLArgDescriptor{
    public:
       static jlong getBits(JNIEnv *jenv, jobject argInstance);
       static void setBits(JNIEnv *jenv, jobject argInstance, jlong bits);
       static jobject getMemInstance(JNIEnv *jenv, jobject argInstance);
       static void setMemInstance(JNIEnv *jenv, jobject argInstance, jobject memInstance);
+      static void describeBits(JNIEnv *jenv, jlong bits);
       static void describe(JNIEnv *jenv, jobject argDef, jint argIndex);
 };
 class OpenCLRange{

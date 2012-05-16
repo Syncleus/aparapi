@@ -30,7 +30,7 @@ public class OpenCLProgram{
       return device;
    }
 
-   public OpenCLKernel createKernel(String _kernelName, List<OpenCLArg> args) {
+   public OpenCLKernel createKernel(String _kernelName, List<OpenCLArgDescriptor> args) {
       return (OpenCLJNI.getJNI().createKernel(this, _kernelName, args));
    }
 

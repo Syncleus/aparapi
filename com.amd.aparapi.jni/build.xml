@@ -444,6 +444,8 @@ First consider editing the properties in build.properties
       <javah classpath="..\com.amd.aparapi\dist\aparapi.jar" destdir="include" force="true">
          <class name="com.amd.aparapi.KernelRunner" />
          <class name="com.amd.aparapi.OpenCLJNI" />
+         <class name="com.amd.aparapi.OpenCLArgDescriptor" />
+         <class name="com.amd.aparapi.OpenCLMem" />
       </javah>
    </target>
 
