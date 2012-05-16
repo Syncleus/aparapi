@@ -41,7 +41,6 @@
 
 #include "com_amd_aparapi_OpenCLJNI.h"
 
-
 void OpenCLArgDescriptor::describeBits(JNIEnv *jenv, jlong bits){
    fprintf(stderr, " %lx ", bits);
    if (argisset(bits, READONLY)){
@@ -363,9 +362,9 @@ JNI_JAVA(jobject, OpenCLJNI, createKernel)
 
 
 
-void putArgs(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue commandQueue, cl_event *events, jint *eventc, jint argIndex, jobject argDef, jobject arg){
+void putArg(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue commandQueue, cl_event *events, jint *eventc, jint argIndex, jobject argDef, jobject arg){
    if(1){
-      fprintf(stderr, "putArgs ");
+      fprintf(stderr, "putArg ");
       OpenCLArgDescriptor::describe(jenv, argDef, argIndex);
    }
    cl_int status = CL_SUCCESS;
@@ -461,7 +460,7 @@ void putArgs(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queu
 
 
 
-void getArgs(JNIEnv *jenv, cl_context context, cl_command_queue commandQueue, cl_event *events, jint *eventc, jint argIndex, jobject argDef, jobject arg){
+void getArg(JNIEnv *jenv, cl_context context, cl_command_queue commandQueue, cl_event *events, jint *eventc, jint argIndex, jobject argDef, jobject arg){
    if (0){
       fprintf(stderr, "post ");
       OpenCLArgDescriptor::describe(jenv, argDef, argIndex);
@@ -495,13 +494,11 @@ void getArgs(JNIEnv *jenv, cl_context context, cl_command_queue commandQueue, cl
       }
 
       jobject arrayInstance = OpenCLMem::getInstance(jenv, memInstance);
-
-      OpenCLMem::unpin(jenv, (jarray)arrayInstance, ptr, &argBits);
-
-
-      memreset(argBits, ENQUEUED); //<----- BAD 
-      memreset(argBits, COPY); //<----
-      OpenCLMem::setBits(jenv, memInstance, argBits); // WHAT? GRF
+      jlong memBits = OpenCLMem::getBits(jenv, memInstance);
+      OpenCLMem::unpin(jenv, (jarray)arrayInstance, ptr, &memBits);
+      memreset(memBits, ENQUEUED); 
+      memreset(memBits, COPY); 
+      OpenCLMem::setBits(jenv, memInstance, memBits);
    }
 }
 
@@ -545,7 +542,7 @@ JNI_JAVA(void, OpenCLJNI, invoke)
       for (jsize argIndex=0; argIndex<argc; argIndex++){
          jobject argDef = jenv->GetObjectArrayElement(argDefsArray, argIndex);
          jobject arg = jenv->GetObjectArrayElement(argArray, argIndex+1);
-         putArgs(jenv, context, kernel, commandQueue, events, &eventc, argIndex, argDef, arg);
+         putArg(jenv, context, kernel, commandQueue, events, &eventc, argIndex, argDef, arg);
       }
 
       jobject rangeInstance = jenv->GetObjectArrayElement(argArray, 0);
@@ -579,7 +576,7 @@ JNI_JAVA(void, OpenCLJNI, invoke)
       for (jsize argIndex=0; argIndex<argc; argIndex++){
          jobject argDef = jenv->GetObjectArrayElement(argDefsArray, argIndex);
          jobject arg = jenv->GetObjectArrayElement(argArray, argIndex+1);
-         getArgs(jenv, context, commandQueue, events, &eventc, argIndex, argDef, arg);
+         getArg(jenv, context, commandQueue, events, &eventc, argIndex, argDef, arg);
       }
       status = clWaitForEvents(eventc, events);
       if (status != CL_SUCCESS) {

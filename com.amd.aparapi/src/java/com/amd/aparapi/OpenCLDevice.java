@@ -108,24 +108,38 @@ public class OpenCLDevice extends Device{
       @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
          OpenCLKernel kernel = map.get(method.getName());
          if (kernel != null) {
-            // we have a kernel entrypoint bound
             kernel.invoke(args);
-         } else if (method.getName().equals("put") || method.getName().equals("get")) {
+         } else if (method.getName().equals("put")) {
             for (Object arg : args) {
                Class<?> argClass = arg.getClass();
                if (argClass.isArray()) {
                   if (argClass.getComponentType().isPrimitive()) {
                      OpenCLMem mem = program.getMem(arg, 0L);
                      if (mem == null) {
-                        throw new IllegalStateException("can't put/get an array that has never been passed to a kernel " + argClass);
+                        throw new IllegalStateException("can't put an array that has never been passed to a kernel " + argClass);
 
                      }
-                     if (method.getName().equals("put")) {
-                        mem.bits |= OpenCLMem.MEM_DIRTY_BIT;
-                     } else {
-                        OpenCLJNI.getJNI().getMem(program, mem);
-                     }
+                     mem.bits |= OpenCLMem.MEM_DIRTY_BIT;
+                  } else {
+                     throw new IllegalStateException("Only array args (of primitives) expected for put/get, cant deal with "
+                           + argClass);
 
+                  }
+               } else {
+                  throw new IllegalStateException("Only array args expected for put/get, cant deal with " + argClass);
+               }
+            }
+         } else if (method.getName().equals("get")) {
+            for (Object arg : args) {
+               Class<?> argClass = arg.getClass();
+               if (argClass.isArray()) {
+                  if (argClass.getComponentType().isPrimitive()) {
+                     OpenCLMem mem = program.getMem(arg, 0L);
+                     if (mem == null) {
+                        throw new IllegalStateException("can't get an array that has never been passed to a kernel " + argClass);
+
+                     }
+                     OpenCLJNI.getJNI().getMem(program, mem);
                   } else {
                      throw new IllegalStateException("Only array args (of primitives) expected for put/get, cant deal with "
                            + argClass);
@@ -136,7 +150,7 @@ public class OpenCLDevice extends Device{
                }
             }
          } else {
-            throw new IllegalStateException("How did we get here with method " + method.getName());
+            throw new IllegalStateException("Unbound interface methods " + method.getName());
 
          }
          return proxy;
