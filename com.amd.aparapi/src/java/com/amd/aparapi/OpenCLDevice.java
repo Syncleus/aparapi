@@ -328,20 +328,20 @@ public class OpenCLDevice extends Device{
 
    }
 
-   interface DeviceFilter{
-      boolean match(OpenCLDevice _device);
+   public interface DeviceSelector{
+      OpenCLDevice select(OpenCLDevice _device);
    }
 
-   interface DeviceComparitor{
-      OpenCLDevice best(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs);
+   public interface DeviceComparitor{
+      OpenCLDevice select(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs);
    }
 
-   public static OpenCLDevice selectFirst(DeviceFilter _deviceFilter) {
+   public static OpenCLDevice select(DeviceSelector _deviceSelector) {
       OpenCLDevice device = null;
       for (OpenCLPlatform p : OpenCLPlatform.getPlatforms()) {
          for (OpenCLDevice d : p.getDevices()) {
-            if (_deviceFilter.match(d)) {
-               device = d;
+            device =  _deviceSelector.select(d);
+            if (device != null){
                break;
             }
          }
@@ -352,14 +352,14 @@ public class OpenCLDevice extends Device{
       return (device);
    }
 
-   public static OpenCLDevice selectBest(DeviceComparitor _deviceComparitor) {
+   public static OpenCLDevice select(DeviceComparitor _deviceComparitor) {
       OpenCLDevice device = null;
       for (OpenCLPlatform p : OpenCLPlatform.getPlatforms()) {
          for (OpenCLDevice d : p.getDevices()) {
             if (device == null) {
                device = d;
             } else {
-               device = _deviceComparitor.best(device, d);
+               device = _deviceComparitor.select(device, d);
             }
          }
       }

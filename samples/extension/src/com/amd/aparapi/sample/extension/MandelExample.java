@@ -65,6 +65,7 @@ import com.amd.aparapi.Device;
 import com.amd.aparapi.OpenCL;
 import com.amd.aparapi.OpenCLAdapter;
 import com.amd.aparapi.OpenCLDevice;
+import com.amd.aparapi.OpenCLPlatform;
 import com.amd.aparapi.Range;
 
 /**
@@ -417,7 +418,29 @@ public class MandelExample{
       float offsetx = .0f;
 
       float offsety = .0f;
-      Device device = Device.best();
+      //Device device = Device.firstGPU();
+      Device device = null;
+      /*
+      device = OpenCLDevice.select(new OpenCLDevice.DeviceSelector(){
+         @Override public OpenCLDevice select(OpenCLDevice device) {
+            return((device.getType()==Device.TYPE.GPU 
+                 // && device.getPlatform().getVendor().equals("NVIDIA Corporation")
+                  && device.getPlatform().getVendor().equals("Advanced Micro Devices, Inc.")
+                  )?device:null);
+         }});
+      */
+      for (OpenCLPlatform p:OpenCLPlatform.getPlatforms()){
+        // if (p.getVendor().equals("NVIDIA Corporation")){
+         if (p.getVendor().equals("Advanced Micro Devices, Inc.")){
+            for (OpenCLDevice d:p.getDevices()){
+               if (d.getType().equals(Device.TYPE.GPU)){
+                  device = d;
+                  break;
+               }
+            }
+         }
+      }
+      
       if (device instanceof OpenCLDevice) {
          OpenCLDevice openclDevice = (OpenCLDevice) device;
 

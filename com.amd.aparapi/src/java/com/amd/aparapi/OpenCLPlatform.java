@@ -1,21 +1,24 @@
 package com.amd.aparapi;
 
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OpenCLPlatform{
+  
    private long platformId;
 
    private String version;
 
    private String vendor;
-
+   private String name;
    private List<OpenCLDevice> devices = new ArrayList<OpenCLDevice>();
 
-   OpenCLPlatform(long _platformId, String _version, String _vendor) {
+   OpenCLPlatform(long _platformId, String _version, String _vendor, String _name) {
       platformId = _platformId;
       version = _version;
       vendor = _vendor;
+      name = _name;
    }
 
    public String toString() {
@@ -37,6 +40,17 @@ public class OpenCLPlatform{
          return(new ArrayList<OpenCLPlatform>());
       }
       
+   }
+
+   public String getName() {
+      return (name);
+   }
+   
+   public String getVersion() {
+      return (version);
+   }
+   public String getVendor() {
+      return (vendor);
    }
 
 }

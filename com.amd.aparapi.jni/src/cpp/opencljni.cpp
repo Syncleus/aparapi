@@ -608,13 +608,17 @@ JNI_JAVA(jobject, OpenCLJNI, getPlatforms)
 #endif
                ) { 
                char platformVendorName[512];  
+               char platformName[512];  
                status = clGetPlatformInfo(platformIds[platformIdx], CL_PLATFORM_VENDOR, sizeof(platformVendorName), platformVendorName, NULL);
+               status = clGetPlatformInfo(platformIds[platformIdx], CL_PLATFORM_NAME, sizeof(platformName), platformName, NULL);
                //fprintf(stderr, "platform vendor    %d %s\n", platformIdx, platformVendorName); 
                //fprintf(stderr, "platform version %d %s\n", platformIdx, platformVersionName); 
-               jobject platformInstance = JNIHelper::createInstance(jenv, OpenCLPlatformClass , ArgsVoidReturn(LongArg StringClassArg StringClassArg ), 
+               jobject platformInstance = JNIHelper::createInstance(jenv, OpenCLPlatformClass , ArgsVoidReturn(LongArg StringClassArg StringClassArg StringClassArg ), 
                      (jlong)platformIds[platformIdx],
                      jenv->NewStringUTF(platformVersionName), 
-                     jenv->NewStringUTF(platformVendorName));
+                     jenv->NewStringUTF(platformVendorName),
+                     jenv->NewStringUTF(platformName)
+                     );
                JNIHelper::callVoid(jenv, platformListInstance, "add", ArgsBooleanReturn(ObjectClassArg), platformInstance);
 
                cl_uint deviceIdc;
