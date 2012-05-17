@@ -55,6 +55,8 @@ public interface OpenCL<T> {
    public T put(int[] array);
 
    public T put(short[] array);
+   
+   public T put(byte[] array);
 
    public T put(char[] array);
 
@@ -73,4 +75,10 @@ public interface OpenCL<T> {
    public T get(boolean[] array);
 
    public T get(double[] array);
+   
+   public T get(byte[] array);
+   
+   public T begin();
+   
+   public T end();
 }

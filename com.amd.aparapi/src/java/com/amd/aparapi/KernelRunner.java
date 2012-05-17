@@ -1354,7 +1354,7 @@ class KernelRunner{
             }
             if ((entryPoint != null) && !entryPoint.shouldFallback()) {
              
-               if (device != null && device instanceof OpenCLDevice){
+               if (device != null && !(device instanceof OpenCLDevice)){
                   throw new IllegalStateException("range's device is not suitable for OpenCL ");
                }
                OpenCLDevice openCLDevice = (OpenCLDevice) device; // still might be null! 

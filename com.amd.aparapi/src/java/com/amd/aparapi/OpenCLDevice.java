@@ -110,6 +110,7 @@ public class OpenCLDevice extends Device{
          if (kernel != null) {
             kernel.invoke(args);
          } else if (method.getName().equals("put")) {
+            /*
             for (Object arg : args) {
                Class<?> argClass = arg.getClass();
                if (argClass.isArray()) {
@@ -129,7 +130,9 @@ public class OpenCLDevice extends Device{
                   throw new IllegalStateException("Only array args expected for put/get, cant deal with " + argClass);
                }
             }
+            */
          } else if (method.getName().equals("get")) {
+            /*
             for (Object arg : args) {
                Class<?> argClass = arg.getClass();
                if (argClass.isArray()) {
@@ -149,6 +152,10 @@ public class OpenCLDevice extends Device{
                   throw new IllegalStateException("Only array args expected for put/get, cant deal with " + argClass);
                }
             }
+            */
+         } else if (method.getName().equals("begin")) {
+            
+         } else if (method.getName().equals("end")) {
          } else {
             throw new IllegalStateException("Unbound interface methods " + method.getName());
 

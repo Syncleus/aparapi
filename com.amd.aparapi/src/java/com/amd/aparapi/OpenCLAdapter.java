@@ -2,6 +2,14 @@ package com.amd.aparapi;
 
 public class OpenCLAdapter<T> implements OpenCL<T>{
 
+   public T put(byte[] array) {
+      return ((T) this);
+   }
+   
+   public T get(byte[] array) {
+      return ((T) this);
+   }
+   
    public T put(float[] array) {
       return ((T) this);
    }
@@ -49,4 +57,12 @@ public class OpenCLAdapter<T> implements OpenCL<T>{
    public T get(double[] array) {
       return ((T) this);
    }
+   public T begin() {
+      return ((T) this);
+   }
+   public T end(){
+      return((T)this);
+   }
+   
+  
 }

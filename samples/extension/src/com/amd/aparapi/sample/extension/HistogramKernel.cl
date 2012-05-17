@@ -102,7 +102,7 @@ jurisdiction and venue of these courts.
 #define LINEAR_MEM_ACCESS
 #pragma OPENCL EXTENSION cl_khr_byte_addressable_store : enable 
 
-#define BIN_SIZE 256
+
 
 /**
  * @brief   Calculates block-histogram bin whose bin size is 256
@@ -113,7 +113,8 @@ jurisdiction and venue of these courts.
 __kernel
 void histogram256(__global const uchar* data,
                   __local uchar* sharedArray,
-                  __global uint* binResult)
+                  __global uint* binResult, 
+                  uint binSize)
 {
     size_t localId = get_local_id(0);
     size_t globalId = get_global_id(0);
@@ -121,33 +122,45 @@ void histogram256(__global const uchar* data,
     size_t groupSize = get_local_size(0);
 
     /* initialize shared array to zero */
-    for(int i = 0; i < BIN_SIZE; ++i)
-        sharedArray[localId * BIN_SIZE + i] = 0;
+    for(int i = 0; i < binSize; ++i)
+        sharedArray[localId * binSize + i] = 0;
 
     barrier(CLK_LOCAL_MEM_FENCE);
     
     /* calculate thread-histograms */
-    for(int i = 0; i < BIN_SIZE; ++i)
+    for(int i = 0; i < binSize; ++i)
     {
 #ifdef LINEAR_MEM_ACCESS
-        uchar value = data[groupId * groupSize * BIN_SIZE + i * groupSize + localId];
+        uchar value = data[groupId * groupSize * binSize + i * groupSize + localId];
 #else
-        uchar value = data[globalId * BIN_SIZE + i];
+        uchar value = data[globalId * binSize + i];
 #endif // LINEAR_MEM_ACCESS
-        sharedArray[localId * BIN_SIZE + value]++;
+        sharedArray[localId * binSize + value]++;
     }
     
     barrier(CLK_LOCAL_MEM_FENCE); 
     
     /* merge all thread-histograms into block-histogram */
-    for(int i = 0; i < BIN_SIZE / groupSize; ++i)
+    for(int i = 0; i < binSize / groupSize; ++i)
     {
         uint binCount = 0;
         for(int j = 0; j < groupSize; ++j)
-            binCount += sharedArray[j * BIN_SIZE + i * groupSize + localId];
+            binCount += sharedArray[j * binSize + i * groupSize + localId];
             
-        binResult[groupId * BIN_SIZE + i * groupSize + localId] = binCount;
+        binResult[groupId * binSize + i * groupSize + localId] = binCount;
     }
 }
 
-
+__kernel
+void bin256(__global uint* histo,
+                  __global const uint* binResult,
+                  uint subHistogramSize )
+{
+  size_t j = get_local_id(0);
+  size_t binSize=get_global_size(0);
+  uint histValue=0;
+  for(int i = 0; i < subHistogramSize; ++i){
+     histValue += binResult[i * binSize + j];
+  }
+  histo[j]=histValue;
+}
