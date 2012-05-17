@@ -94,7 +94,7 @@ class ByteBuffer{
    }
 
    int u4(int _offset) {
-      return (u2(_offset) << 16 | u2(_offset + 2));
+      return ((u2(_offset)&0xffff) << 16 | u2(_offset + 2));
    }
 
    int s4(int _offset) {
@@ -124,7 +124,7 @@ class ByteBuffer{
    }
 
    long u8(int _offset) {
-      return (((long) u4(_offset)) << 32 | u4(_offset + 4));
+      return ((u4(_offset)&0xffffffffL) << 32) |(u4(_offset + 4)&0xffffffffL);
    }
 
    int utf8bytes(int _offset) {
@@ -137,7 +137,6 @@ class ByteBuffer{
       return (returnBytes);
    }
 
-   // See DataInputStream utf8, that's where we liberated this from
    String utf8(int _offset) {
       int utflen = u2(_offset);
       _offset += 2;
