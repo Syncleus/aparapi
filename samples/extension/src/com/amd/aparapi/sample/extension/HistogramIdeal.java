@@ -43,8 +43,11 @@ public class HistogramIdeal{
       System.out.println("binResult size=" + binResult.length);
       final int[] histo = new int[BIN_SIZE];
       int[] refHisto = new int[BIN_SIZE];
-      Device device = Device.firstGPU();
+      Device device = Device.best();
+    
       if (device != null) {
+         
+         System.out.println(((OpenCLDevice)device).getPlatform().getName());
          Range rangeBinSize = device.createRange(BIN_SIZE);
 
          Range range = Range.create((WIDTH * HEIGHT) / BIN_SIZE, GROUP_SIZE);
