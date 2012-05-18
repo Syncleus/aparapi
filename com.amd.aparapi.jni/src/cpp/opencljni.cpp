@@ -181,26 +181,21 @@ jsize OpenCLMem::getArraySizeInBytes(JNIEnv *jenv, jarray array, jlong argBits){
 void *getArrayPtr(JNIEnv *jenv, jarray array, jlong *argBits){
    jboolean isCopy;
    void *ptr = NULL;
-     if (argisset(*argBits, BYTE)){
-         jenv->GetByteArrayElements((jbyteArray)array, &isCopy); 
-          }else if (argisset(*argBits, INT)){
-               jenv->GetIntArrayElements((jintArray)array, &isCopy); 
-                }else if (argisset(*argBits, SHORT)){
-               jenv->GetShortArrayElements((jshortArray)array, &isCopy); 
-      }else if (argisset(*argBits, FLOAT)){
-           jenv->GetFloatArrayElements((jfloatArray)array, &isCopy); 
-      }else if (argisset(*argBits, LONG)){
-        
-          jenv->GetLongArrayElements((jlongArray)array, &isCopy); 
-      }else if (argisset(*argBits, DOUBLE)){
-        
-           jenv->GetDoubleArrayElements((jdoubleArray)array, &isCopy); 
-      }
-      
-     
+   if (argisset(*argBits, BYTE)){
+      jenv->GetByteArrayElements((jbyteArray)array, &isCopy); 
+   }else if (argisset(*argBits, INT)){
+      jenv->GetIntArrayElements((jintArray)array, &isCopy); 
+   }else if (argisset(*argBits, SHORT)){
+      jenv->GetShortArrayElements((jshortArray)array, &isCopy); 
+   }else if (argisset(*argBits, FLOAT)){
+      jenv->GetFloatArrayElements((jfloatArray)array, &isCopy); 
+   }else if (argisset(*argBits, LONG)){
+      jenv->GetLongArrayElements((jlongArray)array, &isCopy); 
+   }else if (argisset(*argBits, DOUBLE)){
+      jenv->GetDoubleArrayElements((jdoubleArray)array, &isCopy); 
+   }
    if (argBits != NULL){
       if(0){OpenCLArgDescriptor::describeBits(jenv, *argBits);fprintf(stderr, " \n");}
-     
    }
    return(ptr);
 }
@@ -210,9 +205,7 @@ void releaseArrayPtr(JNIEnv *jenv, jarray array, void *ptr, jlong *argBits){
    jenv->ReleaseByteArrayElements((jbyteArray)array, (jbyte*)ptr, JNI_COMMIT /* JNI_ABORT */); 
    if (argBits != NULL){
       if(0){OpenCLArgDescriptor::describeBits(jenv, *argBits);fprintf(stderr, " \n");}
-     
    }
-   
 }
 
 void *OpenCLMem::pin(JNIEnv *jenv, jarray array, jlong *memBits){
@@ -291,7 +284,7 @@ cl_mem OpenCLMem::getMem(JNIEnv *jenv, jobject memInstance){
 }
 
 void OpenCLMem::setMem(JNIEnv *jenv, jobject memInstance, cl_mem mem){
-      JNIHelper::setInstanceFieldLong(jenv, memInstance, "memId", (jlong)mem);
+   JNIHelper::setInstanceFieldLong(jenv, memInstance, "memId", (jlong)mem);
 }
 
 void OpenCLMem::describe(JNIEnv *jenv, jobject memInstance){
@@ -529,7 +522,7 @@ void getArg(JNIEnv *jenv, cl_context context, cl_command_queue commandQueue, cl_
          if (0){
             fprintf(stderr, "about to enqueu read eventc = %d!\n", *eventc);
          }
-           fprintf(stderr, "enqueuing read of arg ");
+         fprintf(stderr, "enqueuing read of arg ");
          OpenCLArgDescriptor::describe(jenv, argDef, argIndex);
          cl_int status = clEnqueueReadBuffer(commandQueue, mem, CL_FALSE, 0, sizeInBytes, ptr ,*eventc, (*eventc)==0?NULL:events, &events[*eventc]);
          if (status != CL_SUCCESS) {
