@@ -63,6 +63,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.WindowConstants;
 
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.ProfileInfo;
@@ -347,27 +348,8 @@ public class Main{
       panel.add(canvas, BorderLayout.CENTER);
       frame.getContentPane().add(panel, BorderLayout.CENTER);
       final FPSAnimator animator = new FPSAnimator(canvas, 100);
-      frame.addWindowListener(new WindowAdapter(){
-
-         @Override public void windowClosed(WindowEvent e) {
-            System.out.println("closed");
-            animator.stop();
-            GLProfile.shutdown();
-            System.exit(1);
-
-         }
-
-         @Override public void windowClosing(WindowEvent e) {
-            System.out.println("closing");
-            animator.stop();
-            GLProfile.shutdown();
-            //  System.exit(1);
-
-         }
-
-      });
-
-      //frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    
+      frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
       frame.pack();
       frame.setVisible(true);
 
