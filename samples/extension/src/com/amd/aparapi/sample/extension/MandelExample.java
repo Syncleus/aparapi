@@ -429,24 +429,24 @@ public class MandelExample{
                   )?device:null);
          }});
       */
-      for (OpenCLPlatform p:OpenCLPlatform.getPlatforms()){
-        // if (p.getVendor().equals("NVIDIA Corporation")){
-         if (p.getVendor().equals("Advanced Micro Devices, Inc.")){
-            for (OpenCLDevice d:p.getDevices()){
-               if (d.getType().equals(Device.TYPE.GPU)){
+      for (OpenCLPlatform p : OpenCLPlatform.getPlatforms()) {
+         // if (p.getVendor().equals("NVIDIA Corporation")){
+         if (p.getVendor().equals("Advanced Micro Devices, Inc.")) {
+            for (OpenCLDevice d : p.getDevices()) {
+               if (d.getType().equals(Device.TYPE.GPU)) {
                   device = d;
                   break;
                }
             }
          }
       }
-      
+
       if (device instanceof OpenCLDevice) {
          OpenCLDevice openclDevice = (OpenCLDevice) device;
 
          System.out.println("max memory = " + openclDevice.getGlobalMemSize());
          System.out.println("max mem alloc size = " + openclDevice.getMaxMemAllocSize());
-         gpuMandelBrot = openclDevice.create(MandelBrot.class);
+         gpuMandelBrot = openclDevice.bind(MandelBrot.class);
       }
 
       javaMandelBrot = new JavaMandelBrot();

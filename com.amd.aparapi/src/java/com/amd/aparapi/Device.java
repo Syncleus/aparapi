@@ -35,18 +35,18 @@ public abstract class Device{
    public static Device first(final Device.TYPE _type) {
       return (OpenCLDevice.select(new DeviceSelector(){
          @Override public OpenCLDevice select(OpenCLDevice _device) {
-            return (_device.getType() == _type?_device:null);
+            return (_device.getType() == _type ? _device : null);
          }
       }));
    }
-   
+
    public static Device firstGPU() {
-      return (first(Device.TYPE.GPU)); 
+      return (first(Device.TYPE.GPU));
    }
 
    public static Device firstCPU() {
-      return (first(Device.TYPE.CPU)); 
-     
+      return (first(Device.TYPE.CPU));
+
    }
 
    protected TYPE type = TYPE.UNKNOWN;

@@ -4,7 +4,7 @@ public class WideInc{
 
    public void run() {
       int value = 0;
-      value+=128;
+      value += 128;
    }
 }
 

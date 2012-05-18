@@ -106,63 +106,63 @@ public class OpenCLDevice extends Device{
       }
 
       @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-         OpenCLKernel kernel = map.get(method.getName());
-         if (kernel != null) {
-            kernel.invoke(args);
-         } else if (method.getName().equals("put")) {
-            /*
-            for (Object arg : args) {
-               Class<?> argClass = arg.getClass();
-               if (argClass.isArray()) {
-                  if (argClass.getComponentType().isPrimitive()) {
-                     OpenCLMem mem = program.getMem(arg, 0L);
-                     if (mem == null) {
-                        throw new IllegalStateException("can't put an array that has never been passed to a kernel " + argClass);
-
-                     }
-                     mem.bits |= OpenCLMem.MEM_DIRTY_BIT;
-                  } else {
-                     throw new IllegalStateException("Only array args (of primitives) expected for put/get, cant deal with "
-                           + argClass);
-
-                  }
-               } else {
-                  throw new IllegalStateException("Only array args expected for put/get, cant deal with " + argClass);
-               }
+         if (!isReservedInterfaceMethod(method)) {
+            OpenCLKernel kernel = map.get(method.getName());
+            if (kernel != null) {
+               kernel.invoke(args);
             }
-            */
-         } else if (method.getName().equals("get")) {
-            /*
-            for (Object arg : args) {
-               Class<?> argClass = arg.getClass();
-               if (argClass.isArray()) {
-                  if (argClass.getComponentType().isPrimitive()) {
-                     OpenCLMem mem = program.getMem(arg, 0L);
-                     if (mem == null) {
-                        throw new IllegalStateException("can't get an array that has never been passed to a kernel " + argClass);
-
-                     }
-                     OpenCLJNI.getJNI().getMem(program, mem);
-                  } else {
-                     throw new IllegalStateException("Only array args (of primitives) expected for put/get, cant deal with "
-                           + argClass);
-
-                  }
-               } else {
-                  throw new IllegalStateException("Only array args expected for put/get, cant deal with " + argClass);
-               }
-            }
-            */
-         } else if (method.getName().equals("begin")) {
-            
-         } else if (method.getName().equals("end")) {
          } else {
-            throw new IllegalStateException("Unbound interface methods " + method.getName());
+            if (method.getName().equals("put")) {
 
+               /*
+               for (Object arg : args) {
+                  Class<?> argClass = arg.getClass();
+                  if (argClass.isArray()) {
+                     if (argClass.getComponentType().isPrimitive()) {
+                        OpenCLMem mem = program.getMem(arg, 0L);
+                        if (mem == null) {
+                           throw new IllegalStateException("can't put an array that has never been passed to a kernel " + argClass);
+
+                        }
+                        mem.bits |= OpenCLMem.MEM_DIRTY_BIT;
+                     } else {
+                        throw new IllegalStateException("Only array args (of primitives) expected for put/get, cant deal with "
+                              + argClass);
+
+                     }
+                  } else {
+                     throw new IllegalStateException("Only array args expected for put/get, cant deal with " + argClass);
+                  }
+               }
+               */
+            } else if (method.getName().equals("get")) {
+               /*
+               for (Object arg : args) {
+                  Class<?> argClass = arg.getClass();
+                  if (argClass.isArray()) {
+                     if (argClass.getComponentType().isPrimitive()) {
+                        OpenCLMem mem = program.getMem(arg, 0L);
+                        if (mem == null) {
+                           throw new IllegalStateException("can't get an array that has never been passed to a kernel " + argClass);
+
+                        }
+                        OpenCLJNI.getJNI().getMem(program, mem);
+                     } else {
+                        throw new IllegalStateException("Only array args (of primitives) expected for put/get, cant deal with "
+                              + argClass);
+
+                     }
+                  } else {
+                     throw new IllegalStateException("Only array args expected for put/get, cant deal with " + argClass);
+                  }
+               }
+               */
+            } else if (method.getName().equals("begin")) {
+            } else if (method.getName().equals("end")) {
+            }
          }
          return proxy;
       }
-
    }
 
    public List<OpenCLArgDescriptor> getArgs(Method m) {
@@ -242,80 +242,117 @@ public class OpenCLDevice extends Device{
       return (args);
    }
 
-   public <T extends OpenCL<T>> T create(Class<T> _interface) {
+   private static boolean isReservedInterfaceMethod(Method _methods) {
+      return (_methods.getName().equals("put") || _methods.getName().equals("get") || _methods.getName().equals("begin") || _methods
+            .getName().equals("begin"));
+   }
 
+   private String streamToString(InputStream _inputStream) {
       StringBuilder sourceBuilder = new StringBuilder();
-      Map<String, List<OpenCLArgDescriptor>> kernelNameToArgsMap = new HashMap<String, List<OpenCLArgDescriptor>>();
-      boolean interfaceIsAnnotated = false;
-      for (Annotation a : _interface.getAnnotations()) {
-         if (a instanceof OpenCL.Source) {
-            OpenCL.Source source = (OpenCL.Source) a;
-            sourceBuilder.append(source.value()).append("\n");
-            interfaceIsAnnotated = true;
-         } else if (a instanceof OpenCL.Resource) {
-            OpenCL.Resource sourceResource = (OpenCL.Resource) a;
-            InputStream stream = _interface.getClassLoader().getResourceAsStream(sourceResource.value());
-            if (stream != null) {
 
-               BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+      if (_inputStream != null) {
 
-               try {
-                  for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                     sourceBuilder.append(line).append("\n");
-                  }
-               } catch (IOException e) {
-                  // TODO Auto-generated catch block
-                  e.printStackTrace();
-               }
+         BufferedReader reader = new BufferedReader(new InputStreamReader(_inputStream));
 
+         try {
+            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+               sourceBuilder.append(line).append("\n");
             }
-            interfaceIsAnnotated = true;
+         } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
          }
+
       }
+      try {
+         _inputStream.close();
+      } catch (IOException e) {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      return (sourceBuilder.toString());
+   }
 
-      if (interfaceIsAnnotated) {
-         // just crawl the methods (non put or get) and create kernels
-         for (Method m : _interface.getDeclaredMethods()) {
-            if ((!m.getName().equals("put") && !m.getName().equals("get"))) {
+   public <T extends OpenCL<T>> T bind(Class<T> _interface, InputStream _inputStream) {
+      return (bind(_interface, streamToString(_inputStream)));
+   }
 
-               List<OpenCLArgDescriptor> args = getArgs(m);
+   public <T extends OpenCL<T>> T bind(Class<T> _interface) {
+      return (bind(_interface, (String) null));
+   }
 
-               kernelNameToArgsMap.put(m.getName(), args);
+   public <T extends OpenCL<T>> T bind(Class<T> _interface, String _source) {
+
+      Map<String, List<OpenCLArgDescriptor>> kernelNameToArgsMap = new HashMap<String, List<OpenCLArgDescriptor>>();
+      if (_source == null) {
+         StringBuilder sourceBuilder = new StringBuilder();
+         boolean interfaceIsAnnotated = false;
+         for (Annotation a : _interface.getAnnotations()) {
+            if (a instanceof OpenCL.Source) {
+               OpenCL.Source source = (OpenCL.Source) a;
+               sourceBuilder.append(source.value()).append("\n");
+               interfaceIsAnnotated = true;
+            } else if (a instanceof OpenCL.Resource) {
+               OpenCL.Resource sourceResource = (OpenCL.Resource) a;
+               InputStream stream = _interface.getClassLoader().getResourceAsStream(sourceResource.value());
+               sourceBuilder.append(streamToString(stream));
+               interfaceIsAnnotated = true;
             }
          }
-      } else {
-         for (Method m : _interface.getDeclaredMethods()) {
 
-            for (Annotation a : m.getAnnotations()) {
-               //  System.out.println("   annotation "+a);
-               // System.out.println("   annotation type " + a.annotationType());
-               if (a instanceof OpenCL.Kernel && (!m.getName().equals("put") && !m.getName().equals("get"))) {
-                  sourceBuilder.append("__kernel void " + m.getName() + "(");
+         if (interfaceIsAnnotated) {
+            // just crawl the methods (non put or get) and create kernels
+            for (Method m : _interface.getDeclaredMethods()) {
+               if (!isReservedInterfaceMethod(m)) {
                   List<OpenCLArgDescriptor> args = getArgs(m);
-
-                  boolean first = true;
-                  for (OpenCLArgDescriptor arg : args) {
-                     if (first) {
-                        first = false;
-                     } else {
-                        sourceBuilder.append(",");
-                     }
-                     sourceBuilder.append("\n   " + arg);
-                  }
-
-                  sourceBuilder.append(")");
-                  OpenCL.Kernel kernel = (OpenCL.Kernel) a;
-                  sourceBuilder.append(kernel.value());
                   kernelNameToArgsMap.put(m.getName(), args);
                }
             }
+         } else {
+
+            for (Method m : _interface.getDeclaredMethods()) {
+               if (!isReservedInterfaceMethod(m)) {
+                  for (Annotation a : m.getAnnotations()) {
+                     //  System.out.println("   annotation "+a);
+                     // System.out.println("   annotation type " + a.annotationType());
+                     if (a instanceof OpenCL.Kernel) {
+                        sourceBuilder.append("__kernel void " + m.getName() + "(");
+                        List<OpenCLArgDescriptor> args = getArgs(m);
+
+                        boolean first = true;
+                        for (OpenCLArgDescriptor arg : args) {
+                           if (first) {
+                              first = false;
+                           } else {
+                              sourceBuilder.append(",");
+                           }
+                           sourceBuilder.append("\n   " + arg);
+                        }
+
+                        sourceBuilder.append(")");
+                        OpenCL.Kernel kernel = (OpenCL.Kernel) a;
+                        sourceBuilder.append(kernel.value());
+                        kernelNameToArgsMap.put(m.getName(), args);
+
+                     }
+                  }
+               }
+            }
+
+         }
+         _source = sourceBuilder.toString();
+      } else {
+         for (Method m : _interface.getDeclaredMethods()) {
+            if (!isReservedInterfaceMethod(m)) {
+               List<OpenCLArgDescriptor> args = getArgs(m);
+               kernelNameToArgsMap.put(m.getName(), args);
+            }
          }
       }
 
-      String source = sourceBuilder.toString();
-      System.out.println("opencl{\n" + source + "\n}opencl");
+      System.out.println("opencl{\n" + _source + "\n}opencl");
 
-      OpenCLProgram program = createProgram(source);
+      OpenCLProgram program = createProgram(_source);
 
       Map<String, OpenCLKernel> map = new HashMap<String, OpenCLKernel>();
       for (String name : kernelNameToArgsMap.keySet()) {
@@ -347,8 +384,8 @@ public class OpenCLDevice extends Device{
       OpenCLDevice device = null;
       for (OpenCLPlatform p : OpenCLPlatform.getPlatforms()) {
          for (OpenCLDevice d : p.getDevices()) {
-            device =  _deviceSelector.select(d);
-            if (device != null){
+            device = _deviceSelector.select(d);
+            if (device != null) {
                break;
             }
          }

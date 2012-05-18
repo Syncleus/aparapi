@@ -40,13 +40,7 @@ public class OpenCLJNI{
    public static OpenCLJNI getJNI() {
       return (jni);
    }
-   
- 
 
-
-
-
-   
    native public List<OpenCLPlatform> getPlatforms();
 
    native public OpenCLProgram createProgram(OpenCLDevice context, String openCLSource);
@@ -58,9 +52,9 @@ public class OpenCLJNI{
    native public void remap(OpenCLProgram program, OpenCLMem mem, long address);
 
    native public void getMem(OpenCLProgram program, OpenCLMem mem);
-   
-   public boolean isOpenCLAvailable(){
-      return(openCLAvailable);
+
+   public boolean isOpenCLAvailable() {
+      return (openCLAvailable);
    }
 
 }

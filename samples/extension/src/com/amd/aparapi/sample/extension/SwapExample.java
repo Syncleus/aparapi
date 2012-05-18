@@ -10,8 +10,7 @@ public class SwapExample{
    interface Swapper extends OpenCL<Swapper>{
       @Kernel("{\n"//
             + "  const size_t id = get_global_id(0);\n"//
-            + "  float temp=lhs[id];"
-            + "  lhs[id] = rhs[id];\n"//
+            + "  float temp=lhs[id];" + "  lhs[id] = rhs[id];\n"//
             + "  rhs[id] = temp;\n"//
             + "}\n")//
       public Swapper swap(//
@@ -19,8 +18,6 @@ public class SwapExample{
             @GlobalReadWrite("lhs") float[] lhs,//
             @GlobalReadWrite("rhs") float[] rhs);
    }
-
- 
 
    public static void main(String[] args) {
 
@@ -37,29 +34,29 @@ public class SwapExample{
       if (device instanceof OpenCLDevice) {
          OpenCLDevice openclDevice = (OpenCLDevice) device;
 
-         Swapper swapper = openclDevice.create(Swapper.class);
+         Swapper swapper = openclDevice.bind(Swapper.class);
          for (int i = 0; i < size; i++) {
             System.out.println(lhs[i] + " " + rhs[i]);
          }
-         
+
          swapper.swap(range, lhs, rhs);
 
          for (int i = 0; i < size; i++) {
             System.out.println(lhs[i] + " " + rhs[i]);
          }
-         
+
          swapper.swap(range, lhs, rhs);
 
          for (int i = 0; i < size; i++) {
             System.out.println(lhs[i] + " " + rhs[i]);
          }
-         
+
          swapper.swap(range, rhs, lhs);
 
          for (int i = 0; i < size; i++) {
             System.out.println(lhs[i] + " " + rhs[i]);
          }
-         
+
       }
    }
 

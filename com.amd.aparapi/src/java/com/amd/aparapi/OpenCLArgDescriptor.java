@@ -4,11 +4,11 @@
 package com.amd.aparapi;
 
 public class OpenCLArgDescriptor{
-   
+
    public final static int ARG_BYTE_BIT = 1 << 0x000;
-   
+
    public final static int ARG_SHORT_BIT = 1 << 0x001;
-   
+
    public final static int ARG_INT_BIT = 1 << 0x002;
 
    public final static int ARG_FLOAT_BIT = 1 << 0x003;
@@ -18,7 +18,7 @@ public class OpenCLArgDescriptor{
    public final static int ARG_DOUBLE_BIT = 1 << 0x005;
 
    public final static int ARG_ARRAY_BIT = 1 << 0x006;
-   
+
    public final static int ARG_PRIMITIVE_BIT = 1 << 0x007;
 
    public final static int ARG_GLOBAL_BIT = 1 << 0x008;
@@ -32,10 +32,9 @@ public class OpenCLArgDescriptor{
    public final static int ARG_WRITEONLY_BIT = 1 << 0x00C;
 
    public final static int ARG_READWRITE_BIT = 1 << 0x00D;
-   
+
    public final static int ARG_ISARG_BIT = 1 << 0x00E;
 
-   
    public OpenCLMem memVal;
 
    private String name;

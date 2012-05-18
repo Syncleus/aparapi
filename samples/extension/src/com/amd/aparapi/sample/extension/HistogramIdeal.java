@@ -1,17 +1,14 @@
 package com.amd.aparapi.sample.extension;
 
-import java.util.Arrays;
-
 import com.amd.aparapi.Device;
-import com.amd.aparapi.Kernel;
 import com.amd.aparapi.OpenCL;
 import com.amd.aparapi.OpenCLDevice;
 import com.amd.aparapi.Range;
 
 public class HistogramIdeal{
 
-   @OpenCL.Resource("com/amd/aparapi/sample/extension/HistogramKernel.cl") interface HistogramKernel extends
-         OpenCL<HistogramKernel>{
+   // @OpenCL.Resource("com/amd/aparapi/sample/extension/HistogramKernel.cl")
+   interface HistogramKernel extends OpenCL<HistogramKernel>{
 
       public HistogramKernel histogram256(//
             Range _range,//
@@ -44,10 +41,10 @@ public class HistogramIdeal{
       final int[] histo = new int[BIN_SIZE];
       int[] refHisto = new int[BIN_SIZE];
       Device device = Device.best();
-    
+
       if (device != null) {
-         
-         System.out.println(((OpenCLDevice)device).getPlatform().getName());
+
+         System.out.println(((OpenCLDevice) device).getPlatform().getName());
          Range rangeBinSize = device.createRange(BIN_SIZE);
 
          Range range = Range.create((WIDTH * HEIGHT) / BIN_SIZE, GROUP_SIZE);
@@ -55,7 +52,8 @@ public class HistogramIdeal{
          if (device instanceof OpenCLDevice) {
             OpenCLDevice openclDevice = (OpenCLDevice) device;
 
-            HistogramKernel histogram = openclDevice.create(HistogramKernel.class);
+            HistogramKernel histogram = openclDevice.bind(HistogramKernel.class, Histogram.class.getClassLoader()
+                  .getResourceAsStream("com/amd/aparapi/sample/extension/HistogramKernel.cl"));
             long start = System.nanoTime();
             histogram.begin()//
                   .put(data)//
@@ -77,7 +75,7 @@ public class HistogramIdeal{
             }
 
          }
-      }else{
+      } else {
          System.out.println("no GPU device");
       }
    }

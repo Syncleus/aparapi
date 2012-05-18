@@ -1,17 +1,18 @@
 package com.amd.aparapi;
 
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OpenCLPlatform{
-  
+
    private long platformId;
 
    private String version;
 
    private String vendor;
+
    private String name;
+
    private List<OpenCLDevice> devices = new ArrayList<OpenCLDevice>();
 
    OpenCLPlatform(long _platformId, String _version, String _vendor, String _name) {
@@ -34,21 +35,22 @@ public class OpenCLPlatform{
    }
 
    public static List<OpenCLPlatform> getPlatforms() {
-      if (OpenCLJNI.getJNI().isOpenCLAvailable()){
+      if (OpenCLJNI.getJNI().isOpenCLAvailable()) {
          return (OpenCLJNI.getJNI().getPlatforms());
-      }else{
-         return(new ArrayList<OpenCLPlatform>());
+      } else {
+         return (new ArrayList<OpenCLPlatform>());
       }
-      
+
    }
 
    public String getName() {
       return (name);
    }
-   
+
    public String getVersion() {
       return (version);
    }
+
    public String getVendor() {
       return (vendor);
    }

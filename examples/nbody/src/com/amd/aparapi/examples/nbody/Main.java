@@ -44,7 +44,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -64,7 +63,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.WindowConstants;
 
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.ProfileInfo;
@@ -240,7 +238,7 @@ public class Main{
       caps.setDoubleBuffered(true);
       caps.setHardwareAccelerated(true);
       final GLCanvas canvas = new GLCanvas(caps);
-     
+
       Dimension dimension = new Dimension(Integer.getInteger("width", 742), Integer.getInteger("height", 742));
       canvas.setPreferredSize(dimension);
 
@@ -351,32 +349,28 @@ public class Main{
       final FPSAnimator animator = new FPSAnimator(canvas, 100);
       frame.addWindowListener(new WindowAdapter(){
 
-     
          @Override public void windowClosed(WindowEvent e) {
             System.out.println("closed");
             animator.stop();
             GLProfile.shutdown();
             System.exit(1);
-            
+
          }
 
          @Override public void windowClosing(WindowEvent e) {
             System.out.println("closing");
             animator.stop();
             GLProfile.shutdown();
-          //  System.exit(1);
-            
+            //  System.exit(1);
+
          }
 
-        
-         
       });
 
       //frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
       frame.pack();
       frame.setVisible(true);
 
-     
       animator.start();
 
    }

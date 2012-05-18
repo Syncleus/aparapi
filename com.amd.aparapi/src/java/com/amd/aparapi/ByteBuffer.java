@@ -94,7 +94,7 @@ class ByteBuffer{
    }
 
    int u4(int _offset) {
-      return ((u2(_offset)&0xffff) << 16 | u2(_offset + 2));
+      return ((u2(_offset) & 0xffff) << 16 | u2(_offset + 2));
    }
 
    int s4(int _offset) {
@@ -124,7 +124,7 @@ class ByteBuffer{
    }
 
    long u8(int _offset) {
-      return ((u4(_offset)&0xffffffffL) << 32) |(u4(_offset + 4)&0xffffffffL);
+      return ((u4(_offset) & 0xffffffffL) << 32) | (u4(_offset + 4) & 0xffffffffL);
    }
 
    int utf8bytes(int _offset) {

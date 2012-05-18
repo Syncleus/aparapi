@@ -7,10 +7,7 @@ import com.amd.aparapi.Range;
 
 public class Pow4Example{
 
-  
-
-   @OpenCL.Resource("com/amd/aparapi/sample/extension/squarer.cl") interface Squarer extends
-         OpenCL<Squarer>{
+   @OpenCL.Resource("com/amd/aparapi/sample/extension/squarer.cl") interface Squarer extends OpenCL<Squarer>{
 
       public Squarer square(//
             Range _range,//
@@ -18,7 +15,6 @@ public class Pow4Example{
             @GlobalReadWrite("out") float[] out);
    }
 
- 
    public static void main(String[] args) {
 
       int size = 32;
@@ -34,17 +30,17 @@ public class Pow4Example{
       if (device instanceof OpenCLDevice) {
          OpenCLDevice openclDevice = (OpenCLDevice) device;
 
-         Squarer squarer = openclDevice.create(Squarer.class);
+         Squarer squarer = openclDevice.bind(Squarer.class);
          squarer.square(range, in, squares);
 
          for (int i = 0; i < size; i++) {
             System.out.println(in[i] + " " + squares[i]);
          }
-         
+
          squarer.square(range, squares, in);
 
          for (int i = 0; i < size; i++) {
-            System.out.println(i+" " +squares[i] +" "+ in[i] );
+            System.out.println(i + " " + squares[i] + " " + in[i]);
          }
       }
    }
