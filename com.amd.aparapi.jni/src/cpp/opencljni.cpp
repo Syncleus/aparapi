@@ -174,8 +174,45 @@ jsize OpenCLMem::getPrimitiveSizeInBytes(JNIEnv *jenv, jlong argBits){
 jsize OpenCLMem::getArraySizeInBytes(JNIEnv *jenv, jarray array, jlong argBits){
    jsize arrayLen = jenv->GetArrayLength(array);
    jsize sizeInBytes = getPrimitiveSizeInBytes(jenv, argBits) * arrayLen;
-   fprintf(stderr, "size of new Mem arg is %d\n", sizeInBytes);
+   if(0)fprintf(stderr, "size of new Mem arg is %d\n", sizeInBytes);
    return(sizeInBytes);
+}
+
+void *getArrayPtr(JNIEnv *jenv, jarray array, jlong *argBits){
+   jboolean isCopy;
+   void *ptr = NULL;
+     if (argisset(*argBits, BYTE)){
+         jenv->GetByteArrayElements((jbyteArray)array, &isCopy); 
+          }else if (argisset(*argBits, INT)){
+               jenv->GetIntArrayElements((jintArray)array, &isCopy); 
+                }else if (argisset(*argBits, SHORT)){
+               jenv->GetShortArrayElements((jshortArray)array, &isCopy); 
+      }else if (argisset(*argBits, FLOAT)){
+           jenv->GetFloatArrayElements((jfloatArray)array, &isCopy); 
+      }else if (argisset(*argBits, LONG)){
+        
+          jenv->GetLongArrayElements((jlongArray)array, &isCopy); 
+      }else if (argisset(*argBits, DOUBLE)){
+        
+           jenv->GetDoubleArrayElements((jdoubleArray)array, &isCopy); 
+      }
+      
+     
+   if (argBits != NULL){
+      if(0){OpenCLArgDescriptor::describeBits(jenv, *argBits);fprintf(stderr, " \n");}
+     
+   }
+   return(ptr);
+}
+
+void releaseArrayPtr(JNIEnv *jenv, jarray array, void *ptr, jlong *argBits){
+   jboolean isCopy;
+   jenv->ReleaseByteArrayElements((jbyteArray)array, (jbyte*)ptr, JNI_COMMIT /* JNI_ABORT */); 
+   if (argBits != NULL){
+      if(0){OpenCLArgDescriptor::describeBits(jenv, *argBits);fprintf(stderr, " \n");}
+     
+   }
+   
 }
 
 void *OpenCLMem::pin(JNIEnv *jenv, jarray array, jlong *memBits){
@@ -214,13 +251,13 @@ jobject OpenCLMem::create(JNIEnv *jenv, cl_context context, jlong argBits, jarra
    }
 
    jobject memInstance = OpenCLMem::create(jenv);
-   fprintf(stderr, "created a new mem object!\n");
+   if(0)fprintf(stderr, "created a new mem object!\n");
    OpenCLMem::setAddress(jenv, memInstance, ptr);
    OpenCLMem::setInstance(jenv, memInstance, array);
    OpenCLMem::setSizeInBytes(jenv, memInstance, sizeInBytes);
    OpenCLMem::setBits(jenv, memInstance, memBits);
    OpenCLMem::setMem(jenv, memInstance, mem);
-   fprintf(stderr, "initiated mem object!\n");
+   if(0)fprintf(stderr, "initiated mem object!\n");
    return(memInstance);
 }
 jlong OpenCLMem::getBits(JNIEnv *jenv, jobject memInstance){
@@ -313,7 +350,7 @@ JNI_JAVA(jobject, OpenCLJNI, createProgram)
       cl_int status = CL_SUCCESS;
       cl_device_type deviceType;
       clGetDeviceInfo(deviceId, CL_DEVICE_TYPE,  sizeof(deviceType), &deviceType, NULL);
-      //fprintf(stderr, "device[%d] CL_DEVICE_TYPE = %x\n", deviceId, deviceType);
+      if(0)fprintf(stderr, "device[%d] CL_DEVICE_TYPE = %x\n", deviceId, deviceType);
 
 
       cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platformId, 0 };
@@ -342,7 +379,7 @@ JNI_JAVA(jobject, OpenCLJNI, createKernel)
       cl_program program = OpenCLProgram::getProgram(jenv, programInstance); 
       cl_int status = CL_SUCCESS;
       const char *nameChars = jenv->GetStringUTFChars(name, NULL);
-      fprintf(stderr, "tring to extract kernel '%s'\n", nameChars);
+      if(0)fprintf(stderr, "tring to extract kernel '%s'\n", nameChars);
       cl_kernel kernel = clCreateKernel(program, nameChars, &status);
       jenv->ReleaseStringUTFChars(name, nameChars);
 
@@ -363,14 +400,14 @@ JNI_JAVA(jobject, OpenCLJNI, createKernel)
 
 
 void putArg(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue commandQueue, cl_event *events, jint *eventc, jint argIndex, jobject argDef, jobject arg){
-   if(1){
+   if(0){
       fprintf(stderr, "putArg ");
       OpenCLArgDescriptor::describe(jenv, argDef, argIndex);
    }
    cl_int status = CL_SUCCESS;
    jlong argBits = OpenCLArgDescriptor::getBits(jenv, argDef);
    if (argisset(argBits, ARRAY) && argisset(argBits, GLOBAL)){ 
-      fprintf(stderr, "GLOBAL\n");
+      if(0)fprintf(stderr, "GLOBAL\n");
       jobject memInstance = OpenCLArgDescriptor::getMemInstance(jenv, argDef);
       if (memInstance == NULL){
          // first call?
@@ -383,7 +420,7 @@ void putArg(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue
          void *ptr  =  OpenCLMem::pin(jenv, (jarray)arg,&argBits); 
          void *oldPtr = OpenCLMem::getAddress(jenv, memInstance);
          if (ptr !=oldPtr){
-            fprintf(stderr, "ptr moved from %lx to %lx\n", oldPtr, ptr);
+            if(0)fprintf(stderr, "ptr moved from %lx to %lx\n", oldPtr, ptr);
             cl_mem mem = OpenCLMem::getMem(jenv, memInstance);
             status = clReleaseMemObject(mem); 
             memInstance = OpenCLMem::create(jenv, context, argBits, (jarray)arg);
@@ -399,6 +436,8 @@ void putArg(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue
          jlong memBits = OpenCLMem::getBits(jenv, memInstance);
          memset(memBits, ENQUEUED);
          OpenCLMem::setBits(jenv, memInstance, memBits);
+         fprintf(stderr, "enqueuing write of arg ");
+         OpenCLArgDescriptor::describe(jenv, argDef, argIndex);
          status = clEnqueueWriteBuffer(commandQueue, mem, CL_FALSE, 0, sizeInBytes, ptr, *eventc, (*eventc)==0?NULL:events, &events[*eventc]);
          if (status != CL_SUCCESS) {
             fprintf(stderr, "error enqueuing write %s!\n",  CLHelper::errString(status));
@@ -414,11 +453,11 @@ void putArg(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue
          if(0)fprintf(stderr, "set arg  = %d!\n", argIndex);
       }
    } else if (argisset(argBits, ARRAY) && argisset(argBits, LOCAL)){ 
-      fprintf(stderr, "LOCAL\n");
+      if(0)fprintf(stderr, "LOCAL\n");
 
       jsize sizeInBytes = OpenCLMem::getArraySizeInBytes(jenv, (jarray)arg, argBits);
       cl_int status = CL_SUCCESS;
-      fprintf(stderr, "local is %d bytes\n", sizeInBytes);
+      if(0)fprintf(stderr, "local is %d bytes\n", sizeInBytes);
       status = clSetKernelArg(kernel, argIndex, (size_t)sizeInBytes, (void *)NULL);          
       if (status != CL_SUCCESS) {
          fprintf(stderr, "error setting arg %d %s!\n",  argIndex, CLHelper::errString(status));
@@ -426,7 +465,7 @@ void putArg(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue
          if(0)fprintf(stderr, "set arg  = %d!\n", argIndex);
       }
    }else if (argisset(argBits, PRIMITIVE)){
-      fprintf(stderr, "PRIMITIVE\n");
+      if(0)fprintf(stderr, "PRIMITIVE\n");
       if (argisset(argBits, INT)){
          cl_int value = JNIHelper::getInstanceFieldInt(jenv, arg, "value");
          status = clSetKernelArg(kernel, argIndex, sizeof(value), (void *)&(value));          
@@ -442,6 +481,14 @@ void putArg(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue
             fprintf(stderr, "error setting int arg %d %f %s!\n",  argIndex, value, CLHelper::errString(status));
          }else{
             if(0)fprintf(stderr, "set arg  = %d to %f!\n", argIndex, value);
+         }
+      }else if (argisset(argBits, LONG)){
+         cl_long value = JNIHelper::getInstanceFieldLong(jenv, arg, "value");
+         status = clSetKernelArg(kernel, argIndex, sizeof(value), (void *)&(value));          
+         if (status != CL_SUCCESS) {
+            fprintf(stderr, "error setting int arg %d %d %s!\n",  argIndex, value, CLHelper::errString(status));
+         }else{
+            if(0)fprintf(stderr, "set arg  = %d to %d!\n", argIndex, value);
          }
 
       }else if (argisset(argBits, DOUBLE)){
@@ -482,6 +529,8 @@ void getArg(JNIEnv *jenv, cl_context context, cl_command_queue commandQueue, cl_
          if (0){
             fprintf(stderr, "about to enqueu read eventc = %d!\n", *eventc);
          }
+           fprintf(stderr, "enqueuing read of arg ");
+         OpenCLArgDescriptor::describe(jenv, argDef, argIndex);
          cl_int status = clEnqueueReadBuffer(commandQueue, mem, CL_FALSE, 0, sizeInBytes, ptr ,*eventc, (*eventc)==0?NULL:events, &events[*eventc]);
          if (status != CL_SUCCESS) {
             fprintf(stderr, "error enqueuing read %s!\n",  CLHelper::errString(status));
