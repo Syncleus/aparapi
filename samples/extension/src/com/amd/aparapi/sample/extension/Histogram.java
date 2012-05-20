@@ -60,11 +60,10 @@ public class Histogram{
          OpenCLDevice openclDevice = (OpenCLDevice) device;
 
          HistogramKernel histogram = openclDevice.bind(HistogramKernel.class);
-         //  histogram.histogram256(range, data, sharedArray, binResult);
+       
+         StopWatch timer = new StopWatch();
+         timer.start();
 
-         // Arrays.fill(binResult, 0);
-
-         long start = System.nanoTime();
          histogram.histogram256(range, data, sharedArray, binResult, BIN_SIZE);
          boolean java = false;
          boolean aparapiKernel = false;
@@ -74,24 +73,21 @@ public class Histogram{
                for (int i = 0; i < SUB_HISTOGRAM_COUNT; ++i)
                   histo[j] += binResult[i * BIN_SIZE + j];
          } else if (aparapiKernel) {
-
             k.execute(range2);
          } else {
             histogram.bin256(range2, histo, binResult, SUB_HISTOGRAM_COUNT);
          }
-         System.out.println("opencl " + ((System.nanoTime() - start) / 1000000));
-
-         start = System.nanoTime();
+         timer.print("opencl");
+         timer.start();
          for (int i = 0; i < WIDTH * HEIGHT; i++) {
             refHisto[data[i]]++;
          }
-         System.out.println("java " + ((System.nanoTime() - start) / 1000000));
+         timer.print("java");
          for (int i = 0; i < 128; i++) {
             if (refHisto[i] != histo[i]) {
                System.out.println(i + " " + histo[i] + " " + refHisto[i]);
             }
          }
-
       }
    }
 }

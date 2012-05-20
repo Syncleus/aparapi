@@ -103,14 +103,19 @@ public class FFTExample{
 
       Range range = device.createRange(64);
       System.out.println("range=" + range);
-      long start = System.nanoTime();
+
+      StopWatch timer = new StopWatch();
+      timer.start();
       fft.forward(range, real, imaginary);
-      System.out.println("opencl " + ((System.nanoTime() - start) / 1000000));
-      start = System.nanoTime();
+      timer.print("opencl");
+
+      timer.start();
       fft(referenceReal, referenceImaginary);
-      System.out.println("java " + ((System.nanoTime() - start) / 1000000));
+      timer.print("java");
       for (int i = 0; i < LEN; i++) {
-         System.out.printf("%d %5.2f %5.2f %5.2f\n", i, initial[i], real[i], referenceReal[i]);
+         if (Math.abs(real[i] - referenceReal[i]) > 0.01) {
+            System.out.printf("%d %5.2f %5.2f %5.2f\n", i, initial[i], real[i], referenceReal[i]);
+         }
       }
 
    }
