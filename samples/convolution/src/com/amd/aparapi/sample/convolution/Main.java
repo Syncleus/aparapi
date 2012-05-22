@@ -116,7 +116,7 @@ public class Main{
          //  put(inputData); // Because we are using explicit buffer management we must put the imageData array
       }
 
-      public void run() {
+      @Override public void run() {
 
          int x = getGlobalId(0);
          int y = getGlobalId(1);
