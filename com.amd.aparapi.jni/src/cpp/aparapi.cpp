@@ -718,7 +718,12 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
 
     if (jniContext->firstRun && jniContext->isProfilingEnabled()){
          cl_event firstEvent;
+#ifdef CL_VERSION_1_2
+         status = clEnqueueMarkerWithWaitList(jniContext->commandQueue, 0, NULL, &firstEvent);
+#else
+         // this was deprecated in 1.1
          status = clEnqueueMarker(jniContext->commandQueue, &firstEvent);
+#endif
          if (status != CL_SUCCESS) {
             PRINT_CL_ERR(status, "clEnqueueMarker endOfTxfers");
             return 0L;
