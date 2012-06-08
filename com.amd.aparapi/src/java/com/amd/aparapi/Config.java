@@ -184,7 +184,8 @@ class Config{
 
    static public InstructionListener instructionListener = null;
 
-   {
+   static {
+      System.out.println("junk!");
 
       if (instructionListenerClassName != null && !instructionListenerClassName.equals("")) {
          try {
