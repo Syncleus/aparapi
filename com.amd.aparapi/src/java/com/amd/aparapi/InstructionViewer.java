@@ -834,7 +834,7 @@ public class InstructionViewer implements Config.InstructionListener{
       panel.add(BorderLayout.EAST, controls);
       frame.setBackground(background);
       frame.getContentPane().add(panel);
-      frame.setPreferredSize(new Dimension(800, 1000));
+      frame.setPreferredSize(new Dimension(1024, 1000));
       frame.pack();
       frame.setVisible(true);
 
