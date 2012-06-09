@@ -142,7 +142,7 @@ class Config{
 
    static final boolean enableSWITCH = Boolean.getBoolean(propPkgName + ".enable.SWITCH");
 
-   static final int JTPLocalSizeMultiplier = Integer.getInteger(propPkgName + ".JTP.localSizeMul", 2);
+  // static final int JTPLocalSizeMultiplier = Integer.getInteger(propPkgName + ".JTP.localSizeMul", 2);
 
    // Logging setup
    private static final String logPropName = propPkgName + ".logLevel";
