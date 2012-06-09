@@ -1362,8 +1362,9 @@ class KernelRunner{
                int jniFlags = 0;
                if (openCLDevice == null) {
                   if (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU)) {
-                     // We just treat as before by getting first GPU device
-                     openCLDevice = (OpenCLDevice) OpenCLDevice.firstGPU();
+                     // We used to treat as before by getting first GPU device
+                     // now we get the best GPU
+                     openCLDevice = (OpenCLDevice) OpenCLDevice.best();
                      jniFlags |= JNI_FLAG_USE_GPU; // this flag might be redundant now. 
                   } else {
                      // We fetch the first CPU device 

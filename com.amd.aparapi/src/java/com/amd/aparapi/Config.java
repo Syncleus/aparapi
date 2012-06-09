@@ -180,13 +180,15 @@ class Config{
       void showAndTell(String message, Instruction _start, Instruction _instruction);
    }
 
+   static final boolean enableInstructionDecodeViewer = Boolean.getBoolean(propPkgName + ".enableInstructionDecodeViewer");
    static String instructionListenerClassName = System.getProperty(propPkgName + ".instructionListenerClass");
 
    static public InstructionListener instructionListener = null;
 
    static {
-      System.out.println("junk!");
-
+      if (enableInstructionDecodeViewer && (instructionListenerClassName==null || instructionListenerClassName.equals(""))  ){
+         instructionListenerClassName = InstructionViewer.class.getName();
+      }
       if (instructionListenerClassName != null && !instructionListenerClassName.equals("")) {
          try {
             Class<?> instructionListenerClass = Class.forName(instructionListenerClassName);
