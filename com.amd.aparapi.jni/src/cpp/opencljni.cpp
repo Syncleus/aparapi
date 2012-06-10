@@ -429,7 +429,7 @@ void putArg(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue
          jlong memBits = OpenCLMem::getBits(jenv, memInstance);
          memset(memBits, ENQUEUED);
          OpenCLMem::setBits(jenv, memInstance, memBits);
-         fprintf(stderr, "enqueuing write of arg ");
+        // fprintf(stderr, "enqueuing write of arg ");
          OpenCLArgDescriptor::describe(jenv, argDef, argIndex);
          status = clEnqueueWriteBuffer(commandQueue, mem, CL_FALSE, 0, sizeInBytes, ptr, *eventc, (*eventc)==0?NULL:events, &events[*eventc]);
          if (status != CL_SUCCESS) {
@@ -522,7 +522,7 @@ void getArg(JNIEnv *jenv, cl_context context, cl_command_queue commandQueue, cl_
          if (0){
             fprintf(stderr, "about to enqueu read eventc = %d!\n", *eventc);
          }
-         fprintf(stderr, "enqueuing read of arg ");
+        // fprintf(stderr, "enqueuing read of arg ");
          OpenCLArgDescriptor::describe(jenv, argDef, argIndex);
          cl_int status = clEnqueueReadBuffer(commandQueue, mem, CL_FALSE, 0, sizeInBytes, ptr ,*eventc, (*eventc)==0?NULL:events, &events[*eventc]);
          if (status != CL_SUCCESS) {
