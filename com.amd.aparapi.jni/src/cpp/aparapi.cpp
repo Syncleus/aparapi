@@ -218,7 +218,7 @@ class KernelArg{
       }
       void unpin(JNIEnv *jenv){
 		 //if  (value.ref.isPinned == JNI_FALSE){		 
-         //   fprintf(stderr, "why are we unpinning buffer %s! isPinned = JNI_TRUE\n", name);
+       //     fprintf(stdout, "why are we unpinning buffer %s! isPinned = JNI_TRUE\n", name);
 		 //}
          if (isMutableByKernel()){
             // we only need to commit if the buffer has been written to
@@ -233,16 +233,16 @@ class KernelArg{
       }
       void pin(JNIEnv *jenv){
 		 //if  (value.ref.isPinned == JNI_TRUE){			 
-         //   fprintf(stderr, "why are we pinning buffer %s! isPinned = JNI_TRUE\n", name);
-		 //}
+       //     fprintf(stdout, "why are we pinning buffer %s! isPinned = JNI_TRUE\n", name);
+		// }
 		 void *ptr = value.ref.addr;
          value.ref.addr = jenv->GetPrimitiveArrayCritical((jarray)value.ref.javaArray,&value.ref.isCopy);
 		 //if (ptr != value.ref.addr){
-         //   fprintf(stderr, "buffer %s has moved!\n", name);
-		 //}
-         //if (value.ref.isCopy){
-         //   fprintf(stderr, "buffer %s is a copy!\n", name);
-         //}
+       //     fprintf(stdout, "buffer %s has moved!\n", name);
+		// }
+       //  if (value.ref.isCopy){
+       //     fprintf(stderr, "buffer %s is a copy!\n", name);
+       //  }
          value.ref.isPinned = JNI_TRUE;
       }
 
@@ -440,21 +440,31 @@ jboolean isVerbose(){
 }
 
 void dispose(JNIEnv *jenv){
+   //fprintf(stdout, "dispose()\n");
    cl_int status = CL_SUCCESS;
    jenv->DeleteGlobalRef(kernelObject);
    jenv->DeleteGlobalRef(kernelClass);
    if (context != 0){
       status = clReleaseContext(context);
+      //fprintf(stdout, "dispose context %0lx\n", context);
       ASSERT_CL_NO_RETURN("clReleaseContext()");
       context = (cl_context)0;
    }
+   if (commandQueue != 0){
+      status = clReleaseCommandQueue((cl_command_queue)commandQueue);
+      //fprintf(stdout, "dispose commandQueue %0lx\n", commandQueue);
+      ASSERT_CL_NO_RETURN("clReleaseCommandQueue()");
+      commandQueue = (cl_command_queue)0;
+   }
    if (program != 0){
       status = clReleaseProgram((cl_program)program);
+      //fprintf(stdout, "dispose program %0lx\n", program);
       ASSERT_CL_NO_RETURN("clReleaseProgram()");
       program = (cl_program)0;
    }
    if (kernel != 0){
       status = clReleaseKernel((cl_kernel)kernel);
+      //fprintf(stdout, "dispose kernel %0lx\n", kernel);
       ASSERT_CL_NO_RETURN("clReleaseKernel()");
       kernel = (cl_kernel)0;
    }
@@ -464,6 +474,7 @@ void dispose(JNIEnv *jenv){
          if (!arg->isPrimitive()){
             if (arg->value.ref.mem != 0){
                status = clReleaseMemObject((cl_mem)arg->value.ref.mem);
+               //fprintf(stdout, "dispose arg %d %0lx\n", i, arg->value.ref.mem);
                ASSERT_CL_NO_RETURN("clReleaseMemObject()");
                arg->value.ref.mem = (cl_mem)0;
             }
@@ -1232,6 +1243,7 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
 // we return the JNIContext from here 
 JNI_JAVA(jlong, KernelRunner, initJNI)
    (JNIEnv *jenv, jclass clazz, jobject kernelObject, jobject openCLDeviceObject, jint flags) {
+   fprintf(stdout, "init()\n");
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = new JNIContext(jenv, kernelObject, openCLDeviceObject, flags);
 
