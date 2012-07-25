@@ -88,7 +88,16 @@ class Config{
     *  
     */
    static final boolean enableVerboseJNI = Boolean.getBoolean(propPkgName + ".enableVerboseJNI");
-
+   
+   /**
+    * Allows the user to request tracking of opencl resources.  
+    * 
+    *  This is really a debugging option to help locate leaking OpenCL resources, this will be dumped to stderr.
+    * 
+    *  Usage -Dcom.amd.aparapi.enableOpenCLResourceTracking={true|false}
+    *  
+    */
+   static final boolean enableVerboseJNIOpenCLResourceTracking = Boolean.getBoolean(propPkgName + ".enableVerboseJNIOpenCLResourceTracking");
    /**
     * Allows the user to request that the execution mode of each kernel invocation be reported to stdout.
     * 

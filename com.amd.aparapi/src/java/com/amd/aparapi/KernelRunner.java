@@ -388,7 +388,19 @@ class KernelRunner{
     * @author gfrost
     */
 
-   @UsedByJNICode @Annotations.Experimental public static final int JNI_FLAG_ENABLE_VERBOSE_JNI = 1 << 3;
+   @UsedByJNICode public static final int JNI_FLAG_ENABLE_VERBOSE_JNI = 1 << 3;
+   
+   /**
+    * This 'bit' indicates that we wish to enable OpenCL resource tracking by JNI layer to be written to stderr.<br/>
+    * 
+    * @see com.amd.aparapi.annotations.UsedByJNICode
+    * @see com.amd.aparapi.annotations.Experimental
+    * 
+    * @author gfrost
+    */
+
+   @UsedByJNICode @Annotations.Experimental public static final int JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING = 1 << 4;
+
 
    /**
     * Each field (or captured field in the case of an anonymous inner class) referenced by any bytecode reachable from the users Kernel.run(), will
@@ -1379,6 +1391,7 @@ class KernelRunner{
                jniFlags |= (Config.enableProfiling ? JNI_FLAG_ENABLE_PROFILING : 0);
                jniFlags |= (Config.enableProfilingCSV ? JNI_FLAG_ENABLE_PROFILING_CSV | JNI_FLAG_ENABLE_PROFILING : 0);
                jniFlags |= (Config.enableVerboseJNI ? JNI_FLAG_ENABLE_VERBOSE_JNI : 0);
+               jniFlags |= (Config.enableVerboseJNIOpenCLResourceTracking ? JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING :0);
                // jniFlags |= (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU) ? JNI_FLAG_USE_GPU : 0);
                // Init the device to check capabilities before emitting the
                // code that requires the capabilities.
