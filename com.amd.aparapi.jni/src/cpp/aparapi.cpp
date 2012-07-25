@@ -344,6 +344,67 @@ jfieldID KernelArg::javaArrayFieldID=0;
 jfieldID KernelArg::sizeInBytesFieldID=0;
 jfieldID KernelArg::numElementsFieldID=0; 
 
+template <class T> class List; // forward
+
+template <class T> class Handle{
+   private:
+       T value;
+       int line;
+       Handle<T> *next;
+       friend class List<T>;
+   public:
+       Handle(T _value, int _line): value(_value), line(_line),next(NULL){
+       }
+};
+
+template <class T> class List{
+   private:
+       char *name;
+       Handle<T> *head;
+       int count;
+   public:
+       List(char *_name): head(NULL), count(0), name(_name){
+       }
+       void add(T _value, int _line){
+          Handle<T> *handle = new Handle<T>(_value, _line);
+          handle->next = head; 
+          head = handle;
+          count++;
+          //fprintf(stdout, "LINE %d added %s %0lx\n", _line, name, _value);
+       }
+       void remove(T _value, int _line){
+          for (Handle<T> *ptr = head, *last=NULL; ptr != NULL; last=ptr, ptr = ptr->next){
+             if (ptr->value == _value){
+                if (last == NULL){ // head 
+                   head = ptr->next;
+                }else{ // !head
+                   last->next = ptr->next;
+                }
+                delete ptr;
+                count--;
+                //fprintf(stdout, "LINE %d removed %s %0lx\n", _line, name, _value);
+                return;
+             }
+          }
+          fprintf(stderr, "LINE %d failed to find %s to remove %0lx\n", _line, name, _value);
+       }
+       void report(FILE *stream){
+          if (head != NULL){
+             fprintf(stream, "Resource report %d resources of type %s still in play ", count, name);
+             for (Handle<T> *ptr = head; ptr != NULL; ptr = ptr->next){
+                fprintf(stream, " %0lx(%d)", ptr->value, ptr->line);
+             }
+             fprintf(stream, "\n");
+          }
+       }
+};
+
+List<cl_command_queue> commandQueueList("cl_command_queue");
+List<cl_mem> memList("cl_mem");
+List<cl_event> readEventList("cl_event (read)");
+List<cl_event> executeEventList("cl_event (exec)");
+List<cl_event> writeEventList("cl_event (write)");
+
 class JNIContext{
    private: 
       jint flags;
@@ -399,7 +460,6 @@ class JNIContext{
          profileFile(NULL), 
          valid(JNI_FALSE){
             cl_int status = CL_SUCCESS;
-
             // The device is passed to us.  So just extract the device Id, platform Id etc and create a context.
             //
             jobject platformInstance = OpenCLDevice::getPlatformInstance(jenv, openCLDeviceObject);
@@ -426,6 +486,9 @@ jboolean isValid(){
 jboolean isProfilingCSVEnabled(){
    return((flags&com_amd_aparapi_KernelRunner_JNI_FLAG_ENABLE_PROFILING_CSV)==com_amd_aparapi_KernelRunner_JNI_FLAG_ENABLE_PROFILING_CSV?JNI_TRUE:JNI_FALSE);
 }
+jboolean isTrackingOpenCLResources(){
+   return((flags&com_amd_aparapi_KernelRunner_JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING)==com_amd_aparapi_KernelRunner_JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING?JNI_TRUE:JNI_FALSE);
+}
 jboolean isProfilingEnabled(){
    return((flags&com_amd_aparapi_KernelRunner_JNI_FLAG_ENABLE_PROFILING)==com_amd_aparapi_KernelRunner_JNI_FLAG_ENABLE_PROFILING?JNI_TRUE:JNI_FALSE);
 }
@@ -451,6 +514,9 @@ void dispose(JNIEnv *jenv){
       context = (cl_context)0;
    }
    if (commandQueue != 0){
+      if (isTrackingOpenCLResources()){
+          commandQueueList.remove((cl_command_queue)commandQueue, __LINE__);
+      }
       status = clReleaseCommandQueue((cl_command_queue)commandQueue);
       //fprintf(stdout, "dispose commandQueue %0lx\n", commandQueue);
       ASSERT_CL_NO_RETURN("clReleaseCommandQueue()");
@@ -473,6 +539,9 @@ void dispose(JNIEnv *jenv){
          KernelArg *arg = args[i];
          if (!arg->isPrimitive()){
             if (arg->value.ref.mem != 0){
+               if (isTrackingOpenCLResources()){
+                  memList.remove((cl_mem)arg->value.ref.mem, __LINE__);
+               }
                status = clReleaseMemObject((cl_mem)arg->value.ref.mem);
                //fprintf(stdout, "dispose arg %d %0lx\n", i, arg->value.ref.mem);
                ASSERT_CL_NO_RETURN("clReleaseMemObject()");
@@ -492,6 +561,7 @@ void dispose(JNIEnv *jenv){
       }
       delete[] args; args=NULL;
 
+      // do we need to call clReleaseEvent on any of these that are still retained....
       delete []readEvents; readEvents =NULL;
       delete []writeEvents; writeEvents = NULL;
       delete []executeEvents; executeEvents = NULL;
@@ -505,6 +575,15 @@ void dispose(JNIEnv *jenv){
          delete[] readEventArgs; readEventArgs=0;
          delete[] writeEventArgs; writeEventArgs=0;
       } 
+   }
+   if (isTrackingOpenCLResources()){
+   fprintf(stderr, "after dispose{ \n");
+   commandQueueList.report(stderr);
+   memList.report(stderr); 
+   readEventList.report(stderr); 
+   executeEventList.report(stderr); 
+   writeEventList.report(stderr); 
+   fprintf(stderr, "}\n");
    }
 }
 
@@ -845,7 +924,9 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
                jniContext->unpinAll(jenv);
                return status;
             }
-
+            if (jniContext->isTrackingOpenCLResources()){
+               memList.add(arg->value.ref.mem, __LINE__);
+            }
 
             status = clSetKernelArg(jniContext->kernel, kernelArgPos++, sizeof(cl_mem), (void *)&(arg->value.ref.mem));                  
             if (status != CL_SUCCESS) {
@@ -899,12 +980,16 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             }
 
             status = clEnqueueWriteBuffer(jniContext->commandQueue, arg->value.ref.mem, CL_FALSE, 0, 
-                  arg->sizeInBytes, arg->value.ref.addr, 0, NULL, &(jniContext->writeEvents[writeEventCount++]));
+                  arg->sizeInBytes, arg->value.ref.addr, 0, NULL, &(jniContext->writeEvents[writeEventCount]));
             if (status != CL_SUCCESS) {
                PRINT_CL_ERR(status, "clEnqueueWriteBuffer");
                jniContext->unpinAll(jenv);
                return status;
             }
+            if (jniContext->isTrackingOpenCLResources()){
+               writeEventList.add(jniContext->writeEvents[writeEventCount],__LINE__);
+            }
+            writeEventCount++;
             if (arg->isExplicit() && arg->isExplicitWrite()){
                if (jniContext->isVerbose()){
                   fprintf(stderr, "clearing explicit buffer bit %d %s\n", i, arg->name);
@@ -1050,6 +1135,7 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
                      jniContext->unpinAll(jenv);
                      return status;
                   }
+                //  execEventList.remove(jniContext->executeEvents[0],__LINE__);
                }
                // Now we can profile info for passid-1 
                status = profile(&jniContext->exec[passid-1], &jniContext->executeEvents[0], 1, NULL, jniContext->profileBaseTime);
@@ -1080,6 +1166,7 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             jniContext->unpinAll(jenv);
             return status;
          }
+        // execEventList.add(jniContext->executeEvents[0],__LINE__);
       if (0){  // I dont think we need this
          if (passid < passes-1){
             // we need to wait for the executions to complete...
@@ -1141,6 +1228,9 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             jniContext->unpinAll(jenv);
             return status;
          }
+         if (jniContext->isTrackingOpenCLResources()){
+            readEventList.add(jniContext->readEvents[readEventCount],__LINE__);
+         }
          readEventCount++;
       }
    }
@@ -1170,6 +1260,9 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             PRINT_CL_ERR(status, "clReleaseEvent() read event");
             jniContext->unpinAll(jenv);
             return status;
+         }
+         if (jniContext->isTrackingOpenCLResources()){
+            readEventList.remove(jniContext->readEvents[i],__LINE__);
          }
       }
    } else {
@@ -1225,12 +1318,24 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
          jniContext->unpinAll(jenv);
          return status;
       }
+      if (jniContext->isTrackingOpenCLResources()){
+         writeEventList.remove(jniContext->writeEvents[i],__LINE__);
+      }
    }
 
    jniContext->unpinAll(jenv);
 
    if (jniContext->isProfilingCSVEnabled()) {
       writeProfileInfo(jniContext);
+   }
+   if (jniContext->isTrackingOpenCLResources()){
+   fprintf(stderr, "following execution of kernel{\n");
+   commandQueueList.report(stderr);
+   memList.report(stderr); 
+   readEventList.report(stderr); 
+   executeEventList.report(stderr); 
+   writeEventList.report(stderr); 
+   fprintf(stderr, "}\n");
    }
 
    jniContext->firstRun = false;
@@ -1283,6 +1388,8 @@ JNI_JAVA(jlong, KernelRunner, buildProgramJNI)
        queue_props,
        &status);
    ASSERT_CL("clCreateCommandQueue()");
+
+   commandQueueList.add(jniContext->commandQueue, __LINE__);
 
    if (jniContext->isProfilingCSVEnabled()) {
       // compute profile filename
