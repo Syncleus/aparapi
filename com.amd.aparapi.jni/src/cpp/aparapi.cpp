@@ -760,13 +760,15 @@ jint updateNonPrimitiveReferences(JNIEnv *jenv, jobject jobj, JNIContext* jniCon
                // need to free opencl buffers, run will reallocate later
                if (arg->value.ref.mem != 0) {
                   //fprintf(stderr, "-->releaseMemObject[%d]\n", i);
+                  if (jniContext->isTrackingOpenCLResources()){
+                     memList.remove(arg->value.ref.mem,__LINE__);
+                  }
                   status = clReleaseMemObject((cl_mem)arg->value.ref.mem);
                   //fprintf(stderr, "<--releaseMemObject[%d]\n", i);
                   ASSERT_CL("clReleaseMemObject()");
                   arg->value.ref.mem = (cl_mem)0;
                }
 
-               arg->value.ref.mem = (cl_mem) 0;
                arg->value.ref.addr = NULL;
 
                // Capture new array ref from the kernel arg object
@@ -900,6 +902,17 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
          }
 
          if (jniContext->firstRun || (arg->value.ref.mem == 0) || objectMoved ){
+
+            if (arg->value.ref.mem != 0 && objectMoved){
+               // we need to release the old buffer 
+               if (jniContext->isTrackingOpenCLResources()){
+                  memList.remove((cl_mem)arg->value.ref.mem, __LINE__);
+               }
+               status = clReleaseMemObject((cl_mem)arg->value.ref.mem);
+               //fprintf(stdout, "dispose arg %d %0lx\n", i, arg->value.ref.mem);
+               ASSERT_CL_NO_RETURN("clReleaseMemObject()");
+               arg->value.ref.mem = (cl_mem)0;
+            }
             // if either this is the first run or user changed input array
             // or gc moved something, then we create buffers/args
             cl_uint mask = CL_MEM_USE_HOST_PTR;
@@ -1126,17 +1139,26 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             // we block and do supply executeEvents 
             //fprintf(stderr, "setting passid to %d of %d not first not last\n", passid, passes);
             //
+            
+            status = clWaitForEvents(1, &jniContext->executeEvents[0]);
+            if (status != CL_SUCCESS) {
+                PRINT_CL_ERR(status, "clWaitForEvents() execute event");
+                jniContext->unpinAll(jenv);
+                return status;
+            }
+            if (jniContext->isTrackingOpenCLResources()){
+               executeEventList.remove(jniContext->executeEvents[0],__LINE__);
+            }
+            status = clReleaseEvent(jniContext->executeEvents[0]);
+            if (status != CL_SUCCESS) {
+               PRINT_CL_ERR(status, "clReleaseEvent() read event");
+               jniContext->unpinAll(jenv);
+               return status;
+            }
+
+            
             // We must capture any profile info for passid-1  so we must wait for the last execution to complete
-            if (jniContext->isProfilingEnabled()) {
-               if (passid ==1 ){
-                  status = clWaitForEvents(1, &jniContext->executeEvents[0]);
-                  if (status != CL_SUCCESS) {
-                     PRINT_CL_ERR(status, "clWaitForEvents() execute event");
-                     jniContext->unpinAll(jenv);
-                     return status;
-                  }
-                //  execEventList.remove(jniContext->executeEvents[0],__LINE__);
-               }
+            if (passid == 1 && jniContext->isProfilingEnabled()) {
                // Now we can profile info for passid-1 
                status = profile(&jniContext->exec[passid-1], &jniContext->executeEvents[0], 1, NULL, jniContext->profileBaseTime);
                if (status != CL_SUCCESS) {
@@ -1166,7 +1188,9 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             jniContext->unpinAll(jenv);
             return status;
          }
-        // execEventList.add(jniContext->executeEvents[0],__LINE__);
+         if(jniContext->isTrackingOpenCLResources()){
+            executeEventList.add(jniContext->executeEvents[0],__LINE__);
+         }
       if (0){  // I dont think we need this
          if (passid < passes-1){
             // we need to wait for the executions to complete...
@@ -1267,8 +1291,6 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
       }
    } else {
       // if readEventCount == 0 then we don't need any reads so we just wait for the executions to complete
-
-	   
       status = clWaitForEvents(1, jniContext->executeEvents);
       if (status != CL_SUCCESS) {
          PRINT_CL_ERR(status, "clWaitForEvents() execute event");
@@ -1276,37 +1298,36 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
          return status;
       }
    }
-
-   if (jniContext->isProfilingEnabled()) {
-      status = profile(&jniContext->exec[passes-1], &jniContext->executeEvents[0], 1, NULL, jniContext->profileBaseTime); // multi gpu ?
+      if (jniContext->isTrackingOpenCLResources()){
+         executeEventList.remove(jniContext->executeEvents[0],__LINE__);
+      }
+      if (jniContext->isProfilingEnabled()) {
+        status = profile(&jniContext->exec[passes-1], &jniContext->executeEvents[0], 1, NULL, jniContext->profileBaseTime); // multi gpu ?
+        if (status != CL_SUCCESS) {
+           jniContext->unpinAll(jenv);
+           return status;
+        }
+      }
+       // extract the execution status from the executeEvent
+      cl_int executeStatus;
+      status = clGetEventInfo(jniContext->executeEvents[0], CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(cl_int), &executeStatus, NULL);
       if (status != CL_SUCCESS) {
+         PRINT_CL_ERR(status, "clGetEventInfo() execute event");
          jniContext->unpinAll(jenv);
          return status;
       }
-   }
-
-   // extract the execution status from the executeEvent
-   cl_int executeStatus;
-   status = clGetEventInfo(jniContext->executeEvents[0], CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(cl_int), &executeStatus, NULL);
-   if (status != CL_SUCCESS) {
-      PRINT_CL_ERR(status, "clGetEventInfo() execute event");
-      jniContext->unpinAll(jenv);
-      return status;
-   }
-   if (executeStatus != CL_SUCCESS) {
-      // it should definitely not be negative, but since we did a wait above, it had better be CL_COMPLETE==CL_SUCCESS
-      PRINT_CL_ERR(executeStatus, "Execution status of execute event");
-      jniContext->unpinAll(jenv);
-      return executeStatus;
-   }
-
-
-   status = clReleaseEvent(jniContext->executeEvents[0]);
-   if (status != CL_SUCCESS) {
-      PRINT_CL_ERR(status, "clReleaseEvent() execute event");
-      jniContext->unpinAll(jenv);
-      return status;
-   }
+      if (executeStatus != CL_SUCCESS) {
+          // it should definitely not be negative, but since we did a wait above, it had better be CL_COMPLETE==CL_SUCCESS
+         PRINT_CL_ERR(executeStatus, "Execution status of execute event");
+         jniContext->unpinAll(jenv);
+         return executeStatus;
+      }
+      status = clReleaseEvent(jniContext->executeEvents[0]);
+      if (status != CL_SUCCESS) {
+         PRINT_CL_ERR(status, "clReleaseEvent() read event");
+         jniContext->unpinAll(jenv);
+         return status;
+      }
 
    for (int i=0; i< writeEventCount; i++){
       if (jniContext->isProfilingEnabled()) {
@@ -1329,12 +1350,12 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
       writeProfileInfo(jniContext);
    }
    if (jniContext->isTrackingOpenCLResources()){
-   fprintf(stderr, "following execution of kernel{\n");
-   commandQueueList.report(stderr);
-   memList.report(stderr); 
-   readEventList.report(stderr); 
-   executeEventList.report(stderr); 
-   writeEventList.report(stderr); 
+      fprintf(stderr, "following execution of kernel{\n");
+      commandQueueList.report(stderr);
+      memList.report(stderr); 
+      readEventList.report(stderr); 
+      executeEventList.report(stderr); 
+      writeEventList.report(stderr); 
    fprintf(stderr, "}\n");
    }
 
