@@ -548,4 +548,27 @@ First consider editing the properties in build.properties
 
    <target name="build" depends="clean, javah, msvc, mingw, gcc, gcc_mac" />
 
+   <target name="msvc_cltest" if="use.msvc">
+      <mkdir dir="${basedir}\dist"/>
+      <echo message="msvc_cltest ${os.arch}" />
+      <exec executable="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe">
+         <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE" />
+         <arg value="/nologo" />
+         <arg value="/TP" />
+         <arg value="/Ox" />
+         <arg value="/I${msvc.dir}\vc\include" />
+         <arg value="/I${msvc.sdk.dir}\include" />
+         <arg value="/I${amd.app.sdk.dir}\include" />
+         <arg value="src\cpp\cltest.cpp" />
+         <arg value="/link" />
+         <arg value="/libpath:${msvc.dir}\vc\lib\${optional.amd64.subdir}" />
+         <arg value="/libpath:${msvc.sdk.dir}\lib\${optional.x64.subdir}" />
+         <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
+         <arg value="OpenCL.lib" />
+         <arg value="/out:cltest_${x86_or_x86_64}.exe" />
+      </exec>
+   </target>
+
+   <target name="cltest" depends="check,msvc_cltest" />
+
 </project>
