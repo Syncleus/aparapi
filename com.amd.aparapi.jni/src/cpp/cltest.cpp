@@ -184,10 +184,35 @@ int main(int argc, char **argv){
                status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_GLOBAL_MEM_SIZE,  sizeof(globalMemSize), &globalMemSize, NULL);
                fprintf(stderr, "         CL_DEVICE_GLOBAL_MEM_SIZE.......... %lu\n", globalMemSize);
 
-
                cl_ulong localMemSize;
                status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_LOCAL_MEM_SIZE,  sizeof(localMemSize), &localMemSize, NULL);
                fprintf(stderr, "         CL_DEVICE_LOCAL_MEM_SIZE........... %lu\n", localMemSize);
+
+
+
+               char profile[2048];
+               status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_PROFILE,  sizeof(profile), &profile, NULL);
+               fprintf(stderr, "         CL_DEVICE_PROFILE.................. %s\n", profile);
+
+               char deviceVersion[2048];
+               status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_VERSION,  sizeof(deviceVersion), &deviceVersion, NULL);
+               fprintf(stderr, "         CL_DEVICE_VERSION.................. %s\n", deviceVersion);
+
+               char driverVersion[2048];
+               status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DRIVER_VERSION,  sizeof(driverVersion), &driverVersion, NULL);
+               fprintf(stderr, "         CL_DRIVER_VERSION.................. %s\n", driverVersion);
+
+               char cVersion[2048];
+               status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_OPENCL_C_VERSION,  sizeof(cVersion), &cVersion, NULL);
+               fprintf(stderr, "         CL_DEVICE_OPENCL_C_VERSION......... %s\n", cVersion);
+
+               char name[2048];
+               status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_NAME,  sizeof(name), &name, NULL);
+               fprintf(stderr, "         CL_DEVICE_NAME..................... %s\n", name);
+               char extensions[2048];
+               status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_EXTENSIONS,  sizeof(extensions), &extensions, NULL);
+               fprintf(stderr, "         CL_DEVICE_EXTENSIONS............... %s\n", extensions);
+
                fprintf(stderr, "      }\n");
             }
 
