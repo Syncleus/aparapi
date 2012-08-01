@@ -161,7 +161,7 @@ abstract class Instruction{
       byteCode = _byteCode;
    }
 
-   protected Instruction(MethodModel _method, ByteCode _byteCode, ByteReader _byteReader) {
+   protected Instruction(MethodModel _method, ByteCode _byteCode, ByteReader _byteReader, boolean _wide) {
       this(_method, _byteCode, _byteReader.getOffset() - 1);
    }
 
