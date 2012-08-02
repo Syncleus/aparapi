@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+
+<project name="codegen" default="junit" basedir=".">
+
+   <!-- 
+			USER CONFIGURABLE PROPERTIES 
+   -->	
+   <property name="junit.jar.version" value="4.10"/>
+   <property name="junit.jar.name" value="junit-${junit.jar.version}.jar"/>
+   <property name="junit.home" value="${basedir}/.libs"/>
+   <property name="junit.base.url" value="http://repo1.maven.org/maven2/junit/junit"/>
+	
+   <!-- 
+			DO NOT EDIT BELOW THIS LINE 
+   -->
+   <echo>OS Name:    ${os.name}</echo>
+   <echo>OS Version: ${os.version}</echo>
+   <echo>OS Arch:    ${os.arch}</echo>
+
+   <property name="build.compiler" value="javac1.6"/>
+   <property name="ant.build.javac.source" value="1.6"/>
+   <property name="ant.build.javac.target" value="1.6"/>
+	
+   <available property="junit.installed" file="${junit.home}/${junit.jar.name}"/>
+
+	<target name="install.junit" unless="junit.installed">
+	   <mkdir dir="${junit.home}"/>
+	   <!-- Cleanup all existing JUnit installations -->
+	   <delete failonerror="false" includeEmptyDirs="true">
+		   <fileset dir="${junit.home}" includes="junit*/"/>
+	   </delete>
+	   <!-- Download and unzip requested JUnit version -->
+	   <get src="${junit.base.url}/${junit.jar.version}/${junit.jar.name}" dest="${junit.home}"/>
+	</target>
+	
+   <target name="clean">
+      <delete dir="classes"/>
+      <delete dir="junit"/>
+      <delete dir="src/genjava/com"/>
+   	  <!-- Legacy cleanup -->
+      <delete file="junit*.jar"/>
+   </target>
+
+   <path id="classpath">
+      <pathelement path="${basedir}/../../com.amd.aparapi/dist/aparapi.jar"/>
+      <pathelement path="${junit.home}/${junit.jar.name}"/>
+      <pathelement path="classes"/>
+   </path>
+	
+   <target name="junit" depends="clean, install.junit">
+      <mkdir dir="classes"/>
+   	  <javac debug="true"
+      	 debuglevel="lines,vars,source"
+         srcdir="src/java" 
+      	 destdir="classes" 
+      	 includeAntRuntime="false"
+      	 classpathref="classpath">
+      	    <compilerarg value="-Xlint"/>
+      	   	<compilerarg value="-Xlint:-path"/>
+      </javac>
+
+      <java classname="com.amd.aparapi.CreateJUnitTests" classpathref="classpath">
+         <sysproperty key="root" value="${basedir}"/>
+      </java>
+
+      <javac debug="true"
+      	 debuglevel="lines,vars,source"
+         srcdir="src/genjava" 
+      	 destdir="classes" 
+      	 includeAntRuntime="false"
+      	 classpathref="classpath">
+      	    <compilerarg value="-Xlint"/>
+      	   	<compilerarg value="-Xlint:-path"/>
+      </javac>
+      
+   	  <mkdir dir="junit"/>
+      <mkdir dir="junit/data"/>
+      
+   	  <junit printsummary="false" fork="false" haltonfailure="false" failureproperty="tests.failed" showoutput="false">
+         <formatter type="xml" />
+         <classpath refid="classpath"/>
+         <batchtest todir="junit/data">
+            <fileset dir="src/genjava"/> 
+         </batchtest>
+      </junit>
+
+      <junitreport todir="junit/data">
+         <fileset dir="junit/data"/>
+         <report format="frames" todir="junit/html" />
+      </junitreport>
+   </target>
+
+</project>
