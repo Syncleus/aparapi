@@ -9,13 +9,12 @@ public class WideInc{
 }
 
 /**{OpenCL{
-typedef struct This_s{
+typedef struct This_s{  
    int passid;
 }This;
 int get_pass_id(This *this){
    return this->passid;
    }
-
 __kernel void run(
    int passid
 ){
