@@ -718,7 +718,7 @@ class InstructionSet{
          boolean isWide = false;
          if (byteCode.equals(ByteCode.WIDE)){
             // handle wide 
-            System.out.println("WIDE");
+            //System.out.println("WIDE");
             isWide = true;
             byteCode = get(_byteReader.u1());
          }
@@ -3959,9 +3959,9 @@ class InstructionSet{
       Index08(MethodModel _methodPoolEntry, ByteCode _byteCode, ByteReader _byteReader, boolean _wide) {
          super(_methodPoolEntry, _byteCode, _byteReader, _wide);
          if (_wide){
-          index = _byteReader.u2();  
+            index = _byteReader.u2();  
          }else{
-         index = _byteReader.u1();
+            index = _byteReader.u1();
          }
 
       }
