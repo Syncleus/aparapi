@@ -1612,6 +1612,8 @@ class KernelRunner{
     * @see Kernel#get(float[] arr)
     * @see Kernel#get(double[] arr)
     * @see Kernel#get(long[] arr)
+    * @see Kernel#get(char[] arr)
+    * @see Kernel#get(boolean[] arr)
     */
    protected void get(Object array) {
       if (explicit
@@ -1642,6 +1644,8 @@ class KernelRunner{
     * @see Kernel#put(float[] arr)
     * @see Kernel#put(double[] arr)
     * @see Kernel#put(long[] arr)
+    * @see Kernel#put(char[] arr)
+    * @see Kernel#put(boolean[] arr)
     */
 
    protected void put(Object array) {
