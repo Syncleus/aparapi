@@ -10,3 +10,5 @@ kenneth@hexad.dk provided patch for issue #12 (Handling of Kernel static fields)
 Ryan LaMothe provided patch for issue #3 (Support of char - mapped to unsigned short) Nov 28th 2011.
 Ryan LaMothe provided patch for issue #22 (Integrate FindBugs into the Ant build scripts) Feb 18th 2012.
 Ryan LaMothe provided patch for issue #37 (Add Kernel and JNI build support for Applets and JNLP JWS) Feb 18th 2012.
+Oliver Coleman provided patch for issue #64 (Support explicit boolean put and get) Aug 15th 2012
+
