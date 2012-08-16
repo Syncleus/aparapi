@@ -1381,6 +1381,9 @@ class KernelRunner{
                   } else {
                      // We fetch the first CPU device 
                      openCLDevice = (OpenCLDevice) OpenCLDevice.firstCPU();
+                     if (openCLDevice == null){
+                        return warnFallBackAndExecute(_entrypointName, _range, _passes, "CPU request can't be honored not CPU device");
+                     }
                   }
                } else {
                   if (openCLDevice.getType() == Device.TYPE.GPU) {
