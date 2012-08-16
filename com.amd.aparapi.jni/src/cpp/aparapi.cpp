@@ -465,15 +465,14 @@ class JNIContext{
             jobject platformInstance = OpenCLDevice::getPlatformInstance(jenv, openCLDeviceObject);
             cl_platform_id platformId = OpenCLPlatform::getPlatformId(jenv, platformInstance);
             deviceId = OpenCLDevice::getDeviceId(jenv, openCLDeviceObject);
-            cl_device_type deviceType;
-            clGetDeviceInfo(deviceId, CL_DEVICE_TYPE,  sizeof(deviceType), &deviceType, NULL);
-      //fprintf(stderr, "device[%d] CL_DEVICE_TYPE = %x\n", deviceId, deviceType);
+            cl_device_type returnedDeviceType;
+            clGetDeviceInfo(deviceId, CL_DEVICE_TYPE,  sizeof(returnedDeviceType), &returnedDeviceType, NULL);
+      //fprintf(stderr, "device[%d] CL_DEVICE_TYPE = %x\n", deviceId, returnedDeviceType);
 
 
       cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platformId, 0 };
       cl_context_properties* cprops = (NULL == platformId) ? NULL : cps;
-      context = clCreateContextFromType( cprops, deviceType, NULL, NULL, &status); 
-
+      context = clCreateContextFromType( cprops, returnedDeviceType, NULL, NULL, &status); 
             ASSERT_CL_NO_RETURN("clCreateContextFromType()");
             if (status == CL_SUCCESS){
                valid = JNI_TRUE;
@@ -1369,7 +1368,7 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
 // we return the JNIContext from here 
 JNI_JAVA(jlong, KernelRunner, initJNI)
    (JNIEnv *jenv, jclass clazz, jobject kernelObject, jobject openCLDeviceObject, jint flags) {
-   fprintf(stdout, "init()\n");
+   //fprintf(stdout, "init()\n");
    cl_int status = CL_SUCCESS;
    JNIContext* jniContext = new JNIContext(jenv, kernelObject, openCLDeviceObject, flags);
 
