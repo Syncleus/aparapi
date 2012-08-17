@@ -5,6 +5,7 @@ java ^
  -Dcom.amd.aparapi.enableVerboseJNI=false ^
  -Dcom.amd.aparapi.enableProfiling=false ^
  -Dcom.amd.aparapi.enableShowGeneratedOpenCL=false ^
+ -Dcom.amd.aparapi.enableInstructionDecodeViewer=false ^
  -classpath ../../com.amd.aparapi/dist/aparapi.jar;mandel.jar ^
  com.amd.aparapi.sample.mandel.Main
 

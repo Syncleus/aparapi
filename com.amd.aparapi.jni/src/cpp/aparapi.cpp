@@ -140,9 +140,11 @@ class ProfileInfo{
       cl_ulong end;
 };
 
+class JNIContext ; // forward reference
 
-class KernelArgRef{
+class ArrayBuffer{
    public:
+      JNIContext *jniContext;
       jobject javaArray;        // The java array or direct buffer that this arg is mapped to 
       bool  isArray;            // true if above is an array
       cl_uint javaArrayLength;  // the number of elements for arrays (used only when ARRAYLENGTH bit is set for this arg)
@@ -154,8 +156,26 @@ class KernelArgRef{
       char memSpec[128];       // The string form of the mask we used for create buffer. for debugging
       ProfileInfo read;
       ProfileInfo write;
+
+      ArrayBuffer(JNIContext *jniContext):
+         jniContext(jniContext){
+      }
+
+      void unpinAbort(JNIEnv *jenv){
+         jenv->ReleasePrimitiveArrayCritical((jarray)javaArray, addr,JNI_ABORT);
+         isPinned = JNI_FALSE;
+      }
+      void unpinCommit(JNIEnv *jenv){
+         jenv->ReleasePrimitiveArrayCritical((jarray)javaArray, addr, 0);
+         isPinned = JNI_FALSE;
+      }
+      void pin(JNIEnv *jenv){
+		   void *ptr = addr;
+         addr = jenv->GetPrimitiveArrayCritical((jarray)javaArray,&isCopy);
+         isPinned = JNI_TRUE;
+      }
 };
-class JNIContext ; // forward reference
+
 
 class KernelArg{
    private:
@@ -166,6 +186,7 @@ class KernelArg{
       static jfieldID sizeInBytesFieldID;
       static jfieldID numElementsFieldID; 
    public:
+      JNIContext *jniContext;
       static jfieldID javaArrayFieldID; 
       jobject argObj;
       char *name;        // used for debugging printfs
@@ -180,10 +201,11 @@ class KernelArg{
          cl_float f;
          cl_int i;
          cl_long j;
-         KernelArgRef ref;
+         ArrayBuffer *arrayBuffer;
       } value;
 
-      KernelArg(JNIEnv *jenv, jobject argObj):
+      KernelArg(JNIEnv *jenv, JNIContext *jniContext, jobject argObj):
+         jniContext(jniContext),
          argObj(argObj){
             javaArg = jenv->NewGlobalRef(argObj);   // save a global ref to the java Arg Object
             if (argClazz == 0){
@@ -194,6 +216,7 @@ class KernelArg{
                javaArrayFieldID = jenv->GetFieldID(c, "javaArray", "Ljava/lang/Object;"); ASSERT_FIELD(javaArray);
                sizeInBytesFieldID = jenv->GetFieldID(c, "sizeInBytes", "I"); ASSERT_FIELD(sizeInBytes);
                numElementsFieldID = jenv->GetFieldID(c, "numElements", "I"); ASSERT_FIELD(numElements);
+               argClazz  = c;
             }
             type = jenv->GetIntField(argObj, typeFieldID);
             isStatic = jenv->GetBooleanField(argObj, isStaticFieldID);
@@ -205,16 +228,21 @@ class KernelArg{
             name=strdup(nameChars);
 #endif
             jenv->ReleaseStringUTFChars(nameString, nameChars);
+            if (isArray()){
+               value.arrayBuffer= new ArrayBuffer(jniContext);
+            }else{
+               value.arrayBuffer=NULL;
+            }
          }
 
       ~KernelArg(){
       }
 
       void unpinAbort(JNIEnv *jenv){
-         jenv->ReleasePrimitiveArrayCritical((jarray)value.ref.javaArray, value.ref.addr,JNI_ABORT);
+         value.arrayBuffer->unpinAbort(jenv);
       }
       void unpinCommit(JNIEnv *jenv){
-         jenv->ReleasePrimitiveArrayCritical((jarray)value.ref.javaArray, value.ref.addr, 0);
+         value.arrayBuffer->unpinCommit(jenv);
       }
       void unpin(JNIEnv *jenv){
 		 //if  (value.ref.isPinned == JNI_FALSE){		 
@@ -229,21 +257,9 @@ class KernelArg{
             // fast path for a read_only buffer
             unpinAbort(jenv);
          }
-         value.ref.isPinned = JNI_FALSE;
       }
       void pin(JNIEnv *jenv){
-		 //if  (value.ref.isPinned == JNI_TRUE){			 
-       //     fprintf(stdout, "why are we pinning buffer %s! isPinned = JNI_TRUE\n", name);
-		// }
-		 void *ptr = value.ref.addr;
-         value.ref.addr = jenv->GetPrimitiveArrayCritical((jarray)value.ref.javaArray,&value.ref.isCopy);
-		 //if (ptr != value.ref.addr){
-       //     fprintf(stdout, "buffer %s has moved!\n", name);
-		// }
-       //  if (value.ref.isCopy){
-       //     fprintf(stderr, "buffer %s is a copy!\n", name);
-       //  }
-         value.ref.isPinned = JNI_TRUE;
+         value.arrayBuffer->pin(jenv);
       }
 
       int isArray(){
@@ -329,13 +345,14 @@ class KernelArg{
          sizeInBytes = jenv->GetIntField(javaArg, sizeInBytesFieldID);
       }
       void syncJavaArrayLength(JNIEnv* jenv){
-         value.ref.javaArrayLength = jenv->GetIntField(javaArg, numElementsFieldID);
+         value.arrayBuffer->javaArrayLength = jenv->GetIntField(javaArg, numElementsFieldID);
       }
       void clearExplicitBufferBit(JNIEnv* jenv){
          type &= ~com_amd_aparapi_KernelRunner_ARG_EXPLICIT_WRITE;
          jenv->SetIntField(javaArg, typeFieldID,type );
       }
 };
+
 jclass KernelArg::argClazz=(jclass)0;
 jfieldID KernelArg::nameFieldID=0;
 jfieldID KernelArg::typeFieldID=0; 
@@ -537,17 +554,21 @@ void dispose(JNIEnv *jenv){
       for (int i=0; i< argc; i++){
          KernelArg *arg = args[i];
          if (!arg->isPrimitive()){
-            if (arg->value.ref.mem != 0){
-               if (isTrackingOpenCLResources()){
-                  memList.remove((cl_mem)arg->value.ref.mem, __LINE__);
+            if (arg->value.arrayBuffer != NULL){
+               if (arg->value.arrayBuffer->mem != 0){
+                  if (isTrackingOpenCLResources()){
+                     memList.remove((cl_mem)arg->value.arrayBuffer->mem, __LINE__);
+                  }
+                  status = clReleaseMemObject((cl_mem)arg->value.arrayBuffer->mem);
+                  //fprintf(stdout, "dispose arg %d %0lx\n", i, arg->value.arrayBuffer->mem);
+                  ASSERT_CL_NO_RETURN("clReleaseMemObject()");
+                  arg->value.arrayBuffer->mem = (cl_mem)0;
                }
-               status = clReleaseMemObject((cl_mem)arg->value.ref.mem);
-               //fprintf(stdout, "dispose arg %d %0lx\n", i, arg->value.ref.mem);
-               ASSERT_CL_NO_RETURN("clReleaseMemObject()");
-               arg->value.ref.mem = (cl_mem)0;
-            }
-            if (arg->value.ref.javaArray != NULL)  {
-               jenv->DeleteWeakGlobalRef((jweak) arg->value.ref.javaArray);
+               if (arg->value.arrayBuffer->javaArray != NULL)  {
+                  jenv->DeleteWeakGlobalRef((jweak) arg->value.arrayBuffer->javaArray);
+               }
+               delete arg->value.arrayBuffer;
+               arg->value.arrayBuffer = NULL;
             }
          }
          if (arg->name != NULL){
@@ -645,15 +666,15 @@ jint writeProfileInfo(JNIContext* jniContext){
 
          // Initialize the base time for this sample
          if (currSampleBaseTime == -1) {
-            currSampleBaseTime = arg->value.ref.write.queued;
+            currSampleBaseTime = arg->value.arrayBuffer->write.queued;
          } 
          fprintf(jniContext->profileFile, "%d write %s,", pos++, arg->name);
 
          fprintf(jniContext->profileFile, "%lu,%lu,%lu,%lu,",  
-               (arg->value.ref.write.queued - currSampleBaseTime)/1000, 
-               (arg->value.ref.write.submit - currSampleBaseTime)/1000, 
-               (arg->value.ref.write.start - currSampleBaseTime)/1000, 
-               (arg->value.ref.write.end - currSampleBaseTime)/1000);
+               (arg->value.arrayBuffer->write.queued - currSampleBaseTime)/1000, 
+               (arg->value.arrayBuffer->write.submit - currSampleBaseTime)/1000, 
+               (arg->value.arrayBuffer->write.start - currSampleBaseTime)/1000, 
+               (arg->value.arrayBuffer->write.end - currSampleBaseTime)/1000);
       }
    }
 
@@ -684,16 +705,16 @@ jint writeProfileInfo(JNIContext* jniContext){
 
             // Initialize the base time for this sample
             if (currSampleBaseTime == -1) {
-               currSampleBaseTime = arg->value.ref.read.queued;
+               currSampleBaseTime = arg->value.arrayBuffer->read.queued;
             }
 
             fprintf(jniContext->profileFile, "%d read %s,", pos++, arg->name);
 
             fprintf(jniContext->profileFile, "%lu,%lu,%lu,%lu,",  
-                  (arg->value.ref.read.queued - currSampleBaseTime)/1000, 
-                  (arg->value.ref.read.submit - currSampleBaseTime)/1000, 
-                  (arg->value.ref.read.start - currSampleBaseTime)/1000, 
-                  (arg->value.ref.read.end - currSampleBaseTime)/1000);
+                  (arg->value.arrayBuffer->read.queued - currSampleBaseTime)/1000, 
+                  (arg->value.arrayBuffer->read.submit - currSampleBaseTime)/1000, 
+                  (arg->value.arrayBuffer->read.start - currSampleBaseTime)/1000, 
+                  (arg->value.arrayBuffer->read.end - currSampleBaseTime)/1000);
          }
       }
    }
@@ -741,47 +762,47 @@ jint updateNonPrimitiveReferences(JNIEnv *jenv, jobject jobj, JNIContext* jniCon
             // Following used for all primitive arrays, object arrays and nio Buffers
             jarray newRef = (jarray)jenv->GetObjectField(arg->javaArg, KernelArg::javaArrayFieldID);
             if (jniContext->isVerbose()){
-               fprintf(stderr, "testing for Resync javaArray %s: old=%p, new=%p\n", arg->name, arg->value.ref.javaArray, newRef);         
+               fprintf(stderr, "testing for Resync javaArray %s: old=%p, new=%p\n", arg->name, arg->value.arrayBuffer->javaArray, newRef);         
             }
 
-            if (!jenv->IsSameObject(newRef, arg->value.ref.javaArray)) {
+            if (!jenv->IsSameObject(newRef, arg->value.arrayBuffer->javaArray)) {
                if (jniContext->isVerbose()){
-                  fprintf(stderr, "Resync javaArray for %s: %p  %p\n", arg->name, newRef, arg->value.ref.javaArray);         
+                  fprintf(stderr, "Resync javaArray for %s: %p  %p\n", arg->name, newRef, arg->value.arrayBuffer->javaArray);         
                }
                // Free previous ref if any
-               if (arg->value.ref.javaArray != NULL) {
-                  jenv->DeleteWeakGlobalRef((jweak) arg->value.ref.javaArray);
+               if (arg->value.arrayBuffer->javaArray != NULL) {
+                  jenv->DeleteWeakGlobalRef((jweak) arg->value.arrayBuffer->javaArray);
                   if (jniContext->isVerbose()){
-                     fprintf(stderr, "DeleteWeakGlobalRef for %s: %p\n", arg->name, arg->value.ref.javaArray);         
+                     fprintf(stderr, "DeleteWeakGlobalRef for %s: %p\n", arg->name, arg->value.arrayBuffer->javaArray);         
                   }
                }
 
                // need to free opencl buffers, run will reallocate later
-               if (arg->value.ref.mem != 0) {
+               if (arg->value.arrayBuffer->mem != 0) {
                   //fprintf(stderr, "-->releaseMemObject[%d]\n", i);
                   if (jniContext->isTrackingOpenCLResources()){
-                     memList.remove(arg->value.ref.mem,__LINE__);
+                     memList.remove(arg->value.arrayBuffer->mem,__LINE__);
                   }
-                  status = clReleaseMemObject((cl_mem)arg->value.ref.mem);
+                  status = clReleaseMemObject((cl_mem)arg->value.arrayBuffer->mem);
                   //fprintf(stderr, "<--releaseMemObject[%d]\n", i);
                   ASSERT_CL("clReleaseMemObject()");
-                  arg->value.ref.mem = (cl_mem)0;
+                  arg->value.arrayBuffer->mem = (cl_mem)0;
                }
 
-               arg->value.ref.addr = NULL;
+               arg->value.arrayBuffer->addr = NULL;
 
                // Capture new array ref from the kernel arg object
 
                if (newRef != NULL) {
-                  arg->value.ref.javaArray = (jarray)jenv->NewWeakGlobalRef((jarray)newRef);
+                  arg->value.arrayBuffer->javaArray = (jarray)jenv->NewWeakGlobalRef((jarray)newRef);
                   if (jniContext->isVerbose()){
                      fprintf(stderr, "NewWeakGlobalRef for %s, set to %p\n", arg->name,
-                           arg->value.ref.javaArray);         
+                           arg->value.arrayBuffer->javaArray);         
                   }
                } else {
-                  arg->value.ref.javaArray = NULL;
+                  arg->value.arrayBuffer->javaArray = NULL;
                }
-               arg->value.ref.isArray = true;
+               arg->value.arrayBuffer->isArray = true;
 
                // Save the sizeInBytes which was set on the java side
                arg->syncSizeInBytes(jenv);
@@ -864,27 +885,27 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
       }
       if (!arg->isPrimitive() && !arg->isLocal()) {
          if (jniContext->isProfilingEnabled()){
-            arg->value.ref.read.valid = false;
-            arg->value.ref.write.valid = false;
+            arg->value.arrayBuffer->read.valid = false;
+            arg->value.arrayBuffer->write.valid = false;
          }
          // pin the arrays so that GC does not move them during the call
 
          // get the C memory address for the region being transferred
          // this uses different JNI calls for arrays vs. directBufs
-         void * prevAddr =  arg->value.ref.addr;
-         if (arg->value.ref.isArray) {
+         void * prevAddr =  arg->value.arrayBuffer->addr;
+         if (arg->value.arrayBuffer->isArray) {
             arg->pin(jenv);
          }
 
          if (jniContext->isVerbose()){
             fprintf(stderr, "runKernel: arrayOrBuf ref %p, oldAddr=%p, newAddr=%p, ref.mem=%p, isArray=%d\n",
-                  arg->value.ref.javaArray, 
+                  arg->value.arrayBuffer->javaArray, 
                   prevAddr,
-                  arg->value.ref.addr,
-                  arg->value.ref.mem,
-                  arg->value.ref.isArray );
-            fprintf(stderr, "at memory addr %p, contents: ", arg->value.ref.addr);
-            unsigned char *pb = (unsigned char *) arg->value.ref.addr;
+                  arg->value.arrayBuffer->addr,
+                  arg->value.arrayBuffer->mem,
+                  arg->value.arrayBuffer->isArray );
+            fprintf(stderr, "at memory addr %p, contents: ", arg->value.arrayBuffer->addr);
+            unsigned char *pb = (unsigned char *) arg->value.arrayBuffer->addr;
             for (int k=0; k<8; k++) {
                fprintf(stderr, "%02x ", pb[k]);
             }
@@ -892,7 +913,7 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
          }
          // record whether object moved 
          // if we see that isCopy was returned by getPrimitiveArrayCritical, treat that as a move
-         bool objectMoved = (arg->value.ref.addr != prevAddr) || arg->value.ref.isCopy;
+         bool objectMoved = (arg->value.arrayBuffer->addr != prevAddr) || arg->value.arrayBuffer->isCopy;
 
          if (jniContext->isVerbose()){
             if (arg->isExplicit() && arg->isExplicitWrite()){
@@ -900,17 +921,17 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             }
          }
 
-         if (jniContext->firstRun || (arg->value.ref.mem == 0) || objectMoved ){
+         if (jniContext->firstRun || (arg->value.arrayBuffer->mem == 0) || objectMoved ){
 
-            if (arg->value.ref.mem != 0 && objectMoved){
+            if (arg->value.arrayBuffer->mem != 0 && objectMoved){
                // we need to release the old buffer 
                if (jniContext->isTrackingOpenCLResources()){
-                  memList.remove((cl_mem)arg->value.ref.mem, __LINE__);
+                  memList.remove((cl_mem)arg->value.arrayBuffer->mem, __LINE__);
                }
-               status = clReleaseMemObject((cl_mem)arg->value.ref.mem);
-               //fprintf(stdout, "dispose arg %d %0lx\n", i, arg->value.ref.mem);
+               status = clReleaseMemObject((cl_mem)arg->value.arrayBuffer->mem);
+               //fprintf(stdout, "dispose arg %d %0lx\n", i, arg->value.arrayBuffer->mem);
                ASSERT_CL_NO_RETURN("clReleaseMemObject()");
-               arg->value.ref.mem = (cl_mem)0;
+               arg->value.arrayBuffer->mem = (cl_mem)0;
             }
             // if either this is the first run or user changed input array
             // or gc moved something, then we create buffers/args
@@ -918,18 +939,18 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             if (arg->isReadByKernel() && arg->isMutableByKernel()) mask |= CL_MEM_READ_WRITE;
             else if (arg->isReadByKernel() && !arg->isMutableByKernel()) mask |= CL_MEM_READ_ONLY;
             else if (arg->isMutableByKernel()) mask |= CL_MEM_WRITE_ONLY;
-            arg->value.ref.memMask = mask;
+            arg->value.arrayBuffer->memMask = mask;
             if (jniContext->isVerbose()){
-               strcpy(arg->value.ref.memSpec,"CL_MEM_USE_HOST_PTR");
-               if (mask & CL_MEM_READ_WRITE) strcat(arg->value.ref.memSpec,"|CL_MEM_READ_WRITE");
-               if (mask & CL_MEM_READ_ONLY) strcat(arg->value.ref.memSpec,"|CL_MEM_READ_ONLY");
-               if (mask & CL_MEM_WRITE_ONLY) strcat(arg->value.ref.memSpec,"|CL_MEM_WRITE_ONLY");
+               strcpy(arg->value.arrayBuffer->memSpec,"CL_MEM_USE_HOST_PTR");
+               if (mask & CL_MEM_READ_WRITE) strcat(arg->value.arrayBuffer->memSpec,"|CL_MEM_READ_WRITE");
+               if (mask & CL_MEM_READ_ONLY) strcat(arg->value.arrayBuffer->memSpec,"|CL_MEM_READ_ONLY");
+               if (mask & CL_MEM_WRITE_ONLY) strcat(arg->value.arrayBuffer->memSpec,"|CL_MEM_WRITE_ONLY");
 
                fprintf(stderr, "%s %d clCreateBuffer(context, %s, size=%08x bytes, address=%08x, &status)\n", arg->name, 
-                     i, arg->value.ref.memSpec, arg->sizeInBytes, arg->value.ref.addr);
+                     i, arg->value.arrayBuffer->memSpec, arg->sizeInBytes, arg->value.arrayBuffer->addr);
             }
-            arg->value.ref.mem = clCreateBuffer(jniContext->context, arg->value.ref.memMask, 
-                  arg->sizeInBytes, arg->value.ref.addr, &status);
+            arg->value.arrayBuffer->mem = clCreateBuffer(jniContext->context, arg->value.arrayBuffer->memMask, 
+                  arg->sizeInBytes, arg->value.arrayBuffer->addr, &status);
 
             if (status != CL_SUCCESS) {
                PRINT_CL_ERR(status, "clCreateBuffer");
@@ -937,10 +958,10 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
                return status;
             }
             if (jniContext->isTrackingOpenCLResources()){
-               memList.add(arg->value.ref.mem, __LINE__);
+               memList.add(arg->value.arrayBuffer->mem, __LINE__);
             }
 
-            status = clSetKernelArg(jniContext->kernel, kernelArgPos++, sizeof(cl_mem), (void *)&(arg->value.ref.mem));                  
+            status = clSetKernelArg(jniContext->kernel, kernelArgPos++, sizeof(cl_mem), (void *)&(arg->value.arrayBuffer->mem));                  
             if (status != CL_SUCCESS) {
                PRINT_CL_ERR(status, "clSetKernelArg (array)");
                jniContext->unpinAll(jenv);
@@ -951,10 +972,10 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             if (arg->usesArrayLength()){
                arg->syncJavaArrayLength(jenv);
 
-               status = clSetKernelArg(jniContext->kernel, kernelArgPos++, sizeof(jint), &(arg->value.ref.javaArrayLength));
+               status = clSetKernelArg(jniContext->kernel, kernelArgPos++, sizeof(jint), &(arg->value.arrayBuffer->javaArrayLength));
 
                if (jniContext->isVerbose()){
-                  fprintf(stderr, "runKernel arg %d %s, javaArrayLength = %d\n", i, arg->name, arg->value.ref.javaArrayLength);
+                  fprintf(stderr, "runKernel arg %d %s, javaArrayLength = %d\n", i, arg->name, arg->value.arrayBuffer->javaArrayLength);
                }
                if (status != CL_SUCCESS) {
                   PRINT_CL_ERR(status, "clSetKernelArg (array length)");
@@ -991,8 +1012,8 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
                fprintf(stderr, "writing constant buffer %s\n", arg->name);
             }
 
-            status = clEnqueueWriteBuffer(jniContext->commandQueue, arg->value.ref.mem, CL_FALSE, 0, 
-                  arg->sizeInBytes, arg->value.ref.addr, 0, NULL, &(jniContext->writeEvents[writeEventCount]));
+            status = clEnqueueWriteBuffer(jniContext->commandQueue, arg->value.arrayBuffer->mem, CL_FALSE, 0, 
+                  arg->sizeInBytes, arg->value.arrayBuffer->addr, 0, NULL, &(jniContext->writeEvents[writeEventCount]));
             if (status != CL_SUCCESS) {
                PRINT_CL_ERR(status, "clEnqueueWriteBuffer");
                jniContext->unpinAll(jenv);
@@ -1244,8 +1265,8 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             fprintf(stderr, "reading buffer %d %s\n", i, arg->name);
          }
 
-         status = clEnqueueReadBuffer(jniContext->commandQueue, arg->value.ref.mem, CL_FALSE, 0, 
-               arg->sizeInBytes,arg->value.ref.addr , 1, jniContext->executeEvents, &(jniContext->readEvents[readEventCount]));
+         status = clEnqueueReadBuffer(jniContext->commandQueue, arg->value.arrayBuffer->mem, CL_FALSE, 0, 
+               arg->sizeInBytes,arg->value.arrayBuffer->addr , 1, jniContext->executeEvents, &(jniContext->readEvents[readEventCount]));
          if (status != CL_SUCCESS) {
             PRINT_CL_ERR(status, "clEnqueueReadBuffer()");
             jniContext->unpinAll(jenv);
@@ -1272,7 +1293,7 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
 
       for (int i=0; i< readEventCount; i++){
          if (jniContext->isProfilingEnabled()) {
-            status = profile(&jniContext->args[jniContext->readEventArgs[i]]->value.ref.read, &jniContext->readEvents[i], 0,jniContext->args[jniContext->readEventArgs[i]]->name, jniContext->profileBaseTime);
+            status = profile(&jniContext->args[jniContext->readEventArgs[i]]->value.arrayBuffer->read, &jniContext->readEvents[i], 0,jniContext->args[jniContext->readEventArgs[i]]->name, jniContext->profileBaseTime);
             if (status != CL_SUCCESS) {
                jniContext->unpinAll(jenv);
                return status;
@@ -1330,7 +1351,7 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
 
    for (int i=0; i< writeEventCount; i++){
       if (jniContext->isProfilingEnabled()) {
-         profile(&jniContext->args[jniContext->writeEventArgs[i]]->value.ref.write, &jniContext->writeEvents[i], 2, jniContext->args[jniContext->writeEventArgs[i]]->name, jniContext->profileBaseTime);
+         profile(&jniContext->args[jniContext->writeEventArgs[i]]->value.arrayBuffer->write, &jniContext->writeEvents[i], 2, jniContext->args[jniContext->writeEventArgs[i]]->name, jniContext->profileBaseTime);
       }
       status = clReleaseEvent(jniContext->writeEvents[i]);
       if (status != CL_SUCCESS) {
@@ -1474,7 +1495,7 @@ JNI_JAVA(jint, KernelRunner, setArgsJNI)
 
 
          jobject argObj = jenv->GetObjectArrayElement(argArray, i);
-         KernelArg* arg = jniContext->args[i] = new KernelArg(jenv, argObj);
+         KernelArg* arg = jniContext->args[i] = new KernelArg(jenv, jniContext, argObj);
          if (jniContext->isVerbose()){
             if (arg->isExplicit()){
                fprintf(stderr, "%s is explicit!\n", arg->name);
@@ -1527,8 +1548,8 @@ JNI_JAVA(jint, KernelRunner, setArgsJNI)
                arg->sizeInBytes = sizeof(jdouble);
             }
          }else{ // we will use an array
-            arg->value.ref.mem = (cl_mem) 0;
-            arg->value.ref.javaArray = 0;
+            arg->value.arrayBuffer->mem = (cl_mem) 0;
+            arg->value.arrayBuffer->javaArray = 0;
             arg->sizeInBytes = 0;
          }
          if (jniContext->isVerbose()){
@@ -1589,7 +1610,7 @@ KernelArg* getArgForBuffer(JNIEnv* jenv, JNIContext* jniContext, jobject buffer)
       for (jint i=0; returnArg == NULL && i<jniContext->argc; i++){ 
          KernelArg *arg= jniContext->args[i];
          if (arg->isArray()){
-            jboolean isSame = jenv->IsSameObject(buffer, arg->value.ref.javaArray);
+            jboolean isSame = jenv->IsSameObject(buffer, arg->value.arrayBuffer->javaArray);
             if (isSame){
 		       if (jniContext->isVerbose()){
                   fprintf(stderr, "matched arg '%s'\n", arg->name);
@@ -1624,10 +1645,10 @@ JNI_JAVA(jint, KernelRunner, getJNI)
          }
          arg->pin(jenv);
 
-         status = clEnqueueReadBuffer(jniContext->commandQueue, arg->value.ref.mem, CL_FALSE, 0, 
-               arg->sizeInBytes,arg->value.ref.addr , 0, NULL, &jniContext->readEvents[0]);
+         status = clEnqueueReadBuffer(jniContext->commandQueue, arg->value.arrayBuffer->mem, CL_FALSE, 0, 
+               arg->sizeInBytes,arg->value.arrayBuffer->addr , 0, NULL, &jniContext->readEvents[0]);
 		 if (jniContext->isVerbose()){
-		    fprintf(stderr, "explicitly read %s ptr=%lx len=%d\n", arg->name, arg->value.ref.addr,arg->sizeInBytes );
+		    fprintf(stderr, "explicitly read %s ptr=%lx len=%d\n", arg->name, arg->value.arrayBuffer->addr,arg->sizeInBytes );
 		 }
          if (status != CL_SUCCESS) {
             PRINT_CL_ERR(status, "clEnqueueReadBuffer()");
@@ -1639,7 +1660,7 @@ JNI_JAVA(jint, KernelRunner, getJNI)
             return status;
          }
          if (jniContext->isProfilingEnabled()){
-            status = profile(&arg->value.ref.read, &jniContext->readEvents[0], 0,arg->name, jniContext->profileBaseTime);
+            status = profile(&arg->value.arrayBuffer->read, &jniContext->readEvents[0], 0,arg->name, jniContext->profileBaseTime);
             if (status != CL_SUCCESS) {
                PRINT_CL_ERR(status, "profile ");
                return status;
@@ -1687,8 +1708,8 @@ JNI_JAVA(jobject, KernelRunner, getProfileInfoJNI)
          for (jint i=0; i<jniContext->argc; i++){ 
             KernelArg *arg= jniContext->args[i];
             if (arg->isArray()){
-               if (arg->isMutableByKernel() && arg->value.ref.write.valid){
-                  jobject writeProfileInfo = createProfileInfo(jenv,  arg->value.ref.write);
+               if (arg->isMutableByKernel() && arg->value.arrayBuffer->write.valid){
+                  jobject writeProfileInfo = createProfileInfo(jenv,  arg->value.arrayBuffer->write);
                   JNIHelper::callVoid(jenv, returnList, "add", ArgsBooleanReturn(ObjectClassArg), writeProfileInfo);
                }
             }
@@ -1702,8 +1723,8 @@ JNI_JAVA(jobject, KernelRunner, getProfileInfoJNI)
          for (jint i=0; i<jniContext->argc; i++){ 
             KernelArg *arg= jniContext->args[i];
             if (arg->isArray()){
-               if (arg->isReadByKernel() && arg->value.ref.read.valid){
-                  jobject readProfileInfo = createProfileInfo(jenv,  arg->value.ref.read);
+               if (arg->isReadByKernel() && arg->value.arrayBuffer->read.valid){
+                  jobject readProfileInfo = createProfileInfo(jenv,  arg->value.arrayBuffer->read);
                   JNIHelper::callVoid(jenv, returnList, "add", ArgsBooleanReturn(ObjectClassArg), readProfileInfo);
                }
             }
