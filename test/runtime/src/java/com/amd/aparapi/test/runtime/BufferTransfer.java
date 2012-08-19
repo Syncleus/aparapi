@@ -1,12 +1,14 @@
 package com.amd.aparapi.test.runtime;
 
+import static com.amd.aparapi.test.runtime.Util.apply;
+import static com.amd.aparapi.test.runtime.Util.fill;
+import static com.amd.aparapi.test.runtime.Util.same;
+import static com.amd.aparapi.test.runtime.Util.zero;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -14,79 +16,20 @@ import com.amd.aparapi.Device;
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.OpenCLDevice;
 import com.amd.aparapi.Range;
+import com.amd.aparapi.test.runtime.Util.Filler;
+import com.amd.aparapi.test.runtime.Util.Operator;
 
 public class BufferTransfer{
-
-   interface Filler{
-      void fill(int[] array, int index);
-   }
-
-   interface Comparer{
-      boolean same(int[] lhs, int[] rhs, int index);
-   }
-
-   interface Operator{
-      void apply(int[] lhs, int[] rhs, int index);
-   }
-
-   void fill(int[] array, Filler _filler) {
-      for (int i = 0; i < array.length; i++) {
-         _filler.fill(array, i);
-      }
-   }
-
-   boolean same(int[] lhs, int[] rhs, Comparer _comparer) {
-      boolean same = lhs != null && rhs != null && lhs.length == rhs.length;
-      for (int i = 0; same && i < lhs.length; i++) {
-         same = _comparer.same(lhs, rhs, i);
-      }
-      return (same);
-   }
-
-   void zero(int[] array) {
-      Arrays.fill(array, 0);
-   }
-
-   boolean same(int[] lhs, int[] rhs) {
-      return (same(lhs, rhs, new Comparer(){
-
-         @Override public boolean same(int[] lhs, int[] rhs, int index) {
-
-            return lhs[index] == rhs[index];
-         }
-      }));
-   }
-
-   void apply(int[] lhs, int[] rhs, Operator _operator) {
-      for (int i = 0; i < lhs.length; i++) {
-         _operator.apply(lhs, rhs, i);
-      }
-   }
-
-  
 
    static OpenCLDevice openCLDevice = null;
 
    @BeforeClass public static void setUpBeforeClass() throws Exception {
-      //System.out.println("setUpBeforeClass");
+
       Device device = Device.best();
       if (device == null || !(device instanceof OpenCLDevice)) {
-         throw new IllegalStateException("no opencl device!");
+         fail("no opencl device!");
       }
       openCLDevice = (OpenCLDevice) device;
-   }
-
-   @AfterClass public static void tearDownAfterClass() throws Exception {
-      //System.out.println("tearDownAfterClass");
-   }
-
-   @Before public void setUp() throws Exception {
-      //System.out.println("setup");
-
-   }
-
-   @After public void tearDown() throws Exception {
-      //System.out.println("tearDown");
    }
 
    public static class InOutKernel extends Kernel{
@@ -119,7 +62,7 @@ public class BufferTransfer{
       });
       kernel.execute(range);
 
-      assertTrue("in == out", same(kernel.in, kernel.out));
+      assertTrue("in == out", Util.same(kernel.in, kernel.out));
 
    }
 
@@ -243,8 +186,25 @@ public class BufferTransfer{
       int[] simStep = new int[1];
 
       int[] neuronOutputs = new int[3];
-      
-      int[] expected = new int []{3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0};
+
+      int[] expected = new int[] {
+            3,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0
+      };
 
       public void step() {
          int simSteps = 16;
@@ -256,10 +216,10 @@ public class BufferTransfer{
                log[n][simStep[0]] = neuronOutputs[n];
          }
          System.out.println(getExecutionMode() + (isExplicit() ? ", explicit" : ", auto"));
-     
+
          for (int n = 0; n < neuronOutputs.length; n++)
             System.out.println(Arrays.toString(log[n]));
-      
+
          assertTrue("log[2] == expected", same(log[2], expected));
       }
 
@@ -276,7 +236,7 @@ public class BufferTransfer{
       kernel.step();
 
    }
-   
+
    @Test public void issue60Auto() {
       TestKernel kernel = new TestKernel();
       kernel.step();

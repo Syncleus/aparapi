@@ -1,6 +1,7 @@
 package com.amd.aparapi.test.runtime;
 
-import static org.junit.Assert.*;
+import static com.amd.aparapi.test.runtime.Util.same;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -33,14 +34,6 @@ public class ExplicitBoolean{
          int id = getGlobalId();
          output[id] = input[id];
       }
-   }
-
-   static boolean same(boolean[] lhs, boolean[] rhs) {
-      boolean same = lhs != null && rhs != null && lhs.length == rhs.length;
-      for (int i = 0; same && i < lhs.length; i++) {
-         same = lhs[i] == rhs[i];
-      }
-      return (same);
    }
 
    @Test public void test() {
