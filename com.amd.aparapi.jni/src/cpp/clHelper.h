@@ -68,5 +68,90 @@ class CLHelper{
    static jstring getExtensions(JNIEnv *jenv, cl_device_id deviceId, cl_int *status);
 };
 
+template <typename  T> class List; // forward
+
+template <typename  T> class Ref{
+   private:
+      T value;
+      int line;
+      char *fileName;
+      Ref<T> *next;
+      friend class List<T>;
+   public:
+      Ref(T _value, int _line, char* _fileName);
+};
+
+template <typename  T> class List{
+   private:
+      char *name;
+      Ref<T> *head;
+      int count;
+   public:
+      List(char *_name);
+      void add(T _value, int _line, char *_fileName);
+      void remove(T _value, int _line, char *_fileName);
+      void report(FILE *stream);
+};
+
+template <typename  T> Ref<T>::Ref(T _value, int _line, char* _fileName):
+   value(_value),
+   line(_line),
+   fileName(_fileName),
+   next(NULL){
+   }
+
+template <typename  T> List<T>::List(char *_name): 
+   head(NULL),
+   count(0),
+   name(_name){
+   }
+
+template <typename  T> void List<T>::add(T _value, int _line, char *_fileName){
+   Ref<T> *handle = new Ref<T>(_value, _line, _fileName);
+   handle->next = head; 
+   head = handle;
+   count++;
+}
+
+template <typename  T> void List<T>::remove(T _value, int _line, char *_fileName){
+   for (Ref<T> *ptr = head, *last=NULL; ptr != NULL; last=ptr, ptr = ptr->next){
+      if (ptr->value == _value){
+         if (last == NULL){ // head 
+            head = ptr->next;
+         }else{ // !head
+            last->next = ptr->next;
+         }
+         delete ptr;
+         count--;
+         return;
+      }
+   }
+   fprintf(stderr, "FILE %s LINE %d failed to find %s to remove %0lx\n", _fileName, _line, name, _value);
+}
+
+template <typename  T> void List<T>::report(FILE *stream){
+   if (head != NULL){
+      fprintf(stream, "Resource report %d resources of type %s still in play ", count, name);
+      for (Ref<T> *ptr = head; ptr != NULL; ptr = ptr->next){
+         fprintf(stream, " %0lx(%d)", ptr->value, ptr->line);
+      }
+      fprintf(stream, "\n");
+   }
+}
+
+#ifdef CLHELPER_SOURCE
+List<cl_command_queue> commandQueueList("cl_command_queue");
+List<cl_mem> memList("cl_mem");
+List<cl_event> readEventList("cl_event (read)");
+List<cl_event> executeEventList("cl_event (exec)");
+List<cl_event> writeEventList("cl_event (write)");
+#else
+extern List<cl_command_queue> commandQueueList;
+extern List<cl_mem> memList;
+extern List<cl_event> readEventList;
+extern List<cl_event> executeEventList;
+extern List<cl_event> writeEventList;
+#endif
+
 #endif // CLHELPER_H
 

@@ -152,4 +152,3 @@ jstring CLHelper::getExtensions(JNIEnv *jenv, cl_device_id deviceId, cl_int *sta
 }
 
 
-

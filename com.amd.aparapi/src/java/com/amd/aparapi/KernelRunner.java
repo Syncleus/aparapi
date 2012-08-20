@@ -321,6 +321,17 @@ class KernelRunner{
     * @author rlamothe
     */
    @UsedByJNICode public static final int ARG_CHAR = 1 << 21;
+   
+   /**
+    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>static</code> field (array or primitive).
+    * 
+    * 
+    * @see com.amd.aparapi.annotations.UsedByJNICode
+    * @see com.amd.aparapi.KernelRunner.KernelArg
+    * 
+    * @author gfrost
+    */
+   @UsedByJNICode public static final int ARG_STATIC = 1 << 22;
 
    static final String CL_KHR_FP64 = "cl_khr_fp64";
 
@@ -354,7 +365,7 @@ class KernelRunner{
     * 
     * @author gfrost
     */
-   @UsedByJNICode public static final int JNI_FLAG_ENABLE_PROFILING = 1 << 0;
+   //@UsedByJNICode public static final int JNI_FLAG_ENABLE_PROFILING = 1 << 0;
 
    /**
     * This 'bit' indicates that we wish to store profiling information in a CSV file from JNI code.
@@ -364,7 +375,7 @@ class KernelRunner{
     * 
     * @author gfrost
     */
-   @UsedByJNICode public static final int JNI_FLAG_ENABLE_PROFILING_CSV = 1 << 1;
+  // @UsedByJNICode public static final int JNI_FLAG_ENABLE_PROFILING_CSV = 1 << 1;
 
    /**
     * This 'bit' indicates that we want to execute on the GPU.
@@ -388,7 +399,7 @@ class KernelRunner{
     * @author gfrost
     */
 
-   @UsedByJNICode public static final int JNI_FLAG_ENABLE_VERBOSE_JNI = 1 << 3;
+  // @UsedByJNICode public static final int JNI_FLAG_ENABLE_VERBOSE_JNI = 1 << 3;
    
    /**
     * This 'bit' indicates that we wish to enable OpenCL resource tracking by JNI layer to be written to stderr.<br/>
@@ -399,7 +410,7 @@ class KernelRunner{
     * @author gfrost
     */
 
-   @UsedByJNICode @Annotations.Experimental public static final int JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING = 1 << 4;
+ //  @UsedByJNICode @Annotations.Experimental public static final int JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING = 1 << 4;
 
 
    /**
@@ -441,11 +452,7 @@ class KernelRunner{
        */
       @UsedByJNICode public int type;
 
-      /**
-       * True if the field is static
-       */
-      @UsedByJNICode public boolean isStatic;
-
+     
       /**
        * Name of the field
        */
@@ -1391,10 +1398,10 @@ class KernelRunner{
                   }
                }
 
-               jniFlags |= (Config.enableProfiling ? JNI_FLAG_ENABLE_PROFILING : 0);
-               jniFlags |= (Config.enableProfilingCSV ? JNI_FLAG_ENABLE_PROFILING_CSV | JNI_FLAG_ENABLE_PROFILING : 0);
-               jniFlags |= (Config.enableVerboseJNI ? JNI_FLAG_ENABLE_VERBOSE_JNI : 0);
-               jniFlags |= (Config.enableVerboseJNIOpenCLResourceTracking ? JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING :0);
+             //  jniFlags |= (Config.enableProfiling ? JNI_FLAG_ENABLE_PROFILING : 0);
+             //  jniFlags |= (Config.enableProfilingCSV ? JNI_FLAG_ENABLE_PROFILING_CSV | JNI_FLAG_ENABLE_PROFILING : 0);
+             //  jniFlags |= (Config.enableVerboseJNI ? JNI_FLAG_ENABLE_VERBOSE_JNI : 0);
+             // jniFlags |= (Config.enableVerboseJNIOpenCLResourceTracking ? JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING :0);
                // jniFlags |= (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU) ? JNI_FLAG_USE_GPU : 0);
                // Init the device to check capabilities before emitting the
                // code that requires the capabilities.
@@ -1461,7 +1468,10 @@ class KernelRunner{
                      args[i] = new KernelArg();
                      args[i].name = field.getName();
                      args[i].field = field;
-                     args[i].isStatic = (field.getModifiers() & Modifier.STATIC) == Modifier.STATIC;
+                     if ((field.getModifiers() & Modifier.STATIC)== Modifier.STATIC){
+                        args[i].type |= ARG_STATIC;
+                     }
+                  
                      Class<?> type = field.getType();
                      if (type.isArray()) {
 

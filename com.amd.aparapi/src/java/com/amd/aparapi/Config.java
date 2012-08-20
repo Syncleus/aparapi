@@ -41,6 +41,8 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.amd.aparapi.KernelRunner.UsedByJNICode;
+
 /**
  * A central location for holding all runtime configurable properties as well as logging configuration.
  * 
@@ -71,7 +73,7 @@ class Config{
     *  Usage -Dcom.amd.aparapi.enableProfiling={true|false}
     *  
     */
-   static final boolean enableProfiling = Boolean.getBoolean(propPkgName + ".enableProfiling");
+   @UsedByJNICode static final boolean enableProfiling = Boolean.getBoolean(propPkgName + ".enableProfiling");
 
    /**
     * Allows the user to turn on OpenCL profiling for the JNI/OpenCL layer, this information will be written to CSV file
@@ -79,7 +81,7 @@ class Config{
     *  Usage -Dcom.amd.aparapi.enableProfiling={true|false}
     *  
     */
-   static final boolean enableProfilingCSV = Boolean.getBoolean(propPkgName + ".enableProfilingCSV");
+   @UsedByJNICode static final boolean enableProfilingCSV = Boolean.getBoolean(propPkgName + ".enableProfilingCSV");
 
    /**
     * Allows the user to request that verbose JNI messages be dumped to stderr.
@@ -87,7 +89,7 @@ class Config{
     *  Usage -Dcom.amd.aparapi.enableVerboseJNI={true|false}
     *  
     */
-   static final boolean enableVerboseJNI = Boolean.getBoolean(propPkgName + ".enableVerboseJNI");
+   @UsedByJNICode static final boolean enableVerboseJNI = Boolean.getBoolean(propPkgName + ".enableVerboseJNI");
    
    /**
     * Allows the user to request tracking of opencl resources.  
@@ -97,7 +99,7 @@ class Config{
     *  Usage -Dcom.amd.aparapi.enableOpenCLResourceTracking={true|false}
     *  
     */
-   static final boolean enableVerboseJNIOpenCLResourceTracking = Boolean.getBoolean(propPkgName + ".enableVerboseJNIOpenCLResourceTracking");
+   @UsedByJNICode static final boolean enableVerboseJNIOpenCLResourceTracking = Boolean.getBoolean(propPkgName + ".enableVerboseJNIOpenCLResourceTracking");
    /**
     * Allows the user to request that the execution mode of each kernel invocation be reported to stdout.
     * 
@@ -179,10 +181,7 @@ class Config{
          e.printStackTrace();
       }
 
-      if (dumpFlags) {
-         logger.fine("executionMode = " + executionMode);
-
-      }
+    
    };
 
    public interface InstructionListener{
@@ -212,6 +211,21 @@ class Config{
             // TODO Auto-generated catch block
             e.printStackTrace();
          }
+      }
+      if (dumpFlags) {
+         
+         System.out.println(propPkgName+".executionMode{GPU|CPU|JTP|SEQ}="+executionMode);
+         System.out.println(propPkgName+".logLevel{OFF|FINEST|FINER|FINE|WARNING|SEVERE|ALL}="+logger.getLevel());
+         System.out.println(propPkgName+".enableProfiling{true|false}="+enableProfiling);
+         System.out.println(propPkgName+".enableProfilingCSV{true|false}="+enableProfilingCSV);
+         System.out.println(propPkgName+".enableVerboseJNI{true|false}="+enableVerboseJNI);
+         System.out.println(propPkgName+".enableVerboseJNIOpenCLResourceTracking{true|false}="+enableVerboseJNIOpenCLResourceTracking);
+         System.out.println(propPkgName+".enableShowGeneratedOpenCL{true|false}="+enableShowGeneratedOpenCL);
+         System.out.println(propPkgName+".enableExecutionModeReporting{true|false}="+enableExecutionModeReporting);
+         System.out.println(propPkgName+".enableInstructionDecodeViewer{true|false}="+enableInstructionDecodeViewer);
+         System.out.println(propPkgName+".instructionListenerClassName{<class name which extends com.amd.aparapi.Config.InstructionListener>}="+instructionListenerClassName);
+       
+
       }
    }
 
