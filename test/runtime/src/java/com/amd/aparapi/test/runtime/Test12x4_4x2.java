@@ -1,10 +1,12 @@
-package com.amd.aparapi.sample.convolution;
+package com.amd.aparapi.test.runtime;
+
+import org.junit.Test;
 
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.Range;
 
 public class Test12x4_4x2{
-   public static void main(String[] _args) {
+   @Test public void test() {
       // globalThreadId, threadId, globalX, globalY, localX, localY
       final int[][] test = new int[][] {
             {
@@ -490,6 +492,7 @@ public class Test12x4_4x2{
          }
 
       };
+      kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
       kernel.execute(Range.create2D(12, 4, 4, 2));
 
    }
