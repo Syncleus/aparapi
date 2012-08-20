@@ -444,6 +444,12 @@ First consider editing the properties in build.properties
       <delete file="aparapi.exp" />
       <delete file="opencljni.obj" />
       <delete file="opencljni.o" />
+      <delete file="config.obj" />
+      <delete file="config.o" />
+      <delete file="profileInfo.obj" />
+      <delete file="profileInfo.o" />
+      <delete file="arrayBuffer.obj" />
+      <delete file="arrayBuffer.o" />
       <delete file="jniHelper.obj" />
       <delete file="jniHelper.o" />
       <delete file="clHelper.obj" />
