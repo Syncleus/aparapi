@@ -56,10 +56,11 @@ Config::Config(JNIEnv *jenv){
       enableProfiling = getBoolean(jenv, "enableProfiling");
       enableProfilingCSV = getBoolean(jenv, "enableProfilingCSV");
    }
-   fprintf(stderr, "Config::enableVerboseJNI=%s\n",enableVerboseJNI?"true":"false");
-   fprintf(stderr, "Config::enableVerboseJNIOpenCLResourceTracking=%s\n",enableVerboseJNIOpenCLResourceTracking?"true":"false");
-   fprintf(stderr, "Config::enableProfiling=%s\n",enableProfiling?"true":"false");
-   fprintf(stderr, "Config::enableProfilingCSV=%s\n",enableProfilingCSV?"true":"false");
+
+   //fprintf(stderr, "Config::enableVerboseJNI=%s\n",enableVerboseJNI?"true":"false");
+   //fprintf(stderr, "Config::enableVerboseJNIOpenCLResourceTracking=%s\n",enableVerboseJNIOpenCLResourceTracking?"true":"false");
+   //fprintf(stderr, "Config::enableProfiling=%s\n",enableProfiling?"true":"false");
+   //fprintf(stderr, "Config::enableProfilingCSV=%s\n",enableProfilingCSV?"true":"false");
 }
 
 jboolean Config::isVerbose(){
