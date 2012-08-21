@@ -42,6 +42,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -335,13 +338,15 @@ public abstract class Kernel implements Cloneable{
           }
        }
       */
+
       static EXECUTION_MODE getDefaultExecutionMode() {
          EXECUTION_MODE defaultExecutionMode = OpenCLJNI.getJNI().isOpenCLAvailable() ? GPU : JTP;
          String executionMode = Config.executionMode;
          if (executionMode != null) {
             try {
-               EXECUTION_MODE requestedExecutionMode = valueOf(executionMode.toUpperCase());
-               logger.fine("requested execution mode = " + requestedExecutionMode);
+               EXECUTION_MODE requestedExecutionMode;
+               requestedExecutionMode = getExecutionModeFromString(executionMode).iterator().next();
+               logger.fine("requested execution mode =");
                if ((OpenCLJNI.getJNI().isOpenCLAvailable() && requestedExecutionMode.isOpenCL())
                      || !requestedExecutionMode.isOpenCL()) {
                   defaultExecutionMode = requestedExecutionMode;
@@ -351,9 +356,54 @@ public abstract class Kernel implements Cloneable{
             }
          }
 
-         logger.fine("default execution mode = " + defaultExecutionMode);
+         logger.fine("default execution modes = " + defaultExecutionMode);
 
          return (defaultExecutionMode);
+      }
+
+      static LinkedHashSet<EXECUTION_MODE> getDefaultExecutionModes() {
+         LinkedHashSet<EXECUTION_MODE> defaultExecutionModes = new LinkedHashSet<EXECUTION_MODE>();
+         if(OpenCLJNI.getJNI().isOpenCLAvailable()) {
+             defaultExecutionModes.add(GPU);
+             defaultExecutionModes.add(JTP);
+         } else {
+             defaultExecutionModes.add(JTP);
+         }
+         String executionMode = Config.executionMode;
+         if (executionMode != null) {
+            try {
+               LinkedHashSet<EXECUTION_MODE> requestedExecutionModes;
+               requestedExecutionModes = EXECUTION_MODE.getExecutionModeFromString(executionMode);
+               logger.fine("requested execution mode =");
+               for(EXECUTION_MODE mode : requestedExecutionModes) {
+                   logger.fine(" " + mode);
+               }
+               if ((OpenCLJNI.getJNI().isOpenCLAvailable() 
+                     && EXECUTION_MODE.anyOpenCL(requestedExecutionModes))
+                     || !EXECUTION_MODE.anyOpenCL(requestedExecutionModes)) {
+                  defaultExecutionModes = requestedExecutionModes;
+               }
+            } catch (Throwable t) {
+               // we will take the default
+            }
+         }
+
+         logger.fine("default execution modes = " + defaultExecutionModes);
+
+         for(EXECUTION_MODE e : defaultExecutionModes)
+         {
+             logger.warning("SETTING DEFAULT MODE: " + e.toString());
+         }
+
+         return (defaultExecutionModes);
+      }
+
+      static LinkedHashSet<EXECUTION_MODE> getExecutionModeFromString(String executionMode) {
+         LinkedHashSet<EXECUTION_MODE> executionModes = new LinkedHashSet<EXECUTION_MODE>();
+         for(String mode : executionMode.split(",")) {
+             executionModes.add(valueOf(mode.toUpperCase()));
+         }
+         return executionModes;
       }
 
       static EXECUTION_MODE getFallbackExecutionMode() {
@@ -362,13 +412,22 @@ public abstract class Kernel implements Cloneable{
          return (defaultFallbackExecutionMode);
       }
 
+
+      static boolean anyOpenCL(LinkedHashSet<EXECUTION_MODE> _executionModes) {
+         for(EXECUTION_MODE mode : _executionModes) {
+            if(mode == GPU || mode== CPU) {
+               return true;
+            }
+         }
+         return false;
+      }
+
       boolean isOpenCL() {
          return this == GPU || this == CPU;
       }
 
    };
 
-   private EXECUTION_MODE executionMode = EXECUTION_MODE.getDefaultExecutionMode();
 
    int[] globalId = new int[] {
          0,
@@ -2124,6 +2183,37 @@ public abstract class Kernel implements Cloneable{
          kernelRunner = new KernelRunner(this);
       }
       return (kernelRunner.getProfileInfo());
+   }
+
+   private LinkedHashSet<EXECUTION_MODE> executionModes = EXECUTION_MODE.getDefaultExecutionModes();
+   private Iterator<EXECUTION_MODE> currentMode = executionModes.iterator();
+   private EXECUTION_MODE executionMode = currentMode.next();
+
+   /**
+    * set possible fallback path for execution modes.
+    * for example setExecutionFallbackPath(GPU,CPU,JTP) will try to use the GPU
+    * if it fails it will fall back to OpenCL CPU and finally it will try JTP.
+    */
+   public void addExecutionModes(EXECUTION_MODE... platforms) {
+      executionModes.addAll(Arrays.asList(platforms));
+      currentMode = executionModes.iterator();
+      executionMode = currentMode.next();
+   }
+
+   /**
+    * @return is there another execution path we can try
+    */
+   public boolean hasNextExecutionMode() {
+      return currentMode.hasNext();
+   }
+
+   /**
+    * try the next execution path in the list if there aren't any more than give up
+    */
+   public void tryNextExecutionMode() {
+      if(currentMode.hasNext()) {
+         executionMode = currentMode.next();
+      }
    }
 
 }

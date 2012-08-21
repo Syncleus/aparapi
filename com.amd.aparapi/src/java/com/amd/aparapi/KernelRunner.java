@@ -1332,8 +1332,12 @@ class KernelRunner{
    }
 
    synchronized private Kernel fallBackAndExecute(String _entrypointName, final Range _range, final int _passes) {
+      if(kernel.hasNextExecutionMode()) {
+         kernel.tryNextExecutionMode();
+      } else {
+         kernel.setFallbackExecutionMode();
+      }
 
-      kernel.setFallbackExecutionMode();
       return execute(_entrypointName, _range, _passes);
    }
 

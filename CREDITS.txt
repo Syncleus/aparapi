@@ -11,4 +11,5 @@ Ryan LaMothe provided patch for issue #3 (Support of char - mapped to unsigned s
 Ryan LaMothe provided patch for issue #22 (Integrate FindBugs into the Ant build scripts) Feb 18th 2012.
 Ryan LaMothe provided patch for issue #37 (Add Kernel and JNI build support for Applets and JNLP JWS) Feb 18th 2012.
 Oliver Coleman provided patch for issue #64 (Support explicit boolean put and get) Aug 15th 2012
+Steven Libby provided patch for #6 (Allow finer control over fallback mode selection) Aug 21th 2012
 
