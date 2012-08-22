@@ -82,7 +82,6 @@ public class Convolution{
          width = _width;
          height = _height;
          convMatrix3x3 = _convMatrix3x3;
-
          execute(3 * width * height);
       }
 
