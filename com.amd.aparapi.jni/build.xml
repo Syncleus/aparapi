@@ -20,7 +20,8 @@ First consider editing the properties in build.properties
    <property environment="env" />
    <!-- we need env.PATH for msvc only -->
 
-   <!--<property file="build.properties" />-->
+   <!-- uncomment this if you want to use mingw! -->
+   <!--<property name="mingw.dir" value="c:\\MinGW"/>-->
 
    <target name="init">
       <available property="win32.amd.app.sdk.exists" file="C:/Program Files/AMD APP" type="dir"/>
@@ -34,6 +35,7 @@ First consider editing the properties in build.properties
             </not>
          </and>
       </condition>
+
 
       <available property="win64.amd.app.sdk.exists" file="C:/Program Files (x86)/AMD APP" type="dir"/>
       <condition property="amd.app.sdk.dir" value="C:/Program Files (x86)/AMD APP">
@@ -80,6 +82,9 @@ First consider editing the properties in build.properties
             <not>
                <isset property="msvc.dir" />
             </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
          </and>
       </condition>
 
@@ -97,6 +102,9 @@ First consider editing the properties in build.properties
             <not>
                <isset property="msvc.dir" />
             </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
          </and>
       </condition>
 
@@ -111,6 +119,9 @@ First consider editing the properties in build.properties
             <isset property="msvc.32.10.0.exists" />
             <not>
                <isset property="msvc.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
             </not>
          </and>
       </condition>
@@ -127,6 +138,9 @@ First consider editing the properties in build.properties
             <not>
                <isset property="msvc.dir" />
             </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
          </and>
       </condition>
 
@@ -137,6 +151,9 @@ First consider editing the properties in build.properties
             <isset property="msvc.sdk.7.1.exists" />
             <not>
                <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
             </not>
          </and>
       </condition>
@@ -149,6 +166,9 @@ First consider editing the properties in build.properties
             <not>
                <isset property="msvc.sdk.dir" />
             </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
          </and>
       </condition>
 
@@ -159,6 +179,9 @@ First consider editing the properties in build.properties
             <isset property="msvc.sdk.6.0A.exists" />
             <not>
                <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
             </not>
          </and>
       </condition>
@@ -171,6 +194,9 @@ First consider editing the properties in build.properties
             <not>
                <isset property="msvc.sdk.dir" />
             </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
          </and>
       </condition>
 
@@ -181,6 +207,9 @@ First consider editing the properties in build.properties
             <isset property="msvc.sdk.7.0A.32.exists" />
             <not>
                <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
             </not>
          </and>
       </condition>
