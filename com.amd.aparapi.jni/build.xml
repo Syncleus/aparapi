@@ -529,7 +529,6 @@ First consider editing the properties in build.properties
          <arg value="-g" />
          <arg value="-fPIC" />
          <arg value="-I/System/Library/Frameworks/JavaVM.framework/Headers" />
-         <arg value="-I/System/Library/Frameworks/OpenCL.framework/Headers" />
          <arg value="-Iinclude" />
          <arg value="-shared" />
          <arg value="-o" />
@@ -543,6 +542,7 @@ First consider editing the properties in build.properties
          <arg value="src/cpp/clHelper.cpp" />
          <arg value="-framework" />
          <arg value="OpenCL" />
+	 <arg value="-Wno-write-strings" />
       </exec>
    </target>
 
@@ -627,6 +627,22 @@ First consider editing the properties in build.properties
       </exec>
    </target>
 
-   <target name="cltest" depends="check,msvc_cltest" />
+   <target name="mac_cltest" if="use.gcc_mac">
+      <mkdir dir="${basedir}/dist"/>
+      <echo message="gcc cltest ${os.arch}" />
+      <exec executable="g++">
+         <arg value="-O3" />
+         <arg value="-g" />
+         <arg value="-fPIC" />
+         <arg value="-I/System/Library/Frameworks/JavaVM.framework/Headers" />
+         <arg value="-Iinclude" />
+         <arg value="-o" />
+         <arg value="${basedir}/dist/cltest" />
+         <arg value="src/cpp/cltest.cpp" />
+         <arg value="-framework" />
+         <arg value="OpenCL" />
+      </exec>
+   </target>
 
+   <target name="cltest" depends="check,msvc_cltest,mac_cltest" />
 </project>

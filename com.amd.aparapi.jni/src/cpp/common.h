@@ -56,7 +56,7 @@
 #ifndef __APPLE__
 #include <CL/cl.h>
 #else
-#include <cl.h>
+#include <opencl/opencl.h>
 #endif
 
 #include <jni.h>
