@@ -1,6 +1,5 @@
 package com.amd.aparapi.test.runtime;
 
-import static com.amd.aparapi.test.runtime.Util.same;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -54,14 +53,14 @@ public class ExplicitBoolean{
       if (size <= 32)
          printArray(k1.output);
 
-      assertTrue("k1.input == k1.output ", same(k1.output, k1.output));
+      assertTrue("k1.input == k1.output ", Util.same(k1.output, k1.output));
 
       k2.go();
 
       if (size <= 32)
          printArray(k2.output);
 
-      assertTrue("k1.input == k2.input", same(k1.output, k1.output));
+      assertTrue("k1.input == k2.input", Util.same(k1.output, k1.output));
       System.out.println(k1.getExecutionMode());
    }
 
