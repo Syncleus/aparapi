@@ -75,6 +75,8 @@ import com.amd.aparapi.InstructionSet.I_IINC;
 import com.amd.aparapi.InstructionSet.I_POP;
 import com.amd.aparapi.InstructionSet.If;
 import com.amd.aparapi.InstructionSet.IfUnary;
+import com.amd.aparapi.InstructionSet.I_IFNULL;
+import com.amd.aparapi.InstructionSet.I_IFNONNULL;
 import com.amd.aparapi.InstructionSet.IncrementInstruction;
 import com.amd.aparapi.InstructionSet.InlineAssignInstruction;
 import com.amd.aparapi.InstructionSet.MethodCall;
@@ -127,7 +129,25 @@ abstract class BlockWriter{
          writeInstruction(iff.getLhs());
          write(_branch16.getOperator().getText(_invert));
          writeInstruction(iff.getRhs());
+      } else if (_branch16 instanceof I_IFNULL) {
+         I_IFNULL iff = (I_IFNULL) _branch16;
+         writeInstruction(iff.getFirstChild());
 
+         if (_invert) {
+            write(" != NULL");
+         } else {
+            write(" == NULL");
+         }
+
+      } else if (_branch16 instanceof I_IFNONNULL) {
+         I_IFNONNULL iff = (I_IFNONNULL) _branch16;
+         writeInstruction(iff.getFirstChild());
+
+         if (_invert) {
+            write(" == NULL");
+         } else {
+            write(" != NULL");
+         }
       } else if (_branch16 instanceof IfUnary) {
          IfUnary branch16 = (IfUnary) _branch16;
          Instruction comparison = branch16.getUnary();
@@ -154,7 +174,6 @@ abstract class BlockWriter{
          }
 
       }
-
    }
 
    protected void writeComposite(CompositeInstruction instruction) throws CodeGenException {
