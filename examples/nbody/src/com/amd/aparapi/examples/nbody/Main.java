@@ -240,7 +240,7 @@ public class Main{
       caps.setHardwareAccelerated(true);
       final GLCanvas canvas = new GLCanvas(caps);
 
-      Dimension dimension = new Dimension(Integer.getInteger("width", 742), Integer.getInteger("height", 742));
+      Dimension dimension = new Dimension(Integer.getInteger("width", 742-64), Integer.getInteger("height", 742-64));
       canvas.setPreferredSize(dimension);
 
       canvas.addGLEventListener(new GLEventListener(){
