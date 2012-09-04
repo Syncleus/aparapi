@@ -45,9 +45,9 @@ import java.awt.image.DataBufferByte;
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.Range;
 
-public class Main{
+public class AparapiSolution{
 
-   public static class Convolution extends Kernel{
+   public static class AparapiConvolution extends Kernel{
 
       private byte[] inputData;
 
@@ -61,7 +61,7 @@ public class Main{
 
       float[] convMatrix3x3;
 
-      public Convolution(BufferedImage _imageIn, BufferedImage _imageOut) {
+      public AparapiConvolution(BufferedImage _imageIn, BufferedImage _imageOut) {
          inputData = ((DataBufferByte) _imageIn.getRaster().getDataBuffer()).getData();
          outputData = ((DataBufferByte) _imageOut.getRaster().getDataBuffer()).getData();
          width = _imageIn.getWidth();
@@ -116,12 +116,12 @@ public class Main{
             -10f,
             0f
       };
-      new JJMPEGPlayer("lab-6-solution", fileName, convMatrix3x3){
-         Convolution kernel = null;
+      new JJMPEGPlayer("Aparapi - Solution", fileName, convMatrix3x3){
+         AparapiConvolution kernel = null;
 
          @Override protected void processFrame(Graphics2D gc, float[] _convMatrix3x3, BufferedImage in, BufferedImage out) {
             if (kernel == null) {
-               kernel = new Convolution(in, out);
+               kernel = new AparapiConvolution(in, out);
             }
             kernel.apply(_convMatrix3x3);
          }
