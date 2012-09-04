@@ -388,11 +388,11 @@ public abstract class Kernel implements Cloneable{
             }
          }
 
-         logger.fine("default execution modes = " + defaultExecutionModes);
+         logger.info("default execution modes = " + defaultExecutionModes);
 
          for(EXECUTION_MODE e : defaultExecutionModes)
          {
-             logger.warning("SETTING DEFAULT MODE: " + e.toString());
+             logger.info("SETTING DEFAULT MODE: " + e.toString());
          }
 
          return (defaultExecutionModes);
