@@ -1,6 +1,5 @@
 package com.amd.aparapi.test.runtime;
 
-
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -13,7 +12,6 @@ import com.amd.aparapi.Device;
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.OpenCLDevice;
 import com.amd.aparapi.Range;
-
 
 public class BufferTransfer{
 
@@ -85,7 +83,7 @@ public class BufferTransfer{
       kernel.values = new int[SIZE];
       kernel.result = new int[SIZE];
       Util.zero(kernel.result);
-      Util.fill(kernel.values, new  Util.Filler(){
+      Util.fill(kernel.values, new Util.Filler(){
          public void fill(int[] array, int index) {
             array[index] = index;
          }
@@ -93,7 +91,7 @@ public class BufferTransfer{
 
       int[] expectedResult = Arrays.copyOf(kernel.result, kernel.result.length);
 
-      Util.apply(expectedResult, kernel.values, new  Util.Operator(){
+      Util.apply(expectedResult, kernel.values, new Util.Operator(){
 
          @Override public void apply(int[] lhs, int[] rhs, int index) {
             lhs[index] = lhs[index] + rhs[index];
@@ -102,22 +100,22 @@ public class BufferTransfer{
       });
       kernel.execute(range);
 
-      assertTrue("expectedResult == result",  Util.same(expectedResult, kernel.result));
+      assertTrue("expectedResult == result", Util.same(expectedResult, kernel.result));
 
       kernel.execute(range);
 
-      Util.apply(expectedResult, kernel.values, new  Util.Operator(){
+      Util.apply(expectedResult, kernel.values, new Util.Operator(){
 
          @Override public void apply(int[] lhs, int[] rhs, int index) {
             lhs[index] = lhs[index] + rhs[index];
 
          }
       });
-      assertTrue("expectedResult == result",  Util.same(expectedResult, kernel.result));
+      assertTrue("expectedResult == result", Util.same(expectedResult, kernel.result));
 
       Util.zero(kernel.values);
       kernel.execute(range);
-      assertTrue("expectedResult == result",  Util.same(expectedResult, kernel.result));
+      assertTrue("expectedResult == result", Util.same(expectedResult, kernel.result));
 
    }
 
@@ -131,7 +129,7 @@ public class BufferTransfer{
       kernel.values = new int[SIZE];
       kernel.result = new int[SIZE];
       Util.zero(kernel.result);
-      Util.fill(kernel.values, new  Util.Filler(){
+      Util.fill(kernel.values, new Util.Filler(){
          public void fill(int[] array, int index) {
             array[index] = index;
          }
@@ -139,7 +137,7 @@ public class BufferTransfer{
 
       int[] expectedResult = Arrays.copyOf(kernel.result, kernel.result.length);
 
-      Util.apply(expectedResult, kernel.values, new  Util.Operator(){
+      Util.apply(expectedResult, kernel.values, new Util.Operator(){
 
          @Override public void apply(int[] lhs, int[] rhs, int index) {
             lhs[index] = lhs[index] + rhs[index];
@@ -149,23 +147,23 @@ public class BufferTransfer{
 
       kernel.execute(range).get(kernel.result);
 
-      assertTrue("after first explicit add expectedResult == result",  Util.same(expectedResult, kernel.result));
+      assertTrue("after first explicit add expectedResult == result", Util.same(expectedResult, kernel.result));
 
       kernel.execute(range).get(kernel.result);
 
-      Util.apply(expectedResult, kernel.values, new  Util.Operator(){
+      Util.apply(expectedResult, kernel.values, new Util.Operator(){
          @Override public void apply(int[] lhs, int[] rhs, int index) {
             lhs[index] = lhs[index] + rhs[index];
 
          }
       });
-      assertTrue("after second explicit add expectedResult == result",  Util.same(expectedResult, kernel.result));
+      assertTrue("after second explicit add expectedResult == result", Util.same(expectedResult, kernel.result));
 
       Util.zero(kernel.values);
 
       kernel.put(kernel.values).execute(range).get(kernel.result);
 
-      assertTrue("after zeroing values and third explici add expectedResult == result",  Util.same(expectedResult, kernel.result));
+      assertTrue("after zeroing values and third explici add expectedResult == result", Util.same(expectedResult, kernel.result));
 
       Util.zero(kernel.result);
 
@@ -216,7 +214,7 @@ public class BufferTransfer{
          for (int n = 0; n < neuronOutputs.length; n++)
             System.out.println(Arrays.toString(log[n]));
 
-         assertTrue("log[2] == expected",  Util.same(log[2], expected));
+         assertTrue("log[2] == expected", Util.same(log[2], expected));
       }
 
       @Override public void run() {
