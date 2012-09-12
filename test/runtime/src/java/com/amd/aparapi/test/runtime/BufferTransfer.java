@@ -14,6 +14,7 @@ import com.amd.aparapi.Kernel;
 import com.amd.aparapi.OpenCLDevice;
 import com.amd.aparapi.Range;
 
+
 public class BufferTransfer{
 
    static OpenCLDevice openCLDevice = null;
