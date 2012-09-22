@@ -321,7 +321,7 @@ class KernelRunner{
     * @author rlamothe
     */
    @UsedByJNICode public static final int ARG_CHAR = 1 << 21;
-   
+
    /**
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>static</code> field (array or primitive).
     * 
@@ -375,7 +375,7 @@ class KernelRunner{
     * 
     * @author gfrost
     */
-  // @UsedByJNICode public static final int JNI_FLAG_ENABLE_PROFILING_CSV = 1 << 1;
+   // @UsedByJNICode public static final int JNI_FLAG_ENABLE_PROFILING_CSV = 1 << 1;
 
    /**
     * This 'bit' indicates that we want to execute on the GPU.
@@ -399,8 +399,8 @@ class KernelRunner{
     * @author gfrost
     */
 
-  // @UsedByJNICode public static final int JNI_FLAG_ENABLE_VERBOSE_JNI = 1 << 3;
-   
+   // @UsedByJNICode public static final int JNI_FLAG_ENABLE_VERBOSE_JNI = 1 << 3;
+
    /**
     * This 'bit' indicates that we wish to enable OpenCL resource tracking by JNI layer to be written to stderr.<br/>
     * 
@@ -410,8 +410,7 @@ class KernelRunner{
     * @author gfrost
     */
 
- //  @UsedByJNICode @Annotations.Experimental public static final int JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING = 1 << 4;
-
+   //  @UsedByJNICode @Annotations.Experimental public static final int JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING = 1 << 4;
 
    /**
     * Each field (or captured field in the case of an anonymous inner class) referenced by any bytecode reachable from the users Kernel.run(), will
@@ -452,7 +451,6 @@ class KernelRunner{
        */
       @UsedByJNICode public int type;
 
-     
       /**
        * Name of the field
        */
@@ -1332,7 +1330,7 @@ class KernelRunner{
    }
 
    synchronized private Kernel fallBackAndExecute(String _entrypointName, final Range _range, final int _passes) {
-      if(kernel.hasNextExecutionMode()) {
+      if (kernel.hasNextExecutionMode()) {
          kernel.tryNextExecutionMode();
       } else {
          kernel.setFallbackExecutionMode();
@@ -1376,41 +1374,44 @@ class KernelRunner{
                return warnFallBackAndExecute(_entrypointName, _range, _passes, exception);
             }
             if ((entryPoint != null) && !entryPoint.shouldFallback()) {
+               synchronized (Kernel.class) { // This seems to be needed because of a race condition uncovered with issue #68 http://code.google.com/p/aparapi/issues/detail?id=68
+                  if (device != null && !(device instanceof OpenCLDevice)) {
+                     throw new IllegalStateException("range's device is not suitable for OpenCL ");
+                  }
+                  OpenCLDevice openCLDevice = (OpenCLDevice) device; // still might be null! 
 
-               if (device != null && !(device instanceof OpenCLDevice)) {
-                  throw new IllegalStateException("range's device is not suitable for OpenCL ");
-               }
-               OpenCLDevice openCLDevice = (OpenCLDevice) device; // still might be null! 
-
-               int jniFlags = 0;
-               if (openCLDevice == null) {
-                  if (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU)) {
-                     // We used to treat as before by getting first GPU device
-                     // now we get the best GPU
-                     openCLDevice = (OpenCLDevice) OpenCLDevice.best();
-                     jniFlags |= JNI_FLAG_USE_GPU; // this flag might be redundant now. 
+                  int jniFlags = 0;
+                  if (openCLDevice == null) {
+                     if (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU)) {
+                        // We used to treat as before by getting first GPU device
+                        // now we get the best GPU
+                        openCLDevice = (OpenCLDevice) OpenCLDevice.best();
+                        jniFlags |= JNI_FLAG_USE_GPU; // this flag might be redundant now. 
+                     } else {
+                        // We fetch the first CPU device 
+                        openCLDevice = (OpenCLDevice) OpenCLDevice.firstCPU();
+                        if (openCLDevice == null) {
+                           return warnFallBackAndExecute(_entrypointName, _range, _passes,
+                                 "CPU request can't be honored not CPU device");
+                        }
+                     }
                   } else {
-                     // We fetch the first CPU device 
-                     openCLDevice = (OpenCLDevice) OpenCLDevice.firstCPU();
-                     if (openCLDevice == null){
-                        return warnFallBackAndExecute(_entrypointName, _range, _passes, "CPU request can't be honored not CPU device");
+                     if (openCLDevice.getType() == Device.TYPE.GPU) {
+                        jniFlags |= JNI_FLAG_USE_GPU; // this flag might be redundant now. 
                      }
                   }
-               } else {
-                  if (openCLDevice.getType() == Device.TYPE.GPU) {
-                     jniFlags |= JNI_FLAG_USE_GPU; // this flag might be redundant now. 
-                  }
-               }
 
-             //  jniFlags |= (Config.enableProfiling ? JNI_FLAG_ENABLE_PROFILING : 0);
-             //  jniFlags |= (Config.enableProfilingCSV ? JNI_FLAG_ENABLE_PROFILING_CSV | JNI_FLAG_ENABLE_PROFILING : 0);
-             //  jniFlags |= (Config.enableVerboseJNI ? JNI_FLAG_ENABLE_VERBOSE_JNI : 0);
-             // jniFlags |= (Config.enableVerboseJNIOpenCLResourceTracking ? JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING :0);
-               // jniFlags |= (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU) ? JNI_FLAG_USE_GPU : 0);
-               // Init the device to check capabilities before emitting the
-               // code that requires the capabilities.
+                  //  jniFlags |= (Config.enableProfiling ? JNI_FLAG_ENABLE_PROFILING : 0);
+                  //  jniFlags |= (Config.enableProfilingCSV ? JNI_FLAG_ENABLE_PROFILING_CSV | JNI_FLAG_ENABLE_PROFILING : 0);
+                  //  jniFlags |= (Config.enableVerboseJNI ? JNI_FLAG_ENABLE_VERBOSE_JNI : 0);
+                  // jniFlags |= (Config.enableVerboseJNIOpenCLResourceTracking ? JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING :0);
+                  // jniFlags |= (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU) ? JNI_FLAG_USE_GPU : 0);
+                  // Init the device to check capabilities before emitting the
+                  // code that requires the capabilities.
 
-               jniContextHandle = initJNI(kernel, openCLDevice, jniFlags); // openCLDevice will not be null here
+                  // synchronized(Kernel.class){
+                  jniContextHandle = initJNI(kernel, openCLDevice, jniFlags); // openCLDevice will not be null here
+               } // end of synchronized! issue 68
                if (jniContextHandle == 0) {
                   return warnFallBackAndExecute(_entrypointName, _range, _passes, "initJNI failed to return a valid handle");
                }
@@ -1472,10 +1473,10 @@ class KernelRunner{
                      args[i] = new KernelArg();
                      args[i].name = field.getName();
                      args[i].field = field;
-                     if ((field.getModifiers() & Modifier.STATIC)== Modifier.STATIC){
+                     if ((field.getModifiers() & Modifier.STATIC) == Modifier.STATIC) {
                         args[i].type |= ARG_STATIC;
                      }
-                  
+
                      Class<?> type = field.getType();
                      if (type.isArray()) {
 
