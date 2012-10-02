@@ -114,15 +114,15 @@ public class Life{
 
       private int toBase;
 
-      public LifeKernel(int _width, int _height, BufferedImage _image, Kernel.EXECUTION_MODE _mode) {
-         setExecutionMode(_mode);
+      public LifeKernel(int _width, int _height, BufferedImage _image) {
+
          imageData = ((DataBufferInt) _image.getRaster().getDataBuffer()).getData();
          width = _width;
          height = _height;
          range = Range.create(width * height, 256);
          System.out.println("range = " + range);
 
-         setExplicit(_mode.equals(Kernel.EXECUTION_MODE.GPU)); // This gives us a performance boost for GPU mode.
+         setExplicit(true); // This gives us a performance boost for GPU mode.
 
          fromBase = height * width;
          toBase = 0;
@@ -132,9 +132,8 @@ public class Life{
             imageData[toBase + i] = LifeKernel.ALIVE;
             imageData[fromBase + i] = LifeKernel.ALIVE;
          }
-         if (isExplicit()) {
-            put(imageData); // Because we are using explicit buffer management we must put the imageData array
-         }
+
+         put(imageData); // Because we are using explicit buffer management we must put the imageData array
 
       }
 
@@ -184,7 +183,7 @@ public class Life{
 
    static boolean running = false;
 
-   static LifeKernel lifeKernel = null;
+   // static LifeKernel lifeKernel = null;
 
    static double generationsPerSecondField = 0;
 
@@ -199,37 +198,35 @@ public class Life{
       // and bottom to top in alternate generation passses. The LifeKernel will track which pass is which
       final BufferedImage image = new BufferedImage(width, height * 2, BufferedImage.TYPE_INT_RGB);
 
-      final LifeKernel lifeKernelJTP = new LifeKernel(width, height, image, Kernel.EXECUTION_MODE.JTP);
-
-      final LifeKernel lifeKernelGPU = new LifeKernel(width, height, image, Kernel.EXECUTION_MODE.GPU);
-      lifeKernel = lifeKernelJTP;
+      final LifeKernel lifeKernel = new LifeKernel(width, height, image);
+      lifeKernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
 
       final Font font = new Font("Garamond", Font.BOLD, 100);
       // Create a component for viewing the offsecreen image
       @SuppressWarnings("serial") JComponent viewer = new JComponent(){
          @Override public void paintComponent(Graphics g) {
             g.setFont(font);
-            if (lifeKernel != null) {
-               if (lifeKernel.isExplicit()) {
-                  lifeKernel.get(lifeKernel.imageData); // We only pull the imageData when we intend to use it.
-                  List<ProfileInfo> profileInfo = lifeKernel.getProfileInfo();
-                  if (profileInfo != null) {
-                     for (ProfileInfo p : profileInfo) {
-                        System.out.print(" " + p.getType() + " " + p.getLabel() + " " + (p.getStart() / 1000) + " .. "
-                              + (p.getEnd() / 1000) + " " + (p.getEnd() - p.getStart()) / 1000 + "us");
-                     }
-                     System.out.println();
+            //  if (lifeKernel != null) {
+            if (lifeKernel.isExplicit()) {
+               lifeKernel.get(lifeKernel.imageData); // We only pull the imageData when we intend to use it.
+               List<ProfileInfo> profileInfo = lifeKernel.getProfileInfo();
+               if (profileInfo != null) {
+                  for (ProfileInfo p : profileInfo) {
+                     System.out.print(" " + p.getType() + " " + p.getLabel() + " " + (p.getStart() / 1000) + " .. "
+                           + (p.getEnd() / 1000) + " " + (p.getEnd() - p.getStart()) / 1000 + "us");
                   }
+                  System.out.println();
                }
-               // We copy one half of the offscreen buffer to the viewer, we copy the half that we just mutated.
-               if (lifeKernel.fromBase == 0) {
-                  g.drawImage(image, 0, 0, width, height, 0, 0, width, height, this);
-               } else {
-                  g.drawImage(image, 0, 0, width, height, 0, height, width, 2 * height, this);
-               }
-               g.drawString(String.format("%5.2f", generationsPerSecondField), 20, 100);
-
             }
+            // We copy one half of the offscreen buffer to the viewer, we copy the half that we just mutated.
+            if (lifeKernel.fromBase == 0) {
+               g.drawImage(image, 0, 0, width, height, 0, 0, width, height, this);
+            } else {
+               g.drawImage(image, 0, 0, width, height, 0, height, width, 2 * height, this);
+            }
+            g.drawString(String.format("%5.2f", generationsPerSecondField), 20, 100);
+
+            // }
          }
       };
 
@@ -262,11 +259,11 @@ public class Life{
             // modeButton = gpuMandelBrot;
             //   } else 
             if (item.equals(choices[0])) {
-               lifeKernel = lifeKernelJTP;
+               lifeKernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
 
                // modeButton = javaMandelBrot;
             } else if (item.equals(choices[1])) {
-               lifeKernel = lifeKernelGPU;
+               lifeKernel.setExecutionMode(Kernel.EXECUTION_MODE.GPU);
                // modeButton = javaMandelBrotMultiThread;
             }
          }

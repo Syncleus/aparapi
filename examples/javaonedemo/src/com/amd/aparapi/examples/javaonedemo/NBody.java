@@ -42,6 +42,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -57,16 +59,17 @@ import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.fixedfunc.GLLightingFunc;
 import javax.media.opengl.glu.GLU;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.ProfileInfo;
 import com.amd.aparapi.Range;
 import com.jogamp.opengl.util.FPSAnimator;
+import com.jogamp.opengl.util.gl2.GLUT;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
@@ -197,8 +200,8 @@ public class NBody{
 
    public static void main(String _args[]) {
 
-      final NBodyKernel kernel = new NBodyKernel(Range.create(Integer.getInteger("bodies", 8192)));
-
+      final NBodyKernel kernel = new NBodyKernel(Range.create(Integer.getInteger("bodies", 12288)));
+      kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
       JFrame frame = new JFrame("NBody");
 
       JPanel panel = new JPanel(new BorderLayout());
@@ -216,28 +219,46 @@ public class NBody{
       controlPanel.add(startButton);
       controlPanel.add(new JLabel(kernel.getExecutionMode().toString()));
 
-      controlPanel.add(new JLabel("   Particles"));
-      controlPanel.add(new JTextField("" + kernel.range.getGlobalSize(0), 5));
+      //  controlPanel.add(new JLabel("   Particles"));
 
-      controlPanel.add(new JLabel("FPS"));
-      final JTextField framesPerSecondTextField = new JTextField("0", 5);
+      final String[] choices = new String[] {
+            // "Java Sequential",
+            "Java Threads",
+            "GPU OpenCL"
+      };
 
-      controlPanel.add(framesPerSecondTextField);
-      controlPanel.add(new JLabel("Score("));
-      JLabel miniLabel = new JLabel("<html><small>calcs</small><hr/><small>&micro;sec</small></html>");
+      final JComboBox modeButton = new JComboBox(choices);
 
-      controlPanel.add(miniLabel);
-      controlPanel.add(new JLabel(")"));
+      modeButton.addItemListener(new ItemListener(){
+         @Override public void itemStateChanged(ItemEvent e) {
+            String item = (String) modeButton.getSelectedItem();
 
-      final JTextField positionUpdatesPerMicroSecondTextField = new JTextField("0", 5);
+            // if (item.equals(choices[2])) {
+            // modeButton = gpuMandelBrot;
+            //   } else 
+            if (item.equals(choices[0])) {
+               kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
 
-      controlPanel.add(positionUpdatesPerMicroSecondTextField);
+               // modeButton = javaMandelBrot;
+            } else if (item.equals(choices[1])) {
+               // lifeKernel = lifeKernelGPU;
+               // modeButton = javaMandelBrotMultiThread;
+               kernel.setExecutionMode(Kernel.EXECUTION_MODE.GPU);
+            }
+         }
+
+      });
+      controlPanel.add(modeButton);
+
+      controlPanel.add(new JLabel("            " + kernel.range.getGlobalSize(0) + " Particles"));
+
       GLCapabilities caps = new GLCapabilities(null);
       final GLProfile profile = caps.getGLProfile();
       caps.setDoubleBuffered(true);
       caps.setHardwareAccelerated(true);
       final GLCanvas canvas = new GLCanvas(caps);
 
+      final GLUT glut = new GLUT();
       Dimension dimension = new Dimension(Integer.getInteger("width", 742 - 64), Integer.getInteger("height", 742 - 64));
       canvas.setPreferredSize(dimension);
 
@@ -297,18 +318,16 @@ public class NBody{
             long time = now - last;
             frames++;
 
-            if (time > 1000) { // We update the frames/sec every second
-               if (running) {
-                  float framesPerSecond = (frames * 1000.0f) / time;
-                  int updatesPerMicroSecond = (int) ((framesPerSecond * kernel.range.getGlobalSize(0) * kernel.range
-                        .getGlobalSize(0)) / 1000000);
-                  framesPerSecondTextField.setText(String.format("%5.2f", framesPerSecond));
-                  positionUpdatesPerMicroSecondTextField.setText(String.format("%4d", updatesPerMicroSecond));
-               }
-               frames = 0;
-               last = now;
+            if (running) {
+               int framesPerSecond = (int) ((frames * 1000.0f) / time);
+
+               gl.glColor3f(.5f, .5f, .5f);
+               gl.glRasterPos2i(-40, 38);
+               glut.glutBitmapString(8, String.format("%5d fps", framesPerSecond));
+               gl.glFlush();
             }
-            gl.glFlush();
+            frames = 0;
+            last = now;
 
          }
 
