@@ -240,7 +240,7 @@ public class NBody{
       caps.setHardwareAccelerated(true);
       final GLCanvas canvas = new GLCanvas(caps);
 
-      Dimension dimension = new Dimension(Integer.getInteger("width", 742-64), Integer.getInteger("height", 742-64));
+      Dimension dimension = new Dimension(Integer.getInteger("width", 742 - 64), Integer.getInteger("height", 742 - 64));
       canvas.setPreferredSize(dimension);
 
       canvas.addGLEventListener(new GLEventListener(){
@@ -348,7 +348,7 @@ public class NBody{
       panel.add(canvas, BorderLayout.CENTER);
       frame.getContentPane().add(panel, BorderLayout.CENTER);
       final FPSAnimator animator = new FPSAnimator(canvas, 100);
-    
+
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
       frame.pack();
       frame.setVisible(true);

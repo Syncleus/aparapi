@@ -121,25 +121,23 @@ public class Life{
          height = _height;
          range = Range.create(width * height, 256);
          System.out.println("range = " + range);
-        
-        setExplicit(_mode.equals(Kernel.EXECUTION_MODE.GPU)); // This gives us a performance boost for GPU mode.
 
-        fromBase = height * width;
-        toBase = 0;
-        Arrays.fill(imageData, LifeKernel.DEAD);
-        /** draw a line across the image **/
-        for (int i = width * (height / 2) + width / 10; i < width * (height / 2 + 1) - width / 10; i++) {
-           imageData[toBase+i] = LifeKernel.ALIVE;
-           imageData[fromBase+i] = LifeKernel.ALIVE;
-        }
-        if (isExplicit()) {
-           put(imageData); // Because we are using explicit buffer management we must put the imageData array
-        }
+         setExplicit(_mode.equals(Kernel.EXECUTION_MODE.GPU)); // This gives us a performance boost for GPU mode.
 
-        
+         fromBase = height * width;
+         toBase = 0;
+         Arrays.fill(imageData, LifeKernel.DEAD);
+         /** draw a line across the image **/
+         for (int i = width * (height / 2) + width / 10; i < width * (height / 2 + 1) - width / 10; i++) {
+            imageData[toBase + i] = LifeKernel.ALIVE;
+            imageData[fromBase + i] = LifeKernel.ALIVE;
+         }
+         if (isExplicit()) {
+            put(imageData); // Because we are using explicit buffer management we must put the imageData array
+         }
+
       }
-      
-    
+
       @Override public void run() {
          int gid = getGlobalId();
          int to = gid + toBase;
@@ -187,7 +185,8 @@ public class Life{
    static boolean running = false;
 
    static LifeKernel lifeKernel = null;
-   static double generationsPerSecondField =0;
+
+   static double generationsPerSecondField = 0;
 
    public static void main(String[] _args) {
 
@@ -204,8 +203,8 @@ public class Life{
 
       final LifeKernel lifeKernelGPU = new LifeKernel(width, height, image, Kernel.EXECUTION_MODE.GPU);
       lifeKernel = lifeKernelJTP;
-      
-      final Font font = new Font ("Garamond", Font.BOLD , 100);
+
+      final Font font = new Font("Garamond", Font.BOLD, 100);
       // Create a component for viewing the offsecreen image
       @SuppressWarnings("serial") JComponent viewer = new JComponent(){
          @Override public void paintComponent(Graphics g) {
@@ -229,7 +228,7 @@ public class Life{
                   g.drawImage(image, 0, 0, width, height, 0, height, width, 2 * height, this);
                }
                g.drawString(String.format("%5.2f", generationsPerSecondField), 20, 100);
-              
+
             }
          }
       };
@@ -264,7 +263,7 @@ public class Life{
             //   } else 
             if (item.equals(choices[0])) {
                lifeKernel = lifeKernelJTP;
-            
+
                // modeButton = javaMandelBrot;
             } else if (item.equals(choices[1])) {
                lifeKernel = lifeKernelGPU;
@@ -277,9 +276,9 @@ public class Life{
 
       //  controlPanel.add(new JLabel(lifeKernel.getExecutionMode().toString()));
 
-    //  controlPanel.add(new JLabel("  Generations/Second="));
-    //  JLabel generationsPerSecond = new JLabel("0.00");
-    //  controlPanel.add(generationsPerSecond);
+      //  controlPanel.add(new JLabel("  Generations/Second="));
+      //  JLabel generationsPerSecond = new JLabel("0.00");
+      //  controlPanel.add(generationsPerSecond);
 
       // Set the default size and add to the frames content pane
       viewer.setPreferredSize(new Dimension(width, height));
@@ -308,8 +307,8 @@ public class Life{
          generations++;
          long now = System.currentTimeMillis();
          if (now - start > 1000) {
-            generationsPerSecondField =(generations * 1000.0) / (now - start);
-          //  generationsPerSecond.setText(String.format("%5.2f", generationsPerSecondField));
+            generationsPerSecondField = (generations * 1000.0) / (now - start);
+            //  generationsPerSecond.setText(String.format("%5.2f", generationsPerSecondField));
             start = now;
             generations = 0;
          }
