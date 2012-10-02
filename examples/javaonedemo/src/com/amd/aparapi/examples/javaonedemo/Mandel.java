@@ -38,10 +38,17 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 
 package com.amd.aparapi.examples.javaonedemo;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -50,8 +57,11 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.List;
 
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.ProfileInfo;
@@ -162,6 +172,10 @@ public class Mandel{
    /** User selected zoom-in point on the Mandelbrot view. */
    public static volatile Point to = null;
 
+   public static int frames = 0;
+
+   public static long start = 0;
+
    @SuppressWarnings("serial") public static void main(String[] _args) {
 
       JFrame frame = new JFrame("MandelBrot");
@@ -178,13 +192,65 @@ public class Mandel{
       /** Image for Mandelbrot view. */
       final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
       final BufferedImage offscreen = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+      // Extract the underlying RGB buffer from the image.
+      // Pass this to the kernel so it operates directly on the RGB buffer of the image
+      final int[] rgb = ((DataBufferInt) offscreen.getRaster().getDataBuffer()).getData();
+      final int[] imageRgb = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+      // Create a Kernel passing the size, RGB buffer and the palette.
+      final MandelKernel kernel = new MandelKernel(width, height, rgb);
+      kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
+      final Font font = new Font("Garamond", Font.BOLD, 100);
       // Draw Mandelbrot image
       JComponent viewer = new JComponent(){
          @Override public void paintComponent(Graphics g) {
 
             g.drawImage(image, 0, 0, width, height, this);
+            g.setFont(font);
+            long now = System.currentTimeMillis();
+            //  if (now - start > 1000) {
+            double framesPerSecond = (frames * 1000.0) / (now - start);
+            g.drawString(String.format("%5.2f", framesPerSecond), 20, 100);
+            //  generationsPerSecond.setText(String.format("%5.2f", generationsPerSecondField));
+
+            frames++;
+            // }
          }
       };
+
+      JPanel controlPanel = new JPanel(new FlowLayout());
+      frame.getContentPane().add(controlPanel, BorderLayout.SOUTH);
+
+      final String[] choices = new String[] {
+            // "Java Sequential",
+            "Java Threads",
+            "GPU OpenCL"
+      };
+
+      final JComboBox modeButton = new JComboBox(choices);
+
+      modeButton.addItemListener(new ItemListener(){
+         @Override public void itemStateChanged(ItemEvent e) {
+            String item = (String) modeButton.getSelectedItem();
+
+            // if (item.equals(choices[2])) {
+            // modeButton = gpuMandelBrot;
+            //   } else 
+            if (item.equals(choices[0])) {
+               kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
+               frames = 0;
+               start = System.currentTimeMillis();
+
+               // modeButton = javaMandelBrot;
+            } else if (item.equals(choices[1])) {
+               kernel.setExecutionMode(Kernel.EXECUTION_MODE.GPU);
+               frames = 0;
+               start = System.currentTimeMillis();
+               // modeButton = javaMandelBrotMultiThread;
+            }
+         }
+
+      });
+      controlPanel.add(modeButton);
 
       // Set the size of JComponent which displays Mandelbrot image
       viewer.setPreferredSize(new Dimension(width, height));
@@ -202,17 +268,10 @@ public class Mandel{
       });
 
       // Swing housework to create the frame
-      frame.getContentPane().add(viewer);
+      frame.getContentPane().add(viewer, BorderLayout.CENTER);
       frame.pack();
       frame.setLocationRelativeTo(null);
       frame.setVisible(true);
-
-      // Extract the underlying RGB buffer from the image.
-      // Pass this to the kernel so it operates directly on the RGB buffer of the image
-      final int[] rgb = ((DataBufferInt) offscreen.getRaster().getDataBuffer()).getData();
-      final int[] imageRgb = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-      // Create a Kernel passing the size, RGB buffer and the palette.
-      final MandelKernel kernel = new MandelKernel(width, height, rgb);
 
       float defaultScale = 3f;
 
@@ -247,7 +306,8 @@ public class Mandel{
                }
             }
          }
-
+         frames = 0;
+         start = System.currentTimeMillis();
          float x = -1f;
          float y = 0f;
          float scale = defaultScale;
