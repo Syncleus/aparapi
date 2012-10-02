@@ -84,7 +84,7 @@ import com.jogamp.opengl.util.texture.TextureIO;
  * @author gfrost
  *
  */
-public class Main{
+public class NBody{
 
    public static class NBodyKernel extends Kernel{
       protected final float delT = .005f;
@@ -321,7 +321,7 @@ public class Main{
             gl.glEnable(GL.GL_BLEND);
             gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
             try {
-               InputStream textureStream = Main.class.getResourceAsStream("particle.jpg");
+               InputStream textureStream = NBody.class.getResourceAsStream("particle.jpg");
                Texture texture = TextureIO.newTexture(textureStream, false, null);
                texture.enable(gl);
             } catch (IOException e) {
