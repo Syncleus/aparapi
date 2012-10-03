@@ -45,8 +45,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
@@ -57,7 +55,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.List;
 
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -172,7 +169,7 @@ public class Mandel{
    /** User selected zoom-in point on the Mandelbrot view. */
    public static volatile Point to = null;
 
-   public static int frames = 0;
+   public static int frameCount = 0;
 
    public static long start = 0;
 
@@ -198,7 +195,7 @@ public class Mandel{
       final int[] imageRgb = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
       // Create a Kernel passing the size, RGB buffer and the palette.
       final MandelKernel kernel = new MandelKernel(width, height, rgb);
-      kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
+
       final Font font = new Font("Garamond", Font.BOLD, 100);
       // Draw Mandelbrot image
       JComponent viewer = new JComponent(){
@@ -206,13 +203,14 @@ public class Mandel{
 
             g.drawImage(image, 0, 0, width, height, this);
             g.setFont(font);
+            g.setColor(Color.WHITE);
             long now = System.currentTimeMillis();
             //  if (now - start > 1000) {
-            double framesPerSecond = (frames * 1000.0) / (now - start);
+            double framesPerSecond = (frameCount * 1000.0) / (now - start);
             g.drawString(String.format("%5.2f", framesPerSecond), 20, 100);
             //  generationsPerSecond.setText(String.format("%5.2f", generationsPerSecondField));
 
-            frames++;
+            //  frames++;
             // }
          }
       };
@@ -237,13 +235,13 @@ public class Mandel{
             //   } else 
             if (item.equals(choices[0])) {
                kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
-               frames = 0;
+               frameCount = 0;
                start = System.currentTimeMillis();
 
                // modeButton = javaMandelBrot;
             } else if (item.equals(choices[1])) {
                kernel.setExecutionMode(Kernel.EXECUTION_MODE.GPU);
-               frames = 0;
+               frameCount = 0;
                start = System.currentTimeMillis();
                // modeButton = javaMandelBrotMultiThread;
             }
@@ -278,7 +276,7 @@ public class Mandel{
       // Set the default scale and offset, execute the kernel and force a repaint of the viewer.
       kernel.setScaleAndOffset(defaultScale, -1f, 0f);
       kernel.execute(range);
-
+      kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
       System.arraycopy(rgb, 0, imageRgb, 0, rgb.length);
       viewer.repaint();
 
@@ -306,8 +304,7 @@ public class Mandel{
                }
             }
          }
-         frames = 0;
-         start = System.currentTimeMillis();
+
          float x = -1f;
          float y = 0f;
          float scale = defaultScale;
@@ -316,9 +313,11 @@ public class Mandel{
 
          // This is how many frames we will display as we zoom in and out.
          int frames = 128;
-         long startMillis = System.currentTimeMillis();
+         frameCount = 0;
+         start = System.currentTimeMillis();
          for (int sign = -1; sign < 2; sign += 2) {
             for (int i = 0; i < frames - 4; i++) {
+               frameCount++;
                scale = scale + sign * defaultScale / frames;
                x = x - sign * (tox / frames);
                y = y - sign * (toy / frames);
@@ -339,9 +338,6 @@ public class Mandel{
                viewer.repaint();
             }
          }
-
-         long elapsedMillis = System.currentTimeMillis() - startMillis;
-         System.out.println("FPS = " + frames * 1000 / elapsedMillis);
 
          // Reset zoom-in point.
          to = null;

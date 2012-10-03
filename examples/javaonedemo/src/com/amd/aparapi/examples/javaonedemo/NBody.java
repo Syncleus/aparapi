@@ -200,7 +200,7 @@ public class NBody{
 
    public static void main(String _args[]) {
 
-      final NBodyKernel kernel = new NBodyKernel(Range.create(Integer.getInteger("bodies", 12288)));
+      final NBodyKernel kernel = new NBodyKernel(Range.create(Integer.getInteger("bodies", 12288 - 256 - 32)));
       kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
       JFrame frame = new JFrame("NBody");
 
@@ -259,7 +259,8 @@ public class NBody{
       final GLCanvas canvas = new GLCanvas(caps);
 
       final GLUT glut = new GLUT();
-      Dimension dimension = new Dimension(Integer.getInteger("width", 742 - 64), Integer.getInteger("height", 742 - 64));
+
+      Dimension dimension = new Dimension(Integer.getInteger("width", 1024 + 256), Integer.getInteger("height", 768 - 64));
       canvas.setPreferredSize(dimension);
 
       canvas.addGLEventListener(new GLEventListener(){

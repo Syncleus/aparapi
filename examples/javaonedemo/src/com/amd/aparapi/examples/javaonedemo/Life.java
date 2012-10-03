@@ -39,6 +39,7 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 package com.amd.aparapi.examples.javaonedemo;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -190,9 +191,9 @@ public class Life{
    public static void main(String[] _args) {
 
       JFrame frame = new JFrame("Game of Life");
-      final int width = Integer.getInteger("width", 1024 + 512);
+      final int width = Integer.getInteger("width", 1024 + 256);
 
-      final int height = Integer.getInteger("height", 768);
+      final int height = Integer.getInteger("height", 768 - 64);
 
       // Buffer is twice the size as the screen.  We will alternate between mutating data from top to bottom
       // and bottom to top in alternate generation passses. The LifeKernel will track which pass is which
@@ -206,6 +207,7 @@ public class Life{
       @SuppressWarnings("serial") JComponent viewer = new JComponent(){
          @Override public void paintComponent(Graphics g) {
             g.setFont(font);
+            g.setColor(Color.WHITE);
             //  if (lifeKernel != null) {
             if (lifeKernel.isExplicit()) {
                lifeKernel.get(lifeKernel.imageData); // We only pull the imageData when we intend to use it.
