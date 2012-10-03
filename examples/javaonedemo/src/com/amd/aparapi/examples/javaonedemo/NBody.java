@@ -200,7 +200,7 @@ public class NBody{
 
    public static void main(String _args[]) {
 
-      final NBodyKernel kernel = new NBodyKernel(Range.create(Integer.getInteger("bodies", 12288 - 256 - 32)));
+      final NBodyKernel kernel = new NBodyKernel(Range.create(Integer.getInteger("bodies", 10000)));
       kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
       JFrame frame = new JFrame("NBody");
 
@@ -217,7 +217,6 @@ public class NBody{
          }
       });
       controlPanel.add(startButton);
-      controlPanel.add(new JLabel(kernel.getExecutionMode().toString()));
 
       //  controlPanel.add(new JLabel("   Particles"));
 
@@ -260,7 +259,7 @@ public class NBody{
 
       final GLUT glut = new GLUT();
 
-      Dimension dimension = new Dimension(Integer.getInteger("width", 1024 + 256), Integer.getInteger("height", 768 - 64));
+      Dimension dimension = new Dimension(Integer.getInteger("width", 1024 + 256), Integer.getInteger("height", 768 - 64-32));
       canvas.setPreferredSize(dimension);
 
       canvas.addGLEventListener(new GLEventListener(){
@@ -320,11 +319,11 @@ public class NBody{
             frames++;
 
             if (running) {
-               int framesPerSecond = (int) ((frames * 1000.0f) / time);
+               float framesPerSecond = (float) ((frames * 1000.0f) / time);
 
                gl.glColor3f(.5f, .5f, .5f);
                gl.glRasterPos2i(-40, 38);
-               glut.glutBitmapString(8, String.format("%5d fps", framesPerSecond));
+               glut.glutBitmapString(8, String.format("%5.2f fps", framesPerSecond));
                gl.glFlush();
             }
             frames = 0;

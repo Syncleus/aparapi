@@ -178,10 +178,10 @@ public class Mandel{
       JFrame frame = new JFrame("MandelBrot");
 
       /** Width of Mandelbrot view. */
-      final int width = 768;
+      final int width = 768-64-32;
 
       /** Height of Mandelbrot view. */
-      final int height = 768;
+      final int height = 768-64-32;
 
       /** Mandelbrot image height. */
       final Range range = Range.create(width * height);
@@ -279,9 +279,6 @@ public class Mandel{
       kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
       System.arraycopy(rgb, 0, imageRgb, 0, rgb.length);
       viewer.repaint();
-
-      // Report target execution mode: GPU or JTP (Java Thread Pool).
-      System.out.println("Execution mode=" + kernel.getExecutionMode());
 
       // Window listener to dispose Kernel resources on user exit.
       frame.addWindowListener(new WindowAdapter(){

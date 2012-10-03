@@ -186,6 +186,8 @@ public class Life{
 
    // static LifeKernel lifeKernel = null;
 
+   static long start= 0L;
+   static int generations= 0;
    static double generationsPerSecondField = 0;
 
    public static void main(String[] _args) {
@@ -193,7 +195,7 @@ public class Life{
       JFrame frame = new JFrame("Game of Life");
       final int width = Integer.getInteger("width", 1024 + 256);
 
-      final int height = Integer.getInteger("height", 768 - 64);
+      final int height = Integer.getInteger("height", 768 - 64 -32);
 
       // Buffer is twice the size as the screen.  We will alternate between mutating data from top to bottom
       // and bottom to top in alternate generation passses. The LifeKernel will track which pass is which
@@ -208,7 +210,6 @@ public class Life{
          @Override public void paintComponent(Graphics g) {
             g.setFont(font);
             g.setColor(Color.WHITE);
-            //  if (lifeKernel != null) {
             if (lifeKernel.isExplicit()) {
                lifeKernel.get(lifeKernel.imageData); // We only pull the imageData when we intend to use it.
                List<ProfileInfo> profileInfo = lifeKernel.getProfileInfo();
@@ -226,9 +227,14 @@ public class Life{
             } else {
                g.drawImage(image, 0, 0, width, height, 0, height, width, 2 * height, this);
             }
+            long now = System.currentTimeMillis();
+            if (now - start > 1000) {
+               generationsPerSecondField = (generations * 1000.0) / (now - start);
+               start = now;
+               generations = 0;
+            }
             g.drawString(String.format("%5.2f", generationsPerSecondField), 20, 100);
 
-            // }
          }
       };
 
@@ -246,7 +252,6 @@ public class Life{
       controlPanel.add(startButton);
 
       final String[] choices = new String[] {
-            // "Java Sequential",
             "Java Threads",
             "GPU OpenCL"
       };
@@ -256,28 +261,15 @@ public class Life{
       modeButton.addItemListener(new ItemListener(){
          @Override public void itemStateChanged(ItemEvent e) {
             String item = (String) modeButton.getSelectedItem();
-
-            // if (item.equals(choices[2])) {
-            // modeButton = gpuMandelBrot;
-            //   } else 
             if (item.equals(choices[0])) {
                lifeKernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
-
-               // modeButton = javaMandelBrot;
             } else if (item.equals(choices[1])) {
                lifeKernel.setExecutionMode(Kernel.EXECUTION_MODE.GPU);
-               // modeButton = javaMandelBrotMultiThread;
             }
          }
 
       });
       controlPanel.add(modeButton);
-
-      //  controlPanel.add(new JLabel(lifeKernel.getExecutionMode().toString()));
-
-      //  controlPanel.add(new JLabel("  Generations/Second="));
-      //  JLabel generationsPerSecond = new JLabel("0.00");
-      //  controlPanel.add(generationsPerSecond);
 
       // Set the default size and add to the frames content pane
       viewer.setPreferredSize(new Dimension(width, height));
@@ -288,8 +280,6 @@ public class Life{
       frame.setVisible(true);
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-      long start = System.currentTimeMillis();
-      long generations = 0;
       while (!running) {
          try {
             Thread.sleep(10);
@@ -299,18 +289,11 @@ public class Life{
             e1.printStackTrace();
          }
       }
+      start = System.currentTimeMillis();
       while (true) {
-
          lifeKernel.nextGeneration(); // Work is performed here
-         viewer.repaint(); // Request a repaint of the viewer (causes paintComponent(Graphics) to be called later not synchronous
          generations++;
-         long now = System.currentTimeMillis();
-         if (now - start > 1000) {
-            generationsPerSecondField = (generations * 1000.0) / (now - start);
-            //  generationsPerSecond.setText(String.format("%5.2f", generationsPerSecondField));
-            start = now;
-            generations = 0;
-         }
+         viewer.repaint(); // Request a repaint of the viewer (causes paintComponent(Graphics) to be called later not synchronous
       }
 
    }

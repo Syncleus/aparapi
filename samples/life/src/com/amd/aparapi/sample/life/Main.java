@@ -114,7 +114,11 @@ public class Main{
          imageData = ((DataBufferInt) _image.getRaster().getDataBuffer()).getData();
          width = _width;
          height = _height;
-         range = Range.create(width * height, 256);
+         if (System.getProperty("com.amd.aparapi.executionMode").equals("JTP")){
+             range = Range.create(width * height, 4);
+         }else{
+             range = Range.create(width * height);
+         }
          System.out.println("range = " + range);
          fromBase = height * width;
          toBase = 0;
@@ -129,8 +133,7 @@ public class Main{
 
       }
 
-      @Override public void run() {
-         int gid = getGlobalId();
+      public void processPixel(int gid){
          int to = gid + toBase;
          int from = gid + fromBase;
          int x = gid % width;
@@ -158,16 +161,28 @@ public class Main{
             }
 
          }
-
       }
+
+      @Override public void run() {
+         int gid = getGlobalId();
+         processPixel(gid);
+      }
+
+      boolean sequential = Boolean.getBoolean("sequential");
 
       public void nextGeneration() {
          // swap fromBase and toBase
          int swap = fromBase;
          fromBase = toBase;
          toBase = swap;
+         if (sequential){
+            for(int gid = 0; gid<(width*height); gid++){
+               processPixel(gid);
+            }
 
-         execute(range);
+         }else{
+            execute(range);
+         }
 
       }
 
@@ -178,9 +193,9 @@ public class Main{
    public static void main(String[] _args) {
 
       JFrame frame = new JFrame("Game of Life");
-      final int width = Integer.getInteger("width", 1024 + 512);
+      final int width = Integer.getInteger("width", 1024 + 512+256+128);
 
-      final int height = Integer.getInteger("height", 768);
+      final int height = Integer.getInteger("height", 768+256);
 
       // Buffer is twice the size as the screen.  We will alternate between mutating data from top to bottom
       // and bottom to top in alternate generation passses. The LifeKernel will track which pass is which
