@@ -318,10 +318,10 @@ public class Main{
             final GL2 gl = drawable.getGL().getGL2();
 
             gl.glShadeModel(GLLightingFunc.GL_SMOOTH);
-            gl.glEnable(GL.GL_BLEND);
+           gl.glEnable(GL.GL_BLEND);
             gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
             try {
-               InputStream textureStream = Main.class.getResourceAsStream("particle.jpg");
+               InputStream textureStream = Main.class.getResourceAsStream("duke.jpg");
                Texture texture = TextureIO.newTexture(textureStream, false, null);
                texture.enable(gl);
             } catch (IOException e) {
