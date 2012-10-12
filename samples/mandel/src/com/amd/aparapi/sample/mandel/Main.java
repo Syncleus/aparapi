@@ -131,7 +131,7 @@ public class Main{
          /** Translate the gid into an x an y value. */
          float x = (((gid % width * scale) - ((scale / 2) * width)) / width) + offsetx;
 
-         float y = (((gid / height * scale) - ((scale / 2) * height)) / height) + offsety;
+         float y = (((gid / width * scale) - ((scale / 2) * height)) / height) + offsety;
 
          int count = 0;
 
