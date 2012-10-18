@@ -37,6 +37,7 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.amd.aparapi;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -58,6 +59,7 @@ import com.amd.aparapi.InstructionSet.TypeSpec;
  * If the java class mode changes we may need to modify this to accommodate.
  * 
  * @see <a href="http://java.sun.com/docs/books/jvms/second_edition/ClassFileFormat-Java5.pdf">Java 5 Class File Format</a>
+ * @see <a href="http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html"> Java 7 Class File Format</a>
  * 
  * @author gfrost
  *
@@ -120,6 +122,12 @@ class ClassModel{
             && (!mySuper.getName().equals("java.lang.Object"))) {
          superClazz = new ClassModel(mySuper);
       }
+   }
+
+   ClassModel(InputStream _inputStream) throws ClassParseException {
+
+      parse(_inputStream);
+
    }
 
    /**
@@ -502,19 +510,25 @@ class ClassModel{
    private AttributePool attributePool;
 
    enum ConstantPoolType {
-      EMPTY,
-      UTF8,
-      UNICODE,
-      INTEGER,
-      FLOAT,
-      LONG,
-      DOUBLE,
-      CLASS,
-      STRING,
-      FIELD,
-      METHOD,
-      INTERFACEMETHOD,
-      NAMEANDTYPE
+      EMPTY, //0
+      UTF8, //1
+      UNICODE, //2
+      INTEGER, //3
+      FLOAT, //4
+      LONG, //5
+      DOUBLE, //6
+      CLASS, //7
+      STRING, //8
+      FIELD, //9
+      METHOD, //10
+      INTERFACEMETHOD, //11
+      NAMEANDTYPE, //12
+      UNUSED13,
+      UNUSED14,
+      METHODHANDLE, //15
+      METHODTYPE, //16
+      UNUSED17,
+      INVOKEDYNAMIC//18
    };
 
    enum Access {
@@ -726,6 +740,79 @@ class ClassModel{
 
          UTF8Entry getNameUTF8Entry() {
             return (ConstantPool.this.getUTF8Entry(nameIndex));
+         }
+
+      }
+
+      class MethodTypeEntry extends Entry{
+         private int descriptorIndex;
+
+         MethodTypeEntry(ByteReader _byteReader, int _slot) {
+            super(_byteReader, _slot, ConstantPoolType.METHODTYPE);
+            descriptorIndex = _byteReader.u2();
+         }
+
+         int getDescriptorIndex() {
+            return (descriptorIndex);
+         }
+
+         UTF8Entry getDescriptorUTF8Entry() {
+            return (ConstantPool.this.getUTF8Entry(descriptorIndex));
+         }
+
+      }
+
+      class MethodHandleEntry extends Entry{
+         // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4
+
+         private int referenceKind;
+
+         private int referenceIndex;
+
+         MethodHandleEntry(ByteReader _byteReader, int _slot) {
+            super(_byteReader, _slot, ConstantPoolType.METHODHANDLE);
+            referenceKind = _byteReader.u1();
+            referenceIndex = _byteReader.u2();
+         }
+
+         int getReferenceIndex() {
+            return (referenceIndex);
+         }
+
+         int getReferenceKind() {
+            return (referenceKind);
+         }
+
+      }
+
+      class InvokeDynamicEntry extends Entry{
+         // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4
+         private int descriptorIndex;
+
+         private int bootstrapMethodAttrIndex;
+
+         private int nameAndTypeIndex;
+
+         InvokeDynamicEntry(ByteReader _byteReader, int _slot) {
+            super(_byteReader, _slot, ConstantPoolType.INVOKEDYNAMIC);
+            bootstrapMethodAttrIndex = _byteReader.u2();
+            nameAndTypeIndex = _byteReader.u2();
+         }
+
+         int getDescriptorIndex() {
+            return (descriptorIndex);
+         }
+
+         UTF8Entry getDescriptorUTF8Entry() {
+            return (ConstantPool.this.getUTF8Entry(descriptorIndex));
+         }
+
+         int getBootstrapMethodAttrIndex() {
+            return (bootstrapMethodAttrIndex);
+         }
+
+         int getNameAndTypeIndex() {
+            return (nameAndTypeIndex);
          }
 
       }
@@ -1008,6 +1095,15 @@ class ClassModel{
                   break;
                case NAMEANDTYPE:
                   add(new NameAndTypeEntry(_byteReader, i));
+                  break;
+               case METHODHANDLE:
+                  add(new MethodHandleEntry(_byteReader, i));
+                  break;
+               case METHODTYPE:
+                  add(new MethodTypeEntry(_byteReader, i));
+                  break;
+               case INVOKEDYNAMIC:
+                  add(new InvokeDynamicEntry(_byteReader, i));
                   break;
                default:
                   System.out.printf("slot %04x unexpected Constant constantPoolType = %s\n", i, constantPoolType);
@@ -1701,6 +1797,52 @@ class ClassModel{
 
       }
 
+      class BootstrapMethodsEntry extends AttributePoolEntry{
+         // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.21
+         class BootstrapMethod{
+            class BootstrapArgument{
+               public BootstrapArgument(ByteReader _byteReader) {
+                  argument = _byteReader.u2();
+               }
+
+               int argument;// u2;
+            }
+
+            public BootstrapMethod(ByteReader _byteReader) {
+               bootstrapMethodRef = _byteReader.u2();
+               numBootstrapArguments = _byteReader.u2();
+               bootstrapArguments = new BootstrapArgument[numBootstrapArguments];
+               for (int i = 0; i < numBootstrapArguments; i++) {
+                  bootstrapArguments[i] = new BootstrapArgument(_byteReader);
+               }
+            }
+
+            int bootstrapMethodRef; //u2
+
+            int numBootstrapArguments; //u2
+
+            BootstrapArgument bootstrapArguments[];
+         }
+
+         BootstrapMethodsEntry(ByteReader _byteReader, int _nameIndex, int _length) {
+            super(_byteReader, _nameIndex, _length);
+            numBootstrapMethods = _byteReader.u2();
+            bootstrapMethods = new BootstrapMethod[numBootstrapMethods];
+            for (int i = 0; i < numBootstrapMethods; i++) {
+               bootstrapMethods[i] = new BootstrapMethod(_byteReader);
+            }
+         }
+
+         private int numBootstrapMethods;
+
+         BootstrapMethod bootstrapMethods[];
+
+         int getNumBootstrapMethods() {
+            return (numBootstrapMethods);
+         }
+
+      }
+
       class OtherEntry extends AttributePoolEntry{
          private byte[] bytes;
 
@@ -1897,11 +2039,35 @@ class ClassModel{
 
       private SyntheticEntry syntheticEntry = null;
 
+      private BootstrapMethodsEntry bootstrapMethodsEntry = null;
+
       private final static String LOCALVARIABLETABLE_TAG = "LocalVariableTable";
 
       private final static String CONSTANTVALUE_TAG = "ConstantValue";
 
       private final static String LINENUMBERTABLE_TAG = "LineNumberTable";
+
+      private final static String SOURCEFILE_TAG = "SourceFile";
+
+      private final static String SYNTHETIC_TAG = "Synthetic";
+
+      private final static String EXCEPTIONS_TAG = "Exceptions";
+
+      private final static String INNERCLASSES_TAG = "InnerClasses";
+
+      private final static String DEPRECATED_TAG = "Deprecated";
+
+      private final static String CODE_TAG = "Code";
+
+      private final static String ENCLOSINGMETHOD_TAG = "EnclosingMethod";
+
+      private final static String SIGNATURE_TAG = "Signature";
+
+      private final static String RUNTIMEINVISIBLEANNOTATIONS_TAG = "RuntimeInvisibleAnnotations";
+
+      private final static String RUNTIMEVISIBLEANNOTATIONS_TAG = "RuntimeVisibleAnnotations";
+
+      private final static String BOOTSTRAPMETHODS_TAG = "BootstrapMethods";
 
       AttributePool(ByteReader _byteReader) {
 
@@ -1919,36 +2085,40 @@ class ClassModel{
             } else if (attributeName.equals(LINENUMBERTABLE_TAG)) {
                lineNumberTableEntry = new LineNumberTableEntry(_byteReader, attributeNameIndex, length);
                entry = lineNumberTableEntry;
-            } else if (attributeName.equals("SourceFile")) {
+            } else if (attributeName.equals(SOURCEFILE_TAG)) {
                sourceFileEntry = new SourceFileEntry(_byteReader, attributeNameIndex, length);
                entry = sourceFileEntry;
-            } else if (attributeName.equals("Synthetic")) {
+            } else if (attributeName.equals(SYNTHETIC_TAG)) {
                syntheticEntry = new SyntheticEntry(_byteReader, attributeNameIndex, length);
                entry = syntheticEntry;
-            } else if (attributeName.equals("Exceptions")) {
+            } else if (attributeName.equals(EXCEPTIONS_TAG)) {
                exceptionEntry = new ExceptionEntry(_byteReader, attributeNameIndex, length);
                entry = exceptionEntry;
-            } else if (attributeName.equals("InnerClasses")) {
+            } else if (attributeName.equals(INNERCLASSES_TAG)) {
                entry = new InnerClassesEntry(_byteReader, attributeNameIndex, length);
-            } else if (attributeName.equals("Deprecated")) {
+            } else if (attributeName.equals(DEPRECATED_TAG)) {
                deprecatedEntry = new DeprecatedEntry(_byteReader, attributeNameIndex, length);
                entry = deprecatedEntry;
-            } else if (attributeName.equals("Code")) {
+            } else if (attributeName.equals(CODE_TAG)) {
                codeEntry = new CodeEntry(_byteReader, attributeNameIndex, length);
                entry = codeEntry;
-            } else if (attributeName.equals("EnclosingMethod")) {
+            } else if (attributeName.equals(ENCLOSINGMETHOD_TAG)) {
                enclosingMethodEntry = new EnclosingMethodEntry(_byteReader, attributeNameIndex, length);
                entry = enclosingMethodEntry;
-            } else if (attributeName.equals("Signature")) {
+            } else if (attributeName.equals(SIGNATURE_TAG)) {
                entry = new SignatureEntry(_byteReader, attributeNameIndex, length);
-            } else if (attributeName.equals("RuntimeInvisibleAnnotations")) {
+            } else if (attributeName.equals(RUNTIMEINVISIBLEANNOTATIONS_TAG)) {
                runtimeInvisibleAnnotationsEntry = new RuntimeAnnotationsEntry(_byteReader, attributeNameIndex, length);
                entry = runtimeInvisibleAnnotationsEntry;
-            } else if (attributeName.equals("RuntimeVisibleAnnotations")) {
+            } else if (attributeName.equals(RUNTIMEVISIBLEANNOTATIONS_TAG)) {
                runtimeVisibleAnnotationsEntry = new RuntimeAnnotationsEntry(_byteReader, attributeNameIndex, length);
                entry = runtimeVisibleAnnotationsEntry;
+            } else if (attributeName.equals(BOOTSTRAPMETHODS_TAG)) {
+               bootstrapMethodsEntry = new BootstrapMethodsEntry(_byteReader, attributeNameIndex, length);
+               entry = bootstrapMethodsEntry;
+               // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.21
             } else {
-               //  System.out.println("Other! found (name = " + attributeName + ")");
+               System.out.println("Other! found (name = " + attributeName + ")");
                entry = new OtherEntry(_byteReader, attributeNameIndex, length);
             }
             attributePoolEntries.add(entry);
@@ -1988,6 +2158,10 @@ class ClassModel{
       }
 
       RuntimeAnnotationsEntry getRuntimeVisibleAnnotationsEntry() {
+         return (runtimeVisibleAnnotationsEntry);
+      }
+      
+      RuntimeAnnotationsEntry getBootstrap() {
          return (runtimeVisibleAnnotationsEntry);
       }
 
@@ -2197,8 +2371,13 @@ class ClassModel{
     * @throws ClassParseException
     */
    private void parse(ClassLoader _classLoader, String _className) throws ClassParseException {
+      parse(_classLoader.getResourceAsStream(_className.replace('.', '/') + ".class"));
 
-      ByteReader byteReader = new ByteReader(_classLoader.getResourceAsStream(_className.replace('.', '/') + ".class"));
+   }
+
+   void parse(InputStream _inputStream) throws ClassParseException {
+
+      ByteReader byteReader = new ByteReader(_inputStream);
       magic = byteReader.u4();
       minorVersion = byteReader.u2();
       majorVersion = byteReader.u2();
