@@ -757,16 +757,20 @@ class ExpressionList{
             // might be end of arbitrary scope
             LocalVariableTableEntry localVariableTable = methodModel.getMethod().getLocalVariableTableEntry();
             int startPc = Short.MAX_VALUE;
-            for (LocalVariableInfo localVariableInfo : localVariableTable.getPool()) {
+            if (Config.enableAllowMissingLocalVariableTable && localVariableTable == null) {
+               logger.warning("class does not contain a LocalVariableTable - but enableAllowMissingLocalVariableTable is set so we are ignoring");
+            } else {
+               for (LocalVariableInfo localVariableInfo : localVariableTable.getPool()) {
 
-               if (localVariableInfo.getEnd() == _instruction.getThisPC()) {
-                  logger.fine(localVariableInfo.getVariableName() + "  scope  " + localVariableInfo.getStart() + " ,"
-                        + localVariableInfo.getEnd());
-                  if (localVariableInfo.getStart() < startPc) {
-                     startPc = localVariableInfo.getStart();
+                  if (localVariableInfo.getEnd() == _instruction.getThisPC()) {
+                     logger.fine(localVariableInfo.getVariableName() + "  scope  " + localVariableInfo.getStart() + " ,"
+                           + localVariableInfo.getEnd());
+                     if (localVariableInfo.getStart() < startPc) {
+                        startPc = localVariableInfo.getStart();
+                     }
                   }
-               }
 
+               }
             }
             if (startPc < Short.MAX_VALUE) {
                logger.fine("Scope block from " + startPc + " to  " + (tail.getThisPC() + tail.getLength()));

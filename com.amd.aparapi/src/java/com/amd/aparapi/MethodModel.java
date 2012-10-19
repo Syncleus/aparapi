@@ -1468,10 +1468,15 @@ class MethodModel{
 
          // check if we have any local variables which are arrays.  This is an attempt to avoid aliasing field arrays
 
-         for (LocalVariableInfo localVariableInfo : method.getLocalVariableTableEntry()) {
-            final boolean DISALLOWARRAYLOCALVAR = false;
-            if (DISALLOWARRAYLOCALVAR && localVariableInfo.getVariableDescriptor().startsWith("[")) {
-               throw new ClassParseException(ClassParseException.TYPE.ARRAYLOCALVARIABLE);
+         LocalVariableTableEntry localVariableTableEntry = method.getLocalVariableTableEntry();
+         if (Config.enableAllowMissingLocalVariableTable && localVariableTableEntry == null) {
+            logger.warning("class does not contain a LocalVariableTable - but enableAllowMissingLocalVariableTable is set so we are ignoring");
+         } else {
+            for (LocalVariableInfo localVariableInfo : localVariableTableEntry) {
+               final boolean DISALLOWARRAYLOCALVAR = false;
+               if (DISALLOWARRAYLOCALVAR && localVariableInfo.getVariableDescriptor().startsWith("[")) {
+                  throw new ClassParseException(ClassParseException.TYPE.ARRAYLOCALVARIABLE);
+               }
             }
          }
 

@@ -40,11 +40,11 @@ package com.amd.aparapi;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.LinkedHashSet;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -363,11 +363,11 @@ public abstract class Kernel implements Cloneable{
 
       static LinkedHashSet<EXECUTION_MODE> getDefaultExecutionModes() {
          LinkedHashSet<EXECUTION_MODE> defaultExecutionModes = new LinkedHashSet<EXECUTION_MODE>();
-         if(OpenCLJNI.getJNI().isOpenCLAvailable()) {
-             defaultExecutionModes.add(GPU);
-             defaultExecutionModes.add(JTP);
+         if (OpenCLJNI.getJNI().isOpenCLAvailable()) {
+            defaultExecutionModes.add(GPU);
+            defaultExecutionModes.add(JTP);
          } else {
-             defaultExecutionModes.add(JTP);
+            defaultExecutionModes.add(JTP);
          }
          String executionMode = Config.executionMode;
          if (executionMode != null) {
@@ -375,11 +375,10 @@ public abstract class Kernel implements Cloneable{
                LinkedHashSet<EXECUTION_MODE> requestedExecutionModes;
                requestedExecutionModes = EXECUTION_MODE.getExecutionModeFromString(executionMode);
                logger.fine("requested execution mode =");
-               for(EXECUTION_MODE mode : requestedExecutionModes) {
-                   logger.fine(" " + mode);
+               for (EXECUTION_MODE mode : requestedExecutionModes) {
+                  logger.fine(" " + mode);
                }
-               if ((OpenCLJNI.getJNI().isOpenCLAvailable() 
-                     && EXECUTION_MODE.anyOpenCL(requestedExecutionModes))
+               if ((OpenCLJNI.getJNI().isOpenCLAvailable() && EXECUTION_MODE.anyOpenCL(requestedExecutionModes))
                      || !EXECUTION_MODE.anyOpenCL(requestedExecutionModes)) {
                   defaultExecutionModes = requestedExecutionModes;
                }
@@ -390,9 +389,8 @@ public abstract class Kernel implements Cloneable{
 
          logger.info("default execution modes = " + defaultExecutionModes);
 
-         for(EXECUTION_MODE e : defaultExecutionModes)
-         {
-             logger.info("SETTING DEFAULT MODE: " + e.toString());
+         for (EXECUTION_MODE e : defaultExecutionModes) {
+            logger.info("SETTING DEFAULT MODE: " + e.toString());
          }
 
          return (defaultExecutionModes);
@@ -400,8 +398,8 @@ public abstract class Kernel implements Cloneable{
 
       static LinkedHashSet<EXECUTION_MODE> getExecutionModeFromString(String executionMode) {
          LinkedHashSet<EXECUTION_MODE> executionModes = new LinkedHashSet<EXECUTION_MODE>();
-         for(String mode : executionMode.split(",")) {
-             executionModes.add(valueOf(mode.toUpperCase()));
+         for (String mode : executionMode.split(",")) {
+            executionModes.add(valueOf(mode.toUpperCase()));
          }
          return executionModes;
       }
@@ -412,10 +410,9 @@ public abstract class Kernel implements Cloneable{
          return (defaultFallbackExecutionMode);
       }
 
-
       static boolean anyOpenCL(LinkedHashSet<EXECUTION_MODE> _executionModes) {
-         for(EXECUTION_MODE mode : _executionModes) {
-            if(mode == GPU || mode== CPU) {
+         for (EXECUTION_MODE mode : _executionModes) {
+            if (mode == GPU || mode == CPU) {
                return true;
             }
          }
@@ -427,7 +424,6 @@ public abstract class Kernel implements Cloneable{
       }
 
    };
-
 
    int[] globalId = new int[] {
          0,
@@ -2062,19 +2058,19 @@ public abstract class Kernel implements Cloneable{
       kernelRunner.put(array);
       return (this);
    }
-   
+
    /**
     * Tag this array so that it is explicitly enqueued before the kernel is executed
     * @param array
     * @return This kernel so that we can use the 'fluent' style API
     */
-  public Kernel put(boolean[] array) {
-     if (kernelRunner == null) {
-        kernelRunner = new KernelRunner(this);
-     }
-     kernelRunner.put(array);
-     return (this);
-  }
+   public Kernel put(boolean[] array) {
+      if (kernelRunner == null) {
+         kernelRunner = new KernelRunner(this);
+      }
+      kernelRunner.put(array);
+      return (this);
+   }
 
    /**
     * Enqueue a request to return this buffer from the GPU. This method blocks until the array is available. 
@@ -2159,7 +2155,7 @@ public abstract class Kernel implements Cloneable{
       kernelRunner.get(array);
       return (this);
    }
-   
+
    /**
     * Enqueue a request to return this buffer from the GPU. This method blocks until the array is available. 
     * @param array
@@ -2186,7 +2182,9 @@ public abstract class Kernel implements Cloneable{
    }
 
    private LinkedHashSet<EXECUTION_MODE> executionModes = EXECUTION_MODE.getDefaultExecutionModes();
+
    private Iterator<EXECUTION_MODE> currentMode = executionModes.iterator();
+
    private EXECUTION_MODE executionMode = currentMode.next();
 
    /**
@@ -2211,7 +2209,7 @@ public abstract class Kernel implements Cloneable{
     * try the next execution path in the list if there aren't any more than give up
     */
    public void tryNextExecutionMode() {
-      if(currentMode.hasNext()) {
+      if (currentMode.hasNext()) {
          executionMode = currentMode.next();
       }
    }

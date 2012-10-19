@@ -716,7 +716,7 @@ class InstructionSet{
       static Instruction create(MethodModel _methodModel, ByteReader _byteReader) {
          ByteCode byteCode = get(_byteReader.u1());
          boolean isWide = false;
-         if (byteCode.equals(ByteCode.WIDE)){
+         if (byteCode.equals(ByteCode.WIDE)) {
             // handle wide 
             //System.out.println("WIDE");
             isWide = true;
@@ -1198,7 +1198,8 @@ class InstructionSet{
    }
 
    static abstract class LocalVariableConstIndexAccessor extends IndexConst implements AccessLocalVariable{
-      LocalVariableConstIndexAccessor(MethodModel methodPoolEntry, ByteCode byteCode, ByteReader byteReader, boolean _wide, int index) {
+      LocalVariableConstIndexAccessor(MethodModel methodPoolEntry, ByteCode byteCode, ByteReader byteReader, boolean _wide,
+            int index) {
          super(methodPoolEntry, byteCode, byteReader, _wide, index);
       }
 
@@ -1223,8 +1224,8 @@ class InstructionSet{
    }
 
    static abstract class LocalVariableConstIndexStore extends LocalVariableConstIndexAccessor implements AssignToLocalVariable{
-      LocalVariableConstIndexStore(MethodModel methodPoolEntry, ByteCode byteCode, ByteReader byteReader, boolean _wide,int index) {
-         super(methodPoolEntry, byteCode, byteReader, _wide,index);
+      LocalVariableConstIndexStore(MethodModel methodPoolEntry, ByteCode byteCode, ByteReader byteReader, boolean _wide, int index) {
+         super(methodPoolEntry, byteCode, byteReader, _wide, index);
       }
 
       @Override public boolean isDeclaration() {
@@ -1368,7 +1369,7 @@ class InstructionSet{
 
    static class I_ASTORE_1 extends LocalVariableConstIndexStore{
       I_ASTORE_1(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
-         super(_methodPoolEntry, ByteCode.ASTORE_1, _byteReader, _wide,1);
+         super(_methodPoolEntry, ByteCode.ASTORE_1, _byteReader, _wide, 1);
 
       }
 
@@ -1384,7 +1385,7 @@ class InstructionSet{
 
    static class I_ASTORE_3 extends LocalVariableConstIndexStore{
       I_ASTORE_3(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
-         super(_methodPoolEntry, ByteCode.ASTORE_3, _byteReader, _wide,3);
+         super(_methodPoolEntry, ByteCode.ASTORE_3, _byteReader, _wide, 3);
 
       }
 
@@ -1621,7 +1622,7 @@ class InstructionSet{
 
    static class I_DCONST_1 extends BytecodeEncodedConstant<Double>{
       I_DCONST_1(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
-         super(_methodPoolEntry, ByteCode.DCONST_1, _byteReader, _wide,  1.0);
+         super(_methodPoolEntry, ByteCode.DCONST_1, _byteReader, _wide, 1.0);
 
       }
 
@@ -1757,7 +1758,7 @@ class InstructionSet{
 
    static class I_DSTORE_2 extends LocalVariableConstIndexStore{
       I_DSTORE_2(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
-         super(_methodPoolEntry, ByteCode.DSTORE_2, _byteReader, _wide,2);
+         super(_methodPoolEntry, ByteCode.DSTORE_2, _byteReader, _wide, 2);
 
       }
 
@@ -1765,7 +1766,7 @@ class InstructionSet{
 
    static class I_DSTORE_3 extends LocalVariableConstIndexStore{
       I_DSTORE_3(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
-         super(_methodPoolEntry, ByteCode.DSTORE_3, _byteReader, _wide,3);
+         super(_methodPoolEntry, ByteCode.DSTORE_3, _byteReader, _wide, 3);
 
       }
 
@@ -1960,7 +1961,7 @@ class InstructionSet{
 
    static class I_FCONST_0 extends BytecodeEncodedConstant<Float>{
       I_FCONST_0(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
-         super(_methodPoolEntry, ByteCode.FCONST_0, _byteReader, _wide,0f);
+         super(_methodPoolEntry, ByteCode.FCONST_0, _byteReader, _wide, 0f);
 
       }
 
@@ -1972,7 +1973,7 @@ class InstructionSet{
 
    static class I_FCONST_1 extends BytecodeEncodedConstant<Float>{
       I_FCONST_1(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
-         super(_methodPoolEntry, ByteCode.FCONST_1, _byteReader, _wide,  1f);
+         super(_methodPoolEntry, ByteCode.FCONST_1, _byteReader, _wide, 1f);
 
       }
 
@@ -2024,7 +2025,7 @@ class InstructionSet{
 
    static class I_FLOAD_1 extends LocalVariableConstIndexLoad{
       I_FLOAD_1(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
-         super(_methodPoolEntry, ByteCode.FLOAD_1, _byteReader, _wide,  1);
+         super(_methodPoolEntry, ByteCode.FLOAD_1, _byteReader, _wide, 1);
 
       }
 
@@ -2104,7 +2105,7 @@ class InstructionSet{
 
    static class I_FSTORE_0 extends LocalVariableConstIndexStore{
       I_FSTORE_0(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
-         super(_methodPoolEntry, ByteCode.FSTORE_0, _byteReader, _wide,  0);
+         super(_methodPoolEntry, ByteCode.FSTORE_0, _byteReader, _wide, 0);
 
       }
 
@@ -2128,7 +2129,7 @@ class InstructionSet{
 
    static class I_FSTORE_3 extends LocalVariableConstIndexStore{
       I_FSTORE_3(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
-         super(_methodPoolEntry, ByteCode.FSTORE_3, _byteReader, _wide,3);
+         super(_methodPoolEntry, ByteCode.FSTORE_3, _byteReader, _wide, 3);
 
       }
 
@@ -2639,14 +2640,15 @@ class InstructionSet{
 
    static class I_IINC extends Index08{
       private int delta;
+
       private boolean wide;
 
       I_IINC(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
          super(_methodPoolEntry, ByteCode.IINC, _byteReader, _wide);
          wide = _wide;
-         if (wide){
+         if (wide) {
             delta = _byteReader.u2();
-         }else{
+         } else {
             delta = _byteReader.u1();
          }
 
@@ -2674,11 +2676,11 @@ class InstructionSet{
 
       int getAdjust() {
          int adjust = delta;
-         if (wide){
+         if (wide) {
             if (adjust > 0x7fff) {
                adjust = -0x10000 + adjust;
             }
-         }else{
+         } else {
             if (adjust > 0x7f) {
                adjust = -0x100 + adjust;
             }
@@ -3058,7 +3060,7 @@ class InstructionSet{
 
    static class I_ISTORE_1 extends LocalVariableConstIndexStore{
       I_ISTORE_1(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
-         super(_methodPoolEntry, ByteCode.ISTORE_1, _byteReader, _wide,  1);
+         super(_methodPoolEntry, ByteCode.ISTORE_1, _byteReader, _wide, 1);
 
       }
 
@@ -3238,7 +3240,7 @@ class InstructionSet{
 
    static class I_LCONST_0 extends BytecodeEncodedConstant<Long>{
       I_LCONST_0(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
-         super(_methodPoolEntry, ByteCode.LCONST_0, _byteReader, _wide,  0L);
+         super(_methodPoolEntry, ByteCode.LCONST_0, _byteReader, _wide, 0L);
 
       }
 
@@ -3958,9 +3960,9 @@ class InstructionSet{
    static abstract class Index08 extends Index{
       Index08(MethodModel _methodPoolEntry, ByteCode _byteCode, ByteReader _byteReader, boolean _wide) {
          super(_methodPoolEntry, _byteCode, _byteReader, _wide);
-         if (_wide){
-            index = _byteReader.u2();  
-         }else{
+         if (_wide) {
+            index = _byteReader.u2();
+         } else {
             index = _byteReader.u1();
          }
 

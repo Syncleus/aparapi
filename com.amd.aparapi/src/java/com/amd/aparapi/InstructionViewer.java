@@ -267,7 +267,7 @@ public class InstructionViewer implements Config.InstructionListener{
 
       @Check(label = "Collapse All") public boolean collapseAll = false;
 
-     /* @Check(label = "Show expressions")*/ public boolean showExpressions = false;
+      /* @Check(label = "Show expressions")*/public boolean showExpressions = false;
 
    }
 

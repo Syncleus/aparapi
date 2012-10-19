@@ -90,7 +90,7 @@ class Config{
     *  
     */
    @UsedByJNICode static final boolean enableVerboseJNI = Boolean.getBoolean(propPkgName + ".enableVerboseJNI");
-   
+
    /**
     * Allows the user to request tracking of opencl resources.  
     * 
@@ -99,7 +99,9 @@ class Config{
     *  Usage -Dcom.amd.aparapi.enableOpenCLResourceTracking={true|false}
     *  
     */
-   @UsedByJNICode static final boolean enableVerboseJNIOpenCLResourceTracking = Boolean.getBoolean(propPkgName + ".enableVerboseJNIOpenCLResourceTracking");
+   @UsedByJNICode static final boolean enableVerboseJNIOpenCLResourceTracking = Boolean.getBoolean(propPkgName
+         + ".enableVerboseJNIOpenCLResourceTracking");
+
    /**
     * Allows the user to request that the execution mode of each kernel invocation be reported to stdout.
     * 
@@ -153,7 +155,9 @@ class Config{
 
    static final boolean enableSWITCH = Boolean.getBoolean(propPkgName + ".enable.SWITCH");
 
-  // static final int JTPLocalSizeMultiplier = Integer.getInteger(propPkgName + ".JTP.localSizeMul", 2);
+   // Lambda testing requires this because static lambda methods currently do not have localvariabletables.  This may change when Java8 if finalized
+   static final boolean enableAllowMissingLocalVariableTable = Boolean.getBoolean(propPkgName
+         + ".enableAllowMissingLocalVariableTable");
 
    // Logging setup
    private static final String logPropName = propPkgName + ".logLevel";
@@ -181,7 +185,6 @@ class Config{
          e.printStackTrace();
       }
 
-    
    };
 
    public interface InstructionListener{
@@ -189,12 +192,13 @@ class Config{
    }
 
    static final boolean enableInstructionDecodeViewer = Boolean.getBoolean(propPkgName + ".enableInstructionDecodeViewer");
+
    static String instructionListenerClassName = System.getProperty(propPkgName + ".instructionListenerClass");
 
    static public InstructionListener instructionListener = null;
 
    static {
-      if (enableInstructionDecodeViewer && (instructionListenerClassName==null || instructionListenerClassName.equals(""))  ){
+      if (enableInstructionDecodeViewer && (instructionListenerClassName == null || instructionListenerClassName.equals(""))) {
          instructionListenerClassName = InstructionViewer.class.getName();
       }
       if (instructionListenerClassName != null && !instructionListenerClassName.equals("")) {
@@ -213,18 +217,20 @@ class Config{
          }
       }
       if (dumpFlags) {
-         
-         System.out.println(propPkgName+".executionMode{GPU|CPU|JTP|SEQ}="+executionMode);
-         System.out.println(propPkgName+".logLevel{OFF|FINEST|FINER|FINE|WARNING|SEVERE|ALL}="+logger.getLevel());
-         System.out.println(propPkgName+".enableProfiling{true|false}="+enableProfiling);
-         System.out.println(propPkgName+".enableProfilingCSV{true|false}="+enableProfilingCSV);
-         System.out.println(propPkgName+".enableVerboseJNI{true|false}="+enableVerboseJNI);
-         System.out.println(propPkgName+".enableVerboseJNIOpenCLResourceTracking{true|false}="+enableVerboseJNIOpenCLResourceTracking);
-         System.out.println(propPkgName+".enableShowGeneratedOpenCL{true|false}="+enableShowGeneratedOpenCL);
-         System.out.println(propPkgName+".enableExecutionModeReporting{true|false}="+enableExecutionModeReporting);
-         System.out.println(propPkgName+".enableInstructionDecodeViewer{true|false}="+enableInstructionDecodeViewer);
-         System.out.println(propPkgName+".instructionListenerClassName{<class name which extends com.amd.aparapi.Config.InstructionListener>}="+instructionListenerClassName);
-       
+
+         System.out.println(propPkgName + ".executionMode{GPU|CPU|JTP|SEQ}=" + executionMode);
+         System.out.println(propPkgName + ".logLevel{OFF|FINEST|FINER|FINE|WARNING|SEVERE|ALL}=" + logger.getLevel());
+         System.out.println(propPkgName + ".enableProfiling{true|false}=" + enableProfiling);
+         System.out.println(propPkgName + ".enableProfilingCSV{true|false}=" + enableProfilingCSV);
+         System.out.println(propPkgName + ".enableVerboseJNI{true|false}=" + enableVerboseJNI);
+         System.out.println(propPkgName + ".enableVerboseJNIOpenCLResourceTracking{true|false}="
+               + enableVerboseJNIOpenCLResourceTracking);
+         System.out.println(propPkgName + ".enableShowGeneratedOpenCL{true|false}=" + enableShowGeneratedOpenCL);
+         System.out.println(propPkgName + ".enableExecutionModeReporting{true|false}=" + enableExecutionModeReporting);
+         System.out.println(propPkgName + ".enableInstructionDecodeViewer{true|false}=" + enableInstructionDecodeViewer);
+         System.out.println(propPkgName
+               + ".instructionListenerClassName{<class name which extends com.amd.aparapi.Config.InstructionListener>}="
+               + instructionListenerClassName);
 
       }
    }

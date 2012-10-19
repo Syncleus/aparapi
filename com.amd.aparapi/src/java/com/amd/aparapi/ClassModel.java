@@ -2160,7 +2160,7 @@ class ClassModel{
       RuntimeAnnotationsEntry getRuntimeVisibleAnnotationsEntry() {
          return (runtimeVisibleAnnotationsEntry);
       }
-      
+
       RuntimeAnnotationsEntry getBootstrap() {
          return (runtimeVisibleAnnotationsEntry);
       }
@@ -2552,7 +2552,7 @@ class ClassModel{
       totalStructSize = x;
    }
 
-   private Entrypoint getEntrypoint(String _entrypointName, String _descriptor, Object _k) throws AparapiException {
+   Entrypoint getEntrypoint(String _entrypointName, String _descriptor, Object _k) throws AparapiException {
       MethodModel method = getMethodModel(_entrypointName, _descriptor);
       return (new Entrypoint(this, method, _k));
    }

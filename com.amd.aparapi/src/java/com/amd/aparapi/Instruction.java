@@ -162,7 +162,7 @@ abstract class Instruction{
    }
 
    protected Instruction(MethodModel _method, ByteCode _byteCode, ByteReader _byteReader, boolean _wide) {
-      this(_method, _byteCode, _wide? _byteReader.getOffset() - 2:_byteReader.getOffset()-1);
+      this(_method, _byteCode, _wide ? _byteReader.getOffset() - 2 : _byteReader.getOffset() - 1);
    }
 
    // This works for most cases (except calls whose operand count depends upon the signature) so all call instructions therefore override this method
