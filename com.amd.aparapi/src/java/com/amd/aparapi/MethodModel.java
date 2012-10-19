@@ -49,13 +49,13 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry;
-import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry.LocalVariableInfo;
 import com.amd.aparapi.ClassModel.ClassModelMethod;
 import com.amd.aparapi.ClassModel.ConstantPool;
 import com.amd.aparapi.ClassModel.ConstantPool.FieldEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodReferenceEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodReferenceEntry.Arg;
+import com.amd.aparapi.ClassModel.LocalVariableInfo;
+import com.amd.aparapi.ClassModel.LocalVariableTableEntry;
 import com.amd.aparapi.InstructionPattern.InstructionMatch;
 import com.amd.aparapi.InstructionSet.AccessArrayElement;
 import com.amd.aparapi.InstructionSet.AccessField;
@@ -1468,25 +1468,27 @@ class MethodModel{
 
          // check if we have any local variables which are arrays.  This is an attempt to avoid aliasing field arrays
 
-         LocalVariableTableEntry localVariableTableEntry = method.getLocalVariableTableEntry();
-         if (Config.enableAllowMissingLocalVariableTable && localVariableTableEntry == null) {
-            logger.warning("class does not contain a LocalVariableTable - but enableAllowMissingLocalVariableTable is set so we are ignoring");
-         } else {
-            if (localVariableTableEntry == null){
-               throw new ClassParseException(ClassParseException.TYPE.MISSINGLOCALVARIABLETABLE);
-            }
-            for (LocalVariableInfo localVariableInfo : localVariableTableEntry) {
-               final boolean DISALLOWARRAYLOCALVAR = false;
-               if (DISALLOWARRAYLOCALVAR && localVariableInfo.getVariableDescriptor().startsWith("[")) {
-                  throw new ClassParseException(ClassParseException.TYPE.ARRAYLOCALVARIABLE);
-               }
-            }
-         }
-
          // We are going to make 4 passes.
 
          // Pass #1 create a linked list of instructions from head to tail
          Map<Integer, Instruction> pcMap = createListOfInstructions();
+
+         LocalVariableTableEntry<LocalVariableInfo> localVariableTableEntry = method.getLocalVariableTableEntry();
+         if (Config.enableAllowMissingLocalVariableTable && localVariableTableEntry == null) {
+            logger.warning("class does not contain a LocalVariableTable - but enableAllowMissingLocalVariableTable is set so we are ignoring");
+         } else {
+            if (localVariableTableEntry == null) {
+               System.out.println("create local variable table");
+               throw new ClassParseException(ClassParseException.TYPE.MISSINGLOCALVARIABLETABLE);
+            }
+            for (LocalVariableInfo localVariableInfo : localVariableTableEntry) {
+               // TODO: What was the thinking here?
+               final boolean DISALLOWARRAYLOCALVAR = false;
+               if (DISALLOWARRAYLOCALVAR && localVariableInfo.isArray()) {
+                  throw new ClassParseException(ClassParseException.TYPE.ARRAYLOCALVARIABLE);
+               }
+            }
+         }
 
          // pass #2 build branch graph
          buildBranchGraphs(pcMap);

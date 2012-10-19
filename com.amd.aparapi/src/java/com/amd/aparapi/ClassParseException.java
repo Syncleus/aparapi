@@ -79,7 +79,7 @@ package com.amd.aparapi;
       ACCESSEDOBJECTONLYSUPPORTSSIMPLEPUTFIELD("We don't support putfield instructions beyond simple setters"), //
       ACCESSEDOBJECTSETTERARRAY("Passing array arguments to Intrinsics in expression form is not supported"), //
       MULTIDIMENSIONARRAYASSIGN("Can't assign to two dimension array"), //
-      MULTIDIMENSIONARRAYACCESS("Can't access through a two dimensional array"),//
+      MULTIDIMENSIONARRAYACCESS("Can't access through a two dimensional array"), //
       MISSINGLOCALVARIABLETABLE("Method does not contain a local variable table (recompile with -g?)");
 
       private String description;

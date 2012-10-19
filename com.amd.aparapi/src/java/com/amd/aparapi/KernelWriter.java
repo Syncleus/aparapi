@@ -43,13 +43,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry;
-import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry.LocalVariableInfo;
 import com.amd.aparapi.ClassModel.AttributePool.RuntimeAnnotationsEntry;
 import com.amd.aparapi.ClassModel.AttributePool.RuntimeAnnotationsEntry.AnnotationInfo;
 import com.amd.aparapi.ClassModel.ClassModelField;
 import com.amd.aparapi.ClassModel.ConstantPool.FieldEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodEntry;
+import com.amd.aparapi.ClassModel.LocalVariableInfo;
+import com.amd.aparapi.ClassModel.LocalVariableTableEntry;
 import com.amd.aparapi.InstructionSet.AccessArrayElement;
 import com.amd.aparapi.InstructionSet.AssignToArrayElement;
 import com.amd.aparapi.InstructionSet.AssignToField;
@@ -523,7 +523,7 @@ abstract class KernelWriter extends BlockWriter{
 
          boolean alreadyHasFirstArg = !mm.getMethod().isStatic();
 
-         LocalVariableTableEntry lvte = mm.getLocalVariableTableEntry();
+         LocalVariableTableEntry<LocalVariableInfo> lvte = mm.getLocalVariableTableEntry();
          for (LocalVariableInfo lvi : lvte) {
             if ((lvi.getStart() == 0) && ((lvi.getVariableIndex() != 0) || mm.getMethod().isStatic())) { // full scope but skip this
                String descriptor = lvi.getVariableDescriptor();

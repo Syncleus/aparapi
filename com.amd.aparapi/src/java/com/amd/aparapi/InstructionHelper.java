@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry.LocalVariableInfo;
+import com.amd.aparapi.ClassModel.LocalVariableInfo;
 import com.amd.aparapi.InstructionSet.AssignToLocalVariable;
 import com.amd.aparapi.InstructionSet.Branch;
 import com.amd.aparapi.InstructionSet.ByteCode;

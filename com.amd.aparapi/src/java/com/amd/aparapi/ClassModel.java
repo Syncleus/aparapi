@@ -46,7 +46,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.amd.aparapi.ClassModel.AttributePool.CodeEntry;
-import com.amd.aparapi.ClassModel.AttributePool.LocalVariableTableEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.FieldEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodEntry;
 import com.amd.aparapi.InstructionSet.TypeSpec;
@@ -65,6 +64,27 @@ import com.amd.aparapi.InstructionSet.TypeSpec;
  *
  */
 class ClassModel{
+
+   interface LocalVariableInfo{
+
+      int getStart();
+
+      boolean isArray();
+
+      int getEnd();
+
+      String getVariableName();
+
+      String getVariableDescriptor();
+
+      int getVariableIndex();
+
+   }
+
+   interface LocalVariableTableEntry<T extends LocalVariableInfo> extends Iterable<T>{
+      LocalVariableInfo getVariable(int _pc, int _index);
+
+   }
 
    static final char SIGC_VOID = 'V';
 
@@ -1706,9 +1726,10 @@ class ClassModel{
 
       }
 
-      class LocalVariableTableEntry extends PoolEntry<LocalVariableTableEntry.LocalVariableInfo>{
+      class RealLocalVariableTableEntry extends PoolEntry<RealLocalVariableTableEntry.RealLocalVariableInfo> implements
+            LocalVariableTableEntry<RealLocalVariableTableEntry.RealLocalVariableInfo>{
 
-         class LocalVariableInfo{
+         class RealLocalVariableInfo implements LocalVariableInfo{
             private int descriptorIndex;
 
             private int usageLength;
@@ -1719,7 +1740,7 @@ class ClassModel{
 
             private int variableIndex;
 
-            LocalVariableInfo(ByteReader _byteReader) {
+            RealLocalVariableInfo(ByteReader _byteReader) {
                start = _byteReader.u2();
                usageLength = _byteReader.u2();
                variableNameIndex = _byteReader.u2();
@@ -1739,39 +1760,43 @@ class ClassModel{
                return (variableNameIndex);
             }
 
-            int getStart() {
+            @Override public int getStart() {
                return (start);
             }
 
-            int getVariableIndex() {
+            @Override public int getVariableIndex() {
                return (variableIndex);
             }
 
-            String getVariableName() {
+            @Override public String getVariableName() {
                return (constantPool.getUTF8Entry(variableNameIndex).getUTF8());
             }
 
-            String getVariableDescriptor() {
+            @Override public String getVariableDescriptor() {
                return (constantPool.getUTF8Entry(descriptorIndex).getUTF8());
             }
 
-            int getEnd() {
+            @Override public int getEnd() {
                return (start + usageLength);
+            }
+
+            @Override public boolean isArray() {
+               return (getVariableDescriptor().startsWith("["));
             }
          }
 
-         LocalVariableTableEntry(ByteReader _byteReader, int _nameIndex, int _length) {
+         RealLocalVariableTableEntry(ByteReader _byteReader, int _nameIndex, int _length) {
             super(_byteReader, _nameIndex, _length);
             int localVariableTableLength = _byteReader.u2();
             for (int i = 0; i < localVariableTableLength; i++) {
-               getPool().add(new LocalVariableInfo(_byteReader));
+               getPool().add(new RealLocalVariableInfo(_byteReader));
             }
          }
 
-         LocalVariableInfo getVariable(int _pc, int _index) {
-            LocalVariableInfo returnValue = null;
+         public LocalVariableInfo getVariable(int _pc, int _index) {
+            RealLocalVariableInfo returnValue = null;
             // System.out.println("pc = " + _pc + " index = " + _index);
-            for (LocalVariableInfo localVariableInfo : getPool()) {
+            for (RealLocalVariableInfo localVariableInfo : getPool()) {
                // System.out.println("   start=" + localVariableInfo.getStart() + " length=" + localVariableInfo.getLength()
                // + " varidx=" + localVariableInfo.getVariableIndex());
                if (_pc >= localVariableInfo.getStart() - 1 && _pc <= (localVariableInfo.getStart() + localVariableInfo.getLength())
@@ -1786,7 +1811,7 @@ class ClassModel{
 
          String getVariableName(int _pc, int _index) {
             String returnValue = "unknown";
-            LocalVariableInfo localVariableInfo = getVariable(_pc, _index);
+            RealLocalVariableInfo localVariableInfo = (RealLocalVariableInfo) getVariable(_pc, _index);
             if (localVariableInfo != null) {
                returnValue = convert(constantPool.getUTF8Entry(localVariableInfo.getDescriptorIndex()).getUTF8(), constantPool
                      .getUTF8Entry(localVariableInfo.getNameIndex()).getUTF8());
@@ -1859,6 +1884,23 @@ class ClassModel{
             return (new String(bytes));
          }
 
+      }
+
+      class StackMapTableEntry extends AttributePoolEntry{
+         private byte[] bytes;
+
+         StackMapTableEntry(ByteReader _byteReader, int _nameIndex, int _length) {
+            super(_byteReader, _nameIndex, _length);
+            bytes = _byteReader.bytes(_length);
+         }
+
+         byte[] getBytes() {
+            return (bytes);
+         }
+
+         @Override public String toString() {
+            return (new String(bytes));
+         }
       }
 
       class SourceFileEntry extends AttributePoolEntry{
@@ -2069,6 +2111,8 @@ class ClassModel{
 
       private final static String BOOTSTRAPMETHODS_TAG = "BootstrapMethods";
 
+      private final static String STACKMAPTABLE_TAG = "StackMapTable";
+
       AttributePool(ByteReader _byteReader) {
 
          int attributeCount = _byteReader.u2();
@@ -2078,8 +2122,8 @@ class ClassModel{
             int length = _byteReader.u4();
             String attributeName = constantPool.getUTF8Entry(attributeNameIndex).getUTF8();
             if (attributeName.equals(LOCALVARIABLETABLE_TAG)) {
-               localVariableTableEntry = new LocalVariableTableEntry(_byteReader, attributeNameIndex, length);
-               entry = localVariableTableEntry;
+               localVariableTableEntry = new RealLocalVariableTableEntry(_byteReader, attributeNameIndex, length);
+               entry = (RealLocalVariableTableEntry) localVariableTableEntry;
             } else if (attributeName.equals(CONSTANTVALUE_TAG)) {
                entry = new ConstantValueEntry(_byteReader, attributeNameIndex, length);
             } else if (attributeName.equals(LINENUMBERTABLE_TAG)) {
@@ -2117,12 +2161,17 @@ class ClassModel{
                bootstrapMethodsEntry = new BootstrapMethodsEntry(_byteReader, attributeNameIndex, length);
                entry = bootstrapMethodsEntry;
                // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.21
+            } else if (attributeName.equals(STACKMAPTABLE_TAG)) {
+               // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.4
+
+               entry = new StackMapTableEntry(_byteReader, attributeNameIndex, length);
             } else {
                System.out.println("Other! found (name = " + attributeName + ")");
                entry = new OtherEntry(_byteReader, attributeNameIndex, length);
+               attributePoolEntries.add(entry);
             }
-            attributePoolEntries.add(entry);
          }
+
       }
 
       CodeEntry getCodeEntry() {
@@ -2311,11 +2360,11 @@ class ClassModel{
          return (getAttributePool().codeEntry.codeEntryAttributePool.lineNumberTableEntry);
       }
 
-      AttributePool.LocalVariableTableEntry getLocalVariableTableEntry() {
+      LocalVariableTableEntry getLocalVariableTableEntry() {
          return (getAttributePool().codeEntry.codeEntryAttributePool.localVariableTableEntry);
       }
 
-      LocalVariableTableEntry.LocalVariableInfo getLocalVariable(int _pc, int _index) {
+      LocalVariableInfo getLocalVariable(int _pc, int _index) {
          return (getLocalVariableTableEntry().getVariable(_pc, _index));
       }
 
