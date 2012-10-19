@@ -1472,6 +1472,9 @@ class MethodModel{
          if (Config.enableAllowMissingLocalVariableTable && localVariableTableEntry == null) {
             logger.warning("class does not contain a LocalVariableTable - but enableAllowMissingLocalVariableTable is set so we are ignoring");
          } else {
+            if (localVariableTableEntry == null){
+               throw new ClassParseException(ClassParseException.TYPE.MISSINGLOCALVARIABLETABLE);
+            }
             for (LocalVariableInfo localVariableInfo : localVariableTableEntry) {
                final boolean DISALLOWARRAYLOCALVAR = false;
                if (DISALLOWARRAYLOCALVAR && localVariableInfo.getVariableDescriptor().startsWith("[")) {
