@@ -41,13 +41,33 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import com.amd.aparapi.ClassModel.ConstantPool;
+import com.amd.aparapi.ClassModel.LocalVariableInfo;
+import com.amd.aparapi.ClassModel.LocalVariableTableEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.Entry;
 import com.amd.aparapi.ClassModel.ConstantPool.FieldEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodEntry;
-import com.amd.aparapi.ClassModel.LocalVariableInfo;
-import com.amd.aparapi.ClassModel.LocalVariableTableEntry;
 
 class InstructionSet{
+
+   static enum LoadSpec {
+      NONE, //
+      F, // Float
+      D, // Double
+      I, // Integer
+      L, // Long
+      A, // Array
+      O, // Object
+   }
+
+   static enum StoreSpec {
+      NONE, //
+      F, // Float
+      D, // Double
+      I, // Integer
+      L, // Long
+      A, // Array
+      O, // Object
+   }
 
    static enum TypeSpec {
       NONE("none", "none", 0, 0), //
@@ -314,7 +334,7 @@ class InstructionSet{
 
    static enum ByteCode {
       // name, operation type, immediateOperands, pop operands, push operands
-      NOP(null, ImmediateSpec.NONE, PopSpec.NONE, PushSpec.NONE, Operator.NONE), //
+      NOP(null, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, PopSpec.NONE, PushSpec.NONE, Operator.NONE), //
       ACONST_NULL(I_ACONST_NULL.class, PushSpec.N), //
       ICONST_M1(I_ICONST_M1.class, PushSpec.I), //
       ICONST_0(I_ICONST_0.class, PushSpec.I), // 
@@ -335,31 +355,31 @@ class InstructionSet{
       LDC(I_LDC.class, ImmediateSpec.Bcpci, PushSpec.IorForS), //
       LDC_W(I_LDC_W.class, ImmediateSpec.Scpci, PushSpec.IorForS), //
       LDC2_W(I_LDC2_W.class, ImmediateSpec.Scpci, PushSpec.LorD), //
-      ILOAD(I_ILOAD.class, ImmediateSpec.Blvti, PushSpec.I), //
-      LLOAD(I_LLOAD.class, ImmediateSpec.Blvti, PushSpec.L), //
-      FLOAD(I_FLOAD.class, ImmediateSpec.Blvti, PushSpec.F), //
-      DLOAD(I_DLOAD.class, ImmediateSpec.Blvti, PushSpec.D), //
-      ALOAD(I_ALOAD.class, ImmediateSpec.Blvti, PushSpec.O), //
-      ILOAD_0(I_ILOAD_0.class, PushSpec.I), //
-      ILOAD_1(I_ILOAD_1.class, PushSpec.I), //
-      ILOAD_2(I_ILOAD_2.class, PushSpec.I), //
-      ILOAD_3(I_ILOAD_3.class, PushSpec.I), //
-      LLOAD_0(I_LLOAD_0.class, PushSpec.L), //
-      LLOAD_1(I_LLOAD_1.class, PushSpec.L), //
-      LLOAD_2(I_LLOAD_2.class, PushSpec.L), //
-      LLOAD_3(I_LLOAD_3.class, PushSpec.L), //
-      FLOAD_0(I_FLOAD_0.class, PushSpec.F), //
-      FLOAD_1(I_FLOAD_1.class, PushSpec.F), //
-      FLOAD_2(I_FLOAD_2.class, PushSpec.F), //
-      FLOAD_3(I_FLOAD_3.class, PushSpec.F), //
-      DLOAD_0(I_DLOAD_0.class, PushSpec.D), //
-      DLOAD_1(I_DLOAD_1.class, PushSpec.D), //
-      DLOAD_2(I_DLOAD_2.class, PushSpec.D), //
-      DLOAD_3(I_DLOAD_3.class, PushSpec.D), //
-      ALOAD_0(I_ALOAD_0.class, PushSpec.O), //
-      ALOAD_1(I_ALOAD_1.class, PushSpec.O), //
-      ALOAD_2(I_ALOAD_2.class, PushSpec.O), //
-      ALOAD_3(I_ALOAD_3.class, PushSpec.O), //
+      ILOAD(I_ILOAD.class, LoadSpec.I, ImmediateSpec.Blvti, PushSpec.I), //
+      LLOAD(I_LLOAD.class, LoadSpec.L, ImmediateSpec.Blvti, PushSpec.L), //
+      FLOAD(I_FLOAD.class, LoadSpec.F, ImmediateSpec.Blvti, PushSpec.F), //
+      DLOAD(I_DLOAD.class, LoadSpec.F, ImmediateSpec.Blvti, PushSpec.D), //
+      ALOAD(I_ALOAD.class, LoadSpec.A, ImmediateSpec.Blvti, PushSpec.O), //
+      ILOAD_0(I_ILOAD_0.class, LoadSpec.I, PushSpec.I), //
+      ILOAD_1(I_ILOAD_1.class, LoadSpec.I, PushSpec.I), //
+      ILOAD_2(I_ILOAD_2.class, LoadSpec.I, PushSpec.I), //
+      ILOAD_3(I_ILOAD_3.class, LoadSpec.I, PushSpec.I), //
+      LLOAD_0(I_LLOAD_0.class, LoadSpec.L, PushSpec.L), //
+      LLOAD_1(I_LLOAD_1.class, LoadSpec.L, PushSpec.L), //
+      LLOAD_2(I_LLOAD_2.class, LoadSpec.L, PushSpec.L), //
+      LLOAD_3(I_LLOAD_3.class, LoadSpec.L, PushSpec.L), //
+      FLOAD_0(I_FLOAD_0.class, LoadSpec.F, PushSpec.F), //
+      FLOAD_1(I_FLOAD_1.class, LoadSpec.F, PushSpec.F), //
+      FLOAD_2(I_FLOAD_2.class, LoadSpec.F, PushSpec.F), //
+      FLOAD_3(I_FLOAD_3.class, LoadSpec.F, PushSpec.F), //
+      DLOAD_0(I_DLOAD_0.class, LoadSpec.D, PushSpec.D), //
+      DLOAD_1(I_DLOAD_1.class, LoadSpec.D, PushSpec.D), //
+      DLOAD_2(I_DLOAD_2.class, LoadSpec.D, PushSpec.D), //
+      DLOAD_3(I_DLOAD_3.class, LoadSpec.D, PushSpec.D), //
+      ALOAD_0(I_ALOAD_0.class, LoadSpec.A, PushSpec.O), //
+      ALOAD_1(I_ALOAD_1.class, LoadSpec.A, PushSpec.O), //
+      ALOAD_2(I_ALOAD_2.class, LoadSpec.A, PushSpec.O), //
+      ALOAD_3(I_ALOAD_3.class, LoadSpec.A, PushSpec.O), //
       IALOAD(I_IALOAD.class, PopSpec.AI, PushSpec.I), //
       LALOAD(I_LALOAD.class, PopSpec.AI, PushSpec.L), //
       FALOAD(I_FALOAD.class, PopSpec.AI, PushSpec.F), //
@@ -368,31 +388,31 @@ class InstructionSet{
       BALOAD(I_BALOAD.class, PopSpec.AI, PushSpec.I), //
       CALOAD(I_CALOAD.class, PopSpec.AI, PushSpec.I), //
       SALOAD(I_SALOAD.class, PopSpec.AI, PushSpec.I), //
-      ISTORE(I_ISTORE.class, ImmediateSpec.Blvti, PopSpec.I), //
-      LSTORE(I_LSTORE.class, ImmediateSpec.Blvti, PopSpec.L), //
-      FSTORE(I_FSTORE.class, ImmediateSpec.Blvti, PopSpec.F), //
-      DSTORE(I_DSTORE.class, ImmediateSpec.Blvti, PopSpec.D), //
-      ASTORE(I_ASTORE.class, ImmediateSpec.Blvti, PopSpec.O), //
-      ISTORE_0(I_ISTORE_0.class, PopSpec.I), //
-      ISTORE_1(I_ISTORE_1.class, PopSpec.I), //
-      ISTORE_2(I_ISTORE_2.class, PopSpec.I), //
-      ISTORE_3(I_ISTORE_3.class, PopSpec.I), //
-      LSTORE_0(I_LSTORE_0.class, PopSpec.L), //
-      LSTORE_1(I_LSTORE_1.class, PopSpec.L), //
-      LSTORE_2(I_LSTORE_2.class, PopSpec.L), //
-      LSTORE_3(I_LSTORE_3.class, PopSpec.L), //
-      FSTORE_0(I_FSTORE_0.class, PopSpec.F), //
-      FSTORE_1(I_FSTORE_1.class, PopSpec.F), //
-      FSTORE_2(I_FSTORE_2.class, PopSpec.F), //
-      FSTORE_3(I_FSTORE_3.class, PopSpec.F), //
-      DSTORE_0(I_DSTORE_0.class, PopSpec.D), //
-      DSTORE_1(I_DSTORE_1.class, PopSpec.D), //
-      DSTORE_2(I_DSTORE_2.class, PopSpec.D), //
-      DSTORE_3(I_DSTORE_3.class, PopSpec.D), //
-      ASTORE_0(I_ASTORE_0.class, PopSpec.O), //
-      ASTORE_1(I_ASTORE_1.class, PopSpec.O), //
-      ASTORE_2(I_ASTORE_2.class, PopSpec.O), //
-      ASTORE_3(I_ASTORE_3.class, PopSpec.O), //
+      ISTORE(I_ISTORE.class, StoreSpec.I, ImmediateSpec.Blvti, PopSpec.I), //
+      LSTORE(I_LSTORE.class, StoreSpec.L, ImmediateSpec.Blvti, PopSpec.L), //
+      FSTORE(I_FSTORE.class, StoreSpec.F, ImmediateSpec.Blvti, PopSpec.F), //
+      DSTORE(I_DSTORE.class, StoreSpec.D, ImmediateSpec.Blvti, PopSpec.D), //
+      ASTORE(I_ASTORE.class, StoreSpec.A, ImmediateSpec.Blvti, PopSpec.O), //
+      ISTORE_0(I_ISTORE_0.class, StoreSpec.I, PopSpec.I), //
+      ISTORE_1(I_ISTORE_1.class, StoreSpec.I, PopSpec.I), //
+      ISTORE_2(I_ISTORE_2.class, StoreSpec.I, PopSpec.I), //
+      ISTORE_3(I_ISTORE_3.class, StoreSpec.I, PopSpec.I), //
+      LSTORE_0(I_LSTORE_0.class, StoreSpec.L, PopSpec.L), //
+      LSTORE_1(I_LSTORE_1.class, StoreSpec.L, PopSpec.L), //
+      LSTORE_2(I_LSTORE_2.class, StoreSpec.L, PopSpec.L), //
+      LSTORE_3(I_LSTORE_3.class, StoreSpec.L, PopSpec.L), //
+      FSTORE_0(I_FSTORE_0.class, StoreSpec.F, PopSpec.F), //
+      FSTORE_1(I_FSTORE_1.class, StoreSpec.F, PopSpec.F), //
+      FSTORE_2(I_FSTORE_2.class, StoreSpec.F, PopSpec.F), //
+      FSTORE_3(I_FSTORE_3.class, StoreSpec.F, PopSpec.F), //
+      DSTORE_0(I_DSTORE_0.class, StoreSpec.D, PopSpec.D), //
+      DSTORE_1(I_DSTORE_1.class, StoreSpec.D, PopSpec.D), //
+      DSTORE_2(I_DSTORE_2.class, StoreSpec.D, PopSpec.D), //
+      DSTORE_3(I_DSTORE_3.class, StoreSpec.D, PopSpec.D), //
+      ASTORE_0(I_ASTORE_0.class, StoreSpec.A, PopSpec.O), //
+      ASTORE_1(I_ASTORE_1.class, StoreSpec.A, PopSpec.O), //
+      ASTORE_2(I_ASTORE_2.class, StoreSpec.A, PopSpec.O), //
+      ASTORE_3(I_ASTORE_3.class, StoreSpec.A, PopSpec.O), //
       IASTORE(I_IASTORE.class, PopSpec.AII), //
       LASTORE(I_LASTORE.class, PopSpec.AIL), //
       FASTORE(I_FASTORE.class, PopSpec.AIF), //
@@ -492,28 +512,34 @@ class InstructionSet{
       FRETURN(I_FRETURN.class, PopSpec.F), //
       DRETURN(I_DRETURN.class, PopSpec.D), //
       ARETURN(I_ARETURN.class, PopSpec.O), //
-      RETURN(I_RETURN.class, ImmediateSpec.NONE, PopSpec.NONE, PushSpec.NONE, Operator.NONE), //
+      RETURN(I_RETURN.class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, PopSpec.NONE, PushSpec.NONE, Operator.NONE), //
       GETSTATIC(I_GETSTATIC.class, ImmediateSpec.Scpfi, PushSpec.UNKNOWN), //
       PUTSTATIC(I_PUTSTATIC.class, ImmediateSpec.Scpfi, PopSpec.UNKNOWN), //
-      GETFIELD(I_GETFIELD.class, ImmediateSpec.Scpfi, PopSpec.O, PushSpec.UNKNOWN, Operator.NONE), //
+      GETFIELD(I_GETFIELD.class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.Scpfi, PopSpec.O, PushSpec.UNKNOWN, Operator.NONE), //
       PUTFIELD(I_PUTFIELD.class, ImmediateSpec.Scpfi, PopSpec.OUNKNOWN), //
-      INVOKEVIRTUAL(I_INVOKEVIRTUAL.class, ImmediateSpec.Scpmi, PopSpec.OARGS, PushSpec.UNKNOWN, Operator.NONE), //
-      INVOKESPECIAL(I_INVOKESPECIAL.class, ImmediateSpec.Scpmi, PopSpec.OARGS, PushSpec.UNKNOWN, Operator.NONE), //
-      INVOKESTATIC(I_INVOKESTATIC.class, ImmediateSpec.Scpmi, PopSpec.ARGS, PushSpec.UNKNOWN, Operator.NONE), //
-      INVOKEINTERFACE(I_INVOKEINTERFACE.class, ImmediateSpec.ScpmiBB, PopSpec.OARGS, PushSpec.UNKNOWN, Operator.NONE), //
-      INVOKEDYNAMIC(I_INVOKEDYNAMIC.class, ImmediateSpec.ScpmiBB, PopSpec.OARGS, PushSpec.UNKNOWN, Operator.NONE), //
+      INVOKEVIRTUAL(I_INVOKEVIRTUAL.class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.Scpmi, PopSpec.OARGS, PushSpec.UNKNOWN,
+            Operator.NONE), //
+      INVOKESPECIAL(I_INVOKESPECIAL.class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.Scpmi, PopSpec.OARGS, PushSpec.UNKNOWN,
+            Operator.NONE), //
+      INVOKESTATIC(I_INVOKESTATIC.class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.Scpmi, PopSpec.ARGS, PushSpec.UNKNOWN,
+            Operator.NONE), //
+      INVOKEINTERFACE(I_INVOKEINTERFACE.class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.ScpmiBB, PopSpec.OARGS,
+            PushSpec.UNKNOWN, Operator.NONE), //
+      INVOKEDYNAMIC(I_INVOKEDYNAMIC.class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.ScpmiBB, PopSpec.OARGS, PushSpec.UNKNOWN,
+            Operator.NONE), //
 
       NEW(I_NEW.class, ImmediateSpec.Scpci, PushSpec.O), //
-      NEWARRAY(I_NEWARRAY.class, ImmediateSpec.Bconst, PopSpec.I, PushSpec.A, Operator.NONE), //
-      ANEWARRAY(I_ANEWARRAY.class, ImmediateSpec.Sconst, PopSpec.I, PushSpec.A, Operator.NONE), // 189
+      NEWARRAY(I_NEWARRAY.class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.Bconst, PopSpec.I, PushSpec.A, Operator.NONE), //
+      ANEWARRAY(I_ANEWARRAY.class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.Sconst, PopSpec.I, PushSpec.A, Operator.NONE), // 189
       ARRAYLENGTH(I_ARRAYLENGTH.class, PopSpec.A, PushSpec.I), // 190
       ATHROW(I_ATHROW.class, PopSpec.O, PushSpec.O), // 191
-      CHECKCAST(I_CHECKCAST.class, ImmediateSpec.Scpci, PopSpec.O, PushSpec.O, Operator.NONE), // 192
-      INSTANCEOF(I_INSTANCEOF.class, ImmediateSpec.Scpci, PopSpec.O, PushSpec.I, Operator.NONE), // 193
+      CHECKCAST(I_CHECKCAST.class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.Scpci, PopSpec.O, PushSpec.O, Operator.NONE), // 192
+      INSTANCEOF(I_INSTANCEOF.class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.Scpci, PopSpec.O, PushSpec.I, Operator.NONE), // 193
       MONITORENTER(I_MONITORENTER.class, PopSpec.O), // 194
       MONITOREXIT(I_MONITOREXIT.class, PopSpec.O), // 195
-      WIDE(I_WIDE.class, ImmediateSpec.UNKNOWN, PopSpec.UNKNOWN, PushSpec.UNKNOWN, Operator.NONE), // 196
-      MULTIANEWARRAY(I_MULTIANEWARRAY.class, ImmediateSpec.ScpciBdim, PopSpec.UNKNOWN, PushSpec.A, Operator.NONE), // 197
+      WIDE(I_WIDE.class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.UNKNOWN, PopSpec.UNKNOWN, PushSpec.UNKNOWN, Operator.NONE), // 196
+      MULTIANEWARRAY(I_MULTIANEWARRAY.class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.ScpciBdim, PopSpec.UNKNOWN, PushSpec.A,
+            Operator.NONE), // 197
       IFNULL(I_IFNULL.class, ImmediateSpec.Spc, PopSpec.O, Operator.EqualNULL), // 198
       IFNONNULL(I_IFNONNULL.class, ImmediateSpec.Spc, PopSpec.O, Operator.NotEqualNULL), // 199
       GOTO_W(I_GOTO_W.class, ImmediateSpec.Ipc), // 200
@@ -599,51 +625,71 @@ class InstructionSet{
 
       private Operator operator;
 
-      private ByteCode(Class<?> _class, ImmediateSpec _immediate, PopSpec _pop, PushSpec _push, Operator _operator) {
+      private LoadSpec loadSpec;
+
+      private StoreSpec storeSpec;
+
+      private ByteCode(Class<?> _class, LoadSpec _loadSpec, StoreSpec _storeSpec, ImmediateSpec _immediate, PopSpec _pop,
+            PushSpec _push, Operator _operator) {
          clazz = _class;
          immediate = _immediate;
          push = _push;
          pop = _pop;
          operator = _operator;
-
-         //    clazz = ByteCode.class.forName("com.amd.javalabs.classparser.InstructionSet$I_"+getName().toUpperCase(), true, ByteCode.class.getClassLoader());
-
+         loadSpec = _loadSpec;
+         storeSpec = _storeSpec;
       }
 
       private ByteCode(Class<?> _class, ImmediateSpec _immediate) {
-         this(_class, _immediate, PopSpec.NONE, PushSpec.NONE, Operator.NONE);
+         this(_class, LoadSpec.NONE, StoreSpec.NONE, _immediate, PopSpec.NONE, PushSpec.NONE, Operator.NONE);
       }
 
       private ByteCode(Class<?> _class, PushSpec _push) {
-         this(_class, ImmediateSpec.NONE, PopSpec.NONE, _push, Operator.NONE);
+         this(_class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, PopSpec.NONE, _push, Operator.NONE);
+      }
+
+      private ByteCode(Class<?> _class, StoreSpec _store, ImmediateSpec _immediate, PopSpec _pop) {
+         this(_class, LoadSpec.NONE, _store, _immediate, _pop, PushSpec.NONE, Operator.NONE);
+      }
+
+      private ByteCode(Class<?> _class, StoreSpec _store, PopSpec _pop) {
+         this(_class, LoadSpec.NONE, _store, ImmediateSpec.NONE, _pop, PushSpec.NONE, Operator.NONE);
       }
 
       private ByteCode(Class<?> _class, ImmediateSpec _immediate, PopSpec _pop) {
-         this(_class, _immediate, _pop, PushSpec.NONE, Operator.NONE);
+         this(_class, LoadSpec.NONE, StoreSpec.NONE, _immediate, _pop, PushSpec.NONE, Operator.NONE);
       }
 
       private ByteCode(Class<?> _class, ImmediateSpec _immediate, PopSpec _pop, Operator _operator) {
-         this(_class, _immediate, _pop, PushSpec.NONE, _operator);
+         this(_class, LoadSpec.NONE, StoreSpec.NONE, _immediate, _pop, PushSpec.NONE, _operator);
+      }
+
+      private ByteCode(Class<?> _class, LoadSpec _load, ImmediateSpec _immediate, PushSpec _push) {
+         this(_class, _load, StoreSpec.NONE, _immediate, PopSpec.NONE, _push, Operator.NONE);
+      }
+
+      private ByteCode(Class<?> _class, LoadSpec _load, PushSpec _push) {
+         this(_class, _load, StoreSpec.NONE, ImmediateSpec.NONE, PopSpec.NONE, _push, Operator.NONE);
       }
 
       private ByteCode(Class<?> _class, ImmediateSpec _immediate, PushSpec _push) {
-         this(_class, _immediate, PopSpec.NONE, _push, Operator.NONE);
+         this(_class, LoadSpec.NONE, StoreSpec.NONE, _immediate, PopSpec.NONE, _push, Operator.NONE);
       }
 
       private ByteCode(Class<?> _class, PopSpec _pop, PushSpec _push) {
-         this(_class, ImmediateSpec.NONE, _pop, _push, Operator.NONE);
+         this(_class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, _pop, _push, Operator.NONE);
       }
 
       private ByteCode(Class<?> _class, PopSpec _pop, PushSpec _push, Operator _operator) {
-         this(_class, ImmediateSpec.NONE, _pop, _push, _operator);
+         this(_class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, _pop, _push, _operator);
       }
 
       private ByteCode(Class<?> _class, PopSpec _pop) {
-         this(_class, ImmediateSpec.NONE, _pop, PushSpec.NONE, Operator.NONE);
+         this(_class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, _pop, PushSpec.NONE, Operator.NONE);
       }
 
       private ByteCode() {
-         this(null, ImmediateSpec.NONE, PopSpec.NONE, PushSpec.NONE, Operator.NONE);
+         this(null, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, PopSpec.NONE, PushSpec.NONE, Operator.NONE);
       }
 
       int getCode() {
@@ -730,6 +776,14 @@ class InstructionSet{
 
       Operator getOperator() {
          return (operator);
+      }
+
+      public LoadSpec getLoad() {
+         return (loadSpec);
+      }
+
+      public StoreSpec getStore() {
+         return (storeSpec);
       }
    }
 

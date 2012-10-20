@@ -44,18 +44,19 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.amd.aparapi.ClassModel.ClassModelMethod;
 import com.amd.aparapi.ClassModel.ConstantPool;
+import com.amd.aparapi.ClassModel.LocalVariableInfo;
+import com.amd.aparapi.ClassModel.LocalVariableTableEntry;
+import com.amd.aparapi.ClassModel.AttributePool.CodeEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.FieldEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodReferenceEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodReferenceEntry.Arg;
-import com.amd.aparapi.ClassModel.LocalVariableInfo;
-import com.amd.aparapi.ClassModel.LocalVariableTableEntry;
 import com.amd.aparapi.InstructionPattern.InstructionMatch;
 import com.amd.aparapi.InstructionSet.AccessArrayElement;
 import com.amd.aparapi.InstructionSet.AccessField;
@@ -92,10 +93,12 @@ import com.amd.aparapi.InstructionSet.I_PUTSTATIC;
 import com.amd.aparapi.InstructionSet.I_TABLESWITCH;
 import com.amd.aparapi.InstructionSet.IncrementInstruction;
 import com.amd.aparapi.InstructionSet.InlineAssignInstruction;
+import com.amd.aparapi.InstructionSet.LoadSpec;
 import com.amd.aparapi.InstructionSet.MethodCall;
 import com.amd.aparapi.InstructionSet.MultiAssignInstruction;
 import com.amd.aparapi.InstructionSet.New;
 import com.amd.aparapi.InstructionSet.Return;
+import com.amd.aparapi.InstructionSet.StoreSpec;
 
 class MethodModel{
    static Logger logger = Logger.getLogger(Config.getLoggerName());
@@ -1452,6 +1455,164 @@ class MethodModel{
       init(_method);
    }
 
+   public static class FakeLocalVariableTableEntry implements LocalVariableTableEntry<LocalVariableInfo>{
+
+      public static class FakeLocalVariableInfo implements LocalVariableInfo{
+
+         @Override public int getEnd() {
+            // TODO Auto-generated method stub
+            return 0;
+         }
+
+         @Override public int getStart() {
+            // TODO Auto-generated method stub
+            return 0;
+         }
+
+         @Override public String getVariableDescriptor() {
+            // TODO Auto-generated method stub
+            return null;
+         }
+
+         @Override public int getVariableIndex() {
+            // TODO Auto-generated method stub
+            return 0;
+         }
+
+         @Override public String getVariableName() {
+            // TODO Auto-generated method stub
+            return null;
+         }
+
+         @Override public boolean isArray() {
+            // TODO Auto-generated method stub
+            return false;
+         }
+
+      }
+
+      List<LocalVariableInfo> list = new ArrayList<LocalVariableInfo>();
+
+      public static class SlotTable{
+         Slot[] slots;
+
+         public SlotTable(int _numberOfSlots, int _size) {
+            slots = new Slot[_numberOfSlots];
+            for (int i = 0; i < _numberOfSlots; i++) {
+               slots[i] = new Slot(_size);
+            }
+         }
+
+         public static class Slot{
+            public Slot(int _size) {
+               entries = new Entry[_size];
+               for (int i = 0; i < _size; i++) {
+                  entries[i] = new Entry(i);
+               }
+            }
+
+            int number;
+
+            public static class Entry{
+               int slotNumber;
+
+               public Entry(int _slotNumber) {
+                  slotNumber = _slotNumber;
+               }
+
+               LoadSpec loadSpec = LoadSpec.NONE;
+
+               StoreSpec storeSpec = StoreSpec.NONE;
+
+               public String toString() {
+                  if (loadSpec == LoadSpec.NONE && storeSpec == StoreSpec.NONE) {
+                     return ("  ");
+                  } else if (loadSpec != LoadSpec.NONE) {
+                     return ("L" + loadSpec);
+                  } else {
+                     return ("S" + storeSpec);
+                  }
+               }
+            }
+
+            Entry[] entries;
+
+            public Entry getEntry(int _row) {
+               return entries[_row];
+            }
+
+            public void setLoad(int pc, LoadSpec _loadSpec) {
+               entries[pc].loadSpec = _loadSpec;
+
+            }
+
+            public void setStore(int pc, StoreSpec _storeSpec) {
+               entries[pc].storeSpec = _storeSpec;
+
+            }
+         }
+
+         public String toString() {
+            StringBuilder sb = new StringBuilder();
+            for (int row = 0; row < slots[0].entries.length; row++) {
+               for (Slot slot : slots) {
+                  sb.append(slot.getEntry(row) + "|");
+               }
+               sb.append("\n");
+            }
+
+            return (sb.toString());
+
+         }
+
+         public void setLoad(int slot, int pc, LoadSpec _loadSpec) {
+            slots[slot].setLoad(pc, _loadSpec);
+
+         }
+
+         public void setStore(int slot, int pc, StoreSpec _storeSpec) {
+            slots[slot].setStore(pc, _storeSpec);
+
+         }
+      }
+
+      public FakeLocalVariableTableEntry(Map<Integer, Instruction> _pcMap, CodeEntry _codeEntry) {
+         int numberOfSlots = _codeEntry.getMaxLocals();
+         //  System.out.println("slots= " + numberOfSlots);
+         SlotTable slotTable = new SlotTable(numberOfSlots, _pcMap.size());
+         // System.out.println(slotTable);
+         for (Entry<Integer, Instruction> entry : _pcMap.entrySet()) {
+            int pc = entry.getKey();
+            Instruction instruction = entry.getValue();
+            LoadSpec loadSpec = instruction.getByteCode().getLoad();
+            StoreSpec storeSpec = instruction.getByteCode().getStore();
+            if (loadSpec != LoadSpec.NONE) {
+               slotTable.setLoad(((InstructionSet.LocalVariableTableIndexAccessor) instruction).getLocalVariableTableIndex(), pc,
+                     loadSpec);
+
+            }
+            if (storeSpec != StoreSpec.NONE) {
+               slotTable.setStore(((InstructionSet.LocalVariableTableIndexAccessor) instruction).getLocalVariableTableIndex(), pc,
+                     storeSpec);
+            }
+
+            //  System.out.println(" Instruction " + entry.getValue());
+         }
+         //  System.out.println(slotTable);
+
+      }
+
+      @Override public LocalVariableInfo getVariable(int pc, int index) {
+         // TODO Auto-generated method stub
+         return null;
+      }
+
+      @Override public Iterator<LocalVariableInfo> iterator() {
+         return list.iterator();
+      }
+
+   }
+
    private void init(ClassModelMethod _method) throws AparapiException {
       try {
          method = _method;
@@ -1475,11 +1636,18 @@ class MethodModel{
 
          LocalVariableTableEntry<LocalVariableInfo> localVariableTableEntry = method.getLocalVariableTableEntry();
          if (Config.enableAllowMissingLocalVariableTable && localVariableTableEntry == null) {
-            logger.warning("class does not contain a LocalVariableTable - but enableAllowMissingLocalVariableTable is set so we are ignoring");
+            logger
+                  .warning("class does not contain a LocalVariableTable - but enableAllowMissingLocalVariableTable is set so we are ignoring");
          } else {
             if (localVariableTableEntry == null) {
-               System.out.println("create local variable table");
-               throw new ClassParseException(ClassParseException.TYPE.MISSINGLOCALVARIABLETABLE);
+               //System.out.println("create local variable table");
+               localVariableTableEntry = new FakeLocalVariableTableEntry(pcMap, method.getCodeEntry());
+               method.setLocalVariableTableEntry(localVariableTableEntry);
+               localVariableTableEntry = method.getLocalVariableTableEntry();
+               if (localVariableTableEntry == null) {
+                  System.out.println("damn!");
+               }
+               //throw new ClassParseException(ClassParseException.TYPE.MISSINGLOCALVARIABLETABLE);
             }
             for (LocalVariableInfo localVariableInfo : localVariableTableEntry) {
                // TODO: What was the thinking here?

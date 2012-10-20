@@ -499,8 +499,8 @@ class ClassModel{
          }
       }
       if (inMethod) {
-         methodDescription = new MethodDescription(className, methodName, stringStack.toArray(new String[0])[0],
-               methodStack.toArray(new String[0]));
+         methodDescription = new MethodDescription(className, methodName, stringStack.toArray(new String[0])[0], methodStack
+               .toArray(new String[0]));
       } else {
          System.out.println("can't convert to a description");
       }
@@ -548,7 +548,8 @@ class ClassModel{
       METHODHANDLE, //15
       METHODTYPE, //16
       UNUSED17,
-      INVOKEDYNAMIC//18
+      INVOKEDYNAMIC
+      //18
    };
 
    enum Access {
@@ -1903,7 +1904,7 @@ class ClassModel{
          }
       }
 
-       class LocalVariableTypeTableEntry extends AttributePoolEntry{
+      class LocalVariableTypeTableEntry extends AttributePoolEntry{
          private byte[] bytes;
 
          LocalVariableTypeTableEntry(ByteReader _byteReader, int _nameIndex, int _length) {
@@ -1919,7 +1920,6 @@ class ClassModel{
             return (new String(bytes));
          }
       }
-
 
       class SourceFileEntry extends AttributePoolEntry{
          private int sourceFileIndex;
@@ -2384,6 +2384,10 @@ class ClassModel{
 
       LocalVariableTableEntry getLocalVariableTableEntry() {
          return (getAttributePool().codeEntry.codeEntryAttributePool.localVariableTableEntry);
+      }
+
+      void setLocalVariableTableEntry(LocalVariableTableEntry _localVariableTableEntry) {
+         getAttributePool().codeEntry.codeEntryAttributePool.localVariableTableEntry = _localVariableTableEntry;
       }
 
       LocalVariableInfo getLocalVariable(int _pc, int _index) {

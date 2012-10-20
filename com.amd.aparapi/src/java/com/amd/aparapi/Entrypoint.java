@@ -346,8 +346,8 @@ class Entrypoint{
          ArrayList<FieldEntry> structMemberSet = superCandidate.getStructMembers();
          for (FieldEntry f : structMemberSet) {
             if (f.getNameAndTypeEntry().getNameUTF8Entry().getUTF8().equals(accessedFieldName)
-                  && f.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8()
-                        .equals(field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8())) {
+                  && f.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8().equals(
+                        field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8())) {
 
                if (logger.isLoggable(Level.FINE)) {
                   logger.fine("Found match: " + accessedFieldName + " class: " + field.getClassEntry().getNameUTF8Entry().getUTF8()
@@ -377,8 +377,8 @@ class Entrypoint{
          ArrayList<FieldEntry> structMemberSet = memberClassModel.getStructMembers();
          for (FieldEntry f : structMemberSet) {
             if (f.getNameAndTypeEntry().getNameUTF8Entry().getUTF8().equals(accessedFieldName)
-                  && f.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8()
-                        .equals(field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8())) {
+                  && f.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8().equals(
+                        field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8())) {
                found = true;
             }
          }
@@ -467,8 +467,8 @@ class Entrypoint{
                // Look for a intra-object call in a object member
                if (m == null) {
                   for (ClassModel c : allFieldsClasses.values()) {
-                     if (c.getClassWeAreModelling().getName()
-                           .equals(methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.'))) {
+                     if (c.getClassWeAreModelling().getName().equals(
+                           methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.'))) {
                         m = c.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL) ? true : false);
                         assert m != null;
                         break;

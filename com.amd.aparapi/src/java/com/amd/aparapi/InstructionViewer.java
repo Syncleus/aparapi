@@ -219,8 +219,8 @@ public class InstructionViewer implements Config.InstructionListener{
                panel.add(newComponent);
                layout.putConstraint(SpringLayout.NORTH, newComponent, INSET, (last == panel) ? SpringLayout.NORTH
                      : SpringLayout.SOUTH, last);
-               layout.putConstraint(SpringLayout.WEST, newComponent, INSET, SpringLayout.EAST,
-                     fieldToLabelMap.get(fieldWithWidestLabel));
+               layout.putConstraint(SpringLayout.WEST, newComponent, INSET, SpringLayout.EAST, fieldToLabelMap
+                     .get(fieldWithWidestLabel));
                layout.putConstraint(SpringLayout.EAST, newComponent, INSET, SpringLayout.EAST, panel);
             }
             last = newComponent;
