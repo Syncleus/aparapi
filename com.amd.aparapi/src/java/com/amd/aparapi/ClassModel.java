@@ -1903,6 +1903,24 @@ class ClassModel{
          }
       }
 
+       class LocalVariableTypeTableEntry extends AttributePoolEntry{
+         private byte[] bytes;
+
+         LocalVariableTypeTableEntry(ByteReader _byteReader, int _nameIndex, int _length) {
+            super(_byteReader, _nameIndex, _length);
+            bytes = _byteReader.bytes(_length);
+         }
+
+         byte[] getBytes() {
+            return (bytes);
+         }
+
+         @Override public String toString() {
+            return (new String(bytes));
+         }
+      }
+
+
       class SourceFileEntry extends AttributePoolEntry{
          private int sourceFileIndex;
 
@@ -2113,6 +2131,8 @@ class ClassModel{
 
       private final static String STACKMAPTABLE_TAG = "StackMapTable";
 
+      private final static String LOCALVARIABLETYPETABLE_TAG = "LocalVariableTypeTable";
+
       AttributePool(ByteReader _byteReader) {
 
          int attributeCount = _byteReader.u2();
@@ -2163,10 +2183,12 @@ class ClassModel{
                // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.21
             } else if (attributeName.equals(STACKMAPTABLE_TAG)) {
                // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.4
-
                entry = new StackMapTableEntry(_byteReader, attributeNameIndex, length);
+            } else if (attributeName.equals(LOCALVARIABLETYPETABLE_TAG)) {
+               // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.14
+               entry = new LocalVariableTypeTableEntry(_byteReader, attributeNameIndex, length);
             } else {
-               System.out.println("Other! found (name = " + attributeName + ")");
+               logger.warning("Found unexpected Attribute (name = " + attributeName + ")");
                entry = new OtherEntry(_byteReader, attributeNameIndex, length);
                attributePoolEntries.add(entry);
             }
