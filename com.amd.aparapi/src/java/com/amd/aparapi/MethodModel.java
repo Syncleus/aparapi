@@ -53,6 +53,7 @@ import com.amd.aparapi.ClassModel.ClassModelMethod;
 import com.amd.aparapi.ClassModel.ConstantPool;
 import com.amd.aparapi.ClassModel.LocalVariableInfo;
 import com.amd.aparapi.ClassModel.LocalVariableTableEntry;
+import com.amd.aparapi.ClassModel.MethodDescription;
 import com.amd.aparapi.ClassModel.AttributePool.CodeEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.FieldEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodReferenceEntry;
@@ -1496,20 +1497,26 @@ class MethodModel{
       public static class SlotTable{
          Slot[] slots;
 
-         public SlotTable(int _numberOfSlots, int _size) {
+         StoreSpec[] argsAsStoreSlots;
+
+         public SlotTable(StoreSpec[] _argsAsStoreSlots, int _numberOfSlots, int _size) {
+            argsAsStoreSlots = _argsAsStoreSlots;
             slots = new Slot[_numberOfSlots];
             for (int i = 0; i < _numberOfSlots; i++) {
-               slots[i] = new Slot(_size);
+               slots[i] = new Slot(i < argsAsStoreSlots.length ? argsAsStoreSlots[i] : StoreSpec.NONE, _size);
             }
          }
 
          public static class Slot{
-            public Slot(int _size) {
+            public Slot(StoreSpec _defaultStoreSpec, int _size) {
+               defaultStoreSpec = _defaultStoreSpec;
                entries = new Entry[_size];
                for (int i = 0; i < _size; i++) {
                   entries[i] = new Entry(i);
                }
             }
+
+            StoreSpec defaultStoreSpec;
 
             int number;
 
@@ -1550,10 +1557,29 @@ class MethodModel{
                entries[pc].storeSpec = _storeSpec;
 
             }
+
+            public StoreSpec getDefaultStoreSpec() {
+               return (defaultStoreSpec);
+            }
          }
 
          public String toString() {
             StringBuilder sb = new StringBuilder();
+            for (Slot slot : slots) {
+               StoreSpec storeSpec = slot.getDefaultStoreSpec();
+               if (storeSpec != StoreSpec.NONE) {
+                  sb.append("S" + storeSpec);
+               } else {
+                  sb.append("  ");
+               }
+               sb.append("|");
+            }
+            sb.append("\n");
+
+            for (Slot slot : slots) {
+               sb.append("--|");
+            }
+            sb.append("\n");
             for (int row = 0; row < slots[0].entries.length; row++) {
                for (Slot slot : slots) {
                   sb.append(slot.getEntry(row) + "|");
@@ -1576,16 +1602,29 @@ class MethodModel{
          }
       }
 
-      public FakeLocalVariableTableEntry(Map<Integer, Instruction> _pcMap, CodeEntry _codeEntry) {
-         int numberOfSlots = _codeEntry.getMaxLocals();
+      public FakeLocalVariableTableEntry(Map<Integer, Instruction> _pcMap, ClassModelMethod _method) {
+         int numberOfSlots = _method.getCodeEntry().getMaxLocals();
+
+         MethodDescription description = ClassModel.getMethodDescription(_method.getDescriptor());
+         String[] args = description.getArgs();
+         StoreSpec[] argsAsStoreSpecs = new StoreSpec[args.length];
+         for (int i = 0; i < args.length; i++) {
+            if (args[i].startsWith("[")) {
+               argsAsStoreSpecs[i] = StoreSpec.A;
+            } else {
+               argsAsStoreSpecs[i] = StoreSpec.valueOf(args[i].substring(0, 1));
+            }
+         }
+
          //  System.out.println("slots= " + numberOfSlots);
-         SlotTable slotTable = new SlotTable(numberOfSlots, _pcMap.size());
+         SlotTable slotTable = new SlotTable(argsAsStoreSpecs, numberOfSlots, _pcMap.size());
          // System.out.println(slotTable);
          for (Entry<Integer, Instruction> entry : _pcMap.entrySet()) {
             int pc = entry.getKey();
             Instruction instruction = entry.getValue();
             LoadSpec loadSpec = instruction.getByteCode().getLoad();
             StoreSpec storeSpec = instruction.getByteCode().getStore();
+
             if (loadSpec != LoadSpec.NONE) {
                slotTable.setLoad(((InstructionSet.LocalVariableTableIndexAccessor) instruction).getLocalVariableTableIndex(), pc,
                      loadSpec);
@@ -1596,9 +1635,9 @@ class MethodModel{
                      storeSpec);
             }
 
-            //  System.out.println(" Instruction " + entry.getValue());
+            System.out.println(" Instruction " + entry.getValue());
          }
-         //  System.out.println(slotTable);
+         System.out.println(slotTable);
 
       }
 
@@ -1641,12 +1680,11 @@ class MethodModel{
          } else {
             if (localVariableTableEntry == null) {
                //System.out.println("create local variable table");
-               localVariableTableEntry = new FakeLocalVariableTableEntry(pcMap, method.getCodeEntry());
+
+               localVariableTableEntry = new FakeLocalVariableTableEntry(pcMap, method);
+
                method.setLocalVariableTableEntry(localVariableTableEntry);
-               localVariableTableEntry = method.getLocalVariableTableEntry();
-               if (localVariableTableEntry == null) {
-                  System.out.println("damn!");
-               }
+
                //throw new ClassParseException(ClassParseException.TYPE.MISSINGLOCALVARIABLETABLE);
             }
             for (LocalVariableInfo localVariableInfo : localVariableTableEntry) {
