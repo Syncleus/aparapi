@@ -41,23 +41,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.amd.aparapi.ClassModel.ClassModelMethod;
 import com.amd.aparapi.ClassModel.ConstantPool;
-import com.amd.aparapi.ClassModel.LocalVariableInfo;
-import com.amd.aparapi.ClassModel.LocalVariableTableEntry;
-import com.amd.aparapi.ClassModel.MethodDescription;
-import com.amd.aparapi.ClassModel.AttributePool.CodeEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.FieldEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodReferenceEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodReferenceEntry.Arg;
+import com.amd.aparapi.ClassModel.LocalVariableInfo;
+import com.amd.aparapi.ClassModel.LocalVariableTableEntry;
+import com.amd.aparapi.ClassModel.MethodDescription;
 import com.amd.aparapi.InstructionPattern.InstructionMatch;
 import com.amd.aparapi.InstructionSet.AccessArrayElement;
 import com.amd.aparapi.InstructionSet.AccessField;
@@ -1460,59 +1460,90 @@ class MethodModel{
 
       public static class FakeLocalVariableInfo implements LocalVariableInfo{
 
+         int start;
+
+         int end;
+
+         String name;
+
+         String descriptor;
+
+         boolean isArray;
+
+         int variableIndex;
+
+         public FakeLocalVariableInfo(int _variableIndex, int _start, int _end, String _variableName, String _variableDescriptor,
+               boolean _isArray) {
+            variableIndex = _variableIndex;
+            start = _start;
+            end = _end;
+            name = _variableName;
+            descriptor = _variableDescriptor;
+            isArray = _isArray;
+         }
+
          @Override public int getEnd() {
-            // TODO Auto-generated method stub
-            return 0;
+            return (end);
          }
 
          @Override public int getStart() {
-            // TODO Auto-generated method stub
-            return 0;
+            return (start);
          }
 
          @Override public String getVariableDescriptor() {
-            // TODO Auto-generated method stub
-            return null;
+            return (descriptor);
          }
 
          @Override public int getVariableIndex() {
-            // TODO Auto-generated method stub
-            return 0;
+            throw new IllegalStateException();
+
          }
 
          @Override public String getVariableName() {
-            // TODO Auto-generated method stub
-            return null;
+
+            return (name);
          }
 
          @Override public boolean isArray() {
-            // TODO Auto-generated method stub
-            return false;
+
+            return (isArray);
          }
 
       }
 
       List<LocalVariableInfo> list = new ArrayList<LocalVariableInfo>();
 
-      public static class SlotTable{
+      public class SlotTable{
          Slot[] slots;
+
+         int slotSize;
+
+         Map.Entry<Integer, Instruction> pcMapEntries[];
 
          StoreSpec[] argsAsStoreSlots;
 
-         public SlotTable(StoreSpec[] _argsAsStoreSlots, int _numberOfSlots, int _size) {
+         public SlotTable(StoreSpec[] _argsAsStoreSlots, int _numberOfSlots, Map<Integer, Instruction> _pcMap) {
+            slotSize = _pcMap.size();
+            pcMapEntries = new Map.Entry[slotSize];
+            int count = 0;
+            for (Map.Entry<Integer, Instruction> entry : _pcMap.entrySet()) {
+               pcMapEntries[count++] = entry;
+            }
+
             argsAsStoreSlots = _argsAsStoreSlots;
             slots = new Slot[_numberOfSlots];
             for (int i = 0; i < _numberOfSlots; i++) {
-               slots[i] = new Slot(i < argsAsStoreSlots.length ? argsAsStoreSlots[i] : StoreSpec.NONE, _size);
+               slots[i] = new Slot(i < argsAsStoreSlots.length ? argsAsStoreSlots[i] : StoreSpec.NONE, slotSize);
             }
          }
 
-         public static class Slot{
+         public class Slot{
+
             public Slot(StoreSpec _defaultStoreSpec, int _size) {
                defaultStoreSpec = _defaultStoreSpec;
-               entries = new Entry[_size];
-               for (int i = 0; i < _size; i++) {
-                  entries[i] = new Entry(i);
+               entries = new LinkedHashMap<Integer, Entry>();
+               for (Map.Entry<Integer, Instruction> pcMapEntry : pcMapEntries) {
+                  entries.put(pcMapEntry.getKey(), new Entry(pcMapEntry.getKey()));
                }
             }
 
@@ -1520,11 +1551,12 @@ class MethodModel{
 
             int number;
 
-            public static class Entry{
+            public class Entry{
                int slotNumber;
 
                public Entry(int _slotNumber) {
                   slotNumber = _slotNumber;
+
                }
 
                LoadSpec loadSpec = LoadSpec.NONE;
@@ -1542,24 +1574,55 @@ class MethodModel{
                }
             }
 
-            Entry[] entries;
+            Map<Integer, Entry> entries;
 
-            public Entry getEntry(int _row) {
-               return entries[_row];
+            public Entry getEntry(int _pc) {
+               return entries.get(_pc);
             }
 
-            public void setLoad(int pc, LoadSpec _loadSpec) {
-               entries[pc].loadSpec = _loadSpec;
+            public void setLoad(int _pc, LoadSpec _loadSpec) {
+               entries.get(_pc).loadSpec = _loadSpec;
 
             }
 
-            public void setStore(int pc, StoreSpec _storeSpec) {
-               entries[pc].storeSpec = _storeSpec;
+            public void setStore(int _pc, StoreSpec _storeSpec) {
+               entries.get(_pc).storeSpec = _storeSpec;
 
             }
 
             public StoreSpec getDefaultStoreSpec() {
                return (defaultStoreSpec);
+            }
+
+            public LocalVariableInfo createLocalVariableInfo(int _index) {
+               StoreSpec storeSpec = defaultStoreSpec;
+               int variableIndex = 0;
+               int start = 0;
+               int end = 0;
+               String variableName = null;
+               String variableDescription = null;
+
+               String state = storeSpec == StoreSpec.NONE ? "NONE" : "STARTED";
+
+               int count = 0;
+               for (Map.Entry<Integer, Entry> entry : entries.entrySet()) {
+
+                  if (entry.getValue().storeSpec != StoreSpec.NONE) {
+                     if (state.equals("NONE")) {
+                        storeSpec = entry.getValue().storeSpec;
+                        state = "STARTED";
+                        start = end = entry.getKey();
+                     } else if (storeSpec != entry.getValue().storeSpec) {
+                        storeSpec = entry.getValue().storeSpec;
+                        state = "STARTED";
+                        start = end = entry.getKey();
+                     }
+
+                  }
+                  count++;
+               }
+               return ((LocalVariableInfo) new FakeLocalVariableInfo(variableIndex, start, end, variableName, variableDescription,
+                     false));
             }
          }
 
@@ -1580,10 +1643,12 @@ class MethodModel{
                sb.append("--|");
             }
             sb.append("\n");
-            for (int row = 0; row < slots[0].entries.length; row++) {
+            for (Map.Entry<Integer, Instruction> pcMapEntry : pcMapEntries) {
+
                for (Slot slot : slots) {
-                  sb.append(slot.getEntry(row) + "|");
+                  sb.append(slot.getEntry(pcMapEntry.getKey()) + "|");
                }
+               sb.append(" " + pcMapEntry.getValue());
                sb.append("\n");
             }
 
@@ -1602,6 +1667,8 @@ class MethodModel{
          }
       }
 
+      SlotTable slotTable;
+
       public FakeLocalVariableTableEntry(Map<Integer, Instruction> _pcMap, ClassModelMethod _method) {
          int numberOfSlots = _method.getCodeEntry().getMaxLocals();
 
@@ -1617,7 +1684,7 @@ class MethodModel{
          }
 
          //  System.out.println("slots= " + numberOfSlots);
-         SlotTable slotTable = new SlotTable(argsAsStoreSpecs, numberOfSlots, _pcMap.size());
+         slotTable = new SlotTable(argsAsStoreSpecs, numberOfSlots, _pcMap);
          // System.out.println(slotTable);
          for (Entry<Integer, Instruction> entry : _pcMap.entrySet()) {
             int pc = entry.getKey();
@@ -1635,15 +1702,14 @@ class MethodModel{
                      storeSpec);
             }
 
-            System.out.println(" Instruction " + entry.getValue());
+            // System.out.println(" Instruction " + entry.getValue());
          }
          System.out.println(slotTable);
 
       }
 
-      @Override public LocalVariableInfo getVariable(int pc, int index) {
-         // TODO Auto-generated method stub
-         return null;
+      @Override public LocalVariableInfo getVariable(int _pc, int _index) {
+         return (slotTable.slots[_index].createLocalVariableInfo(_index));
       }
 
       @Override public Iterator<LocalVariableInfo> iterator() {
@@ -1675,8 +1741,7 @@ class MethodModel{
 
          LocalVariableTableEntry<LocalVariableInfo> localVariableTableEntry = method.getLocalVariableTableEntry();
          if (Config.enableAllowMissingLocalVariableTable && localVariableTableEntry == null) {
-            logger
-                  .warning("class does not contain a LocalVariableTable - but enableAllowMissingLocalVariableTable is set so we are ignoring");
+            logger.warning("class does not contain a LocalVariableTable - but enableAllowMissingLocalVariableTable is set so we are ignoring");
          } else {
             if (localVariableTableEntry == null) {
                //System.out.println("create local variable table");

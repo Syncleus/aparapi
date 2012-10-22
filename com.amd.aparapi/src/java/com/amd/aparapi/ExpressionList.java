@@ -758,8 +758,7 @@ class ExpressionList{
             LocalVariableTableEntry<LocalVariableInfo> localVariableTable = methodModel.getMethod().getLocalVariableTableEntry();
             int startPc = Short.MAX_VALUE;
             if (Config.enableAllowMissingLocalVariableTable && localVariableTable == null) {
-               logger
-                     .warning("class does not contain a LocalVariableTable - but enableAllowMissingLocalVariableTable is set so we are ignoring");
+               logger.warning("class does not contain a LocalVariableTable - but enableAllowMissingLocalVariableTable is set so we are ignoring");
             } else {
                for (LocalVariableInfo localVariableInfo : localVariableTable) {
 

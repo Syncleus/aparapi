@@ -41,11 +41,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import com.amd.aparapi.ClassModel.ConstantPool;
-import com.amd.aparapi.ClassModel.LocalVariableInfo;
-import com.amd.aparapi.ClassModel.LocalVariableTableEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.Entry;
 import com.amd.aparapi.ClassModel.ConstantPool.FieldEntry;
 import com.amd.aparapi.ClassModel.ConstantPool.MethodEntry;
+import com.amd.aparapi.ClassModel.LocalVariableInfo;
+import com.amd.aparapi.ClassModel.LocalVariableTableEntry;
 
 class InstructionSet{
 
