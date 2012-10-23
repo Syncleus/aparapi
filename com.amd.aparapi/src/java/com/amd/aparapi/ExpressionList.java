@@ -774,6 +774,7 @@ class ExpressionList{
             }
             if (startPc < Short.MAX_VALUE) {
                logger.fine("Scope block from " + startPc + " to  " + (tail.getThisPC() + tail.getLength()));
+               System.out.println("Scope block from " + startPc + " to  " + (tail.getThisPC() + tail.getLength()));
                for (Instruction i = head; i != null; i = i.getNextPC()) {
                   if (i.getThisPC() == startPc) {
                      Instruction startInstruction = i.getRootExpr().getPrevExpr();

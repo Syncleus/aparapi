@@ -79,6 +79,8 @@ class ClassModel{
 
       int getVariableIndex();
 
+      int getLength();
+
    }
 
    interface LocalVariableTableEntry<T extends LocalVariableInfo> extends Iterable<T>{
@@ -1753,7 +1755,7 @@ class ClassModel{
                return (descriptorIndex);
             }
 
-            int getLength() {
+            public int getLength() {
                return (usageLength);
             }
 

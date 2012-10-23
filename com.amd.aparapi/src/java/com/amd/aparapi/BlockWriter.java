@@ -456,8 +456,6 @@ abstract class BlockWriter{
          write(assignedField.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
          write("=");
          writeInstruction(assignedField.getValueToAssign());
-      } else if (_instruction instanceof I_ALOAD_0) {
-         write("this");
       } else if (_instruction instanceof Constant<?>) {
          Constant<?> constantInstruction = (Constant<?>) _instruction;
          Object value = constantInstruction.getValue();
