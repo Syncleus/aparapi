@@ -1513,6 +1513,8 @@ class MethodModel{
 
       List<LocalVariableInfo> list = new ArrayList<LocalVariableInfo>();
 
+      /*
+
       public class SlotTable{
          Slot[] slots;
 
@@ -1666,12 +1668,45 @@ class MethodModel{
 
          }
       }
+      
 
       SlotTable slotTable;
+      */
+
+      class Var{
+
+         int startPc = 0;
+
+         int endPc = 0;
+
+         String name = null;
+
+         // String descriptor;
+         Var(StoreSpec _storeSpec, int _slotIndex, int _startPc) {
+            startPc = _startPc;
+            if (_storeSpec.equals(StoreSpec.A)) {
+               name = "arr_" + _slotIndex;
+            } else {
+               name = _storeSpec.toString().toLowerCase() + "_" + _slotIndex;
+            }
+         }
+
+         Var() {
+            name = "NONE";
+         }
+
+         @Override public boolean equals(Object object) {
+            return (object instanceof Var && ((object == this) || ((Var) object).name.equals(name)));
+         }
+
+         public String toString() {
+            return (name + "[" + startPc + "-" + endPc + "]");
+         }
+      }
 
       public FakeLocalVariableTableEntry(Map<Integer, Instruction> _pcMap, ClassModelMethod _method) {
          int numberOfSlots = _method.getCodeEntry().getMaxLocals();
-
+         Var[] vars = new Var[numberOfSlots];
          MethodDescription description = ClassModel.getMethodDescription(_method.getDescriptor());
          String[] args = description.getArgs();
          StoreSpec[] argsAsStoreSpecs = new StoreSpec[args.length];
@@ -1681,35 +1716,56 @@ class MethodModel{
             } else {
                argsAsStoreSpecs[i] = StoreSpec.valueOf(args[i].substring(0, 1));
             }
+            vars[i] = new Var(argsAsStoreSpecs[i], i, 0);
+         }
+         for (int i = args.length; i < numberOfSlots; i++) {
+            vars[i] = new Var();
          }
 
          //  System.out.println("slots= " + numberOfSlots);
-         slotTable = new SlotTable(argsAsStoreSpecs, numberOfSlots, _pcMap);
+         // slotTable = new SlotTable(argsAsStoreSpecs, numberOfSlots, _pcMap);
          // System.out.println(slotTable);
+
          for (Entry<Integer, Instruction> entry : _pcMap.entrySet()) {
             int pc = entry.getKey();
             Instruction instruction = entry.getValue();
             LoadSpec loadSpec = instruction.getByteCode().getLoad();
             StoreSpec storeSpec = instruction.getByteCode().getStore();
 
+            int slotIndex = -1;
+
             if (loadSpec != LoadSpec.NONE) {
-               slotTable.setLoad(((InstructionSet.LocalVariableTableIndexAccessor) instruction).getLocalVariableTableIndex(), pc,
-                     loadSpec);
+               slotIndex = ((InstructionSet.LocalVariableTableIndexAccessor) instruction).getLocalVariableTableIndex();
+               //  slotTable.setLoad(slotIndex, pc,
+               //    loadSpec);
+               if (vars[slotIndex].endPc < pc) {
+                  vars[slotIndex].endPc = pc;
+               }
 
             }
             if (storeSpec != StoreSpec.NONE) {
-               slotTable.setStore(((InstructionSet.LocalVariableTableIndexAccessor) instruction).getLocalVariableTableIndex(), pc,
-                     storeSpec);
+
+               slotIndex = ((InstructionSet.LocalVariableTableIndexAccessor) instruction).getLocalVariableTableIndex();
+               // slotTable.setStore(slotIndex, pc,
+               //    storeSpec);
+               Var var = new Var(storeSpec, slotIndex, pc);
+               if (!vars[slotIndex].equals(var)) {
+                  vars[slotIndex] = var;
+               }
+
+            }
+            for (int i = 0; i < numberOfSlots; i++) {
+               System.out.print(vars[i] + "|");
             }
 
-            // System.out.println(" Instruction " + entry.getValue());
+            System.out.println(" Instruction " + entry.getValue() + " " + slotIndex);
          }
-         System.out.println(slotTable);
+         //  System.out.println(slotTable);
 
       }
 
       @Override public LocalVariableInfo getVariable(int _pc, int _index) {
-         return (slotTable.slots[_index].createLocalVariableInfo(_index));
+         return (null);//slotTable.slots[_index].createLocalVariableInfo(_index));
       }
 
       @Override public Iterator<LocalVariableInfo> iterator() {
