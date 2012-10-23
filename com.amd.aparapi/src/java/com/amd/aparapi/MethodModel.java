@@ -38,6 +38,9 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 package com.amd.aparapi;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1527,11 +1530,19 @@ class MethodModel{
 
       public FakeLocalVariableTableEntry(Map<Integer, Instruction> _pcMap, ClassModelMethod _method) {
          int numberOfSlots = _method.getCodeEntry().getMaxLocals();
-         Var[] vars = new Var[numberOfSlots];
+
          MethodDescription description = ClassModel.getMethodDescription(_method.getDescriptor());
+
          String[] args = description.getArgs();
-         StoreSpec[] argsAsStoreSpecs = new StoreSpec[args.length];
-         for (int i = 0; i < args.length; i++) {
+         int thisOffset = _method.isStatic() ? 0 : 1;
+         Var[] vars = new Var[numberOfSlots + thisOffset];
+         StoreSpec[] argsAsStoreSpecs = new StoreSpec[args.length + thisOffset];
+         if (thisOffset == 1) {
+            argsAsStoreSpecs[0] = StoreSpec.O;
+            vars[0] = new Var(argsAsStoreSpecs[0], 0, 0, true, list.size());
+            list.add(vars[0]);
+         }
+         for (int i = thisOffset; i < args.length + thisOffset; i++) {
             if (args[i].startsWith("[")) {
                argsAsStoreSpecs[i] = StoreSpec.A;
             } else {
@@ -1540,7 +1551,7 @@ class MethodModel{
             vars[i] = new Var(argsAsStoreSpecs[i], i, 0, true, list.size());
             list.add(vars[i]);
          }
-         for (int i = args.length; i < numberOfSlots; i++) {
+         for (int i = args.length + thisOffset; i < numberOfSlots + thisOffset; i++) {
             vars[i] = new Var();
          }
 
@@ -1571,31 +1582,45 @@ class MethodModel{
                slotIndex = ((InstructionSet.LocalVariableTableIndexAccessor) instruction).getLocalVariableTableIndex();
                // slotTable.setStore(slotIndex, pc,
                //    storeSpec);
-               Var var = new Var(storeSpec, slotIndex, pc, false, list.size()); // will get collected 
+               Var var = new Var(storeSpec, slotIndex, pc + 1, false, list.size()); // will get collected 
                if (!vars[slotIndex].equals(var)) {
                   vars[slotIndex] = var;
                   list.add(vars[slotIndex]);
                }
 
             }
-            for (int i = 0; i < numberOfSlots; i++) {
+            // for (int i = 0; i < numberOfSlots; i++) {
 
-               System.out.print(vars[i] + "|");
-            }
+            //   System.out.print(vars[i] + "|");
+            // }
 
-            System.out.println(" Instruction " + entry.getValue() + " " + slotIndex);
+            //  System.out.println(" Instruction " + entry.getValue() + " " + slotIndex);
          }
-         for (int i = 0; i < numberOfSlots; i++) {
-
+         for (int i = 0; i < numberOfSlots + thisOffset; i++) {
             vars[i].endPc = pc + 1;
          }
+         Arrays.sort(vars, new Comparator<Var>(){
+
+            @Override public int compare(Var o1, Var o2) {
+
+               return o1.startPc - o2.startPc;
+            }
+         });
+
+         Collections.sort(list, new Comparator<LocalVariableInfo>(){
+
+            @Override public int compare(LocalVariableInfo o1, LocalVariableInfo o2) {
+
+               return o1.getStart() - o2.getStart();
+            }
+         });
          System.out.println(" LocalVariableTable:");
          System.out.println(" Start  Length  Slot  Name   Signature");
          for (LocalVariableInfo lvi : list) {
             Var var = (Var) lvi;
-            if (var.arg) {
-               var.endPc = pc;
-            }
+            //  if (var.arg) {
+            //    var.endPc = pc+1;
+            //  }
 
             System.out.println(String.format("%4d %4d %4d %8s %s", var.startPc, var.getLength(), var.variableIndex, var.name,
                   var.descriptor));
