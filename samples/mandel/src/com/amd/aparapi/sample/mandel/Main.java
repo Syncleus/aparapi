@@ -125,7 +125,7 @@ public class Main{
 
       public int getCount(float x, float y, int maxIterations){
 
-         int count =0 ;
+         int count =0;
          float zx = x;
          float zy = y;
          float new_zx = 0f;
