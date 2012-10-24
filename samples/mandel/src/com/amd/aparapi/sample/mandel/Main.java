@@ -123,8 +123,7 @@ public class Main{
 
       }
 
-      public int getCount(float x, float y, int maxIterations){
-
+      public int getCount(float x, float y){
          int count =0;
          float zx = x;
          float zy = y;
@@ -150,9 +149,7 @@ public class Main{
 
          float y = (((gid / width * scale) - ((scale / 2) * height)) / height) + offsety;
 
-         int count = getCount(x,y,maxIterations);
-
-        
+         int count = getCount(x,y);
 
          // Pull the value out of the palette for this iteration count.
          rgb[gid] = pallette[count];
