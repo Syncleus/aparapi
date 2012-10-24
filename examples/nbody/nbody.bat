@@ -4,6 +4,7 @@ java ^
   -Djava.library.path=..\..\com.amd.aparapi.jni\dist;jogamp ^
   -Dcom.amd.aparapi.executionMode=%1 ^
   -Dcom.amd.aparapi.enableProfiling=false ^
+  -Dcom.amd.aparapi.enableShowGeneratedOpenCL=true ^
   -Dbodies=%2 ^
   -Dheight=600 ^
   -Dwidth=600 ^

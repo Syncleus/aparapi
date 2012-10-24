@@ -123,18 +123,9 @@ public class Main{
 
       }
 
-      @Override public void run() {
+      public int getCount(float x, float y, int maxIterations){
 
-         /** Determine which RGB value we are going to process (0..RGB.length). */
-         int gid = getGlobalId();
-
-         /** Translate the gid into an x an y value. */
-         float x = (((gid % width * scale) - ((scale / 2) * width)) / width) + offsetx;
-
-         float y = (((gid / width * scale) - ((scale / 2) * height)) / height) + offsety;
-
-         int count = 0;
-
+         int count =0 ;
          float zx = x;
          float zy = y;
          float new_zx = 0f;
@@ -146,6 +137,22 @@ public class Main{
             zx = new_zx;
             count++;
          }
+         return(count);
+      }
+
+      @Override public void run() {
+
+         /** Determine which RGB value we are going to process (0..RGB.length). */
+         int gid = getGlobalId();
+
+         /** Translate the gid into an x an y value. */
+         float x = (((gid % width * scale) - ((scale / 2) * width)) / width) + offsetx;
+
+         float y = (((gid / width * scale) - ((scale / 2) * height)) / height) + offsety;
+
+         int count = getCount(x,y,maxIterations);
+
+        
 
          // Pull the value out of the palette for this iteration count.
          rgb[gid] = pallette[count];
