@@ -155,9 +155,7 @@ class Config{
 
    static final boolean enableSWITCH = Boolean.getBoolean(propPkgName + ".enable.SWITCH");
 
-   // Lambda testing requires this because static lambda methods currently do not have localvariabletables.  This may change when Java8 if finalized
-   static final boolean enableAllowMissingLocalVariableTable = Boolean.getBoolean(propPkgName
-         + ".enableAllowMissingLocalVariableTable");
+   public static boolean enableShowFakeLocalVariableTable = Boolean.getBoolean(propPkgName + ".enableShowFakeLocalVariableTable");
 
    // Logging setup
    private static final String logPropName = propPkgName + ".logLevel";

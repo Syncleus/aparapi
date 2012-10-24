@@ -1283,7 +1283,8 @@ class InstructionSet{
       }
 
       @Override public boolean isDeclaration() {
-         LocalVariableInfo lvi = method.getLocalVariableTableEntry().getVariable(getThisPC() + getLength(), getLocalVariableTableIndex());
+         LocalVariableInfo lvi = method.getLocalVariableTableEntry().getVariable(getThisPC() + getLength(),
+               getLocalVariableTableIndex());
          return (lvi.getStart() == getThisPC() + getLength());
       }
 
@@ -1302,7 +1303,7 @@ class InstructionSet{
       }
 
       @Override public final LocalVariableInfo getLocalVariableInfo() {
-         
+
          return (method.getLocalVariableTableEntry().getVariable(getThisPC() + getLength(), getLocalVariableTableIndex()));
       }
    }
