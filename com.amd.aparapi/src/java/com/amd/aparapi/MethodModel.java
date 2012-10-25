@@ -1464,16 +1464,16 @@ class MethodModel{
 
          int endPc = 0;
 
-         int variableIndex = 0;
-
          String name = null;
 
          boolean arg;
 
          String descriptor = "";
 
-         Var(StoreSpec _storeSpec, int _slotIndex, int _startPc, boolean _arg, int _variableIndex) {
-            variableIndex = _variableIndex;
+         int slotIndex;
+
+         Var(StoreSpec _storeSpec, int _slotIndex, int _startPc, boolean _arg) {
+            slotIndex = _slotIndex;
             arg = _arg;
             startPc = _startPc;
             if (_storeSpec.equals(StoreSpec.A)) {
@@ -1523,7 +1523,7 @@ class MethodModel{
          }
 
          @Override public int getVariableIndex() {
-            return (variableIndex);
+            return (slotIndex);
          }
       }
 
@@ -1542,7 +1542,7 @@ class MethodModel{
          StoreSpec[] argsAsStoreSpecs = new StoreSpec[args.length + thisOffset];
          if (thisOffset == 1) {
             argsAsStoreSpecs[0] = StoreSpec.O;
-            vars[0] = new Var(argsAsStoreSpecs[0], 0, 0, true, list.size());
+            vars[0] = new Var(argsAsStoreSpecs[0], 0, 0, true);
             list.add(vars[0]);
 
          }
@@ -1552,7 +1552,7 @@ class MethodModel{
             } else {
                argsAsStoreSpecs[i + thisOffset] = StoreSpec.valueOf(args[i].substring(0, 1));
             }
-            vars[i + thisOffset] = new Var(argsAsStoreSpecs[i + thisOffset], i + thisOffset, 0, true, list.size());
+            vars[i + thisOffset] = new Var(argsAsStoreSpecs[i + thisOffset], i + thisOffset, 0, true);
             list.add(vars[i + thisOffset]);
          }
          for (int i = args.length + thisOffset; i < numberOfSlots + thisOffset; i++) {
@@ -1565,44 +1565,31 @@ class MethodModel{
             pc = entry.getKey();
             instruction = entry.getValue();
             StoreSpec storeSpec = instruction.getByteCode().getStore();
-
             if (storeSpec != StoreSpec.NONE) {
                int slotIndex = ((InstructionSet.LocalVariableTableIndexAccessor) instruction).getLocalVariableTableIndex();
                Var prevVar = vars[slotIndex];
-               Var var = new Var(storeSpec, slotIndex, pc + instruction.getLength(), false, list.size()); // will get collected 
+               Var var = new Var(storeSpec, slotIndex, pc + instruction.getLength(), false); // will get collected pretty soon if this is not the same as the previous in this slot
                if (!prevVar.equals(var)) {
                   prevVar.endPc = pc;
                   vars[slotIndex] = var;
                   list.add(vars[slotIndex]);
                }
-
             }
-
          }
          for (int i = 0; i < numberOfSlots + thisOffset; i++) {
             vars[i].endPc = pc + instruction.getLength();
          }
-
          Collections.sort(list, new Comparator<LocalVariableInfo>(){
-
             @Override public int compare(LocalVariableInfo o1, LocalVariableInfo o2) {
-
                return o1.getStart() - o2.getStart();
             }
          });
-
-         int i = 0;
-         for (LocalVariableInfo lvi : list) {
-            Var var = (Var) lvi;
-
-            var.variableIndex = i++;
-         }
          if (Config.enableShowFakeLocalVariableTable) {
             System.out.println("FakeLocalVariableTable:");
             System.out.println(" Start  Length  Slot    Name   Signature");
             for (LocalVariableInfo lvi : list) {
                Var var = (Var) lvi;
-               System.out.println(String.format(" %5d   %5d  %4d  %8s     %s", var.startPc, var.getLength(), var.variableIndex,
+               System.out.println(String.format(" %5d   %5d  %4d  %8s     %s", var.startPc, var.getLength(), var.slotIndex,
                      var.name, var.descriptor));
             }
          }
@@ -1613,15 +1600,14 @@ class MethodModel{
          LocalVariableInfo returnValue = null;
          //  System.out.println("pc = " + _pc + " index = " + _index);
          for (LocalVariableInfo localVariableInfo : list) {
-            //  System.out.println("   start=" + localVariableInfo.getStart() + " length=" + localVariableInfo.getLength()
-            //   + " varidx=" + localVariableInfo.getVariableIndex());
+            // System.out.println("   start=" + localVariableInfo.getStart() + " length=" + localVariableInfo.getLength()
+            // + " varidx=" + localVariableInfo.getVariableIndex());
             if (_pc >= localVariableInfo.getStart() - 1 && _pc <= (localVariableInfo.getStart() + localVariableInfo.getLength())
                   && _index == localVariableInfo.getVariableIndex()) {
                returnValue = localVariableInfo;
                break;
             }
          }
-         // System.out.println("returning " + returnValue);
          return (returnValue);
       }
 
