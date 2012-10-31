@@ -2403,6 +2403,11 @@ class ClassModel{
       ClassModel getClassModel() {
          return (ClassModel.this);
       }
+      
+      public String toString() {
+    	 return getClassModel().getClassWeAreModelling().getName() + "." + 
+            getName() + " " + getDescriptor();
+      }
 
    }
 
