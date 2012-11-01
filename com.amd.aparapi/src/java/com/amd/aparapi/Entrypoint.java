@@ -64,6 +64,7 @@ import com.amd.aparapi.InstructionSet.AssignToField;
 import com.amd.aparapi.InstructionSet.I_ARRAYLENGTH;
 import com.amd.aparapi.InstructionSet.I_GETFIELD;
 import com.amd.aparapi.InstructionSet.I_INVOKESPECIAL;
+import com.amd.aparapi.InstructionSet.I_INVOKESTATIC;
 import com.amd.aparapi.InstructionSet.I_INVOKEVIRTUAL;
 import com.amd.aparapi.InstructionSet.MethodCall;
 import com.amd.aparapi.InstructionSet.TypeSpec;
@@ -230,7 +231,10 @@ class Entrypoint{
 
    /*
     * Update the list of object array member classes and all the superclasses
-    * of those classes and the fields in each class
+    * of those classes and the fields in each class. 
+    * 
+    * It is important to have only one ClassModel for each class used in the kernel
+    * and only one MethodModel per method, so comparison operations work properly.
     */
    ClassModel getOrUpdateAllClassAccesses(String className) throws AparapiException {
       ClassModel memberClassModel = allFieldsClasses.get(className);
@@ -392,6 +396,61 @@ class Entrypoint{
          }
       }
    }
+   
+   /*
+    * Find a suitable call target in the kernel class, supers, object members or static calls
+    */
+   ClassModelMethod resolveCalledMethod(MethodCall methodCall, ClassModel classModel) throws AparapiException {
+      MethodEntry methodEntry = methodCall.getConstantPoolMethodEntry();
+      int thisClassIndex = classModel.getThisClassConstantPoolIndex();//arf
+      boolean isMapped = (thisClassIndex != methodEntry.getClassIndex()) && Kernel.isMappedMethod(methodEntry);
+      if (logger.isLoggable(Level.FINE)) {
+         if (methodCall instanceof I_INVOKESPECIAL) {
+            logger.fine("Method call to super: " + methodEntry);
+         } else if (thisClassIndex != methodEntry.getClassIndex()) {
+            logger.fine("Method call to ??: " + methodEntry + ", isMappedMethod=" + isMapped);
+         } else {
+            logger.fine("Method call in kernel class: " + methodEntry);
+         }
+      }
+
+      ClassModelMethod m = classModel.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL) ? true : false);
+
+      // Did not find method in this class or supers. Look for data member object arrays
+      if (m == null && !isMapped) {
+         m = resolveAccessorCandidate(methodCall, methodEntry);
+      }
+
+      // Look for a intra-object call in a object member
+      if (m == null && !isMapped) {
+         for (ClassModel c : allFieldsClasses.values()) {
+            if (c.getClassWeAreModelling().getName()
+                  .equals(methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.'))) {
+               m = c.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL) ? true : false);
+               assert m != null;
+               break;
+            }
+         }
+      }
+      
+      // Look for static call to some other class
+      if ((m == null) && !isMapped && (methodCall instanceof I_INVOKESTATIC)) {
+         String otherClassName = methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.');
+         ClassModel otherClassModel = getOrUpdateAllClassAccesses(otherClassName);
+        
+         //if (logger.isLoggable(Level.FINE)) {
+         //   logger.fine("Looking for: " + methodEntry + " in other class " + otherClass.getName());
+         //}
+         // false because INVOKESPECIAL not allowed here 
+         m = otherClassModel.getMethod(methodEntry, false);
+      }
+
+      if (logger.isLoggable(Level.INFO)) {
+         logger.fine("Selected method for: " + methodEntry + " is " + m);
+      }
+      
+      return m;
+   }
 
    Entrypoint(ClassModel _classModel, MethodModel _methodModel, Object _k) throws AparapiException {
       classModel = _classModel;
@@ -401,7 +460,6 @@ class Entrypoint{
       Map<ClassModelMethod, MethodModel> methodMap = new LinkedHashMap<ClassModelMethod, MethodModel>();
 
       boolean discovered = true;
-      int thisClassIndex = _classModel.getThisClassConstantPoolIndex();//arf
 
       // Record which pragmas we need to enable
       if (methodModel.requiresDoublePragma()) {
@@ -418,31 +476,15 @@ class Entrypoint{
          }
       }
 
+      // Collect all methods called directly from kernel's run method
       for (MethodCall methodCall : methodModel.getMethodCalls()) {
-         MethodEntry methodEntry = methodCall.getConstantPoolMethodEntry();
-         if (logger.isLoggable(Level.FINE)) {
-            if (methodCall instanceof I_INVOKESPECIAL) {
-               logger.fine("Method call to super: " + methodEntry);
-            } else if (thisClassIndex != methodEntry.getClassIndex()) {
-               logger.fine("Method call to ??: " + methodEntry);
-            } else {
-               logger.fine("Method call in kernel class: " + methodEntry);
-            }
-         }
-
-         ClassModelMethod m = classModel.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL) ? true : false);
-
-         // Did not find method in this class or supers. Look for data member object arrays
-         if (m == null) {
-            m = resolveAccessorCandidate(methodCall, methodEntry);
-         }
-
+         ClassModelMethod m = resolveCalledMethod(methodCall, classModel);
          if (m != null && !methodMap.keySet().contains(m)) {
             MethodModel target = new MethodModel(m, this);
             methodMap.put(m, target);
             methodModel.getCalledMethods().add(target);
             discovered = true;
-         }
+         }         
       }
 
       // methodMap now contains a list of method called by run itself().
@@ -451,31 +493,7 @@ class Entrypoint{
          discovered = false;
          for (MethodModel mm : new ArrayList<MethodModel>(methodMap.values())) {
             for (MethodCall methodCall : mm.getMethodCalls()) {
-               MethodEntry methodEntry = methodCall.getConstantPoolMethodEntry();
-
-               if (logger.isLoggable(Level.FINE)) {
-                  logger.fine("Looking for: " + methodEntry + " called by " + mm.getMethod().getName());
-               }
-
-               ClassModelMethod m = classModel.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL) ? true : false);
-
-               // Did not find method in this class or supers. Look for data member object arrays
-               if (m == null) {
-                  m = resolveAccessorCandidate(methodCall, methodEntry);
-               }
-
-               // Look for a intra-object call in a object member
-               if (m == null) {
-                  for (ClassModel c : allFieldsClasses.values()) {
-                     if (c.getClassWeAreModelling().getName()
-                           .equals(methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.'))) {
-                        m = c.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL) ? true : false);
-                        assert m != null;
-                        break;
-                     }
-                  }
-               }
-
+               ClassModelMethod m = resolveCalledMethod(methodCall, classModel);
                if (m != null) {
                   MethodModel target = null;
                   if (methodMap.keySet().contains(m)) {
@@ -484,7 +502,7 @@ class Entrypoint{
                      // then when we reverse the collection (below) we get the method 
                      // declarations in the correct order.  We are trying to avoid creating forward references
                      target = methodMap.remove(m);
-                     if (logger.isLoggable(Level.FINE)) {
+                     if (logger.isLoggable(Level.FINEST)) {
                         logger.fine("repositioning : " + m.getClassModel().getClassWeAreModelling().getName() + " " + m.getName()
                               + " " + m.getDescriptor());
                      }
@@ -826,9 +844,11 @@ class Entrypoint{
     */
    MethodModel getCallTarget(MethodEntry _methodEntry, boolean _isSpecial) {
       ClassModelMethod target = getClassModel().getMethod(_methodEntry, _isSpecial);
+      boolean isMapped = Kernel.isMappedMethod(_methodEntry);
 
       if (logger.isLoggable(Level.FINE) && target == null) {
-         logger.info("Did not find call target: " + _methodEntry + " in " + getClassModel().getClassWeAreModelling().getName());
+         logger.fine("Did not find call target: " + _methodEntry + " in " + 
+            getClassModel().getClassWeAreModelling().getName() + " isMapped=" + isMapped);
       }
 
       if (target == null) {
@@ -837,7 +857,7 @@ class Entrypoint{
             String entryClassNameInDotForm = _methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.');
             if (entryClassNameInDotForm.equals(memberObjClass.getClassWeAreModelling().getName())) {
                if (logger.isLoggable(Level.FINE)) {
-                  logger.info("Searching for call target: " + _methodEntry + " in "
+                  logger.fine("Searching for call target: " + _methodEntry + " in "
                         + memberObjClass.getClassWeAreModelling().getName());
                }
 
@@ -857,6 +877,21 @@ class Entrypoint{
                }
                return m;
             }
+         }
+      }
+            
+      // Search for static calls to other classes
+      for (MethodModel m : calledMethods) {
+         if (logger.isLoggable(Level.FINE)) {
+            logger.fine("Searching for call target: " + _methodEntry + " in " + m.getName());
+         }         
+         if (m.getMethod().getName().equals(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8())
+                 && m.getMethod().getDescriptor().equals(_methodEntry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8())) {
+            if (logger.isLoggable(Level.FINE)) {
+               logger.fine("Found " + m.getMethod().getClassModel().getClassWeAreModelling().getName() + 
+            		   "." + m.getMethod().getName() + " " + m.getMethod().getDescriptor());
+            }
+            return m;
          }
       }
 

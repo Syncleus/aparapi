@@ -216,12 +216,15 @@ abstract class KernelWriter extends BlockWriter{
          if (intrinsicMapping == null) {
             assert entryPoint != null : "entryPoint should not be null";
             boolean isSpecial = _methodCall instanceof I_INVOKESPECIAL;
+            boolean isMapped = Kernel.isMappedMethod(_methodEntry);
             MethodModel m = entryPoint.getCallTarget(_methodEntry, isSpecial);
 
             if (m != null) {
                write(m.getName());
             } else {
                // Must be a library call like rsqrt
+               assert isMapped : _methodEntry + " should be mapped method!"; 
+            	
                write(methodName);
                isIntrinsic = true;
             }
