@@ -41,6 +41,8 @@ public class CallStaticFromAnonymousKernel {
          }   
       };  
       kernel.execute(size);
+     
+      assertTrue("ran on GPU", kernel.getExecutionMode()==Kernel.EXECUTION_MODE.GPU);
 
       for(int i=0; i<size; i++) {
 	 System.out.println(results[i] + " == " + fooBar(values[i]) + AnotherClass.foo(i));
