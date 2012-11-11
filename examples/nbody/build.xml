@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 
 <project name="nbody" default="build" basedir=".">
-   <property name="jogamp-jar-url" value="http://jogamp.org/deployment/archive/rc/gluegen_28-joal_17-jogl_41-jocl_25/jar"/>
+   <!--<property name="jogamp-jar-url" value="http://jogamp.org/deployment/archive/rc/gluegen_28-joal_17-jogl_41-jocl_25/jar"/>-->
+   <property name="jogamp-jar-url" value="http://jogamp.org/deployment/archive/rc/gluegen_52-joal_32-jogl_66-jocl_41/jar"/>
 
    <path id="compiler.class.path">
       <pathelement path="../../com.amd.aparapi/dist/aparapi.jar"/>
-      <pathelement path="jogamp/jogl.all.jar"/>
+      <pathelement path="jogamp/jogl-all.jar"/>
       <pathelement path="jogamp/gluegen-rt.jar"/>
    </path>
 
@@ -19,7 +20,7 @@
       <get dest="jogamp">
          <url url="${jogamp-jar-url}/jogl-all-natives-windows-i586.jar"/> 
          <url url="${jogamp-jar-url}/gluegen-rt-natives-windows-i586.jar"/> 
-         <url url="${jogamp-jar-url}/jogl.all.jar"/> 
+         <url url="${jogamp-jar-url}/jogl-all.jar"/> 
          <url url="${jogamp-jar-url}/gluegen-rt.jar"/> 
       </get>
       <unzip src="jogamp/jogl-all-natives-windows-i586.jar" dest="jogamp"/>
@@ -32,7 +33,7 @@
       <get dest="jogamp">
          <url url="${jogamp-jar-url}/jogl-all-natives-windows-amd64.jar"/> 
          <url url="${jogamp-jar-url}/gluegen-rt-natives-windows-amd64.jar"/> 
-         <url url="${jogamp-jar-url}/jogl.all.jar"/> 
+         <url url="${jogamp-jar-url}/jogl-all.jar"/> 
          <url url="${jogamp-jar-url}/gluegen-rt.jar"/> 
       </get>
       <unzip src="jogamp/jogl-all-natives-windows-amd64.jar" dest="jogamp"/>
@@ -45,7 +46,7 @@
       <get dest="jogamp">
          <url url="${jogamp-jar-url}/jogl-all-natives-linux-i586.jar"/> 
          <url url="${jogamp-jar-url}/gluegen-rt-natives-linux-i586.jar"/> 
-         <url url="${jogamp-jar-url}/jogl.all.jar"/> 
+         <url url="${jogamp-jar-url}/jogl-all.jar"/> 
          <url url="${jogamp-jar-url}/gluegen-rt.jar"/> 
       </get>
       <unzip src="jogamp/jogl-all-natives-linux-i586.jar" dest="jogamp"/>
@@ -58,7 +59,7 @@
       <get dest="jogamp">
          <url url="${jogamp-jar-url}/jogl-all-natives-linux-amd64.jar"/> 
          <url url="${jogamp-jar-url}/gluegen-rt-natives-linux-amd64.jar"/> 
-         <url url="${jogamp-jar-url}/jogl.all.jar"/> 
+         <url url="${jogamp-jar-url}/jogl-all.jar"/> 
          <url url="${jogamp-jar-url}/gluegen-rt.jar"/> 
       </get>
       <unzip src="jogamp/jogl-all-natives-linux-amd64.jar" dest="jogamp"/>
@@ -71,7 +72,7 @@
 	  <get dest="jogamp">
 	     <url url="${jogamp-jar-url}/jogl-all-natives-macosx-universal.jar"/> 
 	     <url url="${jogamp-jar-url}/gluegen-rt-natives-macosx-universal.jar"/> 
-	     <url url="${jogamp-jar-url}/jogl.all.jar"/> 
+	     <url url="${jogamp-jar-url}/jogl-all.jar"/> 
 	     <url url="${jogamp-jar-url}/gluegen-rt.jar"/> 
 	  </get>
 	  <unzip src="jogamp/jogl-all-natives-macosx-universal.jar" dest="jogamp"/>
@@ -89,7 +90,7 @@
             </or>
             <not><available file="jogamp/jogl-all-natives-windows-i586.jar"/> </not>
             <not><available file="jogamp/gluegen-rt-natives-windows-i586.jar"/> </not>
-            <not><available file="jogamp/jogl.all.jar"/> </not>
+            <not><available file="jogamp/jogl-all.jar"/> </not>
             <not><available file="jogamp/gluegen-rt.jar"/> </not>
          </and>
       </condition>
@@ -104,7 +105,7 @@
             </not>
             <not><available file="jogamp/jogl-all-natives-windows-amd64.jar"/> </not>
             <not><available file="jogamp/gluegen-rt-natives-windows-amd64.jar"/> </not>
-            <not><available file="jogamp/jogl.all.jar"/> </not>
+            <not><available file="jogamp/jogl-all.jar"/> </not>
             <not><available file="jogamp/gluegen-rt.jar"/> </not>
          </and>
       </condition>
@@ -120,7 +121,7 @@
             </or>
             <not><available file="jogamp/jogl-all-natives-linux-i586.jar"/> </not>
             <not><available file="jogamp/gluegen-rt-natives-linux-i586.jar"/> </not>
-            <not><available file="jogamp/jogl.all.jar"/> </not>
+            <not><available file="jogamp/jogl-all.jar"/> </not>
             <not><available file="jogamp/gluegen-rt.jar"/> </not>
          </and>
       </condition>
@@ -138,7 +139,7 @@
             </not>
             <not><available file="jogamp/jogl-all-natives-linux-amd64.jar"/> </not>
             <not><available file="jogamp/gluegen-rt-natives-linux-amd64.jar"/> </not>
-            <not><available file="jogamp/jogl.all.jar"/> </not>
+            <not><available file="jogamp/jogl-all.jar"/> </not>
             <not><available file="jogamp/gluegen-rt.jar"/> </not>
          </and>
       </condition>
@@ -153,7 +154,7 @@
    	        </not>
    	        <not><available file="jogamp/jogl-all-natives-macosx-universal.jar"/> </not>
    	        <not><available file="jogamp/gluegen-rt-natives-macosx-universal.jar"/> </not>
-   	        <not><available file="jogamp/jogl.all.jar"/> </not>
+   	        <not><available file="jogamp/jogl-all.jar"/> </not>
    	        <not><available file="jogamp/gluegen-rt.jar"/> </not>
    	     </and>
    	  </condition>
