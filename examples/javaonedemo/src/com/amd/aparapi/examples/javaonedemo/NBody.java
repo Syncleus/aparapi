@@ -198,6 +198,8 @@ public class NBody{
 
    public static boolean running;
 
+   public static Texture texture;
+
    public static void main(String _args[]) {
 
       final NBodyKernel kernel = new NBodyKernel(Range.create(Integer.getInteger("bodies", 10000)));
@@ -290,6 +292,8 @@ public class NBody{
          @Override public void display(GLAutoDrawable drawable) {
 
             GL2 gl = drawable.getGL().getGL2();
+        texture.enable(gl);
+        texture.bind(gl);
 
             gl.glLoadIdentity();
             gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
@@ -339,8 +343,7 @@ public class NBody{
             gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
             try {
                InputStream textureStream = NBody.class.getResourceAsStream("particle.jpg");
-               Texture texture = TextureIO.newTexture(textureStream, false, null);
-               texture.enable(gl);
+               texture = TextureIO.newTexture(textureStream, false, null);
             } catch (IOException e) {
                e.printStackTrace();
             } catch (GLException e) {

@@ -4,7 +4,7 @@
 
    <path id="compiler.class.path">
       <pathelement path="../../com.amd.aparapi/dist/aparapi.jar"/>
-      <pathelement path="jogamp/jogl.all.jar"/>
+      <pathelement path="jogamp/jogl-all.jar"/>
       <pathelement path="jogamp/gluegen-rt.jar"/>
    </path>
 
