@@ -1067,6 +1067,20 @@ JNI_JAVA(jint, KernelRunner, runKernelJNI)
             return status;
          }
 
+		// -----------
+		// fix for Mac OSX CPU driver (and possibly others) which fail to give correct maximum work group info
+		// while using clGetDeviceInfo
+		// see: http://www.openwall.com/lists/john-dev/2012/04/10/4
+		cl_uint max_group_size[3];
+        status = clGetKernelWorkGroupInfo(jniContext->kernel, (cl_device_id)jniContext->deviceId, CL_KERNEL_WORK_GROUP_SIZE, sizeof(max_group_size), &max_group_size, NULL);
+        
+		if (status != CL_SUCCESS) {
+			PRINT_CL_ERR(status, "clGetKernelWorkGroupInfo()");
+		} else {
+			range.localDims[0] = range.localDims[0] > max_group_size[0] ? max_group_size[0] : range.localDims[0];
+		}
+		// ------ end fix
+
          // two options here due to passid
          if (passid == 0){
             //fprintf(stderr, "setting passid to %d of %d first and last\n", passid, passes);
