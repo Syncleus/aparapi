@@ -1594,9 +1594,9 @@ class KernelRunner{
                   } catch (AparapiException e) {
                      warnFallBackAndExecute(_entrypointName, _range, _passes, e);
                   }
+               } else {
+                  warnFallBackAndExecute(_entrypointName, _range, _passes, "failed to locate entrypoint");
                }
-            } else {
-               warnFallBackAndExecute(_entrypointName, _range, _passes, "failed to locate entrypoint");
             }
          } else {
             try {
