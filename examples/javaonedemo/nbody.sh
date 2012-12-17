@@ -1,4 +1,4 @@
-
+#!/bin/bash 
 case $(uname -i) in 
     x86_64 )
         export ARCH=linux-amd64 ;;
