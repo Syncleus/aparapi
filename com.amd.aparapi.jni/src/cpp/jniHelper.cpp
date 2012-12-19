@@ -234,7 +234,7 @@ jobject JNIHelper::getStaticFieldObject(JNIEnv *jenv, char *className, char *fie
       return(NULL);
    }
 
-   jobject value = jenv->GetStaticObjectField(NULL, fieldId);
+   jobject value = jenv->GetStaticObjectField(theClass, fieldId);
    if (value == NULL || jenv->ExceptionCheck()) {
       jenv->ExceptionDescribe(); 
       jenv->ExceptionClear();
