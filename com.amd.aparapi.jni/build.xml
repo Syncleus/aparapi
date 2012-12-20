@@ -502,6 +502,7 @@ First consider editing the properties in build.properties
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
+         <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="-I${java.home}/../include" />
          <arg value="-I${java.home}/../include/linux" />
          <arg value="-Iinclude" />
@@ -528,6 +529,7 @@ First consider editing the properties in build.properties
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
+         <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="-I/System/Library/Frameworks/JavaVM.framework/Headers" />
          <arg value="-Iinclude" />
          <arg value="-shared" />
@@ -554,6 +556,7 @@ First consider editing the properties in build.properties
          <arg value="/nologo" />
          <arg value="/TP" />
          <arg value="/Ox" />
+         <arg value="/DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="/I${msvc.dir}\vc\include" />
          <arg value="/I${msvc.sdk.dir}\include" />
          <arg value="/I${java.home}\..\include" />
@@ -585,6 +588,7 @@ First consider editing the properties in build.properties
          <arg value="-Wall" />
          <arg value="-O3" />
          <arg value="-Wl,--kill-at" />
+         <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="-I${java.home}\..\include" />
          <arg value="-I${java.home}\..\include\win32" />
          <arg value="-Iinclude" />
@@ -614,6 +618,7 @@ First consider editing the properties in build.properties
          <arg value="/nologo" />
          <arg value="/TP" />
          <arg value="/Ox" />
+         <arg value="/DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="/I${msvc.dir}\vc\include" />
          <arg value="/I${msvc.sdk.dir}\include" />
          <arg value="/I${amd.app.sdk.dir}\include" />
@@ -634,6 +639,7 @@ First consider editing the properties in build.properties
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
+         <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="-I/System/Library/Frameworks/JavaVM.framework/Headers" />
          <arg value="-Iinclude" />
          <arg value="src/cpp/cltest.cpp" />
@@ -651,6 +657,7 @@ First consider editing the properties in build.properties
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
+         <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="-I${java.home}/../include" />
          <arg value="-I${java.home}/../include/linux" />
          <arg value="-I${amd.app.sdk.dir}/include" />
