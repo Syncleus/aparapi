@@ -211,11 +211,13 @@ public class Main {
 
   public static boolean running;
 
+  public static Texture texture = null;
+
   public static void main(String _args[]) {
-	int bodyCount = Integer.getInteger("bodies", 8192);
+	final int bodyCount = Integer.getInteger("bodies", 8192);
 
     //final Main kernel = new Main(bodyCount);
-    final NBodyKernel kernel = new NBodyKernel(Range.create(Integer.getInteger("bodies", 8192)));
+    final NBodyKernel kernel = new NBodyKernel(Range.create(bodyCount));
 
     final JFrame frame = new JFrame("NBody");
 
@@ -290,7 +292,8 @@ public class Main {
       public void display(GLAutoDrawable drawable) {
 
         final GL2 gl = drawable.getGL().getGL2();
-
+        texture.enable(gl);
+        texture.bind(gl);
         gl.glLoadIdentity();
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
         gl.glColor3f(1f, 1f, 1f);
@@ -331,9 +334,13 @@ public class Main {
         gl.glShadeModel(GLLightingFunc.GL_SMOOTH);
         gl.glEnable(GL.GL_BLEND);
         gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
+        
+        gl.glEnable(GL.GL_TEXTURE_2D);
+        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+         gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
         try {
           final InputStream textureStream = Main.class.getResourceAsStream("particle.jpg");
-          final Texture texture = TextureIO.newTexture(textureStream, false, null);
+          texture = TextureIO.newTexture(textureStream, false, null);
           texture.enable(gl);
         } catch (final IOException e) {
           e.printStackTrace();
