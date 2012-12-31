@@ -4,8 +4,8 @@
 
    <path id="compiler.class.path">
       <pathelement path="../../com.amd.aparapi/dist/aparapi.jar"/>
-      <pathelement path="jogamp/jogl-all.jar"/>
-      <pathelement path="jogamp/gluegen-rt.jar"/>
+      <pathelement path="../third-party/jogamp/jogl-all.jar"/>
+      <pathelement path="../third-party/jogamp/gluegen-rt.jar"/>
    </path>
 
    <path id="runtime.class.path" cache="true">
