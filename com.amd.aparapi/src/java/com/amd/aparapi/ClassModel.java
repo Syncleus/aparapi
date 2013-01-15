@@ -38,6 +38,7 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 package com.amd.aparapi;
 
 import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -150,6 +151,11 @@ class ClassModel{
 
       parse(_inputStream);
 
+   }
+
+   ClassModel(Class<?> _clazz,  byte[] _bytes) throws ClassParseException {
+      clazz = _clazz;
+      parse(new ByteArrayInputStream(_bytes));
    }
 
    /**

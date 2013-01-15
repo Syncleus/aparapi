@@ -56,6 +56,14 @@ class Config{
 
    private static final String propPkgName = Config.class.getPackage().getName();
 
+   /**
+    * Allows the user to request to use a jvmti agent to access JNI code rather than loading explicitly.
+    * 
+    * Usage -agentpath=/full/path/to/agent.dll -Dcom.amd.aparapi.useAgent=true
+    */
+    
+   static final boolean useAgent = Boolean.getBoolean(propPkgName + ".useAgent");
+
    static final boolean disableUnsafe = Boolean.getBoolean(propPkgName + ".disableUnsafe");
 
    /**

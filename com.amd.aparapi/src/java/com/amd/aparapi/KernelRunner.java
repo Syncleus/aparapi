@@ -1371,7 +1371,12 @@ class KernelRunner{
          if ((device == null) || (device instanceof OpenCLDevice)) {
             if (entryPoint == null) {
                try {
-                  ClassModel classModel = new ClassModel(kernel.getClass());
+                  ClassModel classModel = null;
+                  if (Config.useAgent){
+                     classModel = new ClassModel(kernel.getClass(), OpenCLJNI.getJNI().getBytes(kernel.getClass().getName()));
+                  }else{
+                     classModel = new ClassModel(kernel.getClass());
+                  }
                   entryPoint = classModel.getEntrypoint(_entrypointName, kernel);
                } catch (Exception exception) {
                   return warnFallBackAndExecute(_entrypointName, _range, _passes, exception);
