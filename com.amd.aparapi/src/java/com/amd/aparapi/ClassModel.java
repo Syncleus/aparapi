@@ -816,7 +816,6 @@ class ClassModel{
 
       class InvokeDynamicEntry extends Entry{
          // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4
-         private int descriptorIndex;
 
          private int bootstrapMethodAttrIndex;
 
@@ -826,14 +825,6 @@ class ClassModel{
             super(_byteReader, _slot, ConstantPoolType.INVOKEDYNAMIC);
             bootstrapMethodAttrIndex = _byteReader.u2();
             nameAndTypeIndex = _byteReader.u2();
-         }
-
-         int getDescriptorIndex() {
-            return (descriptorIndex);
-         }
-
-         UTF8Entry getDescriptorUTF8Entry() {
-            return (ConstantPool.this.getUTF8Entry(descriptorIndex));
          }
 
          int getBootstrapMethodAttrIndex() {

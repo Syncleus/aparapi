@@ -517,6 +517,7 @@ First consider editing the properties in build.properties
          <arg value="src/cpp/opencljni.cpp" />
          <arg value="src/cpp/jniHelper.cpp" />
          <arg value="src/cpp/clHelper.cpp" />
+         <arg value="src/cpp/classtools.cpp" />
          <arg value="src/cpp/agent.cpp" />
          <arg value="-L${amd.app.sdk.dir}/lib/${x86_or_x86_64}" />
          <arg value="-lOpenCL" />
@@ -673,5 +674,20 @@ First consider editing the properties in build.properties
       </exec>
    </target>
 
+   <target name="gcc_clt" if="use.gcc">
+      <mkdir dir="${basedir}/dist"/>
+      <echo message="gcc cltest ${os.arch}" />
+      <exec executable="g++">
+         <arg value="-O3" />
+         <arg value="-g" />
+         <arg value="-fPIC" />
+         <arg value="src/cpp/classtools.cpp" />
+         <arg value="src/cpp/classtoolstest.cpp" />
+         <arg value="-o" />
+         <arg value="${basedir}/clt" />
+      </exec>
+   </target>
+
    <target name="cltest" depends="check,msvc_cltest,mac_cltest,gcc_cltest" />
+   <target name="clt" depends="check,gcc_clt" />
 </project>
