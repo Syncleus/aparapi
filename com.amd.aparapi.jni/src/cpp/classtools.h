@@ -225,6 +225,39 @@ class InvokeDynamicConstantPoolEntry : public ConstantPoolEntry{
 
 class AttributeInfo; // forward
 
+class LineNumberTableAttribute{
+   class LineNumberTableEntry{
+   private:
+     u2_t start_pc;
+     u2_t line_number; 
+   public:
+      LineNumberTableEntry(ByteBuffer *_byteBuffer, ConstantPoolEntry **_constantPool);
+   };
+  private:
+    u2_t line_number_table_length;
+    LineNumberTableEntry **lineNumberTable;
+  public:
+      LineNumberTableAttribute(ByteBuffer *_byteBuffer, ConstantPoolEntry **_constantPool);
+};
+
+class LocalVariableTableAttribute{
+   class LocalVariableTableEntry{
+   private:
+     u2_t start_pc;
+     u2_t length; 
+     u2_t name_index; 
+     u2_t descriptor_index; 
+     u2_t index; 
+   public:
+      LocalVariableTableEntry(ByteBuffer *_byteBuffer, ConstantPoolEntry **_constantPool);
+   };
+  private:
+    u2_t local_variable_table_length;
+    LocalVariableTableEntry **localVariableTable;
+  public:
+      LocalVariableTableAttribute(ByteBuffer *_byteBuffer, ConstantPoolEntry **_constantPool);
+};
+
 class CodeAttribute{
    class ExceptionTableEntry{
    private:
@@ -249,17 +282,27 @@ class CodeAttribute{
       CodeAttribute(ByteBuffer *_byteBuffer, ConstantPoolEntry **_constantPool);
 };
 
+enum AttributeType{
+   Code,
+   LineNumberTable,
+   LocalVariableTable
+};
+
 class AttributeInfo{
    private:
       u2_t attribute_name_index;
       u4_t attribute_length;
       byte_t *info;
+      AttributeType attribute_type;
       union{
          CodeAttribute *codeAttribute;
+         LineNumberTableAttribute *lineNumberTableAttribute;
+         LocalVariableTableAttribute *localVariableTableAttribute;
       };
    public:
       AttributeInfo(ByteBuffer *_byteBuffer, ConstantPoolEntry **_constantPool);
       u2_t getAttributeNameIndex();
+      AttributeType getAttributeType();
 };
 
 class FieldInfo{
