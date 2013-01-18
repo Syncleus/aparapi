@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#define SHOW
+#define SHOW
 
 u1_t ByteBuffer::u1(byte_t *ptr){
    u1_t u1 = (u1_t) (*ptr & 0xff);
