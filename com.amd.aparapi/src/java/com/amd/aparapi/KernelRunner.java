@@ -1396,6 +1396,11 @@ class KernelRunner{
                            // We used to treat as before by getting first GPU device
                            // now we get the best GPU
                            openCLDevice = (OpenCLDevice) OpenCLDevice.best();
+                           if (openCLDevice == null) {
+                              return warnFallBackAndExecute(_entrypointName, _range, _passes,
+                                    "GPU request can't be honored OpenCLDevice.best() returned null");
+                           }
+
                            jniFlags |= JNI_FLAG_USE_GPU; // this flag might be redundant now. 
                         } else {
                            // We fetch the first CPU device 
