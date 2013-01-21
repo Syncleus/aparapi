@@ -51,10 +51,10 @@ Config::Config(JNIEnv *jenv){
       jenv->ExceptionClear();
       fprintf(stderr, "bummer! getting Config from instance\n");
    }else{
-      enableVerboseJNI = getBoolean(jenv, "enableVerboseJNI");
-      enableVerboseJNIOpenCLResourceTracking = getBoolean(jenv, "enableVerboseJNIOpenCLResourceTracking");
-      enableProfiling = getBoolean(jenv, "enableProfiling");
-      enableProfilingCSV = getBoolean(jenv, "enableProfilingCSV");
+      enableVerboseJNI = getBoolean(jenv, (char*)"enableVerboseJNI");
+      enableVerboseJNIOpenCLResourceTracking = getBoolean(jenv, (char*)"enableVerboseJNIOpenCLResourceTracking");
+      enableProfiling = getBoolean(jenv, (char*)"enableProfiling");
+      enableProfilingCSV = getBoolean(jenv, (char*)"enableProfilingCSV");
    }
 
    //fprintf(stderr, "Config::enableVerboseJNI=%s\n",enableVerboseJNI?"true":"false");

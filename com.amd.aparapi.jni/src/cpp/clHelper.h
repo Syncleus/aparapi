@@ -126,25 +126,25 @@ template <typename  T> void List<T>::remove(T _value, int _line, char *_fileName
          return;
       }
    }
-   fprintf(stderr, "FILE %s LINE %d failed to find %s to remove %0lx\n", _fileName, _line, name, _value);
+   fprintf(stderr, "FILE %s LINE %d failed to find %s to remove %0lx\n", (char*)_fileName, _line, name, (unsigned long)_value);
 }
 
 template <typename  T> void List<T>::report(FILE *stream){
    if (head != NULL){
       fprintf(stream, "Resource report %d resources of type %s still in play ", count, name);
       for (Ref<T> *ptr = head; ptr != NULL; ptr = ptr->next){
-         fprintf(stream, " %0lx(%d)", ptr->value, ptr->line);
+         fprintf(stream, " %0lx(%d)", (unsigned long)ptr->value, ptr->line);
       }
       fprintf(stream, "\n");
    }
 }
 
 #ifdef CLHELPER_SOURCE
-List<cl_command_queue> commandQueueList("cl_command_queue");
-List<cl_mem> memList("cl_mem");
-List<cl_event> readEventList("cl_event (read)");
-List<cl_event> executeEventList("cl_event (exec)");
-List<cl_event> writeEventList("cl_event (write)");
+List<cl_command_queue> commandQueueList((char*)"cl_command_queue");
+List<cl_mem> memList((char*)"cl_mem");
+List<cl_event> readEventList((char*)"cl_event (read)");
+List<cl_event> executeEventList((char*)"cl_event (exec)");
+List<cl_event> writeEventList((char*)"cl_event (write)");
 #else
 extern List<cl_command_queue> commandQueueList;
 extern List<cl_mem> memList;

@@ -102,48 +102,48 @@ void OpenCLMem::describeBits(JNIEnv *jenv, jlong bits){
 
 
 jobject OpenCLDevice::getPlatformInstance(JNIEnv *jenv, jobject deviceInstance){ 
-   return(JNIHelper::getInstanceFieldObject(jenv, deviceInstance, "platform", OpenCLPlatformClassArg ));
+   return(JNIHelper::getInstanceFieldObject(jenv, deviceInstance, (char*)"platform", (char*)OpenCLPlatformClassArg ));
 } 
 cl_device_id OpenCLDevice::getDeviceId(JNIEnv *jenv, jobject deviceInstance){
-   return((cl_device_id)JNIHelper::getInstanceFieldLong(jenv, deviceInstance, "deviceId"));
+   return((cl_device_id)JNIHelper::getInstanceFieldLong(jenv, deviceInstance, (char*)"deviceId"));
 }
 
 cl_platform_id OpenCLPlatform::getPlatformId(JNIEnv *jenv, jobject platformInstance){
-   return((cl_platform_id)JNIHelper::getInstanceFieldLong(jenv, platformInstance, "platformId"));
+   return((cl_platform_id)JNIHelper::getInstanceFieldLong(jenv, platformInstance, (char*)"platformId"));
 }
 
 jobject OpenCLProgram::create(JNIEnv *jenv, cl_program program, cl_command_queue queue, cl_context context, jobject deviceInstance, jstring source, jstring log){
-   return(JNIHelper::createInstance(jenv, OpenCLProgramClass, ArgsVoidReturn( LongArg LongArg LongArg OpenCLDeviceClassArg StringClassArg StringClassArg) , (jlong)program, (jlong)queue, (jlong)context, deviceInstance, source, log));
+   return(JNIHelper::createInstance(jenv, (char*)OpenCLProgramClass, (char*)ArgsVoidReturn( LongArg LongArg LongArg OpenCLDeviceClassArg StringClassArg StringClassArg) , (jlong)program, (jlong)queue, (jlong)context, deviceInstance, source, log));
 }
 
 cl_context OpenCLProgram::getContext(JNIEnv *jenv, jobject programInstance){
-   return((cl_context) JNIHelper::getInstanceFieldLong(jenv, programInstance, "contextId")); 
+   return((cl_context) JNIHelper::getInstanceFieldLong(jenv, programInstance, (char*)"contextId")); 
 }
 cl_program OpenCLProgram::getProgram(JNIEnv *jenv, jobject programInstance){
-   return((cl_program) JNIHelper::getInstanceFieldLong(jenv, programInstance, "programId")); 
+   return((cl_program) JNIHelper::getInstanceFieldLong(jenv, programInstance, (char*)"programId")); 
 }
 cl_command_queue OpenCLProgram::getCommandQueue(JNIEnv *jenv, jobject programInstance){
-   return((cl_command_queue)JNIHelper::getInstanceFieldLong(jenv, programInstance, "queueId"));
+   return((cl_command_queue)JNIHelper::getInstanceFieldLong(jenv, programInstance, (char*)"queueId"));
 }
 
 jobject OpenCLKernel::create(JNIEnv *jenv, cl_kernel kernel, jobject programInstance, jstring name, jobject args){
-   return(JNIHelper::createInstance(jenv, OpenCLKernelClass, ArgsVoidReturn( LongArg OpenCLProgramClassArg StringClassArg ListClassArg) , (jlong)kernel, programInstance, name, args));
+   return(JNIHelper::createInstance(jenv, (char*)OpenCLKernelClass, (char*)ArgsVoidReturn( LongArg OpenCLProgramClassArg StringClassArg ListClassArg) , (jlong)kernel, programInstance, name, args));
 }
 
 cl_kernel OpenCLKernel::getKernel(JNIEnv *jenv, jobject kernelInstance){
-   return((cl_kernel) JNIHelper::getInstanceFieldLong(jenv, kernelInstance, "kernelId"));
+   return((cl_kernel) JNIHelper::getInstanceFieldLong(jenv, kernelInstance, (char*)"kernelId"));
 }
 
 jobject OpenCLKernel::getProgramInstance(JNIEnv *jenv, jobject kernelInstance){
-   return(JNIHelper::getInstanceFieldObject(jenv, kernelInstance, "program", OpenCLProgramClassArg));
+   return(JNIHelper::getInstanceFieldObject(jenv, kernelInstance, (char*)"program", (char*)OpenCLProgramClassArg));
 }
 
 jobjectArray OpenCLKernel::getArgsArray(JNIEnv *jenv, jobject kernelInstance){
-   return(reinterpret_cast<jobjectArray> (JNIHelper::getInstanceFieldObject(jenv, kernelInstance, "args", ArrayArg(OpenCLArgDescriptorClass) )));
+   return(reinterpret_cast<jobjectArray> (JNIHelper::getInstanceFieldObject(jenv, kernelInstance, (char*)"args", (char*)ArrayArg(OpenCLArgDescriptorClass) )));
 }
 
 jobject OpenCLMem::create(JNIEnv *jenv){
-   return(JNIHelper::createInstance(jenv, OpenCLMemClassArg, VoidReturn));
+   return(JNIHelper::createInstance(jenv, (char*)OpenCLMemClassArg, (char*)VoidReturn));
 }
 cl_uint OpenCLMem::bitsToOpenCLMask(jlong argBits ){
    cl_uint mask =  CL_MEM_USE_HOST_PTR;
@@ -254,37 +254,37 @@ jobject OpenCLMem::create(JNIEnv *jenv, cl_context context, jlong argBits, jarra
    return(memInstance);
 }
 jlong OpenCLMem::getBits(JNIEnv *jenv, jobject memInstance){
-   return(JNIHelper::getInstanceFieldLong(jenv, memInstance, "bits"));
+   return(JNIHelper::getInstanceFieldLong(jenv, memInstance, (char*)"bits"));
 }
 void OpenCLMem::setBits(JNIEnv *jenv, jobject memInstance, jlong bits){
-   JNIHelper::setInstanceFieldLong(jenv, memInstance, "bits", bits);
+   JNIHelper::setInstanceFieldLong(jenv, memInstance, (char*)"bits", bits);
 }
 void *OpenCLMem::getAddress(JNIEnv *jenv, jobject memInstance){
-   return((void*)JNIHelper::getInstanceFieldLong(jenv, memInstance, "address"));
+   return((void*)JNIHelper::getInstanceFieldLong(jenv, memInstance, (char*)"address"));
 }
 void OpenCLMem::setAddress(JNIEnv *jenv, jobject memInstance, void *address){
-   JNIHelper::setInstanceFieldLong(jenv, memInstance, "address", (jlong)address);
+   JNIHelper::setInstanceFieldLong(jenv, memInstance, (char*)"address", (jlong)address);
 }
 void OpenCLMem::setInstance(JNIEnv *jenv, jobject memInstance, jobject instance){
-   JNIHelper::setInstanceFieldObject(jenv, memInstance, "instance", ObjectClassArg, instance);
+   JNIHelper::setInstanceFieldObject(jenv, memInstance, (char*)"instance", (char*)ObjectClassArg, instance);
 }
 void OpenCLMem::setSizeInBytes(JNIEnv *jenv, jobject memInstance, jint sizeInBytes){
-   JNIHelper::setInstanceFieldInt(jenv, memInstance, "sizeInBytes", sizeInBytes);
+   JNIHelper::setInstanceFieldInt(jenv, memInstance, (char*)"sizeInBytes", sizeInBytes);
 }
 size_t OpenCLMem::getSizeInBytes(JNIEnv *jenv, jobject memInstance){
-   return((size_t)JNIHelper::getInstanceFieldInt(jenv, memInstance, "sizeInBytes"));
+   return((size_t)JNIHelper::getInstanceFieldInt(jenv, memInstance, (char*)"sizeInBytes"));
 }
 jobject OpenCLMem::getInstance(JNIEnv *jenv, jobject memInstance){
-   return(JNIHelper::getInstanceFieldObject(jenv, memInstance, "instance", ObjectClassArg));
+   return(JNIHelper::getInstanceFieldObject(jenv, memInstance, (char*)"instance", (char*)ObjectClassArg));
 }
 
 cl_mem OpenCLMem::getMem(JNIEnv *jenv, jobject memInstance){
-   cl_mem mem = (cl_mem)JNIHelper::getInstanceFieldLong(jenv, memInstance, "memId");
+   cl_mem mem = (cl_mem)JNIHelper::getInstanceFieldLong(jenv, memInstance, (char*)"memId");
    return(mem);
 }
 
 void OpenCLMem::setMem(JNIEnv *jenv, jobject memInstance, cl_mem mem){
-   JNIHelper::setInstanceFieldLong(jenv, memInstance, "memId", (jlong)mem);
+   JNIHelper::setInstanceFieldLong(jenv, memInstance, (char*)"memId", (jlong)mem);
 }
 
 void OpenCLMem::describe(JNIEnv *jenv, jobject memInstance){
@@ -295,16 +295,16 @@ void OpenCLMem::describe(JNIEnv *jenv, jobject memInstance){
 
 
 jlong OpenCLArgDescriptor::getBits(JNIEnv *jenv, jobject argInstance){
-   return(JNIHelper::getInstanceFieldLong(jenv, argInstance, "bits"));
+   return(JNIHelper::getInstanceFieldLong(jenv, argInstance, (char*)"bits"));
 }
 void OpenCLArgDescriptor::setBits(JNIEnv *jenv, jobject argInstance, jlong bits){
-   JNIHelper::setInstanceFieldLong(jenv, argInstance, "bits", bits);
+   JNIHelper::setInstanceFieldLong(jenv, argInstance, (char*)"bits", bits);
 }
 jobject OpenCLArgDescriptor::getMemInstance(JNIEnv *jenv, jobject argInstance){
-   return(JNIHelper::getInstanceFieldObject(jenv, argInstance, "memVal", OpenCLMemClassArg));
+   return(JNIHelper::getInstanceFieldObject(jenv, argInstance, (char*)"memVal", (char*)OpenCLMemClassArg));
 }
 void OpenCLArgDescriptor::setMemInstance(JNIEnv *jenv, jobject argInstance, jobject memInstance){
-   JNIHelper::setInstanceFieldObject(jenv, argInstance, "memVal", OpenCLMemClassArg,memInstance);
+   JNIHelper::setInstanceFieldObject(jenv, argInstance, (char*)"memVal", (char*)OpenCLMemClassArg,memInstance);
 }
 void OpenCLArgDescriptor::describe(JNIEnv *jenv, jobject argDef, jint argIndex){
    jlong argBits = OpenCLArgDescriptor::getBits(jenv, argDef);
@@ -313,22 +313,22 @@ void OpenCLArgDescriptor::describe(JNIEnv *jenv, jobject argDef, jint argIndex){
    fprintf(stderr, "\n");
 }
 jint OpenCLRange::getDims(JNIEnv *jenv, jobject rangeInstance){
-   return(JNIHelper::getInstanceFieldInt(jenv, rangeInstance, "dims"));
+   return(JNIHelper::getInstanceFieldInt(jenv, rangeInstance, (char*)"dims"));
 }
 
 void OpenCLRange::fill(JNIEnv *jenv, jobject rangeInstance, jint dims, size_t* offsets, size_t* globalDims, size_t* localDims){
    if (dims >0){
       offsets[0]= 0;
-      localDims[0]=JNIHelper::getInstanceFieldInt(jenv, rangeInstance, "localSize_0"); 
-      globalDims[0]=JNIHelper::getInstanceFieldInt(jenv, rangeInstance, "globalSize_0"); 
+      localDims[0]=JNIHelper::getInstanceFieldInt(jenv, rangeInstance, (char*)"localSize_0"); 
+      globalDims[0]=JNIHelper::getInstanceFieldInt(jenv, rangeInstance, (char*)"globalSize_0"); 
       if (dims >1){
          offsets[1]= 0;
-         localDims[1]=JNIHelper::getInstanceFieldInt(jenv, rangeInstance, "localSize_1"); 
-         globalDims[1]=JNIHelper::getInstanceFieldInt(jenv, rangeInstance, "globalSize_1"); 
+         localDims[1]=JNIHelper::getInstanceFieldInt(jenv, rangeInstance, (char*)"localSize_1"); 
+         globalDims[1]=JNIHelper::getInstanceFieldInt(jenv, rangeInstance, (char*)"globalSize_1"); 
          if (dims >2){
             offsets[2]= 0;
-            localDims[2]=JNIHelper::getInstanceFieldInt(jenv, rangeInstance, "localSize_2"); 
-            globalDims[2]=JNIHelper::getInstanceFieldInt(jenv, rangeInstance, "globalSize_2"); 
+            localDims[2]=JNIHelper::getInstanceFieldInt(jenv, rangeInstance, (char*)"localSize_2"); 
+            globalDims[2]=JNIHelper::getInstanceFieldInt(jenv, rangeInstance, (char*)"globalSize_2"); 
          }
       }
    }
@@ -343,7 +343,7 @@ JNI_JAVA(jobject, OpenCLJNI, createProgram)
       cl_int status = CL_SUCCESS;
       cl_device_type deviceType;
       clGetDeviceInfo(deviceId, CL_DEVICE_TYPE,  sizeof(deviceType), &deviceType, NULL);
-      if(0)fprintf(stderr, "device[%d] CL_DEVICE_TYPE = %x\n", deviceId, deviceType);
+      if(0)fprintf(stderr, "device[%ld] CL_DEVICE_TYPE = %lx\n", (unsigned long)deviceId, (unsigned long)deviceType);
 
 
       cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platformId, 0 };
@@ -413,7 +413,7 @@ void putArg(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue
          void *ptr  =  OpenCLMem::pin(jenv, (jarray)arg,&argBits); 
          void *oldPtr = OpenCLMem::getAddress(jenv, memInstance);
          if (ptr !=oldPtr){
-            if(0)fprintf(stderr, "ptr moved from %lx to %lx\n", oldPtr, ptr);
+            if(0)fprintf(stderr, "ptr moved from %lx to %lx\n", (unsigned long)oldPtr, (unsigned long)ptr);
             cl_mem mem = OpenCLMem::getMem(jenv, memInstance);
             status = clReleaseMemObject(mem); 
             memInstance = OpenCLMem::create(jenv, context, argBits, (jarray)arg);
@@ -460,7 +460,7 @@ void putArg(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue
    }else if (argisset(argBits, PRIMITIVE)){
       if(0)fprintf(stderr, "PRIMITIVE\n");
       if (argisset(argBits, INT)){
-         cl_int value = JNIHelper::getInstanceFieldInt(jenv, arg, "value");
+         cl_int value = JNIHelper::getInstanceFieldInt(jenv, arg, (char *)"value");
          status = clSetKernelArg(kernel, argIndex, sizeof(value), (void *)&(value));          
          if (status != CL_SUCCESS) {
             fprintf(stderr, "error setting int arg %d %d %s!\n",  argIndex, value, CLHelper::errString(status));
@@ -468,7 +468,7 @@ void putArg(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue
             if(0)fprintf(stderr, "set arg  = %d to %d!\n", argIndex, value);
          }
       }else if (argisset(argBits, FLOAT)){
-         cl_float value = JNIHelper::getInstanceFieldFloat(jenv, arg, "value");
+         cl_float value = JNIHelper::getInstanceFieldFloat(jenv, arg, (char *)"value");
          status = clSetKernelArg(kernel, argIndex, sizeof(value), (void *)&(value));          
          if (status != CL_SUCCESS) {
             fprintf(stderr, "error setting int arg %d %f %s!\n",  argIndex, value, CLHelper::errString(status));
@@ -476,16 +476,16 @@ void putArg(JNIEnv *jenv, cl_context context, cl_kernel kernel, cl_command_queue
             if(0)fprintf(stderr, "set arg  = %d to %f!\n", argIndex, value);
          }
       }else if (argisset(argBits, LONG)){
-         cl_long value = JNIHelper::getInstanceFieldLong(jenv, arg, "value");
+         cl_long value = JNIHelper::getInstanceFieldLong(jenv, arg, (char *)"value");
          status = clSetKernelArg(kernel, argIndex, sizeof(value), (void *)&(value));          
          if (status != CL_SUCCESS) {
-            fprintf(stderr, "error setting int arg %d %d %s!\n",  argIndex, value, CLHelper::errString(status));
+            fprintf(stderr, "error setting int arg %d %ld %s!\n",  argIndex, (unsigned long)value, CLHelper::errString(status));
          }else{
-            if(0)fprintf(stderr, "set arg  = %d to %d!\n", argIndex, value);
+            if(0)fprintf(stderr, "set arg  = %d to %ld!\n", argIndex, (unsigned long)value);
          }
 
       }else if (argisset(argBits, DOUBLE)){
-         cl_double value = JNIHelper::getInstanceFieldDouble(jenv, arg, "value");
+         cl_double value = JNIHelper::getInstanceFieldDouble(jenv, arg, (char *)"value");
          status = clSetKernelArg(kernel, argIndex, sizeof(value), (void *)&(value));          
          if (status != CL_SUCCESS) {
             fprintf(stderr, "error setting double arg %d %lf %s!\n",  argIndex, value, CLHelper::errString(status));
@@ -628,7 +628,7 @@ JNI_JAVA(void, OpenCLJNI, invoke)
 
 JNI_JAVA(jobject, OpenCLJNI, getPlatforms)
    (JNIEnv *jenv, jobject jobj) {
-      jobject platformListInstance = JNIHelper::createInstance(jenv, ArrayListClass, VoidReturn);
+      jobject platformListInstance = JNIHelper::createInstance(jenv, (char*)ArrayListClass, (char*)VoidReturn);
       cl_int status = CL_SUCCESS;
       cl_uint platformc;
 
@@ -643,10 +643,10 @@ JNI_JAVA(jobject, OpenCLJNI, getPlatforms)
             status = clGetPlatformInfo(platformIds[platformIdx], CL_PLATFORM_VERSION, sizeof(platformVersionName), platformVersionName, NULL);
 
             // fix this so OpenCL 1.3 or higher will not break!
-            if (   !strncmp(platformVersionName, "OpenCL 1.2", 10)
+            if (   !strncmp(platformVersionName, (char *)"OpenCL 1.2", 10)
                   || !strncmp(platformVersionName, "OpenCL 1.1", 10)
 #ifdef __APPLE__
-                  || !strncmp(platformVersionName, "OpenCL 1.0", 10)
+                  || !strncmp(platformVersionName, (char *)"OpenCL 1.0", 10)
 #endif
                ) { 
                char platformVendorName[512];  
@@ -655,13 +655,13 @@ JNI_JAVA(jobject, OpenCLJNI, getPlatforms)
                status = clGetPlatformInfo(platformIds[platformIdx], CL_PLATFORM_NAME, sizeof(platformName), platformName, NULL);
                //fprintf(stderr, "platform vendor    %d %s\n", platformIdx, platformVendorName); 
                //fprintf(stderr, "platform version %d %s\n", platformIdx, platformVersionName); 
-               jobject platformInstance = JNIHelper::createInstance(jenv, OpenCLPlatformClass , ArgsVoidReturn(LongArg StringClassArg StringClassArg StringClassArg ), 
+               jobject platformInstance = JNIHelper::createInstance(jenv, (char*)OpenCLPlatformClass , (char*)ArgsVoidReturn(LongArg StringClassArg StringClassArg StringClassArg ), 
                      (jlong)platformIds[platformIdx],
                      jenv->NewStringUTF(platformVersionName), 
                      jenv->NewStringUTF(platformVendorName),
                      jenv->NewStringUTF(platformName)
                      );
-               JNIHelper::callVoid(jenv, platformListInstance, "add", ArgsBooleanReturn(ObjectClassArg), platformInstance);
+               JNIHelper::callVoid(jenv, platformListInstance, (char *)"add", (char*)ArgsBooleanReturn(ObjectClassArg), platformInstance);
 
                cl_uint deviceIdc;
                cl_device_type requestedDeviceType =CL_DEVICE_TYPE_CPU |CL_DEVICE_TYPE_GPU ;
@@ -674,7 +674,7 @@ JNI_JAVA(jobject, OpenCLJNI, getPlatforms)
 
                         cl_device_type deviceType;
                         status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_TYPE,  sizeof(deviceType), &deviceType, NULL);
-                        jobject deviceTypeEnumInstance = JNIHelper::getStaticFieldObject(jenv, DeviceTypeClass, "UNKNOWN", DeviceTypeClassArg);
+                        jobject deviceTypeEnumInstance = JNIHelper::getStaticFieldObject(jenv, (char*)DeviceTypeClass, (char *)"UNKNOWN", (char*)DeviceTypeClassArg);
                         //fprintf(stderr, "device[%d] CL_DEVICE_TYPE = ", deviceIdx);
                         if (deviceType & CL_DEVICE_TYPE_DEFAULT) {
                            deviceType &= ~CL_DEVICE_TYPE_DEFAULT;
@@ -683,12 +683,12 @@ JNI_JAVA(jobject, OpenCLJNI, getPlatforms)
                         if (deviceType & CL_DEVICE_TYPE_CPU) {
                            deviceType &= ~CL_DEVICE_TYPE_CPU;
                            //fprintf(stderr, "CPU ");
-                           deviceTypeEnumInstance = JNIHelper::getStaticFieldObject(jenv, DeviceTypeClass, "CPU", DeviceTypeClassArg);
+                           deviceTypeEnumInstance = JNIHelper::getStaticFieldObject(jenv, (char*)DeviceTypeClass, (char *)"CPU", (char*)DeviceTypeClassArg);
                         }
                         if (deviceType & CL_DEVICE_TYPE_GPU) {
                            deviceType &= ~CL_DEVICE_TYPE_GPU;
                            //fprintf(stderr, "GPU ");
-                           deviceTypeEnumInstance = JNIHelper::getStaticFieldObject(jenv, DeviceTypeClass, "GPU", DeviceTypeClassArg);
+                           deviceTypeEnumInstance = JNIHelper::getStaticFieldObject(jenv, (char*)DeviceTypeClass, (char *)"GPU", (char*)DeviceTypeClassArg);
                         }
                         if (deviceType & CL_DEVICE_TYPE_ACCELERATOR) {
                            deviceType &= ~CL_DEVICE_TYPE_ACCELERATOR;
@@ -698,53 +698,53 @@ JNI_JAVA(jobject, OpenCLJNI, getPlatforms)
                         //fprintf(stderr, "\n");
 
 
-                        jobject deviceInstance = JNIHelper::createInstance(jenv, OpenCLDeviceClass, ArgsVoidReturn( OpenCLPlatformClassArg LongArg DeviceTypeClassArg  ),
+                        jobject deviceInstance = JNIHelper::createInstance(jenv, (char*)OpenCLDeviceClass, (char*)ArgsVoidReturn( OpenCLPlatformClassArg LongArg DeviceTypeClassArg  ),
                               platformInstance, 
                               (jlong)deviceIds[deviceIdx],
                               deviceTypeEnumInstance);
-                        JNIHelper::callVoid(jenv, platformInstance, "add", ArgsVoidReturn( OpenCLDeviceClassArg ), deviceInstance);
+                        JNIHelper::callVoid(jenv, platformInstance, (char *)"add", (char*)ArgsVoidReturn( OpenCLDeviceClassArg ), deviceInstance);
 
 
                         cl_uint maxComputeUnits;
                         status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_MAX_COMPUTE_UNITS,  sizeof(maxComputeUnits), &maxComputeUnits, NULL);
                         //fprintf(stderr, "device[%d] CL_DEVICE_MAX_COMPUTE_UNITS = %u\n", deviceIdx, maxComputeUnits);
-                        JNIHelper::callVoid(jenv, deviceInstance, "setMaxComputeUnits", ArgsVoidReturn(IntArg),  maxComputeUnits);
+                        JNIHelper::callVoid(jenv, deviceInstance, (char *)"setMaxComputeUnits", (char*)ArgsVoidReturn(IntArg),  maxComputeUnits);
 
 
 
                         cl_uint maxWorkItemDimensions;
                         status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,  sizeof(maxWorkItemDimensions), &maxWorkItemDimensions, NULL);
                         //fprintf(stderr, "device[%d] CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS = %u\n", deviceIdx, maxWorkItemDimensions);
-                        JNIHelper::callVoid(jenv, deviceInstance, "setMaxWorkItemDimensions",  ArgsVoidReturn(IntArg),  maxWorkItemDimensions);
+                        JNIHelper::callVoid(jenv, deviceInstance, (char *)"setMaxWorkItemDimensions",  (char*)ArgsVoidReturn(IntArg),  maxWorkItemDimensions);
 
                         size_t *maxWorkItemSizes = new size_t[maxWorkItemDimensions];
                         status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_MAX_WORK_ITEM_SIZES,  sizeof(size_t)*maxWorkItemDimensions, maxWorkItemSizes, NULL);
                         for (unsigned dimIdx=0; dimIdx<maxWorkItemDimensions; dimIdx++){
                            //fprintf(stderr, "device[%d] dim[%d] = %d\n", deviceIdx, dimIdx, maxWorkItemSizes[dimIdx]);
-                           JNIHelper::callVoid(jenv, deviceInstance, "setMaxWorkItemSize", ArgsVoidReturn(IntArg IntArg), dimIdx,maxWorkItemSizes[dimIdx]);
+                           JNIHelper::callVoid(jenv, deviceInstance, (char *)"setMaxWorkItemSize", (char*)ArgsVoidReturn(IntArg IntArg), dimIdx,maxWorkItemSizes[dimIdx]);
                         }
 
                         size_t maxWorkGroupSize;
                         status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_MAX_WORK_GROUP_SIZE,  sizeof(maxWorkGroupSize), &maxWorkGroupSize, NULL);
                         //fprintf(stderr, "device[%d] CL_DEVICE_MAX_GROUP_SIZE = %u\n", deviceIdx, maxWorkGroupSize);
-                        JNIHelper::callVoid(jenv, deviceInstance, "setMaxWorkGroupSize",  ArgsVoidReturn(IntArg),  maxWorkGroupSize);
+                        JNIHelper::callVoid(jenv, deviceInstance, (char *)"setMaxWorkGroupSize",  (char*)ArgsVoidReturn(IntArg),  maxWorkGroupSize);
 
                         cl_ulong maxMemAllocSize;
                         status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_MAX_MEM_ALLOC_SIZE,  sizeof(maxMemAllocSize), &maxMemAllocSize, NULL);
                         //fprintf(stderr, "device[%d] CL_DEVICE_MAX_MEM_ALLOC_SIZE = %lu\n", deviceIdx, maxMemAllocSize);
-                        JNIHelper::callVoid(jenv, deviceInstance, "setMaxMemAllocSize",  ArgsVoidReturn(LongArg),  maxMemAllocSize);
+                        JNIHelper::callVoid(jenv, deviceInstance, (char *)"setMaxMemAllocSize",  (char*)ArgsVoidReturn(LongArg),  maxMemAllocSize);
 
                         cl_ulong globalMemSize;
                         status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_GLOBAL_MEM_SIZE,  sizeof(globalMemSize), &globalMemSize, NULL);
                         //fprintf(stderr, "device[%d] CL_DEVICE_GLOBAL_MEM_SIZE = %lu\n", deviceIdx, globalMemSize);
-                        JNIHelper::callVoid(jenv, deviceInstance, "setGlobalMemSize", ArgsVoidReturn(LongArg),  globalMemSize);
+                        JNIHelper::callVoid(jenv, deviceInstance, (char *)"setGlobalMemSize", (char*)ArgsVoidReturn(LongArg),  globalMemSize);
 
 
 
                         cl_ulong localMemSize;
                         status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_LOCAL_MEM_SIZE,  sizeof(localMemSize), &localMemSize, NULL);
                         //fprintf(stderr, "device[%d] CL_DEVICE_LOCAL_MEM_SIZE = %lu\n", deviceIdx, localMemSize);
-                        JNIHelper::callVoid(jenv, deviceInstance, "setLocalMemSize", ArgsVoidReturn(LongArg),  localMemSize);
+                        JNIHelper::callVoid(jenv, deviceInstance, (char *)"setLocalMemSize", (char*)ArgsVoidReturn(LongArg),  localMemSize);
                      }
 
                   }

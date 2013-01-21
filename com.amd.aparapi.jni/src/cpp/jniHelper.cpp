@@ -425,21 +425,21 @@ jboolean JNIHelper::getInstanceFieldBoolean(JNIEnv *jenv, jobject instance, char
       jenv->ExceptionDescribe(); 
       jenv->ExceptionClear();
       fprintf(stderr, "bummer! getting class from instance\n");
-      return NULL;
+      return false;
    }
    jfieldID fieldId= jenv->GetFieldID(theClass,fieldName, "Z");
    if (fieldId == NULL || jenv->ExceptionCheck()) {
       jenv->ExceptionDescribe(); 
       jenv->ExceptionClear();
       fprintf(stderr, "bummer getting boolean field '%s' \n", fieldName);
-      return NULL;
+      return false;
    }
    jboolean value= jenv->GetBooleanField(instance, fieldId);
    if (jenv->ExceptionCheck()) {
       jenv->ExceptionDescribe(); 
       jenv->ExceptionClear();
       fprintf(stderr, "bummer getting boolean field  '%s' \n", fieldName);
-      return NULL;
+      return false;
    }
    return(value);
 }

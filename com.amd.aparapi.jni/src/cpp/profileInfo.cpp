@@ -49,7 +49,7 @@ ProfileInfo::ProfileInfo():
 }
 
 jobject ProfileInfo::createProfileInfoInstance(JNIEnv *jenv){
-   jobject profileInstance = JNIHelper::createInstance(jenv, ProfileInfoClass , ArgsVoidReturn(StringClassArg IntArg LongArg LongArg LongArg LongArg), 
+   jobject profileInstance = JNIHelper::createInstance(jenv, (char*)ProfileInfoClass , (char*)ArgsVoidReturn(StringClassArg IntArg LongArg LongArg LongArg LongArg), 
          ((jstring)(name==NULL?NULL:jenv->NewStringUTF(name))),
          ((jint)type), 
          ((jlong)start),
