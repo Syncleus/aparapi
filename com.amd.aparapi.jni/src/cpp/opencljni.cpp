@@ -42,7 +42,7 @@
 #include "com_amd_aparapi_OpenCLJNI.h"
 
 void OpenCLArgDescriptor::describeBits(JNIEnv *jenv, jlong bits){
-   fprintf(stderr, " %lx ", bits);
+   fprintf(stderr, " %lx ", (unsigned long) bits);
    if (argisset(bits, READONLY)){
       fprintf(stderr, "readonly ");
    }
@@ -88,7 +88,7 @@ void OpenCLArgDescriptor::describeBits(JNIEnv *jenv, jlong bits){
 }
 
 void OpenCLMem::describeBits(JNIEnv *jenv, jlong bits){
-   fprintf(stderr, " %lx ", bits);
+   fprintf(stderr, " %lx ", (unsigned long)bits);
    if (memisset(bits, COPY)){
       fprintf(stderr, "copy ");
    }
