@@ -55,8 +55,7 @@
       </subant>
    </target>
 
-   <target name="test" depends="clean">
-      <ant dir="com.amd.aparapi" target="build"/> 
+   <target name="test" depends="build">
       <subant target="junit">
          <fileset dir="test" includes="*/build.xml"/>
       </subant>

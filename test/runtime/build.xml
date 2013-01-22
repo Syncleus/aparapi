@@ -64,7 +64,7 @@
       <!-- even though fork is slower we need to set the library path and this requires fork -->
 
       <junit printsummary="false" fork="true" haltonfailure="false" failureproperty="tests.failed" showoutput="false">
-         <sysproperty key="java.library.path" value="..\..\com.amd.aparapi.jni\dist"/>
+         <sysproperty key="java.library.path" value="${basedir}/../../com.amd.aparapi.jni/dist"/>
          <formatter type="xml" />
          <classpath refid="classpath"/>
          <batchtest todir="junit/data">
