@@ -558,8 +558,9 @@ class Entrypoint{
                   AssignToArrayElement assignment = (AssignToArrayElement) instruction;
 
                   Instruction arrayRef = assignment.getArrayRef();
-                  if (arrayRef instanceof I_GETFIELD) {
-                     I_GETFIELD getField = (I_GETFIELD) arrayRef;
+                  // AccessField here allows instance and static array refs
+                  if (arrayRef instanceof AccessField) {
+                     AccessField getField = (AccessField) arrayRef;
                      FieldEntry field = getField.getConstantPoolFieldEntry();
                      String assignedArrayFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
                      arrayFieldAssignments.add(assignedArrayFieldName);
@@ -570,8 +571,9 @@ class Entrypoint{
                   AccessArrayElement access = (AccessArrayElement) instruction;
 
                   Instruction arrayRef = access.getArrayRef();
-                  if (arrayRef instanceof I_GETFIELD) {
-                     I_GETFIELD getField = (I_GETFIELD) arrayRef;
+                  // AccessField here allows instance and static array refs
+                  if (arrayRef instanceof AccessField) {
+                     AccessField getField = (AccessField) arrayRef;
                      FieldEntry field = getField.getConstantPoolFieldEntry();
                      String accessedArrayFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
                      arrayFieldAccesses.add(accessedArrayFieldName);

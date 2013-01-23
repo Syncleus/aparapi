@@ -147,7 +147,8 @@ class Config{
 
    static final boolean enablePUTSTATIC = Boolean.getBoolean(propPkgName + ".enable.PUTSTATIC");
 
-   static final boolean enableGETSTATIC = Boolean.getBoolean(propPkgName + ".enable.GETSTATIC");
+   // Allow static array accesses 
+   static final boolean enableGETSTATIC = true; //Boolean.getBoolean(propPkgName + ".enable.GETSTATIC");
 
    static final boolean enableINVOKEINTERFACE = Boolean.getBoolean(propPkgName + ".enable.INVOKEINTERFACE");
 
