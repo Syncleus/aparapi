@@ -430,7 +430,7 @@ class ExpressionList{
 
                if (tail != null && tail.isBranch() && tail.asBranch().isReverseConditional()) {
                   /**
-                   * This looks like an eclipse style for/while loop
+                   * This looks like an eclipse style for/while loop or possibly a do{}while()
                    * <pre>
                    * eclipse for (INIT,??,DELTA){BODY} ...
                    *    [INIT] >> [BODY] [DELTA] ?? ?< ...
@@ -446,6 +446,10 @@ class ExpressionList{
                    *    >> [BODY] ?? ?< ...
                    *     -------->
                    *       <----------
+                   * do {BODY} while(??)
+                   *    [BODY] ?? ?< ...
+                   *    <-----------
+                   *    
                    * </pre>
                    **/
                   BranchSet branchSet = ((ConditionalBranch) tail.asBranch()).getOrCreateBranchSet();
@@ -486,6 +490,24 @@ class ExpressionList{
                            addAsComposites(ByteCode.COMPOSITE_FOR_ECLIPSE, loopTop, branchSet);
                            handled = true;
                         }
+                     }
+                     if (!handled){
+                        // do{}while()_ do not require any previous instruction
+                       if (loopTop.getPrevExpr() ==null){
+                           throw new IllegalStateException("might be a dowhile with no provious expression");
+                         
+                        }else if (!(loopTop.getPrevExpr().isBranch() && loopTop.getPrevExpr().asBranch().isForwardUnconditional())){
+                           if (doesNotContainCompositeOrBranch(branchSet.getTarget().getRootExpr(), branchSet.getFirst().getPrevExpr())) {
+                              loopTop = loopTop.getPrevExpr();
+                               branchSet.unhook();
+                              addAsComposites(ByteCode.COMPOSITE_DO_WHILE, loopTop, branchSet);
+                              handled = true;
+                           }
+                        }else{
+                           throw new IllegalStateException("might be mistaken for a do while!");
+                        }
+                    
+                         
                      }
                   }
                }

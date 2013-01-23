@@ -602,7 +602,7 @@ class InstructionSet{
       COMPOSITE_IF, //
       COMPOSITE_IF_ELSE, //
       COMPOSITE_FOR_SUN, //
-      COMPOSITE_FOR_ECLIPSE, //
+      COMPOSITE_FOR_ECLIPSE,// 
       COMPOSITE_ARBITRARY_SCOPE, //
       COMPOSITE_WHILE, //
       CLONE, //
@@ -613,7 +613,8 @@ class InstructionSet{
       FIELD_ARRAY_ELEMENT_INCREMENT, //
       FIELD_ARRAY_ELEMENT_ASSIGN, //
       HEAD, //
-      COMPOSITE_EMPTY_LOOP;
+      COMPOSITE_EMPTY_LOOP,//
+      COMPOSITE_DO_WHILE;
 
       private Class<?> clazz;
 
@@ -835,6 +836,9 @@ class InstructionSet{
             case COMPOSITE_EMPTY_LOOP:
                compositeInstruction = new CompositeEmptyLoopInstruction(_methodModel, _firstChild, _lastChild, _branchSet);
                break;
+            case COMPOSITE_DO_WHILE:
+               compositeInstruction = new CompositeDoWhileInstruction(_methodModel, _firstChild, _lastChild, _branchSet);
+               break;
          }
          return (compositeInstruction);
 
@@ -883,6 +887,15 @@ class InstructionSet{
       protected CompositeEmptyLoopInstruction(MethodModel method, Instruction _firstChild, Instruction _lastChild,
             BranchSet _branchSet) {
          super(method, ByteCode.COMPOSITE_EMPTY_LOOP, _firstChild, _lastChild, _branchSet);
+
+      }
+   }
+   
+   static class CompositeDoWhileInstruction extends CompositeInstruction{
+
+      protected CompositeDoWhileInstruction(MethodModel method, Instruction _firstChild, Instruction _lastChild,
+            BranchSet _branchSet) {
+         super(method, ByteCode.COMPOSITE_DO_WHILE, _firstChild, _lastChild, _branchSet);
 
       }
    }
