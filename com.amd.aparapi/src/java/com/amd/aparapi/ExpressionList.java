@@ -491,23 +491,23 @@ class ExpressionList{
                            handled = true;
                         }
                      }
-                     if (!handled){
+                     if (!handled) {
                         // do{}while()_ do not require any previous instruction
-                       if (loopTop.getPrevExpr() ==null){
+                        if (loopTop.getPrevExpr() == null) {
                            throw new IllegalStateException("might be a dowhile with no provious expression");
-                         
-                        }else if (!(loopTop.getPrevExpr().isBranch() && loopTop.getPrevExpr().asBranch().isForwardUnconditional())){
-                           if (doesNotContainCompositeOrBranch(branchSet.getTarget().getRootExpr(), branchSet.getFirst().getPrevExpr())) {
+
+                        } else if (!(loopTop.getPrevExpr().isBranch() && loopTop.getPrevExpr().asBranch().isForwardUnconditional())) {
+                           if (doesNotContainCompositeOrBranch(branchSet.getTarget().getRootExpr(), branchSet.getFirst()
+                                 .getPrevExpr())) {
                               loopTop = loopTop.getPrevExpr();
-                               branchSet.unhook();
+                              branchSet.unhook();
                               addAsComposites(ByteCode.COMPOSITE_DO_WHILE, loopTop, branchSet);
                               handled = true;
                            }
-                        }else{
+                        } else {
                            throw new IllegalStateException("might be mistaken for a do while!");
                         }
-                    
-                         
+
                      }
                   }
                }

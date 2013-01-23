@@ -61,7 +61,7 @@ class Config{
     * 
     * Usage -agentpath=/full/path/to/agent.dll -Dcom.amd.aparapi.useAgent=true
     */
-    
+
    static final boolean useAgent = Boolean.getBoolean(propPkgName + ".useAgent");
 
    static final boolean disableUnsafe = Boolean.getBoolean(propPkgName + ".disableUnsafe");

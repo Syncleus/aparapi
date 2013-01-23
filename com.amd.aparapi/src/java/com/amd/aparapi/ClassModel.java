@@ -37,8 +37,8 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.amd.aparapi;
 
-import java.io.InputStream;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -153,7 +153,7 @@ class ClassModel{
 
    }
 
-   ClassModel(Class<?> _clazz,  byte[] _bytes) throws ClassParseException {
+   ClassModel(Class<?> _clazz, byte[] _bytes) throws ClassParseException {
       clazz = _clazz;
       parse(new ByteArrayInputStream(_bytes));
    }
@@ -2400,10 +2400,9 @@ class ClassModel{
       ClassModel getClassModel() {
          return (ClassModel.this);
       }
-      
+
       public String toString() {
-    	 return getClassModel().getClassWeAreModelling().getName() + "." + 
-            getName() + " " + getDescriptor();
+         return getClassModel().getClassWeAreModelling().getName() + "." + getName() + " " + getDescriptor();
       }
 
    }

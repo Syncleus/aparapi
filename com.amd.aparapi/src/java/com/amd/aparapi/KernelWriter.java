@@ -223,8 +223,8 @@ abstract class KernelWriter extends BlockWriter{
                write(m.getName());
             } else {
                // Must be a library call like rsqrt
-               assert isMapped : _methodEntry + " should be mapped method!"; 
-            	
+               assert isMapped : _methodEntry + " should be mapped method!";
+
                write(methodName);
                isIntrinsic = true;
             }

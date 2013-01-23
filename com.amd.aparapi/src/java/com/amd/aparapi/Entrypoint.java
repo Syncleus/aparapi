@@ -396,7 +396,7 @@ class Entrypoint{
          }
       }
    }
-   
+
    /*
     * Find a suitable call target in the kernel class, supers, object members or static calls
     */
@@ -432,12 +432,12 @@ class Entrypoint{
             }
          }
       }
-      
+
       // Look for static call to some other class
       if ((m == null) && !isMapped && (methodCall instanceof I_INVOKESTATIC)) {
          String otherClassName = methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.');
          ClassModel otherClassModel = getOrUpdateAllClassAccesses(otherClassName);
-        
+
          //if (logger.isLoggable(Level.FINE)) {
          //   logger.fine("Looking for: " + methodEntry + " in other class " + otherClass.getName());
          //}
@@ -448,7 +448,7 @@ class Entrypoint{
       if (logger.isLoggable(Level.INFO)) {
          logger.fine("Selected method for: " + methodEntry + " is " + m);
       }
-      
+
       return m;
    }
 
@@ -484,7 +484,7 @@ class Entrypoint{
             methodMap.put(m, target);
             methodModel.getCalledMethods().add(target);
             discovered = true;
-         }         
+         }
       }
 
       // methodMap now contains a list of method called by run itself().
@@ -849,8 +849,8 @@ class Entrypoint{
       boolean isMapped = Kernel.isMappedMethod(_methodEntry);
 
       if (logger.isLoggable(Level.FINE) && target == null) {
-         logger.fine("Did not find call target: " + _methodEntry + " in " + 
-            getClassModel().getClassWeAreModelling().getName() + " isMapped=" + isMapped);
+         logger.fine("Did not find call target: " + _methodEntry + " in " + getClassModel().getClassWeAreModelling().getName()
+               + " isMapped=" + isMapped);
       }
 
       if (target == null) {
@@ -881,17 +881,17 @@ class Entrypoint{
             }
          }
       }
-            
+
       // Search for static calls to other classes
       for (MethodModel m : calledMethods) {
          if (logger.isLoggable(Level.FINE)) {
             logger.fine("Searching for call target: " + _methodEntry + " in " + m.getName());
-         }         
+         }
          if (m.getMethod().getName().equals(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8())
-                 && m.getMethod().getDescriptor().equals(_methodEntry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8())) {
+               && m.getMethod().getDescriptor().equals(_methodEntry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8())) {
             if (logger.isLoggable(Level.FINE)) {
-               logger.fine("Found " + m.getMethod().getClassModel().getClassWeAreModelling().getName() + 
-            		   "." + m.getMethod().getName() + " " + m.getMethod().getDescriptor());
+               logger.fine("Found " + m.getMethod().getClassModel().getClassWeAreModelling().getName() + "."
+                     + m.getMethod().getName() + " " + m.getMethod().getDescriptor());
             }
             return m;
          }

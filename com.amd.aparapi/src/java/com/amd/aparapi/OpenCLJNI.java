@@ -8,10 +8,10 @@ public class OpenCLJNI{
 
    static boolean openCLAvailable = false;
    static {
-      if (Config.useAgent){
+      if (Config.useAgent) {
          logger.fine("Using agent!");
          openCLAvailable = true;
-      }else{
+      } else {
          String arch = System.getProperty("os.arch");
          logger.fine("arch = " + arch);
          String aparapiLibraryName = null;
@@ -34,7 +34,7 @@ public class OpenCLJNI{
                      .println("Check your environment. Failed to load aparapi native library "
                            + aparapiLibraryName
                            + " or possibly failed to locate opencl native library (opencl.dll/opencl.so). Ensure that both are in your PATH (windows) or in LD_LIBRARY_PATH (linux).");
-   
+
             }
          }
       }

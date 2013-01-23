@@ -602,7 +602,7 @@ class InstructionSet{
       COMPOSITE_IF, //
       COMPOSITE_IF_ELSE, //
       COMPOSITE_FOR_SUN, //
-      COMPOSITE_FOR_ECLIPSE,// 
+      COMPOSITE_FOR_ECLIPSE, // 
       COMPOSITE_ARBITRARY_SCOPE, //
       COMPOSITE_WHILE, //
       CLONE, //
@@ -613,7 +613,7 @@ class InstructionSet{
       FIELD_ARRAY_ELEMENT_INCREMENT, //
       FIELD_ARRAY_ELEMENT_ASSIGN, //
       HEAD, //
-      COMPOSITE_EMPTY_LOOP,//
+      COMPOSITE_EMPTY_LOOP, //
       COMPOSITE_DO_WHILE;
 
       private Class<?> clazz;
@@ -890,7 +890,7 @@ class InstructionSet{
 
       }
    }
-   
+
    static class CompositeDoWhileInstruction extends CompositeInstruction{
 
       protected CompositeDoWhileInstruction(MethodModel method, Instruction _firstChild, Instruction _lastChild,
