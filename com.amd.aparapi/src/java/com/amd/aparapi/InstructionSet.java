@@ -467,7 +467,7 @@ class InstructionSet{
       LOR(I_LOR.class, PopSpec.LL, PushSpec.L, Operator.BitwiseOr), //
       IXOR(I_IXOR.class, PopSpec.II, PushSpec.I, Operator.BitwiseXor), //
       LXOR(I_LXOR.class, PopSpec.LL, PushSpec.L, Operator.BitwiseXor), //
-      IINC(I_IINC.class, ImmediateSpec.BlvtiBconst), //
+      IINC(I_IINC.class,LoadSpec.I,StoreSpec.I, ImmediateSpec.BlvtiBconst), //
       I2L(I_I2L.class, PopSpec.I, PushSpec.L, Operator.I2LCast), //
       I2F(I_I2F.class, PopSpec.I, PushSpec.F, Operator.I2FCast), //
       I2D(I_I2D.class, PopSpec.I, PushSpec.D, Operator.I2DCast), //
@@ -691,6 +691,10 @@ class InstructionSet{
 
       private ByteCode() {
          this(null, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, PopSpec.NONE, PushSpec.NONE, Operator.NONE);
+      }
+      
+      private ByteCode(Class<?> _class, LoadSpec _load, StoreSpec _store, ImmediateSpec _immediate) {
+         this(_class, _load, _store, _immediate, PopSpec.NONE, PushSpec.NONE, Operator.NONE);
       }
 
       int getCode() {
