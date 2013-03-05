@@ -491,6 +491,10 @@ First consider editing the properties in build.properties
       <delete file="Range.o" />
       <delete file="OpenCLArgDescriptor.obj" />
       <delete file="OpenCLArgDescriptor.o" />
+      <delete file="agent.obj" />
+      <delete file="agent.o" />
+      <delete file="classtools.obj" />
+      <delete file="classtools.o" />
       <delete file="OpenCLMem.obj" />
       <delete file="OpenCLMem.o" />
    </target>
