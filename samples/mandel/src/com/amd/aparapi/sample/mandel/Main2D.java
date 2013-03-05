@@ -108,8 +108,8 @@ public class Main2D{
 
          //Initialize palette
          for (int i = 0; i < maxIterations; i++) {
-            float h = i / (float) maxIterations;
-            float b = 1.0f - h * h;
+            final float h = i / (float) maxIterations;
+            final float b = 1.0f - (h * h);
             pallette[i] = Color.HSBtoRGB(h, 1f, b);
          }
 
@@ -118,12 +118,12 @@ public class Main2D{
       @Override public void run() {
 
          /** Determine which RGB value we are going to process (0..RGB.length). */
-         int gid = getGlobalId(1) * getGlobalSize(0) + getGlobalId(0);
+         final int gid = (getGlobalId(1) * getGlobalSize(0)) + getGlobalId(0);
 
          /** Translate the gid into an x an y value. */
-         float x = (((getGlobalId(0) * scale) - ((scale / 2) * getGlobalSize(0))) / getGlobalSize(0)) + offsetx;
+         final float x = (((getGlobalId(0) * scale) - ((scale / 2) * getGlobalSize(0))) / getGlobalSize(0)) + offsetx;
 
-         float y = (((getGlobalId(1) * scale) - ((scale / 2) * getGlobalSize(1))) / getGlobalSize(1)) + offsety;
+         final float y = (((getGlobalId(1) * scale) - ((scale / 2) * getGlobalSize(1))) / getGlobalSize(1)) + offsety;
 
          int count = 0;
 
@@ -132,9 +132,9 @@ public class Main2D{
          float new_zx = 0f;
 
          // Iterate until the algorithm converges or until maxIterations are reached.
-         while (count < maxIterations && zx * zx + zy * zy < 8) {
-            new_zx = zx * zx - zy * zy + x;
-            zy = 2 * zx * zy + y;
+         while ((count < maxIterations) && (((zx * zx) + (zy * zy)) < 8)) {
+            new_zx = ((zx * zx) - (zy * zy)) + x;
+            zy = (2 * zx * zy) + y;
             zx = new_zx;
             count++;
          }
@@ -156,7 +156,7 @@ public class Main2D{
 
    @SuppressWarnings("serial") public static void main(String[] _args) {
 
-      JFrame frame = new JFrame("MandelBrot");
+      final JFrame frame = new JFrame("MandelBrot");
 
       /** Mandelbrot image height. */
       final Range range = Range.create2D(768, 768);
@@ -166,7 +166,7 @@ public class Main2D{
       final BufferedImage image = new BufferedImage(range.getGlobalSize(0), range.getGlobalSize(1), BufferedImage.TYPE_INT_RGB);
       final BufferedImage offscreen = new BufferedImage(range.getGlobalSize(0), range.getGlobalSize(1), BufferedImage.TYPE_INT_RGB);
       // Draw Mandelbrot image
-      JComponent viewer = new JComponent(){
+      final JComponent viewer = new JComponent(){
          @Override public void paintComponent(Graphics g) {
 
             g.drawImage(image, 0, 0, range.getGlobalSize(0), range.getGlobalSize(1), this);
@@ -201,7 +201,7 @@ public class Main2D{
       // Create a Kernel passing the size, RGB buffer and the palette.
       final MandelKernel kernel = new MandelKernel(rgb);
 
-      float defaultScale = 3f;
+      final float defaultScale = 3f;
 
       // Set the default scale and offset, execute the kernel and force a repaint of the viewer.
       kernel.setScaleAndOffset(defaultScale, -1f, 0f);
@@ -214,7 +214,7 @@ public class Main2D{
 
       // Window listener to dispose Kernel resources on user exit.
       frame.addWindowListener(new WindowAdapter(){
-         public void windowClosing(WindowEvent _windowEvent) {
+         @Override public void windowClosing(WindowEvent _windowEvent) {
             kernel.dispose();
             System.exit(0);
          }
@@ -228,7 +228,7 @@ public class Main2D{
             synchronized (doorBell) {
                try {
                   doorBell.wait();
-               } catch (InterruptedException ie) {
+               } catch (final InterruptedException ie) {
                   ie.getStackTrace();
                }
             }
@@ -237,26 +237,26 @@ public class Main2D{
          float x = -1f;
          float y = 0f;
          float scale = defaultScale;
-         float tox = (float) (to.x - range.getGlobalSize(0) / 2) / range.getGlobalSize(0) * scale;
-         float toy = (float) (to.y - range.getGlobalSize(1) / 2) / range.getGlobalSize(1) * scale;
+         final float tox = ((float) (to.x - (range.getGlobalSize(0) / 2)) / range.getGlobalSize(0)) * scale;
+         final float toy = ((float) (to.y - (range.getGlobalSize(1) / 2)) / range.getGlobalSize(1)) * scale;
 
          // This is how many frames we will display as we zoom in and out.
-         int frames = 128;
-         long startMillis = System.currentTimeMillis();
+         final int frames = 128;
+         final long startMillis = System.currentTimeMillis();
          for (int sign = -1; sign < 2; sign += 2) {
-            for (int i = 0; i < frames - 4; i++) {
-               scale = scale + sign * defaultScale / frames;
-               x = x - sign * (tox / frames);
-               y = y - sign * (toy / frames);
+            for (int i = 0; i < (frames - 4); i++) {
+               scale = scale + ((sign * defaultScale) / frames);
+               x = x - (sign * (tox / frames));
+               y = y - (sign * (toy / frames));
 
                // Set the scale and offset, execute the kernel and force a repaint of the viewer.
                kernel.setScaleAndOffset(scale, x, y);
                kernel.execute(range);
-               List<ProfileInfo> profileInfo = kernel.getProfileInfo();
-               if (profileInfo != null && profileInfo.size() > 0) {
-                  for (ProfileInfo p : profileInfo) {
+               final List<ProfileInfo> profileInfo = kernel.getProfileInfo();
+               if ((profileInfo != null) && (profileInfo.size() > 0)) {
+                  for (final ProfileInfo p : profileInfo) {
                      System.out.print(" " + p.getType() + " " + p.getLabel() + " " + (p.getStart() / 1000) + " .. "
-                           + (p.getEnd() / 1000) + " " + (p.getEnd() - p.getStart()) / 1000 + "us");
+                           + (p.getEnd() / 1000) + " " + ((p.getEnd() - p.getStart()) / 1000) + "us");
                   }
                   System.out.println();
                }
@@ -266,8 +266,8 @@ public class Main2D{
             }
          }
 
-         long elapsedMillis = System.currentTimeMillis() - startMillis;
-         System.out.println("FPS = " + frames * 1000 / elapsedMillis);
+         final long elapsedMillis = System.currentTimeMillis() - startMillis;
+         System.out.println("FPS = " + ((frames * 1000) / elapsedMillis));
 
          // Reset zoom-in point.
          to = null;

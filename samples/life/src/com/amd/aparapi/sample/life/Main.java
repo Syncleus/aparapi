@@ -114,47 +114,49 @@ public class Main{
          imageData = ((DataBufferInt) _image.getRaster().getDataBuffer()).getData();
          width = _width;
          height = _height;
-         if (System.getProperty("com.amd.aparapi.executionMode").equals("JTP")){
-             range = Range.create(width * height, 4);
-         }else{
-             range = Range.create(width * height);
+
+         final String executionMode = System.getProperty("com.amd.aparapi.executionMode");
+         if ((executionMode != null) && executionMode.equals("JTP")) {
+            range = Range.create(width * height, 4);
+         } else {
+            range = Range.create(width * height);
          }
+
          System.out.println("range = " + range);
          fromBase = height * width;
          toBase = 0;
          setExplicit(true); // This gives us a performance boost
 
          /** draw a line across the image **/
-         for (int i = width * (height / 2) + width / 10; i < width * (height / 2 + 1) - width / 10; i++) {
+         for (int i = (width * (height / 2)) + (width / 10); i < ((width * ((height / 2) + 1)) - (width / 10)); i++) {
             imageData[i] = LifeKernel.ALIVE;
          }
 
          put(imageData); // Because we are using explicit buffer management we must put the imageData array
-
       }
 
-      public void processPixel(int gid){
-         int to = gid + toBase;
-         int from = gid + fromBase;
-         int x = gid % width;
-         int y = gid / width;
+      public void processPixel(int gid) {
+         final int to = gid + toBase;
+         final int from = gid + fromBase;
+         final int x = gid % width;
+         final int y = gid / width;
 
-         if ((x == 0 || x == width - 1 || y == 0 || y == height - 1)) {
+         if (((x == 0) || (x == (width - 1)) || (y == 0) || (y == (height - 1)))) {
             // This pixel is on the border of the view, just keep existing value
             imageData[to] = imageData[from];
          } else {
             // Count the number of neighbors.  We use (value&1x) to turn pixel value into either 0 or 1
-            int neighbors = (imageData[from - 1] & 1) + // EAST
+            final int neighbors = (imageData[from - 1] & 1) + // EAST
                   (imageData[from + 1] & 1) + // WEST
                   (imageData[from - width - 1] & 1) + // NORTHEAST                 
                   (imageData[from - width] & 1) + // NORTH
-                  (imageData[from - width + 1] & 1) + // NORTHWEST
-                  (imageData[from + width - 1] & 1) + // SOUTHEAST
+                  (imageData[(from - width) + 1] & 1) + // NORTHWEST
+                  (imageData[(from + width) - 1] & 1) + // SOUTHEAST
                   (imageData[from + width] & 1) + // SOUTH
                   (imageData[from + width + 1] & 1); // SOUTHWEST
 
             // The game of life logic
-            if (neighbors == 3 || (neighbors == 2 && imageData[from] == ALIVE)) {
+            if ((neighbors == 3) || ((neighbors == 2) && (imageData[from] == ALIVE))) {
                imageData[to] = ALIVE;
             } else {
                imageData[to] = DEAD;
@@ -164,7 +166,7 @@ public class Main{
       }
 
       @Override public void run() {
-         int gid = getGlobalId();
+         final int gid = getGlobalId();
          processPixel(gid);
       }
 
@@ -172,15 +174,15 @@ public class Main{
 
       public void nextGeneration() {
          // swap fromBase and toBase
-         int swap = fromBase;
+         final int swap = fromBase;
          fromBase = toBase;
          toBase = swap;
-         if (sequential){
-            for(int gid = 0; gid<(width*height); gid++){
+         if (sequential) {
+            for (int gid = 0; gid < (width * height); gid++) {
                processPixel(gid);
             }
 
-         }else{
+         } else {
             execute(range);
          }
 
@@ -192,10 +194,10 @@ public class Main{
 
    public static void main(String[] _args) {
 
-      JFrame frame = new JFrame("Game of Life");
-      final int width = Integer.getInteger("width", 1024 + 512+256+128);
+      final JFrame frame = new JFrame("Game of Life");
+      final int width = Integer.getInteger("width", 1024 + 512 + 256 + 128);
 
-      final int height = Integer.getInteger("height", 768+256);
+      final int height = Integer.getInteger("height", 768 + 256);
 
       // Buffer is twice the size as the screen.  We will alternate between mutating data from top to bottom
       // and bottom to top in alternate generation passses. The LifeKernel will track which pass is which
@@ -204,17 +206,16 @@ public class Main{
       final LifeKernel lifeKernel = new LifeKernel(width, height, image);
 
       // Create a component for viewing the offsecreen image
-      @SuppressWarnings("serial") JComponent viewer = new JComponent(){
+      @SuppressWarnings("serial") final JComponent viewer = new JComponent(){
          @Override public void paintComponent(Graphics g) {
             if (lifeKernel.isExplicit()) {
                lifeKernel.get(lifeKernel.imageData); // We only pull the imageData when we intend to use it.
-               List<ProfileInfo> profileInfo = lifeKernel.getProfileInfo();
+               final List<ProfileInfo> profileInfo = lifeKernel.getProfileInfo();
                if (profileInfo != null) {
-                  for (ProfileInfo p : profileInfo) {
+                  for (final ProfileInfo p : profileInfo) {
                      System.out.print(" " + p.getType() + " " + p.getLabel() + " " + (p.getStart() / 1000) + " .. "
-                           + (p.getEnd() / 1000) + " " + (p.getEnd() - p.getStart()) / 1000 + "us");
+                           + (p.getEnd() / 1000) + " " + ((p.getEnd() - p.getStart()) / 1000) + "us");
                   }
-                  System.out.println();
                }
             }
             // We copy one half of the offscreen buffer to the viewer, we copy the half that we just mutated.
@@ -226,7 +227,7 @@ public class Main{
          }
       };
 
-      JPanel controlPanel = new JPanel(new FlowLayout());
+      final JPanel controlPanel = new JPanel(new FlowLayout());
       frame.getContentPane().add(controlPanel, BorderLayout.SOUTH);
 
       final JButton startButton = new JButton("Start");
@@ -241,7 +242,7 @@ public class Main{
       controlPanel.add(new JLabel(lifeKernel.getExecutionMode().toString()));
 
       controlPanel.add(new JLabel("  Generations/Second="));
-      JLabel generationsPerSecond = new JLabel("0.00");
+      final JLabel generationsPerSecond = new JLabel("0.00");
       controlPanel.add(generationsPerSecond);
 
       // Set the default size and add to the frames content pane
@@ -259,7 +260,7 @@ public class Main{
          try {
             Thread.sleep(10);
             viewer.repaint();
-         } catch (InterruptedException e1) {
+         } catch (final InterruptedException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
          }
@@ -269,8 +270,8 @@ public class Main{
          lifeKernel.nextGeneration(); // Work is performed here
          viewer.repaint(); // Request a repaint of the viewer (causes paintComponent(Graphics) to be called later not synchronous
          generations++;
-         long now = System.currentTimeMillis();
-         if (now - start > 1000) {
+         final long now = System.currentTimeMillis();
+         if ((now - start) > 1000) {
             generationsPerSecond.setText(String.format("%5.2f", (generations * 1000.0) / (now - start)));
             start = now;
             generations = 0;

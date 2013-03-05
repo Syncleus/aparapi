@@ -11,16 +11,16 @@ abstract class ArrayAccess{
    public abstract int[] getIntData();
 
    public int getOffset() {
-      return this.offset;
+      return offset;
    }
 
    public int getLength() {
-      return this.length;
+      return length;
    }
 
-   private int offset;
+   private final int offset;
 
-   private int length;
+   private final int length;
 }
 
 class IntMemoryArrayAccess extends ArrayAccess{
@@ -29,11 +29,11 @@ class IntMemoryArrayAccess extends ArrayAccess{
       this.data = data;
    }
 
-   public int[] getIntData() {
-      return this.data;
+   @Override public int[] getIntData() {
+      return data;
    }
 
-   private int[] data;
+   private final int[] data;
 }
 
 public class Issue68{
@@ -41,19 +41,19 @@ public class Issue68{
    private class ColumnTableFNTRunnable extends Kernel{
       public ColumnTableFNTRunnable(int length, boolean isInverse, ArrayAccess arrayAccess, int[] wTable, int[] permutationTable,
             int modulus) {
-         this.stride = arrayAccess.getLength() / length;
+         stride = arrayAccess.getLength() / length;
          this.length = length; // Transform length
          this.isInverse = isInverse;
-         this.data = arrayAccess.getIntData();
-         this.offset = arrayAccess.getOffset();
+         data = arrayAccess.getIntData();
+         offset = arrayAccess.getOffset();
          this.wTable = wTable;
          this.permutationTable = permutationTable;
-         this.permutationTableLength = (permutationTable == null ? 0 : permutationTable.length);
+         permutationTableLength = (permutationTable == null ? 0 : permutationTable.length);
          setModulus(modulus);
       }
 
-      public void run() {
-         if (this.isInverse) {
+      @Override public void run() {
+         if (isInverse) {
             inverseColumnTableFNT();
          } else {
             columnTableFNT();
@@ -63,7 +63,7 @@ public class Issue68{
       private void columnTableFNT() {
          int nn, istep, mmax, r;
 
-         int offset = this.offset + getGlobalId();
+         final int offset = this.offset + getGlobalId();
          nn = length;
 
          if (nn < 2) {
@@ -77,10 +77,10 @@ public class Issue68{
 
             // Optimize first step when wr = 1
 
-            for (int i = offset; i < offset + nn * stride; i += istep * stride) {
-               int j = i + mmax * stride;
-               int a = data[i];
-               int b = data[j];
+            for (int i = offset; i < (offset + (nn * stride)); i += istep * stride) {
+               final int j = i + (mmax * stride);
+               final int a = data[i];
+               final int b = data[j];
                data[i] = modAdd(a, b);
                data[j] = modSubtract(a, b);
             }
@@ -88,10 +88,10 @@ public class Issue68{
             int t = r;
 
             for (int m = 1; m < mmax; m++) {
-               for (int i = offset + m * stride; i < offset + nn * stride; i += istep * stride) {
-                  int j = i + mmax * stride;
-                  int a = data[i];
-                  int b = data[j];
+               for (int i = offset + (m * stride); i < (offset + (nn * stride)); i += istep * stride) {
+                  final int j = i + (mmax * stride);
+                  final int a = data[i];
+                  final int b = data[j];
                   data[i] = modAdd(a, b);
                   data[j] = modMultiply(wTable[t], modSubtract(a, b));
                }
@@ -110,7 +110,7 @@ public class Issue68{
       private void inverseColumnTableFNT() {
          int nn, istep, mmax, r;
 
-         int offset = this.offset + getGlobalId();
+         final int offset = this.offset + getGlobalId();
          nn = length;
 
          if (nn < 2) {
@@ -131,9 +131,9 @@ public class Issue68{
 
             // Optimize first step when w = 1
 
-            for (int i = offset; i < offset + nn * stride; i += istep * stride) {
-               int j = i + mmax * stride;
-               int wTemp = data[j];
+            for (int i = offset; i < (offset + (nn * stride)); i += istep * stride) {
+               final int j = i + (mmax * stride);
+               final int wTemp = data[j];
                data[j] = modSubtract(data[i], wTemp);
                data[i] = modAdd(data[i], wTemp);
             }
@@ -141,9 +141,9 @@ public class Issue68{
             int t = r;
 
             for (int m = 1; m < mmax; m++) {
-               for (int i = offset + m * stride; i < offset + nn * stride; i += istep * stride) {
-                  int j = i + mmax * stride;
-                  int wTemp = modMultiply(wTable[t], data[j]);
+               for (int i = offset + (m * stride); i < (offset + (nn * stride)); i += istep * stride) {
+                  final int j = i + (mmax * stride);
+                  final int wTemp = modMultiply(wTable[t], data[j]);
                   data[j] = modSubtract(data[i], wTemp);
                   data[i] = modAdd(data[i], wTemp);
                }
@@ -154,52 +154,52 @@ public class Issue68{
       }
 
       private void columnScramble(int offset) {
-         for (int k = 0; k < this.permutationTableLength; k += 2) {
-            int i = offset + permutationTable[k] * stride, j = offset + permutationTable[k + 1] * stride;
-            int tmp = data[i];
+         for (int k = 0; k < permutationTableLength; k += 2) {
+            final int i = offset + (permutationTable[k] * stride), j = offset + (permutationTable[k + 1] * stride);
+            final int tmp = data[i];
             data[i] = data[j];
             data[j] = tmp;
          }
       }
 
       public final int modMultiply(int a, int b) {
-         int r1 = a * b - (int) (this.inverseModulus * (float) a * (float) b) * this.modulus, r2 = r1 - this.modulus;
+         final int r1 = (a * b) - ((int) (inverseModulus * a * b) * modulus), r2 = r1 - modulus;
 
          return (r2 < 0 ? r1 : r2);
       }
 
       private int modAdd(int a, int b) {
-         int r1 = a + b, r2 = r1 - this.modulus;
+         final int r1 = a + b, r2 = r1 - modulus;
 
          return (r2 < 0 ? r1 : r2);
       }
 
       private int modSubtract(int a, int b) {
-         int r1 = a - b, r2 = r1 + this.modulus;
+         final int r1 = a - b, r2 = r1 + modulus;
 
          return (r1 < 0 ? r2 : r1);
       }
 
       private void setModulus(int modulus) {
-         this.inverseModulus = 1.0f / (modulus + 0.5f); // Round down
+         inverseModulus = 1.0f / (modulus + 0.5f); // Round down
          this.modulus = modulus;
       }
 
-      private int stride;
+      private final int stride;
 
-      private int length;
+      private final int length;
 
-      private boolean isInverse;
+      private final boolean isInverse;
 
-      private int[] data;
+      private final int[] data;
 
-      private int offset;
+      private final int offset;
 
-      @Constant private int[] wTable;
+      @Constant private final int[] wTable;
 
-      @Constant private int[] permutationTable;
+      @Constant private final int[] permutationTable;
 
-      private int permutationTableLength;
+      private final int permutationTableLength;
 
       private int modulus;
 
@@ -209,13 +209,13 @@ public class Issue68{
    public static void main(String[] args) {
       final int SQRT_LENGTH = 1024;
       final int LENGTH = SQRT_LENGTH * SQRT_LENGTH;
-      ArrayAccess arrayAccess = new IntMemoryArrayAccess(new int[LENGTH], 0, LENGTH);
+      final ArrayAccess arrayAccess = new IntMemoryArrayAccess(new int[LENGTH], 0, LENGTH);
       new Issue68().transformColumns(SQRT_LENGTH, SQRT_LENGTH, false, arrayAccess, new int[SQRT_LENGTH], null);
    }
 
    private void transformColumns(final int length, final int count, final boolean isInverse, final ArrayAccess arrayAccess,
          final int[] wTable, final int[] permutationTable) {
-      Kernel kernel = new ColumnTableFNTRunnable(length, isInverse, arrayAccess, wTable, permutationTable, getModulus());
+      final Kernel kernel = new ColumnTableFNTRunnable(length, isInverse, arrayAccess, wTable, permutationTable, getModulus());
       kernel.execute(count);
    }
 

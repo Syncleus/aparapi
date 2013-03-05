@@ -131,7 +131,7 @@ public class WideLoad{
       int value7C = 0;
       int value7D = 0;
       int value7E = 0;
-      int value7F = 0;   
+      int value7F = 0;
       int value80 = 0;
       int value81 = 0;
       int value82 = 0;
@@ -260,8 +260,8 @@ public class WideLoad{
       int valueFD = 0;
       int valueFE = 0;
       int valueFF = 0;
-      int valueWide = 0;  // wide 
-      valueWide++;   // wide 
+      int valueWide = 0; // wide 
+      valueWide++; // wide 
    }
 }
 

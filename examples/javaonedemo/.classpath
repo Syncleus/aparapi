@@ -5,6 +5,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.amd.aparapi"/>
 	<classpathentry kind="lib" path="jogamp/gluegen-rt.jar"/>
-	<classpathentry kind="lib" path="jogamp/jogl-all.jar"/>
+	<classpathentry kind="lib" path="jogamp/jogl.all.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

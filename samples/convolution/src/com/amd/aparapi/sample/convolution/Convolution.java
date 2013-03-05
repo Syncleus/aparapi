@@ -103,8 +103,6 @@ public class Convolution{
             -10f,
             0f,
       };
-      
-      
 
       new ConvolutionViewer(file, convMatrix3x3){
          @Override protected void applyConvolution(float[] _convMatrix3x3, byte[] _inBytes, byte[] _outBytes, int _width,

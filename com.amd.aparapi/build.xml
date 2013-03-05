@@ -5,7 +5,7 @@
 	<!-- 
 			USER CONFIGURABLE PROPERTIES 
 	-->	
-	<property name="findbugs.zip.version" value="2.0.0"/>
+	<property name="findbugs.zip.version" value="2.0.1"/>
 	<property name="findbugs.zip.name" value="findbugs-${findbugs.zip.version}.zip"/>
 	<property name="findbugs.root" value="${basedir}/.libs"/>
 	<property name="findbugs.home" value="${findbugs.root}/findbugs-${findbugs.zip.version}"/>
@@ -18,9 +18,9 @@
 	<echo>OS Version: ${os.version}</echo>
 	<echo>OS Arch:    ${os.arch}</echo>
 
-	<property name="build.compiler" value="javac1.6"/>
+	<!-- <property name="build.compiler" value="javac1.6"/>
 	<property name="ant.build.javac.source" value="1.6"/>
-	<property name="ant.build.javac.target" value="1.6"/>
+	<property name="ant.build.javac.target" value="1.6"/> -->
 
 	<available property="findbugs.installed" file="${findbugs.home}"/>
 
@@ -75,7 +75,50 @@
    		     <compilerarg value="-Xlint"/>
    			 <compilerarg value="-Xlint:-path"/>
        </javac>
-       <jar jarfile="${basedir}/dist/aparapi.jar" basedir="${basedir}/classes"/>
+       <jar jarfile="${basedir}/dist/aparapi.jar" basedir="${basedir}/classes">
+       		<manifest>
+       	      <!-- Who is building this jar? -->
+       	      <attribute name="Built-By" value="Aparapi Open-Source Community"/>
+       	      <!-- Information about the program itself -->
+       	      <!-- <attribute name="Implementation-Vendor" value=""/> -->
+       	      <attribute name="Implementation-Title" value="Aparapi"/>
+       	      <!-- <attribute name="Implementation-Version" value="1.0.0"/> -->
+       	      <!-- Sealed -->
+       	      <section name="com/amd/aparapi/internal/annotation/">
+       	        <attribute name="Sealed" value="true"/>
+       	      </section>
+       	      <section name="com/amd/aparapi/internal/exception/">
+       	        <attribute name="Sealed" value="true"/>
+       	      </section>
+       	      <section name="com/amd/aparapi/internal/instruction/">
+       	        <attribute name="Sealed" value="true"/>
+       	      </section>
+       	      <section name="com/amd/aparapi/internal/jni/">
+       	        <attribute name="Sealed" value="true"/>
+       	      </section>
+       	      <section name="com/amd/aparapi/internal/kernel/">
+       	        <attribute name="Sealed" value="true"/>
+       	      </section>
+       	      <section name="com/amd/aparapi/internal/model/">
+       	        <attribute name="Sealed" value="true"/>
+       	      </section>
+       	      <section name="com/amd/aparapi/internal/opencl/">
+       	        <attribute name="Sealed" value="true"/>
+       	      </section>
+       	      <section name="com/amd/aparapi/internal/reader/">
+       	        <attribute name="Sealed" value="true"/>
+       	      </section>
+       	      <section name="com/amd/aparapi/internal/tool/">
+       	        <attribute name="Sealed" value="true"/>
+       	      </section>
+       	      <section name="com/amd/aparapi/internal/util/">
+       	        <attribute name="Sealed" value="true"/>
+       	      </section>
+       	      <section name="com/amd/aparapi/internal/writer/">
+       	        <attribute name="Sealed" value="true"/>
+       	      </section>
+       	    </manifest>
+       </jar>
    	</target>
 
 </project>

@@ -104,12 +104,12 @@ public class CreateJUnitTests{
 
          String exceptions = source.getExceptionsString();
          if (exceptions.length() > 0) {
-            sb.append("   Class<? extends com.amd.aparapi.AparapiException> expectedException = ");
+            sb.append("   Class<? extends com.amd.aparapi.internal.exception.AparapiException> expectedException = ");
 
-            sb.append("com.amd.aparapi." + exceptions + ".class");
+            sb.append("com.amd.aparapi.internal.exception." + exceptions + ".class");
             sb.append(";\n");
          } else {
-            sb.append("   Class<? extends com.amd.aparapi.AparapiException> expectedException = null;\n");
+            sb.append("   Class<? extends com.amd.aparapi.internal.exception.AparapiException> expectedException = null;\n");
          }
          sb.append("       test(" + testPackageName + "." + className + ".class, expectedException, expectedOpenCL);\n");
          sb.append("   }\n");

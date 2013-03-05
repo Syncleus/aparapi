@@ -2,7 +2,6 @@ package com.amd.aparapi.test;
 
 import com.amd.aparapi.Kernel;
 
-
 class AnotherClass{
    static public int foo() {
       return 42;

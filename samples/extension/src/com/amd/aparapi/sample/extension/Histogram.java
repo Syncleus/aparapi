@@ -1,15 +1,15 @@
 package com.amd.aparapi.sample.extension;
 
-import com.amd.aparapi.Device;
 import com.amd.aparapi.Kernel;
-import com.amd.aparapi.OpenCL;
-import com.amd.aparapi.OpenCLDevice;
 import com.amd.aparapi.Range;
+import com.amd.aparapi.device.Device;
+import com.amd.aparapi.device.OpenCLDevice;
+import com.amd.aparapi.opencl.OpenCL;
+import com.amd.aparapi.opencl.OpenCL.Resource;
 
 public class Histogram{
 
-   @OpenCL.Resource("com/amd/aparapi/sample/extension/HistogramKernel.cl") interface HistogramKernel extends
-         OpenCL<HistogramKernel>{
+   @Resource("com/amd/aparapi/sample/extension/HistogramKernel.cl") interface HistogramKernel extends OpenCL<HistogramKernel>{
 
       public HistogramKernel histogram256(//
             Range _range,//
@@ -32,46 +32,49 @@ public class Histogram{
       final int GROUP_SIZE = 128;
       final int SUB_HISTOGRAM_COUNT = ((WIDTH * HEIGHT) / (GROUP_SIZE * BIN_SIZE));
 
-      byte[] data = new byte[WIDTH * HEIGHT];
-      for (int i = 0; i < WIDTH * HEIGHT; i++) {
-         data[i] = (byte) (Math.random() * BIN_SIZE / 2);
+      final byte[] data = new byte[WIDTH * HEIGHT];
+      for (int i = 0; i < (WIDTH * HEIGHT); i++) {
+         data[i] = (byte) ((Math.random() * BIN_SIZE) / 2);
       }
-      byte[] sharedArray = new byte[GROUP_SIZE * BIN_SIZE];
+      final byte[] sharedArray = new byte[GROUP_SIZE * BIN_SIZE];
       final int[] binResult = new int[SUB_HISTOGRAM_COUNT * BIN_SIZE];
       System.out.println("binResult size=" + binResult.length);
       final int[] histo = new int[BIN_SIZE];
-      int[] refHisto = new int[BIN_SIZE];
-      Device device = Device.firstGPU();
-      Kernel k = new Kernel(){
+      final int[] refHisto = new int[BIN_SIZE];
+      final Device device = Device.firstGPU();
+      final Kernel k = new Kernel(){
 
          @Override public void run() {
-            int j = getGlobalId(0);
-            for (int i = 0; i < SUB_HISTOGRAM_COUNT; ++i)
-               histo[j] += binResult[i * BIN_SIZE + j];
+            final int j = getGlobalId(0);
+            for (int i = 0; i < SUB_HISTOGRAM_COUNT; ++i) {
+               histo[j] += binResult[(i * BIN_SIZE) + j];
+            }
          }
 
       };
-      Range range2 = device.createRange(BIN_SIZE);
+      final Range range2 = device.createRange(BIN_SIZE);
       k.execute(range2);
 
-      Range range = Range.create((WIDTH * HEIGHT) / BIN_SIZE, GROUP_SIZE);
+      final Range range = Range.create((WIDTH * HEIGHT) / BIN_SIZE, GROUP_SIZE);
 
       if (device instanceof OpenCLDevice) {
-         OpenCLDevice openclDevice = (OpenCLDevice) device;
+         final OpenCLDevice openclDevice = (OpenCLDevice) device;
 
-         HistogramKernel histogram = openclDevice.bind(HistogramKernel.class);
-       
-         StopWatch timer = new StopWatch();
+         final HistogramKernel histogram = openclDevice.bind(HistogramKernel.class);
+
+         final StopWatch timer = new StopWatch();
          timer.start();
 
          histogram.histogram256(range, data, sharedArray, binResult, BIN_SIZE);
-         boolean java = false;
-         boolean aparapiKernel = false;
+         final boolean java = false;
+         final boolean aparapiKernel = false;
          if (java) {
             // Calculate final histogram bin 
-            for (int j = 0; j < BIN_SIZE; ++j)
-               for (int i = 0; i < SUB_HISTOGRAM_COUNT; ++i)
-                  histo[j] += binResult[i * BIN_SIZE + j];
+            for (int j = 0; j < BIN_SIZE; ++j) {
+               for (int i = 0; i < SUB_HISTOGRAM_COUNT; ++i) {
+                  histo[j] += binResult[(i * BIN_SIZE) + j];
+               }
+            }
          } else if (aparapiKernel) {
             k.execute(range2);
          } else {
@@ -79,7 +82,7 @@ public class Histogram{
          }
          timer.print("opencl");
          timer.start();
-         for (int i = 0; i < WIDTH * HEIGHT; i++) {
+         for (int i = 0; i < (WIDTH * HEIGHT); i++) {
             refHisto[data[i]]++;
          }
          timer.print("java");

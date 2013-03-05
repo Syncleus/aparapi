@@ -57,6 +57,7 @@
          <compilerarg value="-Xlint"/>
          <compilerarg value="-Xlint:-path"/>
       </javac>
+      <copy todir="classes/com/amd/aparapi/test/runtime" file="src/java/com/amd/aparapi/test/runtime/squarer.cl"/>
 
       <mkdir dir="junit"/>
       <mkdir dir="junit/data"/>

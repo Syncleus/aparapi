@@ -4,6 +4,10 @@
 	<classpathentry kind="src" path="src/genjava"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.amd.aparapi"/>
+	<classpathentry kind="lib" path="/com.amd.aparapi/dist/aparapi.jar" sourcepath="/com.amd.aparapi">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="com.amd.aparapi.jni/dist"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

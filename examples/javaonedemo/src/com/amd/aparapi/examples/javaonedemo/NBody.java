@@ -109,12 +109,12 @@ public class NBody{
          // range = Range.create(bodies);
          xyz = new float[range.getGlobalSize(0) * 3];
          vxyz = new float[range.getGlobalSize(0) * 3];
-         float maxDist = 20f;
-         for (int body = 0; body < range.getGlobalSize(0) * 3; body += 3) {
+         final float maxDist = 20f;
+         for (int body = 0; body < (range.getGlobalSize(0) * 3); body += 3) {
 
-            float theta = (float) (Math.random() * Math.PI * 2);
-            float phi = (float) (Math.random() * Math.PI * 2);
-            float radius = (float) (Math.random() * maxDist);
+            final float theta = (float) (Math.random() * Math.PI * 2);
+            final float phi = (float) (Math.random() * Math.PI * 2);
+            final float radius = (float) (Math.random() * maxDist);
 
             // get the 3D dimensional coordinates
             xyz[body + 0] = (float) (radius * Math.cos(theta) * Math.sin(phi));
@@ -123,7 +123,7 @@ public class NBody{
 
             // divide into two 'spheres of bodies' by adjusting x 
 
-            if (body % 2 == 0) {
+            if ((body % 2) == 0) {
                xyz[body + 0] += maxDist * 1.5;
             } else {
                xyz[body + 0] -= maxDist * 1.5;
@@ -136,33 +136,33 @@ public class NBody{
        * Here is the kernel entrypoint. Here is where we calculate the position of each body
        */
       @Override public void run() {
-         int body = getGlobalId();
-         int count = getGlobalSize(0) * 3;
-         int globalId = body * 3;
+         final int body = getGlobalId();
+         final int count = getGlobalSize(0) * 3;
+         final int globalId = body * 3;
 
          float accx = 0.f;
          float accy = 0.f;
          float accz = 0.f;
 
-         float myPosx = xyz[globalId + 0];
-         float myPosy = xyz[globalId + 1];
-         float myPosz = xyz[globalId + 2];
+         final float myPosx = xyz[globalId + 0];
+         final float myPosy = xyz[globalId + 1];
+         final float myPosz = xyz[globalId + 2];
          for (int i = 0; i < count; i += 3) {
-            float dx = xyz[i + 0] - myPosx;
-            float dy = xyz[i + 1] - myPosy;
-            float dz = xyz[i + 2] - myPosz;
-            float invDist = rsqrt((dx * dx) + (dy * dy) + (dz * dz) + espSqr);
-            float s = mass * invDist * invDist * invDist;
-            accx = accx + s * dx;
-            accy = accy + s * dy;
-            accz = accz + s * dz;
+            final float dx = xyz[i + 0] - myPosx;
+            final float dy = xyz[i + 1] - myPosy;
+            final float dz = xyz[i + 2] - myPosz;
+            final float invDist = rsqrt((dx * dx) + (dy * dy) + (dz * dz) + espSqr);
+            final float s = mass * invDist * invDist * invDist;
+            accx = accx + (s * dx);
+            accy = accy + (s * dy);
+            accz = accz + (s * dz);
          }
          accx = accx * delT;
          accy = accy * delT;
          accz = accz * delT;
-         xyz[globalId + 0] = myPosx + vxyz[globalId + 0] * delT + accx * .5f * delT;
-         xyz[globalId + 1] = myPosy + vxyz[globalId + 1] * delT + accy * .5f * delT;
-         xyz[globalId + 2] = myPosz + vxyz[globalId + 2] * delT + accz * .5f * delT;
+         xyz[globalId + 0] = myPosx + (vxyz[globalId + 0] * delT) + (accx * .5f * delT);
+         xyz[globalId + 1] = myPosy + (vxyz[globalId + 1] * delT) + (accy * .5f * delT);
+         xyz[globalId + 2] = myPosz + (vxyz[globalId + 2] * delT) + (accz * .5f * delT);
 
          vxyz[globalId + 0] = vxyz[globalId + 0] + accx;
          vxyz[globalId + 1] = vxyz[globalId + 1] + accy;
@@ -177,7 +177,7 @@ public class NBody{
       protected void render(GL2 gl) {
          gl.glBegin(GL2.GL_QUADS);
 
-         for (int i = 0; i < range.getGlobalSize(0) * 3; i += 3) {
+         for (int i = 0; i < (range.getGlobalSize(0) * 3); i += 3) {
             gl.glTexCoord2f(0, 1);
             gl.glVertex3f(xyz[i + 0], xyz[i + 1] + 1, xyz[i + 2]);
             gl.glTexCoord2f(0, 0);
@@ -204,10 +204,10 @@ public class NBody{
 
       final NBodyKernel kernel = new NBodyKernel(Range.create(Integer.getInteger("bodies", 10000)));
       kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
-      JFrame frame = new JFrame("NBody");
+      final JFrame frame = new JFrame("NBody");
 
-      JPanel panel = new JPanel(new BorderLayout());
-      JPanel controlPanel = new JPanel(new FlowLayout());
+      final JPanel panel = new JPanel(new BorderLayout());
+      final JPanel controlPanel = new JPanel(new FlowLayout());
       panel.add(controlPanel, BorderLayout.SOUTH);
 
       final JButton startButton = new JButton("Start");
@@ -232,7 +232,7 @@ public class NBody{
 
       modeButton.addItemListener(new ItemListener(){
          @Override public void itemStateChanged(ItemEvent e) {
-            String item = (String) modeButton.getSelectedItem();
+            final String item = (String) modeButton.getSelectedItem();
 
             // if (item.equals(choices[2])) {
             // modeButton = gpuMandelBrot;
@@ -253,7 +253,7 @@ public class NBody{
 
       controlPanel.add(new JLabel("            " + kernel.range.getGlobalSize(0) + " Particles"));
 
-      GLCapabilities caps = new GLCapabilities(null);
+      final GLCapabilities caps = new GLCapabilities(null);
       final GLProfile profile = caps.getGLProfile();
       caps.setDoubleBuffered(true);
       caps.setHardwareAccelerated(true);
@@ -261,7 +261,8 @@ public class NBody{
 
       final GLUT glut = new GLUT();
 
-      Dimension dimension = new Dimension(Integer.getInteger("width", 1024 + 256), Integer.getInteger("height", 768 - 64-32));
+      final Dimension dimension = new Dimension(Integer.getInteger("width", 1024 + 256),
+            Integer.getInteger("height", 768 - 64 - 32));
       canvas.setPreferredSize(dimension);
 
       canvas.addGLEventListener(new GLEventListener(){
@@ -291,15 +292,15 @@ public class NBody{
 
          @Override public void display(GLAutoDrawable drawable) {
 
-            GL2 gl = drawable.getGL().getGL2();
-        texture.enable(gl);
-        texture.bind(gl);
+            final GL2 gl = drawable.getGL().getGL2();
+            texture.enable(gl);
+            texture.bind(gl);
 
             gl.glLoadIdentity();
             gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
             gl.glColor3f(1f, 1f, 1f);
 
-            GLU glu = new GLU();
+            final GLU glu = new GLU();
             glu.gluPerspective(45f, ratio, 0f, 1000f);
 
             glu.gluLookAt(xeye, yeye, zeye * zoomFactor, xat, yat, zat, 0f, 1f, 0f);
@@ -308,22 +309,22 @@ public class NBody{
                if (kernel.isExplicit()) {
                   kernel.get(kernel.xyz);
                }
-               List<ProfileInfo> profileInfo = kernel.getProfileInfo();
-               if (profileInfo != null && profileInfo.size() > 0) {
-                  for (ProfileInfo p : profileInfo) {
-                     System.out.print(" " + p.getType() + " " + p.getLabel() + (p.getEnd() - p.getStart()) / 1000 + "us");
+               final List<ProfileInfo> profileInfo = kernel.getProfileInfo();
+               if ((profileInfo != null) && (profileInfo.size() > 0)) {
+                  for (final ProfileInfo p : profileInfo) {
+                     System.out.print(" " + p.getType() + " " + p.getLabel() + ((p.getEnd() - p.getStart()) / 1000) + "us");
                   }
                   System.out.println();
                }
             }
             kernel.render(gl);
 
-            long now = System.currentTimeMillis();
-            long time = now - last;
+            final long now = System.currentTimeMillis();
+            final long time = now - last;
             frames++;
 
             if (running) {
-               float framesPerSecond = (float) ((frames * 1000.0f) / time);
+               final float framesPerSecond = (frames * 1000.0f) / time;
 
                gl.glColor3f(.5f, .5f, .5f);
                gl.glRasterPos2i(-40, 38);
@@ -342,11 +343,11 @@ public class NBody{
             gl.glEnable(GL.GL_BLEND);
             gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
             try {
-               InputStream textureStream = NBody.class.getResourceAsStream("particle.jpg");
+               final InputStream textureStream = NBody.class.getResourceAsStream("particle.jpg");
                texture = TextureIO.newTexture(textureStream, false, null);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                e.printStackTrace();
-            } catch (GLException e) {
+            } catch (final GLException e) {
                e.printStackTrace();
             }
 
@@ -356,7 +357,7 @@ public class NBody{
             width = _width;
             height = _height;
 
-            GL2 gl = drawable.getGL().getGL2();
+            final GL2 gl = drawable.getGL().getGL2();
             gl.glViewport(0, 0, width, height);
 
             ratio = (double) width / (double) height;

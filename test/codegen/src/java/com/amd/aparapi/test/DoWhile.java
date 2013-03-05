@@ -4,10 +4,10 @@ public class DoWhile{
    public void run() {
       @SuppressWarnings("unused") boolean pass = false;
       int i = 0;
-      do{
+      do {
          pass = true;
          i++;
-      }while (i < 10);
+      } while (i < 10);
    }
 }
 /**{OpenCL{

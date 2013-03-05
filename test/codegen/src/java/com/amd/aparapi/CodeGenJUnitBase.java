@@ -39,6 +39,11 @@ package com.amd.aparapi;
 
 import static org.junit.Assert.assertTrue;
 
+import com.amd.aparapi.internal.exception.AparapiException;
+import com.amd.aparapi.internal.model.ClassModel;
+import com.amd.aparapi.internal.model.Entrypoint;
+import com.amd.aparapi.internal.writer.KernelWriter;
+
 public class CodeGenJUnitBase{
 
    protected void test(Class<?> _class, Class<? extends AparapiException> _expectedExceptionType, String[] expectedOpenCL) {

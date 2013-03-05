@@ -3,8 +3,8 @@ package com.amd.aparapi.test;
 public class EarlyReturn{
    public void run() {
       @SuppressWarnings("unused") boolean pass = false;
-      int i=0;
-      if ((i%2)==0){
+      int i = 0;
+      if ((i % 2) == 0) {
          return;
       }
       i++;

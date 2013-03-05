@@ -4,7 +4,7 @@ public class NullCheck{
    int[] ints = new int[1024];
 
    public void run() {
-      if (ints == null){
+      if (ints == null) {
          return;
       }
       int value = ints[0];

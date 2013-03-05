@@ -38,24 +38,35 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 package com.amd.aparapi;
 
 public class ProfileInfo{
+
    private enum TYPE {
       R,
       X,
       W
    }; // 0 = write, 1 = execute, 2 = read
 
-   TYPE type;
+   private final TYPE type;
 
-   private String label;
+   private final String label;
 
-   private long start;
+   private final long start;
 
-   private long end;
+   private final long end;
 
-   private long submit;
+   private final long submit;
 
-   private long queued;
+   private final long queued;
 
+   /**
+    * Minimal constructor
+    * 
+    * @param _label
+    * @param _type
+    * @param _start
+    * @param _end
+    * @param _submit
+    * @param _queued
+    */
    public ProfileInfo(String _label, int _type, long _start, long _end, long _submit, long _queued) {
       type = TYPE.values()[_type];
       label = _label == null ? "exec()" : _label;
@@ -81,16 +92,32 @@ public class ProfileInfo{
       return queued;
    }
 
-   public String toString() {
-      return "ProfileInfo[" + type + " '" + label + "' start=" + start + ", end=" + end + ", submit=" + submit + ", queued="
-            + queued + ", duration=" + (end - start) + "]";
-   }
-
    public String getLabel() {
       return (label);
    }
 
    public TYPE getType() {
       return (type);
+   }
+
+   @Override public String toString() {
+      final StringBuilder sb = new StringBuilder();
+      sb.append("ProfileInfo[");
+      sb.append(type);
+      sb.append(" '");
+      sb.append(label);
+      sb.append("' start=");
+      sb.append(start);
+      sb.append(", end=");
+      sb.append(end);
+      sb.append(", submit=");
+      sb.append(submit);
+      sb.append(", queued=");
+      sb.append(queued);
+      sb.append(", duration=");
+      sb.append((end - start));
+      sb.append("]");
+
+      return sb.toString();
    }
 }

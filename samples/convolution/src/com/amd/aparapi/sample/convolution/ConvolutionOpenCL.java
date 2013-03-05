@@ -1,4 +1,3 @@
-
 /*
 Copyright (c) 2010-2011, Advanced Micro Devices, Inc.
 All rights reserved.
@@ -41,14 +40,15 @@ package com.amd.aparapi.sample.convolution;
 
 import java.io.File;
 
-import com.amd.aparapi.Device;
-import com.amd.aparapi.OpenCL;
-import com.amd.aparapi.OpenCLDevice;
 import com.amd.aparapi.Range;
+import com.amd.aparapi.device.Device;
+import com.amd.aparapi.device.OpenCLDevice;
+import com.amd.aparapi.opencl.OpenCL;
+import com.amd.aparapi.opencl.OpenCL.Resource;
 
 public class ConvolutionOpenCL{
 
-   @OpenCL.Resource("com/amd/aparapi/sample/convolution/convolution.cl") interface Convolution extends OpenCL<Convolution>{
+   @Resource("com/amd/aparapi/sample/convolution/convolution.cl") interface Convolution extends OpenCL<Convolution>{
       Convolution applyConvolution(//
             Range range, //
             @GlobalReadOnly("_convMatrix3x3") float[] _convMatrix3x3,//// only read from kernel 
@@ -59,12 +59,12 @@ public class ConvolutionOpenCL{
    }
 
    public static void main(final String[] _args) {
-      File file = new File(_args.length == 1 ? _args[0] : "testcard.jpg");
+      final File file = new File(_args.length == 1 ? _args[0] : "testcard.jpg");
 
       final OpenCLDevice openclDevice = (OpenCLDevice) Device.best();
 
       final Convolution convolution = openclDevice.bind(Convolution.class);
-      float convMatrix3x3[] = new float[] {
+      final float convMatrix3x3[] = new float[] {
             0f,
             -10f,
             0f,
@@ -84,10 +84,9 @@ public class ConvolutionOpenCL{
             if (range == null) {
                range = openclDevice.createRange(_width * _height * 3);
             }
+
             convolution.applyConvolution(range, _convMatrix3x3, _inBytes, _outBytes, _width, _height);
          }
       };
-
    }
-
 }

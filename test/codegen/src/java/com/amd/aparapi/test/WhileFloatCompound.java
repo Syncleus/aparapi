@@ -1,16 +1,16 @@
 package com.amd.aparapi.test;
 
 public class WhileFloatCompound{
-   
-   public float randomFunc(){
-     
-      return(1.0f);
-   }
-   
-   public void run() {
-      float v1 = 1f, v2=0f, s = 1f;
 
-      while(s < 1 && s > 0){ 
+   public float randomFunc() {
+
+      return (1.0f);
+   }
+
+   public void run() {
+      float v1 = 1f, v2 = 0f, s = 1f;
+
+      while (s < 1 && s > 0) {
          v1 = randomFunc();
          v2 = randomFunc();
          s = v1 * v1 + v2 * v2;
@@ -46,3 +46,4 @@ __kernel void run(
    }
  }
 }OpenCL}**/
+

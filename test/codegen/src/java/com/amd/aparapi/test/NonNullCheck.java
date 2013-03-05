@@ -4,10 +4,10 @@ public class NonNullCheck{
    int[] ints = new int[1024];
 
    public void run() {
-      if (ints != null){
+      if (ints != null) {
          int value = ints[0];
       }
-    
+
    }
 }
 /**{OpenCL{

@@ -33,32 +33,13 @@
    direct product is subject to national security controls as identified on the Commerce Control List (currently 
    found in Supplement 1 to Part 774 of EAR).  For the most current Country Group listings, or for additional 
    information about the EAR or your obligations under those regulations, please refer to the U.S. Bureau of Industry
-   and Security’s website at http://www.bis.doc.gov/. 
+   and Securityï¿½s website at http://www.bis.doc.gov/. 
    */
 
 #ifndef CLHELPER_H
 #define CLHELPER_H
-/*
-class Program{
-   private:
-   cl_context context;
-   cl_device_id deviceId;
-   cl_command_queue commandQueue;
-   cl_program program;
-   public:
-   Program(cl_context context, cl_device_id deviceId, cl_command_queue commandQueue, cl_program program);
-};
 
-class Buf{
-   private:
-   cl_mem mem;
-   void *ptr;
-   size_t size;
-   cl_uint mask;
-   cl_uint bits;
-};
-*/
-
+#include "Common.h"
 
 class CLHelper{
    public:
@@ -67,91 +48,6 @@ class CLHelper{
    static cl_program compile(JNIEnv *jenv, cl_context context, size_t deviceCount, cl_device_id* deviceId, jstring source, jstring* log, cl_int *status);
    static jstring getExtensions(JNIEnv *jenv, cl_device_id deviceId, cl_int *status);
 };
-
-template <typename  T> class List; // forward
-
-template <typename  T> class Ref{
-   private:
-      T value;
-      int line;
-      char *fileName;
-      Ref<T> *next;
-      friend class List<T>;
-   public:
-      Ref(T _value, int _line, char* _fileName);
-};
-
-template <typename  T> class List{
-   private:
-      char *name;
-      Ref<T> *head;
-      int count;
-   public:
-      List(char *_name);
-      void add(T _value, int _line, char *_fileName);
-      void remove(T _value, int _line, char *_fileName);
-      void report(FILE *stream);
-};
-
-template <typename  T> Ref<T>::Ref(T _value, int _line, char* _fileName):
-   value(_value),
-   line(_line),
-   fileName(_fileName),
-   next(NULL){
-   }
-
-template <typename  T> List<T>::List(char *_name): 
-   head(NULL),
-   count(0),
-   name(_name){
-   }
-
-template <typename  T> void List<T>::add(T _value, int _line, char *_fileName){
-   Ref<T> *handle = new Ref<T>(_value, _line, _fileName);
-   handle->next = head; 
-   head = handle;
-   count++;
-}
-
-template <typename  T> void List<T>::remove(T _value, int _line, char *_fileName){
-   for (Ref<T> *ptr = head, *last=NULL; ptr != NULL; last=ptr, ptr = ptr->next){
-      if (ptr->value == _value){
-         if (last == NULL){ // head 
-            head = ptr->next;
-         }else{ // !head
-            last->next = ptr->next;
-         }
-         delete ptr;
-         count--;
-         return;
-      }
-   }
-   fprintf(stderr, "FILE %s LINE %d failed to find %s to remove %0lx\n", (char*)_fileName, _line, name, (unsigned long)_value);
-}
-
-template <typename  T> void List<T>::report(FILE *stream){
-   if (head != NULL){
-      fprintf(stream, "Resource report %d resources of type %s still in play ", count, name);
-      for (Ref<T> *ptr = head; ptr != NULL; ptr = ptr->next){
-         fprintf(stream, " %0lx(%d)", (unsigned long)ptr->value, ptr->line);
-      }
-      fprintf(stream, "\n");
-   }
-}
-
-#ifdef CLHELPER_SOURCE
-List<cl_command_queue> commandQueueList((char*)"cl_command_queue");
-List<cl_mem> memList((char*)"cl_mem");
-List<cl_event> readEventList((char*)"cl_event (read)");
-List<cl_event> executeEventList((char*)"cl_event (exec)");
-List<cl_event> writeEventList((char*)"cl_event (write)");
-#else
-extern List<cl_command_queue> commandQueueList;
-extern List<cl_mem> memList;
-extern List<cl_event> readEventList;
-extern List<cl_event> executeEventList;
-extern List<cl_event> writeEventList;
-#endif
 
 #endif // CLHELPER_H
 

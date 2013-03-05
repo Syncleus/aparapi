@@ -41,7 +41,6 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 
-
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.Range;
 

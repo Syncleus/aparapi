@@ -36,76 +36,81 @@
    and Security’s website at http://www.bis.doc.gov/. 
    */
 
-#include "common.h"
-
 #define CLHELPER_SOURCE
-#include "clHelper.h"
+#include "CLHelper.h"
+#include "List.h"
+#include <map>
 
-const char *CLHelper::errString(cl_int status){
-   static struct { cl_int code; const char *msg; } error_table[] = {
-      { CL_SUCCESS, "success" },
-      { CL_DEVICE_NOT_FOUND, "device not found", },
-      { CL_DEVICE_NOT_AVAILABLE, "device not available", },
-      { CL_COMPILER_NOT_AVAILABLE, "compiler not available", },
-      { CL_MEM_OBJECT_ALLOCATION_FAILURE, "mem object allocation failure", },
-      { CL_OUT_OF_RESOURCES, "out of resources", },
-      { CL_OUT_OF_HOST_MEMORY, "out of host memory", },
-      { CL_PROFILING_INFO_NOT_AVAILABLE, "profiling not available", },
-      { CL_MEM_COPY_OVERLAP, "memcopy overlaps", },
-      { CL_IMAGE_FORMAT_MISMATCH, "image format mismatch", },
-      { CL_IMAGE_FORMAT_NOT_SUPPORTED, "image format not supported", },
-      { CL_BUILD_PROGRAM_FAILURE, "build program failed", },
-      { CL_MAP_FAILURE, "map failed", },
-      { CL_INVALID_VALUE, "invalid value", },
-      { CL_INVALID_DEVICE_TYPE, "invalid device type", },
-      { CL_INVALID_PLATFORM, "invlaid platform",},
-      { CL_INVALID_DEVICE, "invalid device",},
-      { CL_INVALID_CONTEXT, "invalid context",},
-      { CL_INVALID_QUEUE_PROPERTIES, "invalid queue properties",},
-      { CL_INVALID_COMMAND_QUEUE, "invalid command queue",},
-      { CL_INVALID_HOST_PTR, "invalid host ptr",},
-      { CL_INVALID_MEM_OBJECT, "invalid mem object",},
-      { CL_INVALID_IMAGE_FORMAT_DESCRIPTOR, "invalid image format descriptor ",},
-      { CL_INVALID_IMAGE_SIZE, "invalid image size",},
-      { CL_INVALID_SAMPLER, "invalid sampler",},
-      { CL_INVALID_BINARY, "invalid binary",},
-      { CL_INVALID_BUILD_OPTIONS, "invalid build options",},
-      { CL_INVALID_PROGRAM, "invalid program ",},
-      { CL_INVALID_PROGRAM_EXECUTABLE, "invalid program executable",},
-      { CL_INVALID_KERNEL_NAME, "invalid kernel name",},
-      { CL_INVALID_KERNEL_DEFINITION, "invalid definition",},
-      { CL_INVALID_KERNEL, "invalid kernel",},
-      { CL_INVALID_ARG_INDEX, "invalid arg index",},
-      { CL_INVALID_ARG_VALUE, "invalid arg value",},
-      { CL_INVALID_ARG_SIZE, "invalid arg size",},
-      { CL_INVALID_KERNEL_ARGS, "invalid kernel args",},
-      { CL_INVALID_WORK_DIMENSION , "invalid work dimension",},
-      { CL_INVALID_WORK_GROUP_SIZE, "invalid work group size",},
-      { CL_INVALID_WORK_ITEM_SIZE, "invalid work item size",},
-      { CL_INVALID_GLOBAL_OFFSET, "invalid global offset",},
-      { CL_INVALID_EVENT_WAIT_LIST, "invalid event wait list",},
-      { CL_INVALID_EVENT, "invalid event",},
-      { CL_INVALID_OPERATION, "invalid operation",},
-      { CL_INVALID_GL_OBJECT, "invalid gl object",},
-      { CL_INVALID_BUFFER_SIZE, "invalid buffer size",},
-      { CL_INVALID_MIP_LEVEL, "invalid mip level",},
-      { CL_INVALID_GLOBAL_WORK_SIZE, "invalid global work size",},
-      { 0, NULL },
-   };
-   static char unknown[25];
-   int ii;
+void setMap(std::map<cl_int, const char*>& errorMap) {
+   errorMap[CL_SUCCESS]                         = "success";
+   errorMap[CL_DEVICE_NOT_FOUND]                = "device not found";
+   errorMap[CL_DEVICE_NOT_AVAILABLE]            = "device not available";
+   errorMap[CL_COMPILER_NOT_AVAILABLE]          = "compiler not available";
+   errorMap[CL_MEM_OBJECT_ALLOCATION_FAILURE]   = "mem object allocation failure";
+   errorMap[CL_OUT_OF_RESOURCES]                = "out of resources";
+   errorMap[CL_OUT_OF_HOST_MEMORY]              = "out of host memory";
+   errorMap[CL_PROFILING_INFO_NOT_AVAILABLE]    = "profiling not available";
+   errorMap[CL_MEM_COPY_OVERLAP]                = "memcopy overlaps";
+   errorMap[CL_IMAGE_FORMAT_MISMATCH]           = "image format mismatch";
+   errorMap[CL_IMAGE_FORMAT_NOT_SUPPORTED]      = "image format not supported";
+   errorMap[CL_BUILD_PROGRAM_FAILURE]           = "build program failed";
+   errorMap[CL_MAP_FAILURE]                     = "map failed";
+   errorMap[CL_INVALID_VALUE]                   = "invalid value";
+   errorMap[CL_INVALID_DEVICE_TYPE]             = "invalid device type";
+   errorMap[CL_INVALID_PLATFORM]                = "invlaid platform";
+   errorMap[CL_INVALID_DEVICE]                  = "invalid device";
+   errorMap[CL_INVALID_CONTEXT]                 = "invalid context";
+   errorMap[CL_INVALID_QUEUE_PROPERTIES]        = "invalid queue properties";
+   errorMap[CL_INVALID_COMMAND_QUEUE]           = "invalid command queue";
+   errorMap[CL_INVALID_HOST_PTR]                = "invalid host ptr";
+   errorMap[CL_INVALID_MEM_OBJECT]              = "invalid mem object";
+   errorMap[CL_INVALID_IMAGE_FORMAT_DESCRIPTOR] = "invalid image format descriptor ";
+   errorMap[CL_INVALID_IMAGE_SIZE]              = "invalid image size";
+   errorMap[CL_INVALID_SAMPLER]                 = "invalid sampler";
+   errorMap[CL_INVALID_BINARY]                  = "invalid binary";
+   errorMap[CL_INVALID_BUILD_OPTIONS]           = "invalid build options";
+   errorMap[CL_INVALID_PROGRAM]                 = "invalid program ";
+   errorMap[CL_INVALID_PROGRAM_EXECUTABLE]      = "invalid program executable";
+   errorMap[CL_INVALID_KERNEL_NAME]             = "invalid kernel name";
+   errorMap[CL_INVALID_KERNEL_DEFINITION]       = "invalid definition";
+   errorMap[CL_INVALID_KERNEL]                  = "invalid kernel";
+   errorMap[CL_INVALID_ARG_INDEX]               = "invalid arg index";
+   errorMap[CL_INVALID_ARG_VALUE]               = "invalid arg value";
+   errorMap[CL_INVALID_ARG_SIZE]                = "invalid arg size";
+   errorMap[CL_INVALID_KERNEL_ARGS]             = "invalid kernel args";
+   errorMap[CL_INVALID_WORK_DIMENSION ]         = "invalid work dimension";
+   errorMap[CL_INVALID_WORK_GROUP_SIZE]         = "invalid work group size";
+   errorMap[CL_INVALID_WORK_ITEM_SIZE]          = "invalid work item size";
+   errorMap[CL_INVALID_GLOBAL_OFFSET]           = "invalid global offset";
+   errorMap[CL_INVALID_EVENT_WAIT_LIST]         = "invalid event wait list";
+   errorMap[CL_INVALID_EVENT]                   = "invalid event";
+   errorMap[CL_INVALID_OPERATION]               = "invalid operation";
+   errorMap[CL_INVALID_GL_OBJECT]               = "invalid gl object";
+   errorMap[CL_INVALID_BUFFER_SIZE]             = "invalid buffer size";
+   errorMap[CL_INVALID_MIP_LEVEL]               = "invalid mip level";
+   errorMap[CL_INVALID_GLOBAL_WORK_SIZE]        = "invalid global work size";
+   errorMap[0]                                  = NULL;
+}
 
-   for (ii = 0; error_table[ii].msg != NULL; ii++) {
-      if (error_table[ii].code == status) {
-         return error_table[ii].msg;
-      }
+const char *CLHelper::errString(cl_int status) {
+   static bool mapSet = false;
+   static std::map<cl_int,const char*> errorMap;
+   if(!mapSet) {
+      setMap(errorMap);
+      mapSet = true;
    }
+   if(errorMap.find(status) != errorMap.end()) {
+      return errorMap[status];
+   }
+
+   //if we don't know what the error is
+   static char unknown[25];
 #ifdef _WIN32
-   _snprintf(unknown, sizeof unknown, "unknown error %d", status);
+   _snprintf(unknown, sizeof(unknown), "unknown error %d", status);
 #else
    snprintf(unknown, sizeof(unknown), "unknown error %d", status);
 #endif
-   return unknown;
+   return (const char*)unknown;
 }
 
 void CLHelper::getBuildErr(JNIEnv *jenv, cl_device_id deviceId,  cl_program program, jstring *log){

@@ -1,9 +1,9 @@
 package com.amd.aparapi.sample.extension;
 
-import com.amd.aparapi.Device;
-import com.amd.aparapi.OpenCL;
-import com.amd.aparapi.OpenCLDevice;
 import com.amd.aparapi.Range;
+import com.amd.aparapi.device.Device;
+import com.amd.aparapi.device.OpenCLDevice;
+import com.amd.aparapi.opencl.OpenCL;
 
 public class SwapExample{
 
@@ -21,20 +21,20 @@ public class SwapExample{
 
    public static void main(String[] args) {
 
-      int size = 32;
-      float[] lhs = new float[size];
+      final int size = 32;
+      final float[] lhs = new float[size];
       for (int i = 0; i < size; i++) {
          lhs[i] = i;
       }
-      float[] rhs = new float[size];
-      Range range = Range.create(size);
+      final float[] rhs = new float[size];
+      final Range range = Range.create(size);
 
-      Device device = Device.best();
+      final Device device = Device.best();
 
       if (device instanceof OpenCLDevice) {
-         OpenCLDevice openclDevice = (OpenCLDevice) device;
+         final OpenCLDevice openclDevice = (OpenCLDevice) device;
 
-         Swapper swapper = openclDevice.bind(Swapper.class);
+         final Swapper swapper = openclDevice.bind(Swapper.class);
          for (int i = 0; i < size; i++) {
             System.out.println(lhs[i] + " " + rhs[i]);
          }

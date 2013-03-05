@@ -60,6 +60,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import com.amd.aparapi.annotation.*;
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.ProfileInfo;
 import com.amd.aparapi.Range;
@@ -119,8 +120,8 @@ public class Mandel{
       public MandelKernel(int _width, int _height, int[] _rgb) {
          //Initialize palette values
          for (int i = 0; i < maxIterations; i++) {
-            float h = i / (float) maxIterations;
-            float b = 1.0f - h * h;
+            final float h = i / (float) maxIterations;
+            final float b = 1.0f - (h * h);
             pallette[i] = Color.HSBtoRGB(h, 1f, b);
          }
 
@@ -133,12 +134,12 @@ public class Mandel{
       @Override public void run() {
 
          /** Determine which RGB value we are going to process (0..RGB.length). */
-         int gid = getGlobalId();
+         final int gid = getGlobalId();
 
          /** Translate the gid into an x an y value. */
-         float x = (((gid % width * scale) - ((scale / 2) * width)) / width) + offsetx;
+         final float x = ((((gid % width) * scale) - ((scale / 2) * width)) / width) + offsetx;
 
-         float y = (((gid / height * scale) - ((scale / 2) * height)) / height) + offsety;
+         final float y = ((((gid / height) * scale) - ((scale / 2) * height)) / height) + offsety;
 
          int count = 0;
 
@@ -147,9 +148,9 @@ public class Mandel{
          float new_zx = 0f;
 
          // Iterate until the algorithm converges or until maxIterations are reached.
-         while (count < maxIterations && zx * zx + zy * zy < 8) {
-            new_zx = zx * zx - zy * zy + x;
-            zy = 2 * zx * zy + y;
+         while ((count < maxIterations) && (((zx * zx) + (zy * zy)) < 8)) {
+            new_zx = ((zx * zx) - (zy * zy)) + x;
+            zy = (2 * zx * zy) + y;
             zx = new_zx;
             count++;
          }
@@ -175,13 +176,13 @@ public class Mandel{
 
    @SuppressWarnings("serial") public static void main(String[] _args) {
 
-      JFrame frame = new JFrame("MandelBrot");
+      final JFrame frame = new JFrame("MandelBrot");
 
       /** Width of Mandelbrot view. */
-      final int width = 768-64-32;
+      final int width = 768 - 64 - 32;
 
       /** Height of Mandelbrot view. */
-      final int height = 768-64-32;
+      final int height = 768 - 64 - 32;
 
       /** Mandelbrot image height. */
       final Range range = Range.create(width * height);
@@ -198,15 +199,15 @@ public class Mandel{
 
       final Font font = new Font("Garamond", Font.BOLD, 100);
       // Draw Mandelbrot image
-      JComponent viewer = new JComponent(){
+      final JComponent viewer = new JComponent(){
          @Override public void paintComponent(Graphics g) {
 
             g.drawImage(image, 0, 0, width, height, this);
             g.setFont(font);
             g.setColor(Color.WHITE);
-            long now = System.currentTimeMillis();
+            final long now = System.currentTimeMillis();
             //  if (now - start > 1000) {
-            double framesPerSecond = (frameCount * 1000.0) / (now - start);
+            final double framesPerSecond = (frameCount * 1000.0) / (now - start);
             g.drawString(String.format("%5.2f", framesPerSecond), 20, 100);
             //  generationsPerSecond.setText(String.format("%5.2f", generationsPerSecondField));
 
@@ -215,7 +216,7 @@ public class Mandel{
          }
       };
 
-      JPanel controlPanel = new JPanel(new FlowLayout());
+      final JPanel controlPanel = new JPanel(new FlowLayout());
       frame.getContentPane().add(controlPanel, BorderLayout.SOUTH);
 
       final String[] choices = new String[] {
@@ -228,7 +229,7 @@ public class Mandel{
 
       modeButton.addItemListener(new ItemListener(){
          @Override public void itemStateChanged(ItemEvent e) {
-            String item = (String) modeButton.getSelectedItem();
+            final String item = (String) modeButton.getSelectedItem();
 
             // if (item.equals(choices[2])) {
             // modeButton = gpuMandelBrot;
@@ -271,7 +272,7 @@ public class Mandel{
       frame.setLocationRelativeTo(null);
       frame.setVisible(true);
 
-      float defaultScale = 3f;
+      final float defaultScale = 3f;
 
       // Set the default scale and offset, execute the kernel and force a repaint of the viewer.
       kernel.setScaleAndOffset(defaultScale, -1f, 0f);
@@ -282,7 +283,7 @@ public class Mandel{
 
       // Window listener to dispose Kernel resources on user exit.
       frame.addWindowListener(new WindowAdapter(){
-         public void windowClosing(WindowEvent _windowEvent) {
+         @Override public void windowClosing(WindowEvent _windowEvent) {
             kernel.dispose();
             System.exit(0);
          }
@@ -296,7 +297,7 @@ public class Mandel{
             synchronized (doorBell) {
                try {
                   doorBell.wait();
-               } catch (InterruptedException ie) {
+               } catch (final InterruptedException ie) {
                   ie.getStackTrace();
                }
             }
@@ -305,28 +306,28 @@ public class Mandel{
          float x = -1f;
          float y = 0f;
          float scale = defaultScale;
-         float tox = (float) (to.x - width / 2) / width * scale;
-         float toy = (float) (to.y - height / 2) / height * scale;
+         final float tox = ((float) (to.x - (width / 2)) / width) * scale;
+         final float toy = ((float) (to.y - (height / 2)) / height) * scale;
 
          // This is how many frames we will display as we zoom in and out.
-         int frames = 128;
+         final int frames = 128;
          frameCount = 0;
          start = System.currentTimeMillis();
          for (int sign = -1; sign < 2; sign += 2) {
-            for (int i = 0; i < frames - 4; i++) {
+            for (int i = 0; i < (frames - 4); i++) {
                frameCount++;
-               scale = scale + sign * defaultScale / frames;
-               x = x - sign * (tox / frames);
-               y = y - sign * (toy / frames);
+               scale = scale + ((sign * defaultScale) / frames);
+               x = x - (sign * (tox / frames));
+               y = y - (sign * (toy / frames));
 
                // Set the scale and offset, execute the kernel and force a repaint of the viewer.
                kernel.setScaleAndOffset(scale, x, y);
                kernel.execute(range);
-               List<ProfileInfo> profileInfo = kernel.getProfileInfo();
-               if (profileInfo != null && profileInfo.size() > 0) {
-                  for (ProfileInfo p : profileInfo) {
+               final List<ProfileInfo> profileInfo = kernel.getProfileInfo();
+               if ((profileInfo != null) && (profileInfo.size() > 0)) {
+                  for (final ProfileInfo p : profileInfo) {
                      System.out.print(" " + p.getType() + " " + p.getLabel() + " " + (p.getStart() / 1000) + " .. "
-                           + (p.getEnd() / 1000) + " " + (p.getEnd() - p.getStart()) / 1000 + "us");
+                           + (p.getEnd() / 1000) + " " + ((p.getEnd() - p.getStart()) / 1000) + "us");
                   }
                   System.out.println();
                }

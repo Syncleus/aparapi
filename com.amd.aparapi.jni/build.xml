@@ -233,7 +233,7 @@ First consider editing the properties in build.properties
          <![CDATA[
          You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
 
-         At present msvc.dir seems to be configured but not msvc.sdk.dir
+         At present msvc.dir seems to be Configured but not msvc.sdk.dir
          ]]>
       </fail>
 
@@ -250,7 +250,7 @@ First consider editing the properties in build.properties
          <![CDATA[
          You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
 
-         At present msvc.sdk.dir seems to be configured but not msvc.dir
+         At present msvc.sdk.dir seems to be Configured but not msvc.dir
          ]]>
       </fail>
       <available file="${msvc.dir}" type="dir" property="msvc.dir.exists" />
@@ -338,7 +338,7 @@ First consider editing the properties in build.properties
          <![CDATA[
          You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
 
-         At present ant is configured for both MinGW AND Microsoft Visual Studio. You need to pick one or the other :) !
+         At present ant is Configured for both MinGW AND Microsoft Visual Studio. You need to pick one or the other :) !
 
          Just comment out the properties for the compiler that you *do not* wish to use.
          ]]>
@@ -359,7 +359,7 @@ First consider editing the properties in build.properties
          <![CDATA[
          You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
 
-         This looks like a windows machine so you probably need to configure either:-
+         This looks like a windows machine so you probably need to Configure either:-
 
          * msvc.dir and msvc.sdk.dir if you wish to use Microsoft Visual Studio compiler
 
@@ -416,7 +416,7 @@ First consider editing the properties in build.properties
          <![CDATA[
          You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
 
-         Could not find vc\bin\${optional.amd64.subdir}cl under configured msvc.dir. Check if msvc.dir is pointing
+         Could not find vc\bin\${optional.amd64.subdir}cl under Configured msvc.dir. Check if msvc.dir is pointing
          to a valid visual studio installation
          ]]>
       </fail>
@@ -471,29 +471,50 @@ First consider editing the properties in build.properties
       <delete file="aparapi.o" />
       <delete file="aparapi.lib" />
       <delete file="aparapi.exp" />
-      <delete file="opencljni.obj" />
-      <delete file="opencljni.o" />
-      <delete file="config.obj" />
-      <delete file="config.o" />
-      <delete file="profileInfo.obj" />
-      <delete file="profileInfo.o" />
-      <delete file="arrayBuffer.obj" />
-      <delete file="arrayBuffer.o" />
-      <delete file="jniHelper.obj" />
-      <delete file="jniHelper.o" />
-      <delete file="clHelper.obj" />
-      <delete file="clHelper.o" />
+      <delete file="OpenCLJNI.obj" />
+      <delete file="OpenCLJNI.o" />
+      <delete file="Config.obj" />
+      <delete file="Config.o" />
+      <delete file="ProfileInfo.obj" />
+      <delete file="ProfileInfo.o" />
+      <delete file="ArrayBuffer.obj" />
+      <delete file="ArrayBuffer.o" />
+      <delete file="JNIHelper.obj" />
+      <delete file="JNIHelper.o" />
+      <delete file="CLHelper.obj" />
+      <delete file="CLHelper.o" />
+      <delete file="JNIContext.obj" />
+      <delete file="JNIContext.o" />
+      <delete file="KernelArg.obj" />
+      <delete file="KernelArg.o" />
+      <delete file="Range.obj" />
+      <delete file="Range.o" />
+      <delete file="OpenCLArgDescriptor.obj" />
+      <delete file="OpenCLArgDescriptor.o" />
+      <delete file="OpenCLMem.obj" />
+      <delete file="OpenCLMem.o" />
    </target>
 
    <target name="javah">
       <mkdir dir="include" />
-      <javah classpath="..\com.amd.aparapi\dist\aparapi.jar" destdir="include" force="true">
-         <class name="com.amd.aparapi.KernelRunner" />
-         <class name="com.amd.aparapi.OpenCLJNI" />
-         <class name="com.amd.aparapi.OpenCLArgDescriptor" />
-         <class name="com.amd.aparapi.OpenCLMem" />
+      <javah classpath="..\com.amd.aparapi\classes" destdir="include" force="true">
+         <class name="com.amd.aparapi.internal.jni.ConfigJNI" />
+         <class name="com.amd.aparapi.internal.jni.KernelArgJNI" />
+         <class name="com.amd.aparapi.internal.jni.KernelRunnerJNI" />
+         <class name="com.amd.aparapi.internal.jni.OpenCLJNI" />
+         <class name="com.amd.aparapi.internal.jni.RangeJNI" />
+         <!-- Non-Native Classes -->
+         <class name="com.amd.aparapi.Kernel"/>
+         <class name="com.amd.aparapi.Range"/>
+         <class name="com.amd.aparapi.Config" />
+         <class name="com.amd.aparapi.device.Device" />
+         <class name="com.amd.aparapi.device.OpenCLDevice" />
+         <class name="com.amd.aparapi.internal.kernel.KernelRunner"/>
+         <class name="com.amd.aparapi.internal.opencl.OpenCLArgDescriptor" />
+         <class name="com.amd.aparapi.internal.opencl.OpenCLMem" />
       </javah>
    </target>
+
 
    <target name="gcc" if="use.gcc">
       <mkdir dir="${basedir}/dist"/>
@@ -507,17 +528,25 @@ First consider editing the properties in build.properties
          <arg value="-I${java.home}/../include/linux" />
          <arg value="-Iinclude" />
          <arg value="-I${amd.app.sdk.dir}/include" />
+         <arg value="-Isrc/cpp" />
+         <arg value="-Isrc/cpp/runKernel" />
+         <arg value="-Isrc/cpp/invoke" />
          <arg value="-shared" />
          <arg value="-o" />
          <arg value="${basedir}/dist/libaparapi_${x86_or_x86_64}.so" />
-         <arg value="src/cpp/aparapi.cpp" />
-         <arg value="src/cpp/config.cpp" />
-         <arg value="src/cpp/profileInfo.cpp" />
-         <arg value="src/cpp/arrayBuffer.cpp" />
-         <arg value="src/cpp/opencljni.cpp" />
-         <arg value="src/cpp/jniHelper.cpp" />
-         <arg value="src/cpp/clHelper.cpp" />
+         <arg value="src/cpp/runKernel/Aparapi.cpp" />
+         <arg value="src/cpp/runKernel/ArrayBuffer.cpp" />
+         <arg value="src/cpp/runKernel/Config.cpp" />
+         <arg value="src/cpp/runKernel/JNIContext.cpp" />
+         <arg value="src/cpp/runKernel/KernelArg.cpp" />
+         <arg value="src/cpp/runKernel/ProfileInfo.cpp" />
+         <arg value="src/cpp/runKernel/Range.cpp" />
+         <arg value="src/cpp/invoke/OpenCLJNI.cpp" />
+         <arg value="src/cpp/invoke/OpenCLArgDescriptor.cpp" />
+         <arg value="src/cpp/invoke/OpenCLMem.cpp" />
+         <arg value="src/cpp/CLHelper.cpp" />
          <arg value="src/cpp/classtools.cpp" />
+         <arg value="src/cpp/JNIHelper.cpp" />
          <arg value="src/cpp/agent.cpp" />
          <arg value="-L${amd.app.sdk.dir}/lib/${x86_or_x86_64}" />
          <arg value="-lOpenCL" />
@@ -534,21 +563,29 @@ First consider editing the properties in build.properties
          <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="-I/System/Library/Frameworks/JavaVM.framework/Headers" />
          <arg value="-Iinclude" />
+         <arg value="-Isrc/cpp" />
+         <arg value="-Isrc/cpp/runKernel" />
+         <arg value="-Isrc/cpp/invoke" />
          <arg value="-shared" />
          <arg value="-o" />
          <arg value="${basedir}/dist/libaparapi_${x86_or_x86_64}.dylib" />
-         <arg value="src/cpp/aparapi.cpp" />
-         <arg value="src/cpp/config.cpp" />
-         <arg value="src/cpp/profileInfo.cpp" />
-         <arg value="src/cpp/arrayBuffer.cpp" />
-         <arg value="src/cpp/opencljni.cpp" />
-         <arg value="src/cpp/jniHelper.cpp" />
-         <arg value="src/cpp/clHelper.cpp" />
+         <arg value="src/cpp/runKernel/Aparapi.cpp" />
+         <arg value="src/cpp/runKernel/ArrayBuffer.cpp" />
+         <arg value="src/cpp/runKernel/Config.cpp" />
+         <arg value="src/cpp/runKernel/JNIContext.cpp" />
+         <arg value="src/cpp/runKernel/KernelArg.cpp" />
+         <arg value="src/cpp/runKernel/ProfileInfo.cpp" />
+         <arg value="src/cpp/runKernel/Range.cpp" />
+         <arg value="src/cpp/invoke/OpenCLJNI.cpp" />
+         <arg value="src/cpp/invoke/OpenCLArgDescriptor.cpp" />
+         <arg value="src/cpp/invoke/OpenCLMem.cpp" />
+         <arg value="src/cpp/CLHelper.cpp" />
          <arg value="src/cpp/classtools.cpp" />
+         <arg value="src/cpp/JNIHelper.cpp" />
          <arg value="src/cpp/agent.cpp" />
          <arg value="-framework" />
          <arg value="OpenCL" />
-	 <arg value="-Wno-write-strings" />
+         <arg value="-Wno-write-strings" />
       </exec>
    </target>
 
@@ -560,21 +597,30 @@ First consider editing the properties in build.properties
          <arg value="/nologo" />
          <arg value="/TP" />
          <arg value="/Ox" />
-         <arg value="/DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
+         <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
+         <arg value="/EHsc" />
          <arg value="/I${msvc.dir}\vc\include" />
          <arg value="/I${msvc.sdk.dir}\include" />
          <arg value="/I${java.home}\..\include" />
          <arg value="/I${java.home}\..\include\win32" />
          <arg value="/Iinclude" />
          <arg value="/I${amd.app.sdk.dir}\include" />
-         <arg value="src/cpp/aparapi.cpp" />
-         <arg value="src/cpp/config.cpp" />
-         <arg value="src/cpp/profileInfo.cpp" />
-         <arg value="src/cpp/arrayBuffer.cpp" />
-         <arg value="src/cpp/opencljni.cpp" />
-         <arg value="src/cpp/jniHelper.cpp" />
-         <arg value="src/cpp/clHelper.cpp" />
+         <arg value="/Isrc/cpp" />
+         <arg value="/Isrc/cpp/runKernel" />
+         <arg value="/Isrc/cpp/invoke" />
+         <arg value="src/cpp/runKernel/Aparapi.cpp" />
+         <arg value="src/cpp/runKernel/ArrayBuffer.cpp" />
+         <arg value="src/cpp/runKernel/Config.cpp" />
+         <arg value="src/cpp/runKernel/JNIContext.cpp" />
+         <arg value="src/cpp/runKernel/KernelArg.cpp" />
+         <arg value="src/cpp/runKernel/ProfileInfo.cpp" />
+         <arg value="src/cpp/runKernel/Range.cpp" />
+         <arg value="src/cpp/invoke/OpenCLJNI.cpp" />
+         <arg value="src/cpp/invoke/OpenCLArgDescriptor.cpp" />
+         <arg value="src/cpp/invoke/OpenCLMem.cpp" />
+         <arg value="src/cpp/CLHelper.cpp" />
          <arg value="src/cpp/classtools.cpp" />
+         <arg value="src/cpp/JNIHelper.cpp" />
          <arg value="src/cpp/agent.cpp" />
          <arg value="/LD" />
          <arg value="/link" />
@@ -599,17 +645,25 @@ First consider editing the properties in build.properties
          <arg value="-I${java.home}\..\include\win32" />
          <arg value="-Iinclude" />
          <arg value="-I${amd.app.sdk.dir}\include" />
+         <arg value="-Isrc/cpp" />
+         <arg value="-Isrc/cpp/runKernel" />
+         <arg value="-Isrc/cpp/invoke" />
          <arg value="-shared" />
          <arg value="-o" />
          <arg value="${basedir}\dist\aparapi_${x86_or_x86_64}.dll" />
-         <arg value="src/cpp/aparapi.cpp" />
-         <arg value="src/cpp/config.cpp" />
-         <arg value="src/cpp/profileInfo.cpp" />
-         <arg value="src/cpp/arrayBuffer.cpp" />
-         <arg value="src/cpp/opencljni.cpp" />
-         <arg value="src/cpp/jniHelper.cpp" />
-         <arg value="src/cpp/clHelper.cpp" />
+         <arg value="src/cpp/runKernel/Aparapi.cpp" />
+         <arg value="src/cpp/runKernel/ArrayBuffer.cpp" />
+         <arg value="src/cpp/runKernel/Config.cpp" />
+         <arg value="src/cpp/runKernel/JNIContext.cpp" />
+         <arg value="src/cpp/runKernel/KernelArg.cpp" />
+         <arg value="src/cpp/runKernel/ProfileInfo.cpp" />
+         <arg value="src/cpp/runKernel/Range.cpp" />
+         <arg value="src/cpp/invoke/OpenCLJNI.cpp" />
+         <arg value="src/cpp/invoke/OpenCLArgDescriptor.cpp" />
+         <arg value="src/cpp/invoke/OpenCLMem.cpp" />
+         <arg value="src/cpp/CLHelper.cpp" />
          <arg value="src/cpp/classtools.cpp" />
+         <arg value="src/cpp/JNIHelper.cpp" />
          <arg value="src/cpp/agent.cpp" />
          <arg value="-L${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
          <arg value="-lOpenCL" />
@@ -626,17 +680,20 @@ First consider editing the properties in build.properties
          <arg value="/nologo" />
          <arg value="/TP" />
          <arg value="/Ox" />
-         <arg value="/DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
+         <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="/I${msvc.dir}\vc\include" />
          <arg value="/I${msvc.sdk.dir}\include" />
          <arg value="/I${amd.app.sdk.dir}\include" />
-         <arg value="src\cpp\cltest.cpp" />
+         <arg value="/Isrc/cpp" />
+         <arg value="/Isrc/cpp/runKernel" />
+         <arg value="/Isrc/cpp/invoke" />
+         <arg value="src\cpp\CLTest.cpp" />
          <arg value="/link" />
          <arg value="/libpath:${msvc.dir}\vc\lib\${optional.amd64.subdir}" />
          <arg value="/libpath:${msvc.sdk.dir}\lib\${optional.x64.subdir}" />
          <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
          <arg value="OpenCL.lib" />
-         <arg value="/out:cltest_${x86_or_x86_64}.exe" />
+         <arg value="/out:${basedir}/dist/cltest_${x86_or_x86_64}.exe" />
       </exec>
    </target>
 
@@ -650,11 +707,14 @@ First consider editing the properties in build.properties
          <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="-I/System/Library/Frameworks/JavaVM.framework/Headers" />
          <arg value="-Iinclude" />
-         <arg value="src/cpp/cltest.cpp" />
+         <arg value="-Isrc/cpp" />
+         <arg value="-Isrc/cpp/runKernel" />
+         <arg value="-Isrc/cpp/invoke" />
+         <arg value="-o" />
+         <arg value="${basedir}/dist/cltest" />
+         <arg value="src/cpp/CLTest.cpp" />
          <arg value="-framework" />
          <arg value="OpenCL" />
-         <arg value="-o" />
-         <arg value="${basedir}/cltest_${x86_or_x86_64}" />
       </exec>
    </target>
 
@@ -675,7 +735,7 @@ First consider editing the properties in build.properties
          <arg value="-o" />
          <arg value="${basedir}/cltest_${x86_or_x86_64}" />
       </exec>
-   </target>
+  </target>
 
    <target name="gcc_clt" if="use.gcc">
       <mkdir dir="${basedir}/dist"/>
@@ -688,8 +748,9 @@ First consider editing the properties in build.properties
          <arg value="src/cpp/classtoolstest.cpp" />
          <arg value="-o" />
          <arg value="${basedir}/clt" />
-       </exec>
-   </target>
+      </exec>
+  </target>
+
 
    <target name="mac_clt" if="use.gcc_mac">
       <mkdir dir="${basedir}/dist"/>

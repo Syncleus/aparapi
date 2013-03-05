@@ -8,10 +8,10 @@ import java.util.Arrays;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.amd.aparapi.Device;
 import com.amd.aparapi.Kernel;
-import com.amd.aparapi.OpenCLDevice;
 import com.amd.aparapi.Range;
+import com.amd.aparapi.device.Device;
+import com.amd.aparapi.device.OpenCLDevice;
 
 public class BufferTransfer{
 

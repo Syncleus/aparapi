@@ -129,7 +129,7 @@ public class Life{
          toBase = 0;
          Arrays.fill(imageData, LifeKernel.DEAD);
          /** draw a line across the image **/
-         for (int i = width * (height / 2) + width / 10; i < width * (height / 2 + 1) - width / 10; i++) {
+         for (int i = (width * (height / 2)) + (width / 10); i < ((width * ((height / 2) + 1)) - (width / 10)); i++) {
             imageData[toBase + i] = LifeKernel.ALIVE;
             imageData[fromBase + i] = LifeKernel.ALIVE;
          }
@@ -139,28 +139,28 @@ public class Life{
       }
 
       @Override public void run() {
-         int gid = getGlobalId();
-         int to = gid + toBase;
-         int from = gid + fromBase;
-         int x = gid % width;
-         int y = gid / width;
+         final int gid = getGlobalId();
+         final int to = gid + toBase;
+         final int from = gid + fromBase;
+         final int x = gid % width;
+         final int y = gid / width;
 
-         if ((x == 0 || x == width - 1 || y == 0 || y == height - 1)) {
+         if (((x == 0) || (x == (width - 1)) || (y == 0) || (y == (height - 1)))) {
             // This pixel is on the border of the view, just keep existing value
             imageData[to] = imageData[from];
          } else {
             // Count the number of neighbors.  We use (value&1x) to turn pixel value into either 0 or 1
-            int neighbors = (imageData[from - 1] & 1) + // EAST
+            final int neighbors = (imageData[from - 1] & 1) + // EAST
                   (imageData[from + 1] & 1) + // WEST
                   (imageData[from - width - 1] & 1) + // NORTHEAST                 
                   (imageData[from - width] & 1) + // NORTH
-                  (imageData[from - width + 1] & 1) + // NORTHWEST
-                  (imageData[from + width - 1] & 1) + // SOUTHEAST
+                  (imageData[(from - width) + 1] & 1) + // NORTHWEST
+                  (imageData[(from + width) - 1] & 1) + // SOUTHEAST
                   (imageData[from + width] & 1) + // SOUTH
                   (imageData[from + width + 1] & 1); // SOUTHWEST
 
             // The game of life logic
-            if (neighbors == 3 || (neighbors == 2 && imageData[from] == ALIVE)) {
+            if ((neighbors == 3) || ((neighbors == 2) && (imageData[from] == ALIVE))) {
                imageData[to] = ALIVE;
             } else {
                imageData[to] = DEAD;
@@ -172,7 +172,7 @@ public class Life{
 
       public void nextGeneration() {
          // swap fromBase and toBase
-         int swap = fromBase;
+         final int swap = fromBase;
          fromBase = toBase;
          toBase = swap;
 
@@ -186,16 +186,18 @@ public class Life{
 
    // static LifeKernel lifeKernel = null;
 
-   static long start= 0L;
-   static int generations= 0;
+   static long start = 0L;
+
+   static int generations = 0;
+
    static double generationsPerSecondField = 0;
 
    public static void main(String[] _args) {
 
-      JFrame frame = new JFrame("Game of Life");
+      final JFrame frame = new JFrame("Game of Life");
       final int width = Integer.getInteger("width", 1024 + 256);
 
-      final int height = Integer.getInteger("height", 768 - 64 -32);
+      final int height = Integer.getInteger("height", 768 - 64 - 32);
 
       // Buffer is twice the size as the screen.  We will alternate between mutating data from top to bottom
       // and bottom to top in alternate generation passses. The LifeKernel will track which pass is which
@@ -206,17 +208,17 @@ public class Life{
 
       final Font font = new Font("Garamond", Font.BOLD, 100);
       // Create a component for viewing the offsecreen image
-      @SuppressWarnings("serial") JComponent viewer = new JComponent(){
+      @SuppressWarnings("serial") final JComponent viewer = new JComponent(){
          @Override public void paintComponent(Graphics g) {
             g.setFont(font);
             g.setColor(Color.WHITE);
             if (lifeKernel.isExplicit()) {
                lifeKernel.get(lifeKernel.imageData); // We only pull the imageData when we intend to use it.
-               List<ProfileInfo> profileInfo = lifeKernel.getProfileInfo();
+               final List<ProfileInfo> profileInfo = lifeKernel.getProfileInfo();
                if (profileInfo != null) {
-                  for (ProfileInfo p : profileInfo) {
+                  for (final ProfileInfo p : profileInfo) {
                      System.out.print(" " + p.getType() + " " + p.getLabel() + " " + (p.getStart() / 1000) + " .. "
-                           + (p.getEnd() / 1000) + " " + (p.getEnd() - p.getStart()) / 1000 + "us");
+                           + (p.getEnd() / 1000) + " " + ((p.getEnd() - p.getStart()) / 1000) + "us");
                   }
                   System.out.println();
                }
@@ -227,8 +229,8 @@ public class Life{
             } else {
                g.drawImage(image, 0, 0, width, height, 0, height, width, 2 * height, this);
             }
-            long now = System.currentTimeMillis();
-            if (now - start > 1000) {
+            final long now = System.currentTimeMillis();
+            if ((now - start) > 1000) {
                generationsPerSecondField = (generations * 1000.0) / (now - start);
                start = now;
                generations = 0;
@@ -238,7 +240,7 @@ public class Life{
          }
       };
 
-      JPanel controlPanel = new JPanel(new FlowLayout());
+      final JPanel controlPanel = new JPanel(new FlowLayout());
       frame.getContentPane().add(controlPanel, BorderLayout.SOUTH);
 
       final JButton startButton = new JButton("Start");
@@ -260,7 +262,7 @@ public class Life{
 
       modeButton.addItemListener(new ItemListener(){
          @Override public void itemStateChanged(ItemEvent e) {
-            String item = (String) modeButton.getSelectedItem();
+            final String item = (String) modeButton.getSelectedItem();
             if (item.equals(choices[0])) {
                lifeKernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
             } else if (item.equals(choices[1])) {
@@ -284,7 +286,7 @@ public class Life{
          try {
             Thread.sleep(10);
             viewer.repaint();
-         } catch (InterruptedException e1) {
+         } catch (final InterruptedException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
          }

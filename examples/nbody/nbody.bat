@@ -5,6 +5,7 @@ java ^
   -Dcom.amd.aparapi.executionMode=%1 ^
   -Dcom.amd.aparapi.enableProfiling=false ^
   -Dcom.amd.aparapi.enableShowGeneratedOpenCL=true ^
+  -Dcom.amd.aparapi.logLevel=SEVERE ^
   -Dbodies=%2 ^
   -Dheight=600 ^
   -Dwidth=600 ^

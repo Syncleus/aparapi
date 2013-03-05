@@ -28,4 +28,29 @@
     <delete file="${ant.project.name}.jar"/>
   </target>
 
+   <target name="run-jtp">
+      <java classname="com.amd.aparapi.examples.nbody.Main" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist;jogamp"/>
+         <sysproperty key="com.amd.aparapi.executionMode" value="JTP"/>
+         <sysproperty key="bodies" value="16384"/>
+         <sysproperty key="height" value="800"/>
+         <sysproperty key="width" value="800"/>
+      </java>
+   </target>
+
+   <target name="run-gpu">
+      <java classname="com.amd.aparapi.examples.nbody.Main" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist;jogamp"/>
+         <sysproperty key="com.amd.aparapi.executionMode" value="GPU"/>
+         <sysproperty key="bodies" value="16384"/>
+         <sysproperty key="height" value="800"/>
+         <sysproperty key="width" value="800"/>
+      </java>
+   </target>
+
+   <target name="run" depends="run-gpu"/>
+
+
 </project>

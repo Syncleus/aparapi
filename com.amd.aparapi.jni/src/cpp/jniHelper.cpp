@@ -36,410 +36,141 @@
    and Security’s website at http://www.bis.doc.gov/. 
    */
 
-#include "common.h"
+#include "Common.h"
 #define JNI_SOURCE
-#include "jniHelper.h"
+#include "JNIHelper.h"
 
-void JNIHelper::callVoid(JNIEnv *jenv, jobject instance, char *methodName, char *methodSignature, ...){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return;
-   }
-   jmethodID methodId= jenv->GetMethodID(theClass,methodName,methodSignature);
-   if (methodId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting method '%s','%s' from instance \n", methodName, methodSignature);
-      return;
-   }
-   va_list argp;
-   va_start(argp, methodSignature);
-   jenv->CallVoidMethodV(instance, methodId, argp);
-   if (jenv->ExceptionCheck()) {
+void JNIHelper::callVoid(JNIEnv *jenv, jobject instance, const char *methodName, const char *methodSignature, ...){
+   try {
+      jclass theClass = jenv->GetObjectClass(instance);
+      if (theClass == NULL ||  jenv->ExceptionCheck())
+         throw std::string("bummer! getting class from instance");
+
+      jmethodID methodId= jenv->GetMethodID(theClass,methodName,methodSignature);
+      if (methodId == NULL || jenv->ExceptionCheck())
+         throw std::string("bummer getting method '") + methodName + "', '" + methodSignature + "' from instance";
+
+      va_list argp;
+      va_start(argp, methodSignature);
+      jenv->CallVoidMethodV(instance, methodId, argp);
+      va_end(argp);
+
+      if (jenv->ExceptionCheck())
+         throw std::string("bummer calling '") + methodName + "' '" + methodSignature;
+
+   } catch(std::string& s) {
       jenv->ExceptionDescribe(); /* write to console */
       jenv->ExceptionClear();
-      fprintf(stderr, "bummer  calling '%s %s'\n", methodName, methodSignature);
+      fprintf(stderr, "%s\n", s.c_str());
    }
-   va_end(argp);
-   return;
 }
 
-jobject JNIHelper::callObject(JNIEnv *jenv, jobject instance, char *methodName, char *methodSignature, ...){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return NULL;
-   }
-   jmethodID methodId= jenv->GetMethodID(theClass,methodName,methodSignature);
-   if (methodId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting method '%s','%s' from instance \n", methodName, methodSignature);
-      return NULL;
-   }
-   va_list argp;
-   va_start(argp, methodSignature);
-   jobject value = jenv->CallObjectMethodV(instance, methodId, argp);
-   if (jenv->ExceptionCheck()) {
+jobject JNIHelper::callObject(JNIEnv *jenv, jobject instance, const char *methodName, const char *methodSignature, ...){
+   jobject value = NULL;
+   try {
+      jclass theClass = jenv->GetObjectClass(instance);
+      if (theClass == NULL ||  jenv->ExceptionCheck())
+         throw std::string("bummer! getting class from instance");
+
+      jmethodID methodId= jenv->GetMethodID(theClass,methodName,methodSignature);
+      if (methodId == NULL || jenv->ExceptionCheck())
+         throw std::string("bummer getting method '") + methodName + "', '" + methodSignature + "' from instance";
+
+      va_list argp;
+      va_start(argp, methodSignature);
+      jobject value = jenv->CallObjectMethodV(instance, methodId, argp);
+      va_end(argp);
+
+      if (jenv->ExceptionCheck())
+         throw std::string("bummer calling '") + methodName + "' '" + methodSignature;
+
+   } catch(std::string& s) {
       jenv->ExceptionDescribe(); /* write to console */
       jenv->ExceptionClear();
-      fprintf(stderr, "bummer  calling '%s %s'\n", methodName, methodSignature);
-      return NULL;
+      fprintf(stderr, "%s\n", s.c_str());
+      return 0L;
    }
-   va_end(argp);
+
    return value;
 }
 
-jlong JNIHelper::callLong(JNIEnv *jenv, jobject instance, char *methodName, char *methodSignature, ...){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return 0L;
-   }
-   jmethodID methodId= jenv->GetMethodID(theClass,methodName,methodSignature);
-   if (methodId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting method '%s','%s' from instance \n", methodName, methodSignature);
-      return 0L;
-   }
-   va_list argp;
-   va_start(argp, methodSignature);
-   jlong value = jenv->CallLongMethodV(instance, methodId, argp);
-   if (jenv->ExceptionCheck()) {
+jlong JNIHelper::callLong(JNIEnv *jenv, jobject instance, const char *methodName, const char *methodSignature, ...){
+   jlong value = 0L;
+   try {
+      jclass theClass = jenv->GetObjectClass(instance);
+      if (theClass == NULL ||  jenv->ExceptionCheck())
+         throw std::string("bummer! getting class from instance");
+
+      jmethodID methodId = jenv->GetMethodID(theClass,methodName,methodSignature);
+      if (methodId == NULL || jenv->ExceptionCheck())
+         throw std::string("bummer getting method '") + methodName + "', '" + methodSignature + "' from instance";
+
+      va_list argp;
+      va_start(argp, methodSignature);
+      jlong value = jenv->CallLongMethodV(instance, methodId, argp);
+      va_end(argp);
+
+      if (jenv->ExceptionCheck())
+         throw std::string("bummer calling '") + methodName + "' '" + methodSignature;
+
+   } catch(std::string& s) {
       jenv->ExceptionDescribe(); /* write to console */
       jenv->ExceptionClear();
-      fprintf(stderr, "bummer  calling '%s %s'\n", methodName, methodSignature);
+      fprintf(stderr, "%s\n", s.c_str());
       return 0L;
    }
-   va_end(argp);
    return value;
 }
 
-void JNIHelper::setInstanceFieldInt(JNIEnv* jenv, jobject instance, char *fieldName, jint value){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return;
-   }
-   jfieldID fieldId= jenv->GetFieldID(theClass,fieldName,"I");
-   if (fieldId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting int field '%s' \n", fieldName);
-      return;
-   }
-   jenv->SetIntField(instance, fieldId, value);
-   if (jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer setting int field  '%s' \n", fieldName);
-      return;
-   }
-}
+jobject JNIHelper::getStaticFieldObject(JNIEnv *jenv, const char *className, const char *fieldName, const char *signature){
+   jobject value = NULL;
+   try {
+      jclass theClass = jenv->FindClass(className);
+      if (theClass == NULL ||  jenv->ExceptionCheck())
+         throw std::string("bummer! getting '") + className;
 
-void JNIHelper::setInstanceFieldLong(JNIEnv* jenv, jobject instance, char *fieldName, jlong value){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return;
-   }
-   jfieldID fieldId= jenv->GetFieldID(theClass,fieldName,"J");
-   if (fieldId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting long field '%s' \n", fieldName);
-      return;
-   }
-   jenv->SetLongField(instance, fieldId, value);
-   if (jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer setting long field  '%s' \n", fieldName);
-      return;
-   }
-}
-void JNIHelper::setInstanceFieldBoolean(JNIEnv* jenv, jobject instance, char *fieldName, jboolean value){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return;
-   }
-   jfieldID fieldId= jenv->GetFieldID(theClass,fieldName,"Z");
-   if (fieldId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting boolean field id '%s' \n", fieldName);
-      return;
-   }
-   jenv->SetBooleanField(instance, fieldId, value);
-   if (jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer setting boolean field  '%s' \n", fieldName);
-      return;
-   }
-}
+      jfieldID fieldId = jenv->GetStaticFieldID(theClass,fieldName,signature);
+      if (fieldId == NULL || jenv->ExceptionCheck())
+         throw std::string("bummer getting static field '") + fieldName + "' from '" + className + "' with signature! '" + signature;
 
-void JNIHelper::setInstanceFieldObject(JNIEnv* jenv, jobject instance, char *fieldName, char *signature, jobject value){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return;
-   }
-   jfieldID fieldId= jenv->GetFieldID(theClass,fieldName, signature);
-   if (fieldId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting %s object '%s' \n", signature, fieldName);
-      return;
-   }
-   jenv->SetObjectField(instance, fieldId, value);
-   if (jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer setting %s  object  '%s' \n", signature, fieldName);
-      return;
-   }
-}
+      value = jenv->GetStaticObjectField(theClass, fieldId);
+      if (value == NULL || jenv->ExceptionCheck())
+         throw std::string("bummer getting static field  value '") + fieldName + "' from '" + className + "' with signature! '" + signature;
 
-jobject JNIHelper::getStaticFieldObject(JNIEnv *jenv, char *className, char *fieldName, char *signature){
-   jclass theClass = jenv->FindClass(className);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe();
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting '%s'\n", className);
-      return(NULL);
-   }
-   jfieldID fieldId= jenv->GetStaticFieldID(theClass,fieldName,signature);
-   if (fieldId == NULL || jenv->ExceptionCheck()) {
+   } catch(std::string& s) {
       jenv->ExceptionDescribe(); 
       jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting static field '%s' from '%s' with signature! '%s' \n", fieldName, className, signature);
-      return(NULL);
-   }
-
-   jobject value = jenv->GetStaticObjectField(theClass, fieldId);
-   if (value == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting static field value '%s' from '%s' with signature! '%s' \n", fieldName, className, signature);
+      fprintf(stderr, "%s\n", s.c_str());
       return(NULL);
    }
 
    return(value);
 }
-jobject JNIHelper::createInstance(JNIEnv *jenv, char* className, char *signature, ... ){
-   jclass theClass = jenv->FindClass(className);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
+
+jobject JNIHelper::createInstance(JNIEnv *jenv, const char* className, const char *signature, ... ){
+   jobject instance;
+   try {
+      jclass theClass = jenv->FindClass(className);
+      if (theClass == NULL || jenv->ExceptionCheck())
+         throw std::string("bummer! getting '") + className;
+
+      jmethodID constructor = jenv->GetMethodID(theClass,"<init>",signature);
+      if (constructor == NULL || jenv->ExceptionCheck())
+         throw std::string("bummer getting constructor from '") + className + "' with signature! '" + signature;
+
+      va_list argp;
+      va_start(argp, signature);
+      instance = jenv->NewObjectV(theClass, constructor, argp);
+      va_end(argp);
+
+      if (instance == NULL || jenv->ExceptionCheck())
+         throw std::string("bummer invoking constructor from '") + className + "' with signature! '" + signature;
+
+   } catch(std::string& s) {
       jenv->ExceptionDescribe();
       jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting '%s'\n", className);
+      fprintf(stderr, "%s\n", s.c_str());
       return(NULL);
    }
-
-   jmethodID constructor= jenv->GetMethodID(theClass,"<init>",signature);
-   if (constructor == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting constructor from '%s' with signature! '%s' \n", className, signature);
-      return(NULL);
-   }
-   va_list argp;
-   va_start(argp, signature);
-   jobject instance = jenv->NewObjectV(theClass, constructor, argp);
-   if (instance == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer invoking constructor from '%s' with signature! '%s' \n", className, signature);
-   }
-   va_end(argp);
    return(instance);
 } 
-
-jint JNIHelper::getInstanceFieldInt(JNIEnv *jenv, jobject instance, char *fieldName){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return 0;
-   }
-   jfieldID fieldId= jenv->GetFieldID(theClass,fieldName,"I");
-   if (fieldId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting int field '%s' \n", fieldName);
-      return 0;
-   }
-   jint value= jenv->GetIntField(instance, fieldId);
-   if (jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting int field value '%s' \n", fieldName);
-      return 0;
-   }
-   return(value);
-}
-
-jfloat JNIHelper::getInstanceFieldFloat(JNIEnv *jenv, jobject instance, char *fieldName){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return 0;
-   }
-   jfieldID fieldId= jenv->GetFieldID(theClass,fieldName,"F");
-   if (fieldId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting int field '%s' \n", fieldName);
-      return 0;
-   }
-   jfloat value= jenv->GetFloatField(instance, fieldId);
-   if (jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting int field value '%s' \n", fieldName);
-      return 0;
-   }
-   return(value);
-}
-
-jdouble JNIHelper::getInstanceFieldDouble(JNIEnv *jenv, jobject instance, char *fieldName){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return 0;
-   }
-   jfieldID fieldId= jenv->GetFieldID(theClass,fieldName,"D");
-   if (fieldId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting int field '%s' \n", fieldName);
-      return 0;
-   }
-   jdouble value= jenv->GetDoubleField(instance, fieldId);
-   if (jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting int field value '%s' \n", fieldName);
-      return 0;
-   }
-   return(value);
-}
-jshort JNIHelper::getInstanceFieldShort(JNIEnv *jenv, jobject instance, char *fieldName){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return 0;
-   }
-   jfieldID fieldId= jenv->GetFieldID(theClass,fieldName,"H");
-   if (fieldId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting int field '%s' \n", fieldName);
-      return 0;
-   }
-   jshort value= jenv->GetShortField(instance, fieldId);
-   if (jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting int field value '%s' \n", fieldName);
-      return 0;
-   }
-   return(value);
-}
-
-jlong JNIHelper::getInstanceFieldLong(JNIEnv *jenv, jobject instance, char *fieldName){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return 0;
-   }
-   jfieldID fieldId= jenv->GetFieldID(theClass,fieldName,"J");
-   if (fieldId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting long field '%s' \n", fieldName);
-      return 0;
-   }
-   jlong value= jenv->GetLongField(instance, fieldId);
-   if (jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting long field value  '%s' \n", fieldName);
-      return 0;
-   }
-   return(value);
-}
-jobject JNIHelper::getInstanceFieldObject(JNIEnv *jenv, jobject instance, char *fieldName, char *signature){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return NULL;
-   }
-   jfieldID fieldId= jenv->GetFieldID(theClass,fieldName, signature);
-   if (fieldId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting object field '%s' \n", fieldName);
-      return NULL;
-   }
-   jobject value= jenv->GetObjectField(instance, fieldId);
-   if (jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting object field  '%s' \n", fieldName);
-      return NULL;
-   }
-   return(value);
-}
-jboolean JNIHelper::getInstanceFieldBoolean(JNIEnv *jenv, jobject instance, char *fieldName){
-   jclass theClass = jenv->GetObjectClass(instance);
-   if (theClass == NULL ||  jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer! getting class from instance\n");
-      return false;
-   }
-   jfieldID fieldId= jenv->GetFieldID(theClass,fieldName, "Z");
-   if (fieldId == NULL || jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting boolean field '%s' \n", fieldName);
-      return false;
-   }
-   jboolean value= jenv->GetBooleanField(instance, fieldId);
-   if (jenv->ExceptionCheck()) {
-      jenv->ExceptionDescribe(); 
-      jenv->ExceptionClear();
-      fprintf(stderr, "bummer getting boolean field  '%s' \n", fieldName);
-      return false;
-   }
-   return(value);
-}

@@ -51,8 +51,8 @@ public class Main{
       final float[] b = new float[size];
 
       for (int i = 0; i < size; i++) {
-         a[i] = (float)(Math.random()*100);
-         b[i] = (float)(Math.random()*100);
+         a[i] = (float) (Math.random() * 100);
+         b[i] = (float) (Math.random() * 100);
       }
 
       final float[] sum = new float[size];
