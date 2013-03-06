@@ -234,7 +234,7 @@ class JNIHelper {
             jenv->ExceptionDescribe(); 
             jenv->ExceptionClear();
             fprintf(stderr,"%s",se.c_str());
-            return NULL;
+            return (jT)NULL;
          }
          return(value);
       }
