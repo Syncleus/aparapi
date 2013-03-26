@@ -294,7 +294,7 @@ public class Entrypoint{
          if (callInstance instanceof AccessArrayElement) {
             final AccessArrayElement arrayAccess = (AccessArrayElement) callInstance;
             final Instruction refAccess = arrayAccess.getArrayRef();
-            if (refAccess instanceof I_GETFIELD) {
+            //if (refAccess instanceof I_GETFIELD) {
 
                // It is a call from a member obj array element
                if (logger.isLoggable(Level.FINE)) {
@@ -304,7 +304,7 @@ public class Entrypoint{
 
                // false = no invokespecial allowed here
                return memberClassModel.getMethod(_methodEntry, false);
-            }
+            //}
          }
       }
       return null;

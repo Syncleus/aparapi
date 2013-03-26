@@ -49,6 +49,7 @@ import com.amd.aparapi.internal.exception.CodeGenException;
 import com.amd.aparapi.internal.instruction.Instruction;
 import com.amd.aparapi.internal.instruction.InstructionSet;
 import com.amd.aparapi.internal.instruction.InstructionSet.AccessArrayElement;
+import com.amd.aparapi.internal.instruction.InstructionSet.AccessField;
 import com.amd.aparapi.internal.instruction.InstructionSet.AssignToArrayElement;
 import com.amd.aparapi.internal.instruction.InstructionSet.AssignToField;
 import com.amd.aparapi.internal.instruction.InstructionSet.AssignToLocalVariable;
@@ -250,8 +251,8 @@ public abstract class KernelWriter extends BlockWriter{
             } else if (i instanceof AccessArrayElement) {
                final AccessArrayElement arrayAccess = (AccessArrayElement) ((VirtualMethodCall) _methodCall).getInstanceReference();
                final Instruction refAccess = arrayAccess.getArrayRef();
-               assert refAccess instanceof I_GETFIELD : "ref should come from getfield";
-               final String fieldName = ((I_GETFIELD) refAccess).getConstantPoolFieldEntry().getNameAndTypeEntry()
+               //assert refAccess instanceof I_GETFIELD : "ref should come from getfield";
+               final String fieldName = ((AccessField) refAccess).getConstantPoolFieldEntry().getNameAndTypeEntry()
                      .getNameUTF8Entry().getUTF8();
                write(" &(this->" + fieldName);
                write("[");
