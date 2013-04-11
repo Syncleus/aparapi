@@ -452,6 +452,9 @@ public abstract class BlockWriter{
             } else {
                writeThisRef();
             }
+         }  else{
+            // It is a static field but we still pass it via "this"
+            writeThisRef();
          }
          write(accessField.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
 
