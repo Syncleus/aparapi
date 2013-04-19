@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+
+<project name="mdarray" default="build" basedir=".">
+
+   <path id="compiler.class.path">
+       <pathelement path="../../com.amd.aparapi/dist/aparapi.jar"/>
+   </path>
+
+   <path id="runtime.class.path" cache="true">
+      <path refid="compiler.class.path"/>
+      <pathelement path="${ant.project.name}.jar"/>
+   </path>
+
+   <target name="build" depends="clean">
+      <mkdir dir="classes"/>
+      <javac srcdir="src" destdir="classes" debug="on" includeantruntime="false" fork="true"
+          memorymaximumsize="3G" >
+         <classpath>
+            <pathelement path="../../com.amd.aparapi/dist/aparapi.jar"/>
+         </classpath>
+      </javac>
+      <jar jarfile="${ant.project.name}.jar" basedir="classes"/>
+   </target>
+
+   <target name="clean">
+      <delete dir="classes"/>
+      <delete file="${ant.project.name}.jar"/>
+   </target>
+
+   <target name="run-jtp">
+      <java classname="gov.pnnl.aparapi.sample.mdarray.MDArray" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="../../com.amd.aparapi.jni/dist"/>
+         <sysproperty key="com.amd.aparapi.executionMode" value="JTP"/>
+         <sysproperty key="com.amd.aparapi.logLevel" value="WARNING"/>
+         <sysproperty key="com.amd.aparapi.enableVerboseJNI" value="false"/>
+         <sysproperty key="com.amd.aparapi.enableExecutionModeReporting" value="false"/>
+         <sysproperty key="com.amd.aparapi.enableShowGeneratedOpenCL" value="false"/>
+      </java>
+   </target>
+
+   <target name="run-gpu">
+      <java classname="gov.pnnl.aparapi.sample.mdarray.MDArray" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="../../com.amd.aparapi.jni/dist"/>
+         <jvmarg value="-Xmx5G"/>
+         <jvmarg value="-Xms5G"/>
+         <sysproperty key="com.amd.aparapi.executionMode" value="GPU"/>
+         <sysproperty key="com.amd.aparapi.logLevel" value="WARNING"/>
+         <sysproperty key="com.amd.aparapi.enableVerboseJNI" value="false"/>
+         <sysproperty key="com.amd.aparapi.enableExecutionModeReporting" value="false"/>
+         <sysproperty key="com.amd.aparapi.enableShowGeneratedOpenCL" value="false"/>
+      </java>
+   </target>
+
+
+   <target name="run-gpuv">
+      <java classname="gov.pnnl.aparapi.sample.mdarray.MDArray" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="../../com.amd.aparapi.jni/dist"/>
+         <sysproperty key="com.amd.aparapi.executionMode" value="GPU"/>
+         <sysproperty key="com.amd.aparapi.logLevel" value="WARNING"/>
+         <sysproperty key="com.amd.aparapi.enableVerboseJNI" value="true"/>
+         <sysproperty key="com.amd.aparapi.enableExecutionModeReporting" value="true"/>
+         <sysproperty key="com.amd.aparapi.enableShowGeneratedOpenCL" value="true"/>
+      </java>
+   </target>
+
+   <target name="run-cpu">
+      <java classname="gov.pnnl.aparapi.sample.mdarray.MDArray" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="../../com.amd.aparapi.jni/dist"/>
+         <sysproperty key="com.amd.aparapi.executionMode" value="CPU"/>
+         <sysproperty key="com.amd.aparapi.logLevel" value="WARNING"/>
+         <sysproperty key="com.amd.aparapi.enableVerboseJNI" value="false"/>
+         <sysproperty key="com.amd.aparapi.enableExecutionModeReporting" value="false"/>
+         <sysproperty key="com.amd.aparapi.enableShowGeneratedOpenCL" value="false"/>
+      </java>
+   </target>
+
+   <target name="run-multi">
+      <java classname="gov.pnnl.aparapi.sample.mdarray.MDArray" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="../../com.amd.aparapi.jni/dist"/>
+         <sysproperty key="com.amd.aparapi.executionMode" value="CPU,JTP"/>
+         <sysproperty key="com.amd.aparapi.logLevel" value="WARNING"/>
+         <sysproperty key="com.amd.aparapi.enableVerboseJNI" value="false"/>
+         <sysproperty key="com.amd.aparapi.enableExecutionModeReporting" value="false"/>
+         <sysproperty key="com.amd.aparapi.enableShowGeneratedOpenCL" value="false"/>
+      </java>
+   </target>
+
+
+   <target name="run">
+      <java classname="gov.pnnl.aparapi.sample.mdarray.MDArray" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="../../com.amd.aparapi.jni/dist"/>
+      </java>
+   </target>
+
+   <target name="show">
+      <java classname="gov.pnnl.aparapi.sample.mdarray.MDArray" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="../../com.amd.aparapi.jni/dist"/>
+         <sysproperty key="com.amd.aparapi.enableShowGeneratedOpenCL" value="true"/>
+         <sysproperty key="com.amd.aparapi.enableInstructionDecodeViewer" value="true"/>
+      </java>
+  </target>
+
+   <target name="print">
+      <java classname="gov.pnnl.aparapi.sample.mdarray.MDArray" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <sysproperty key="java.library.path" path="../../com.amd.aparapi.jni/dist"/>
+         <sysproperty key="com.amd.aparapi.enableShowGeneratedOpenCL" value="true"/>
+      </java>
+   </target>
+
+</project>
