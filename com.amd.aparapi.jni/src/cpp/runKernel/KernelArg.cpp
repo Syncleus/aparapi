@@ -34,6 +34,8 @@ KernelArg::KernelArg(JNIEnv *jenv, JNIContext *jniContext, jobject argObj):
       jenv->ReleaseStringUTFChars(nameString, nameChars);
       if (isArray()){
          arrayBuffer = new ArrayBuffer();
+      } else if(isAparapiBuffer()) {
+         aparapiBuffer = AparapiBuffer::flatten(jenv, argObj, type);
       }
    }
 
@@ -42,6 +44,13 @@ cl_int KernelArg::setLocalBufferArg(JNIEnv *jenv, int argIdx, int argPos, bool v
        fprintf(stderr, "ISLOCAL, clSetKernelArg(jniContext->kernel, %d, %d, NULL);\n", argIdx, (int) arrayBuffer->lengthInBytes);
    }
    return(clSetKernelArg(jniContext->kernel, argPos, (int)arrayBuffer->lengthInBytes, NULL));
+}
+
+cl_int KernelArg::setLocalAparapiBufferArg(JNIEnv *jenv, int argIdx, int argPos, bool verbose) {
+   if (verbose){
+       fprintf(stderr, "ISLOCAL, clSetKernelArg(jniContext->kernel, %d, %d, NULL);\n", argIdx, (int) aparapiBuffer->lengthInBytes);
+   }
+   return(clSetKernelArg(jniContext->kernel, argPos, (int)aparapiBuffer->lengthInBytes, NULL));
 }
 
 const char* KernelArg::getTypeName() {

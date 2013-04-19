@@ -5,6 +5,7 @@
 #include "Common.h"
 #include "JNIHelper.h"
 #include "ArrayBuffer.h"
+#include "AparapiBuffer.h"
 #include "com_amd_aparapi_internal_jni_KernelRunnerJNI.h"
 #include "Config.h"
 #include <iostream>
@@ -69,6 +70,7 @@ class KernelArg{
       jint type;         // a bit mask determining the type of this arg
 
       ArrayBuffer *arrayBuffer;
+      AparapiBuffer *aparapiBuffer;
 
       // Uses JNIContext so cant inline here see below
       KernelArg(JNIEnv *jenv, JNIContext *jniContext, jobject argObj);
@@ -157,14 +159,14 @@ class KernelArg{
       int isConstant(){
          return (type&com_amd_aparapi_internal_jni_KernelRunnerJNI_ARG_CONSTANT);
       }
-      int isAparapiBuf(){
-         return (type&com_amd_aparapi_internal_jni_KernelRunnerJNI_ARG_APARAPI_BUF);
+      int isAparapiBuffer(){
+         return (type&com_amd_aparapi_internal_jni_KernelRunnerJNI_ARG_APARAPI_BUFFER);
       }
       int isBackedByArray(){
          return ( (isArray() && (isGlobal() || isConstant())));
       }
       int needToEnqueueRead(){
-         return(((isArray() && isGlobal()) || ((isAparapiBuf()&&isGlobal()))) && (isImplicit()&&isMutableByKernel()));
+         return(((isArray() && isGlobal()) || ((isAparapiBuffer()&&isGlobal()))) && (isImplicit()&&isMutableByKernel()));
       }
       int needToEnqueueWrite(){
          return ((isImplicit()&&isReadByKernel())||(isExplicit()&&isExplicitWrite()));
@@ -188,6 +190,7 @@ class KernelArg{
 
       // Uses JNIContext so can't inline here we below.  
       cl_int setLocalBufferArg(JNIEnv *jenv, int argIdx, int argPos, bool verbose);
+      cl_int setLocalAparapiBufferArg(JNIEnv *jenv, int argIdx, int argPos, bool verbose);
       // Uses JNIContext so can't inline here we below.  
       cl_int setPrimitiveArg(JNIEnv *jenv, int argIdx, int argPos, bool verbose);
 };
