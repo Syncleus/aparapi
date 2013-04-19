@@ -218,4 +218,46 @@ public class KernelArg extends KernelArgJNI{
    protected void setField(Field field) {
       this.field = field;
    }
+
+   /**
+    * @return the buffer
+    */
+   protected Object getJavaBuffer() {
+      return javaBuffer;
+   }
+
+   /**
+    * @param buffer the buffer to set
+    */
+   protected void setJavaBuffer(Object buffer) {
+      this.javaBuffer = buffer;
+   }
+
+   /**
+    * @return the number of dimensions to buffer
+    */
+   protected int getNumDims() {
+      return numDims;
+   }
+
+   /**
+    * @param numDims the number of dimensions for the buffer
+    */
+   protected void setNumDims(int numDims) {
+      this.numDims = numDims;
+   }
+
+   /**
+    * @return the dimensions for the buffer
+    */
+   protected int[] getDims() {
+      return dims;
+   }
+
+   /**
+    * @param dims the dimsensions for the buffer
+    */
+   protected void setDims(int[] dims) {
+      this.dims = dims;
+   }
 }

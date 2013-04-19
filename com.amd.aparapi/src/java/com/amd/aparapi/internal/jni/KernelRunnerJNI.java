@@ -178,7 +178,7 @@ public abstract class KernelRunnerJNI{
     * 
     * @author gfrost
     */
-   @UsedByJNICode protected static final int ARG_APARAPI_BUF = 1 << 15;
+   @UsedByJNICode protected static final int ARG_APARAPI_BUFFER = 1 << 15;
 
    /**
     * This 'bit' indicates that the arg has been explicitly marked for reading
@@ -207,23 +207,6 @@ public abstract class KernelRunnerJNI{
     */
    @UsedByJNICode protected static final int ARG_OBJ_ARRAY_STRUCT = 1 << 18;
 
-   /**
-    * TODO:
-    * 
-    * @see com.amd.aparapi.annotations.UsedByJNICode
-    * 
-    * @author gfrost
-    */
-   // @UsedByJNICode protected static final int ARG_APARAPI_BUF_HAS_ARRAY = 1 << 19;
-
-   /**
-    * TODO:
-    * 
-    * @see com.amd.aparapi.annotations.UsedByJNICode
-    * 
-    * @author gfrost
-    */
-   // @UsedByJNICode protected static final int ARG_APARAPI_BUF_IS_DIRECT = 1 << 20;
 
    /**
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>char</code> type (array or primitive).

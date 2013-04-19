@@ -63,6 +63,7 @@ import com.amd.aparapi.internal.instruction.InstructionSet.AccessField;
 import com.amd.aparapi.internal.instruction.InstructionSet.AssignToArrayElement;
 import com.amd.aparapi.internal.instruction.InstructionSet.AssignToField;
 import com.amd.aparapi.internal.instruction.InstructionSet.I_ARRAYLENGTH;
+import com.amd.aparapi.internal.instruction.InstructionSet.I_AALOAD;
 import com.amd.aparapi.internal.instruction.InstructionSet.I_GETFIELD;
 import com.amd.aparapi.internal.instruction.InstructionSet.I_INVOKESPECIAL;
 import com.amd.aparapi.internal.instruction.InstructionSet.I_INVOKESTATIC;
@@ -591,11 +592,15 @@ public class Entrypoint{
 
                   }
                } else if (instruction instanceof I_ARRAYLENGTH) {
-                  if (!(instruction.getFirstChild() instanceof AccessField)) {
+                  Instruction child = instruction.getFirstChild();
+                  while(child instanceof I_AALOAD) {
+                     child = child.getFirstChild();
+                  }
+                  if (!(child instanceof AccessField)) {
                      throw new ClassParseException(ClassParseException.TYPE.LOCALARRAYLENGTHACCESS);
                   }
-                  final AccessField child = (AccessField) instruction.getFirstChild();
-                  final String arrayName = child.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+                  final AccessField childField = (AccessField) child;
+                  final String arrayName = childField.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
                   arrayFieldArrayLengthUsed.add(arrayName);
                   if (logger.isLoggable(Level.FINE)) {
                      logger.fine("Noted arraylength in " + methodModel.getName() + " on " + arrayName);

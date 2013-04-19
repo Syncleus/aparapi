@@ -1056,14 +1056,9 @@ public class KernelRunner extends KernelRunnerJNI{
                            } else {
                               args[i].setType(args[i].getType() | ARG_GLOBAL);
                            }
-
-                           args[i].setArray(null); // will get updated in updateKernelArrayRefs
-                           args[i].setType(args[i].getType() | ARG_ARRAY);
-
                            if (isExplicit()) {
                               args[i].setType(args[i].getType() | ARG_EXPLICIT);
                            }
-
                            // for now, treat all write arrays as read-write, see bugzilla issue 4859
                            // we might come up with a better solution later
                            args[i].setType(args[i].getType()
@@ -1071,25 +1066,50 @@ public class KernelRunner extends KernelRunnerJNI{
                            args[i].setType(args[i].getType()
                                  | (entryPoint.getArrayFieldAccesses().contains(field.getName()) ? ARG_READ : 0));
                            // args[i].type |= ARG_GLOBAL;
-                           args[i].setType(args[i].getType() | (type.isAssignableFrom(float[].class) ? ARG_FLOAT : 0));
-                           args[i].setType(args[i].getType() | (type.isAssignableFrom(int[].class) ? ARG_INT : 0));
-                           args[i].setType(args[i].getType() | (type.isAssignableFrom(boolean[].class) ? ARG_BOOLEAN : 0));
-                           args[i].setType(args[i].getType() | (type.isAssignableFrom(byte[].class) ? ARG_BYTE : 0));
-                           args[i].setType(args[i].getType() | (type.isAssignableFrom(char[].class) ? ARG_CHAR : 0));
-                           args[i].setType(args[i].getType() | (type.isAssignableFrom(double[].class) ? ARG_DOUBLE : 0));
-                           args[i].setType(args[i].getType() | (type.isAssignableFrom(long[].class) ? ARG_LONG : 0));
-                           args[i].setType(args[i].getType() | (type.isAssignableFrom(short[].class) ? ARG_SHORT : 0));
 
-                           // arrays whose length is used will have an int arg holding
-                           // the length as a kernel param
-                           if (entryPoint.getArrayFieldArrayLengthUsed().contains(args[i].getName())) {
-                              args[i].setType(args[i].getType() | ARG_ARRAYLENGTH);
-                           }
 
                            if (type.getName().startsWith("[L")) {
-                              args[i].setType(args[i].getType() | (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ));
+                              args[i].setType(args[i].getType()
+                                    | (ARG_OBJ_ARRAY_STRUCT | 
+                                       ARG_WRITE | 
+                                       ARG_READ | 
+                                       ARG_APARAPI_BUFFER));
+
                               if (logger.isLoggable(Level.FINE)) {
                                  logger.fine("tagging " + args[i].getName() + " as (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ)");
+                              }
+                           } else if (type.getName().startsWith("[[")) {
+
+                              try {
+                                 setMultiArrayType(args[i], type);
+                              } catch(AparapiException e) {
+                                 return warnFallBackAndExecute(_entrypointName, _range, _passes, "failed to set kernel arguement " + args[i].getName() + ".  Aparapi only supports 2D and 3D arrays.");
+                              }
+                           } else {
+
+                              args[i].setArray(null); // will get updated in updateKernelArrayRefs
+                              args[i].setType(args[i].getType() | ARG_ARRAY);
+
+                              args[i].setType(args[i].getType() | (type.isAssignableFrom(float[].class) ? ARG_FLOAT : 0));
+                              args[i].setType(args[i].getType() | (type.isAssignableFrom(int[].class) ? ARG_INT : 0));
+                              args[i].setType(args[i].getType() | (type.isAssignableFrom(boolean[].class) ? ARG_BOOLEAN : 0));
+                              args[i].setType(args[i].getType() | (type.isAssignableFrom(byte[].class) ? ARG_BYTE : 0));
+                              args[i].setType(args[i].getType() | (type.isAssignableFrom(char[].class) ? ARG_CHAR : 0));
+                              args[i].setType(args[i].getType() | (type.isAssignableFrom(double[].class) ? ARG_DOUBLE : 0));
+                              args[i].setType(args[i].getType() | (type.isAssignableFrom(long[].class) ? ARG_LONG : 0));
+                              args[i].setType(args[i].getType() | (type.isAssignableFrom(short[].class) ? ARG_SHORT : 0));
+
+                              // arrays whose length is used will have an int arg holding
+                              // the length as a kernel param
+                              if (entryPoint.getArrayFieldArrayLengthUsed().contains(args[i].getName())) {
+                                 args[i].setType(args[i].getType() | ARG_ARRAYLENGTH);
+                              }
+
+                              if (type.getName().startsWith("[L")) {
+                                 args[i].setType(args[i].getType() | (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ));
+                                 if (logger.isLoggable(Level.FINE)) {
+                                    logger.fine("tagging " + args[i].getName() + " as (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ)");
+                                 }
                               }
                            }
                         } else if (type.isAssignableFrom(float.class)) {
@@ -1122,10 +1142,7 @@ public class KernelRunner extends KernelRunnerJNI{
                         e.printStackTrace();
                      }
 
-                     args[i].setPrimitiveSize(((args[i].getType() & ARG_FLOAT) != 0 ? 4 : (args[i].getType() & ARG_INT) != 0 ? 4
-                           : (args[i].getType() & ARG_BYTE) != 0 ? 1 : (args[i].getType() & ARG_CHAR) != 0 ? 2
-                                 : (args[i].getType() & ARG_BOOLEAN) != 0 ? 1 : (args[i].getType() & ARG_SHORT) != 0 ? 2 : (args[i]
-                                       .getType() & ARG_LONG) != 0 ? 8 : (args[i].getType() & ARG_DOUBLE) != 0 ? 8 : 0));
+                     args[i].setPrimitiveSize(getPrimitiveSize(args[i].getType()));
 
                      if (logger.isLoggable(Level.FINE)) {
                         logger.fine("arg " + i + ", " + args[i].getName() + ", type=" + Integer.toHexString(args[i].getType())
@@ -1175,6 +1192,87 @@ public class KernelRunner extends KernelRunnerJNI{
       accumulatedExecutionTime += executionTime;
 
       return kernel;
+   }
+
+
+   private int getPrimitiveSize(int type) {
+      if ((type & ARG_FLOAT) != 0) {
+         return 4;
+      } else if ((type & ARG_INT) != 0) {
+         return 4;
+      } else if ((type & ARG_BYTE) != 0) {
+         return 1;
+      } else if ((type & ARG_CHAR) != 0) {
+         return 2;
+      } else if ((type & ARG_BOOLEAN) != 0) {
+         return 1;
+      } else if ((type & ARG_SHORT) != 0) {
+         return 2;
+      } else if ((type & ARG_LONG) != 0) {
+         return 8;
+      } else if ((type & ARG_DOUBLE) != 0) {
+         return 8;
+      }
+      return 0;
+   }
+
+   private void setMultiArrayType(KernelArg arg, Class<?> type) throws AparapiException {
+      arg.setType(arg.getType() | (ARG_WRITE | ARG_READ | ARG_APARAPI_BUFFER));
+      int numDims = 0;
+      while(type.getName().startsWith("[[[[")) {
+         throw new AparapiException("Aparapi only supports 2D and 3D arrays.");
+      }
+      arg.setType(arg.getType() | ARG_ARRAYLENGTH);
+      while(type.getName().charAt(numDims) == '[') {
+         numDims++;
+      }
+      Object buffer = new Object();
+      try {
+         buffer = arg.getField().get(kernel);
+      } catch(IllegalAccessException e) {
+         e.printStackTrace();
+      }
+      arg.setJavaBuffer(buffer);
+      arg.setNumDims(numDims);
+      Object subBuffer = buffer;
+      int[] dims = new int[numDims];
+      for(int i = 0; i < numDims-1; i++) {
+         dims[i] = Array.getLength(subBuffer);
+         subBuffer = Array.get(subBuffer, 0);
+      }
+      dims[numDims-1] = Array.getLength(subBuffer);
+      arg.setDims(dims);
+
+      if (subBuffer.getClass().isAssignableFrom(float[].class)) {
+         arg.setType(arg.getType() | ARG_FLOAT);
+      }
+      if (subBuffer.getClass().isAssignableFrom(int[].class)) {
+         arg.setType(arg.getType() | ARG_INT);
+      }
+      if (subBuffer.getClass().isAssignableFrom(boolean[].class)) {
+         arg.setType(arg.getType() | ARG_BOOLEAN);
+      }
+      if (subBuffer.getClass().isAssignableFrom(byte[].class)) {
+         arg.setType(arg.getType() | ARG_BYTE);
+      }
+      if (subBuffer.getClass().isAssignableFrom(char[].class)) {
+         arg.setType(arg.getType() | ARG_CHAR);
+      }
+      if (subBuffer.getClass().isAssignableFrom(double[].class)) {
+         arg.setType(arg.getType() | ARG_DOUBLE);
+      }
+      if (subBuffer.getClass().isAssignableFrom(long[].class)) {
+         arg.setType(arg.getType() | ARG_LONG);
+      }
+      if (subBuffer.getClass().isAssignableFrom(short[].class)) {
+         arg.setType(arg.getType() | ARG_SHORT);
+      }
+      int primitiveSize = getPrimitiveSize(arg.getType());
+      int totalElements = 1;
+      for(int i = 0; i < numDims; i++) {
+         totalElements *= dims[i];
+      }
+      arg.setSizeInBytes(totalElements * primitiveSize);
    }
 
    private final Set<Object> puts = new HashSet<Object>();

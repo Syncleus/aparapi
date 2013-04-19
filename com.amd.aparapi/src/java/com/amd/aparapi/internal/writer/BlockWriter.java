@@ -73,6 +73,7 @@ import com.amd.aparapi.internal.instruction.InstructionSet.Constant;
 import com.amd.aparapi.internal.instruction.InstructionSet.FieldArrayElementAssign;
 import com.amd.aparapi.internal.instruction.InstructionSet.FieldArrayElementIncrement;
 import com.amd.aparapi.internal.instruction.InstructionSet.I_ALOAD_0;
+import com.amd.aparapi.internal.instruction.InstructionSet.I_AALOAD;
 import com.amd.aparapi.internal.instruction.InstructionSet.I_ARRAYLENGTH;
 import com.amd.aparapi.internal.instruction.InstructionSet.I_IFNONNULL;
 import com.amd.aparapi.internal.instruction.InstructionSet.I_IFNULL;
@@ -103,6 +104,7 @@ import com.amd.aparapi.internal.model.ClassModel.LocalVariableInfo;
 public abstract class BlockWriter{
 
    public final static String arrayLengthMangleSuffix = "__javaArrayLength";
+   public final static String arrayDimMangleSuffix = "__javaArrayDimension";
 
    public abstract void write(String _string);
 
@@ -434,11 +436,45 @@ public abstract class BlockWriter{
          write(" = ");
          writeInstruction(arrayAssignmentInstruction.getValue());
       } else if (_instruction instanceof AccessArrayElement) {
+
+         //we're getting an element from an array
+         //if the array is a primitive then we just return the value
+         //so the generated code looks like
+         //arrayName[arrayIndex];
+         //but if the array is an object, or multidimensional array, then we want to return
+         //a pointer to our index our position in the array.  The code will look like
+         //&(arrayName[arrayIndex * this->arrayNameLen_dimension]
+         //
          final AccessArrayElement arrayLoadInstruction = (AccessArrayElement) _instruction;
+
+         //object array, get address
+         if(arrayLoadInstruction instanceof I_AALOAD) {
+            write("(&");
+         }
          writeInstruction(arrayLoadInstruction.getArrayRef());
          write("[");
          writeInstruction(arrayLoadInstruction.getArrayIndex());
+
+         //object array, find the size of each object in the array
+         //for 2D arrays, this size is the size of a row.
+         if(arrayLoadInstruction instanceof I_AALOAD) {
+            int dim = 0;
+            Instruction load = arrayLoadInstruction.getArrayRef();
+            while(load instanceof I_AALOAD) {
+               load = load.getFirstChild();
+               dim++;
+            }
+
+            String arrayName = ((AccessInstanceField)load).getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+            write(" * this->" + arrayName + arrayDimMangleSuffix+dim);
+         }
+
          write("]");
+
+         //object array, close parentheses
+         if(arrayLoadInstruction instanceof I_AALOAD) {
+            write(")");
+         }
       } else if (_instruction instanceof AccessField) {
          final AccessField accessField = (AccessField) _instruction;
          if (accessField instanceof AccessInstanceField) {
@@ -452,16 +488,24 @@ public abstract class BlockWriter{
             } else {
                writeThisRef();
             }
-         }  else{
-            // It is a static field but we still pass it via "this"
-            writeThisRef();
          }
          write(accessField.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
 
       } else if (_instruction instanceof I_ARRAYLENGTH) {
-         final AccessInstanceField child = (AccessInstanceField) _instruction.getFirstChild();
+
+         //getting the length of an array.
+         //if this is a primitive array, then this is trivial
+         //if we're getting an object array, then we need to find what dimension
+         //we're looking at
+         int dim = 0;
+         Instruction load = _instruction.getFirstChild();
+         while(load instanceof I_AALOAD) {
+             load = load.getFirstChild();
+             dim++;
+         }
+         final AccessInstanceField child = (AccessInstanceField) load;
          final String arrayName = child.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-         write("this->" + arrayName + arrayLengthMangleSuffix);
+         write("this->" + arrayName + arrayLengthMangleSuffix + dim);
       } else if (_instruction instanceof AssignToField) {
          final AssignToField assignedField = (AssignToField) _instruction;
 

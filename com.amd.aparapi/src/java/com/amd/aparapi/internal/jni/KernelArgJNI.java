@@ -48,6 +48,11 @@ public abstract class KernelArgJNI{
    @UsedByJNICode protected Object javaArray;
 
    /**
+    * If this field represents an aparapi buffer then the instance will be captured here
+    */
+   @UsedByJNICode protected Object javaBuffer;
+
+   /**
     * If this is an array or a buffer then the size (in bytes) is held here
     */
    @UsedByJNICode protected int sizeInBytes;
@@ -56,6 +61,18 @@ public abstract class KernelArgJNI{
     * If this is an array buffer then the number of elements is stored here
     */
    @UsedByJNICode protected int numElements;
+
+   
+   /**
+    * If this is an multidimensional array then the number of dimensions is stored here
+    */
+   @UsedByJNICode protected int numDims;
+
+
+   /**
+    * If this is an multidimensional array then the dimensions are stored here
+    */
+   @UsedByJNICode protected int[] dims;
 
    /**
     * If this is an array buffer then the number of elements is stored here.
@@ -68,6 +85,8 @@ public abstract class KernelArgJNI{
     * Only set for array objs, not used on JNI
     */
    @UsedByJNICode protected Object array;
+
+   @UsedByJNICode protected Object buffer;
 
    /**
     * Field in Kernel class corresponding to this arg

@@ -304,6 +304,8 @@ public abstract class KernelWriter extends BlockWriter{
 
          boolean isPointer = false;
 
+         int numDimensions = 0;
+
          // check the suffix 
          String type = field.getName().endsWith(Kernel.LOCAL_SUFFIX) ? __local
                : (field.getName().endsWith(Kernel.CONSTANT_SUFFIX) ? __constant : __global);
@@ -320,10 +322,15 @@ public abstract class KernelWriter extends BlockWriter{
             }
          }
 
-         if (signature.startsWith("[")) {
-            argLine.append(type + " ");
-            thisStructLine.append(type + " ");
+         //if we have a an array we want to mark the object as a pointer
+         //if we have a multiple dimensional array we want to remember the number of dimensions
+         while (signature.startsWith("[")) {
+            if(isPointer == false) {
+               argLine.append(type + " ");
+               thisStructLine.append(type + " ");
+            }
             isPointer = true;
+            numDimensions++;
             signature = signature.substring(1);
          }
 
@@ -362,23 +369,49 @@ public abstract class KernelWriter extends BlockWriter{
 
          // Add int field into "this" struct for supporting java arraylength op
          // named like foo__javaArrayLength
-         if (isPointer && _entryPoint.getArrayFieldArrayLengthUsed().contains(field.getName())) {
-            final StringBuilder lenStructLine = new StringBuilder();
-            final StringBuilder lenArgLine = new StringBuilder();
-            final StringBuilder lenAssignLine = new StringBuilder();
+         if (isPointer && _entryPoint.getArrayFieldArrayLengthUsed().contains(field.getName()) ||
+             isPointer && numDimensions > 1) {
+            
+            for(int i = 0; i < numDimensions; i++) {
+               final StringBuilder lenStructLine = new StringBuilder();
+               final StringBuilder lenArgLine = new StringBuilder();
+               final StringBuilder lenAssignLine = new StringBuilder();
+               final StringBuilder dimStructLine = new StringBuilder();
+               final StringBuilder dimArgLine = new StringBuilder();
+               final StringBuilder dimAssignLine = new StringBuilder();
 
-            lenStructLine.append("int " + field.getName() + BlockWriter.arrayLengthMangleSuffix);
+               String lenName = field.getName() + BlockWriter.arrayLengthMangleSuffix +
+                    Integer.toString(i);
 
-            lenAssignLine.append("this->");
-            lenAssignLine.append(field.getName() + BlockWriter.arrayLengthMangleSuffix);
-            lenAssignLine.append(" = ");
-            lenAssignLine.append(field.getName() + BlockWriter.arrayLengthMangleSuffix);
+               lenStructLine.append("int " + lenName);
 
-            lenArgLine.append("int " + field.getName() + BlockWriter.arrayLengthMangleSuffix);
+               lenAssignLine.append("this->");
+               lenAssignLine.append(lenName);
+               lenAssignLine.append(" = ");
+               lenAssignLine.append(lenName);
 
-            assigns.add(lenAssignLine.toString());
-            argLines.add(lenArgLine.toString());
-            thisStruct.add(lenStructLine.toString());
+               lenArgLine.append("int " + lenName);
+
+               assigns.add(lenAssignLine.toString());
+               argLines.add(lenArgLine.toString());
+               thisStruct.add(lenStructLine.toString());
+
+               String dimName = field.getName() + BlockWriter.arrayDimMangleSuffix +
+                    Integer.toString(i);
+
+               dimStructLine.append("int " + dimName);
+
+               dimAssignLine.append("this->");
+               dimAssignLine.append(dimName);
+               dimAssignLine.append(" = ");
+               dimAssignLine.append(dimName);
+
+               dimArgLine.append("int " + dimName);
+
+               assigns.add(dimAssignLine.toString());
+               argLines.add(dimArgLine.toString());
+               thisStruct.add(dimStructLine.toString());
+            }
          }
       }
 
@@ -653,9 +686,9 @@ public abstract class KernelWriter extends BlockWriter{
          openCLWriter.write(_entrypoint);
       } catch (final CodeGenException codeGenException) {
          throw codeGenException;
-      } catch (final Throwable t) {
+      }/* catch (final Throwable t) {
          throw new CodeGenException(t);
-      }
+      }*/
 
       return (openCLStringBuilder.toString());
    }

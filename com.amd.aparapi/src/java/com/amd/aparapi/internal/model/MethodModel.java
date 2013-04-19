@@ -1675,30 +1675,6 @@ public class MethodModel{
 
          foldExpressions();
 
-         // Attempt to detect accesses through multi-dimension arrays. 
-         // This was issue 10 in open source release http://code.google.com/p/aparapi/issues/detail?id=10
-         for (final Entry<Integer, Instruction> instructionEntry : pcMap.entrySet()) {
-            final Instruction instruction = instructionEntry.getValue();
-            if (instruction instanceof AccessArrayElement) {
-               final AccessArrayElement accessArrayElement = (AccessArrayElement) instruction;
-               final Instruction accessed = accessArrayElement.getArrayRef();
-               // System.out.println("accessed "+accessed);
-               if (accessed instanceof AccessArrayElement) {
-                  throw new ClassParseException(ClassParseException.TYPE.MULTIDIMENSIONARRAYACCESS);
-               }
-
-            }
-            if (instruction instanceof AssignToArrayElement) {
-               final AssignToArrayElement assignToArrayElement = (AssignToArrayElement) instruction;
-               final Instruction assigned = assignToArrayElement.getArrayRef();
-
-               // System.out.println("assigned "+assigned);
-               if (assigned instanceof AccessArrayElement) {
-                  throw new ClassParseException(ClassParseException.TYPE.MULTIDIMENSIONARRAYASSIGN);
-               }
-
-            }
-         }
          // Accessor conversion only works on member object arrays
          if ((entrypoint != null) && (_method.getClassModel() != entrypoint.getClassModel())) {
             if (logger.isLoggable(Level.FINE)) {
