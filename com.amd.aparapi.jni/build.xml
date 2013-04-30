@@ -36,7 +36,6 @@ First consider editing the properties in build.properties
          </and>
       </condition>
 
-
       <available property="win64.amd.app.sdk.exists" file="C:/Program Files (x86)/AMD APP" type="dir"/>
       <condition property="amd.app.sdk.dir" value="C:/Program Files (x86)/AMD APP">
          <and>
@@ -47,7 +46,6 @@ First consider editing the properties in build.properties
             </not>
          </and>
       </condition>
-
 
       <available property="linux.amd.app.sdk.exists" file="/opt/AMDAPP" type="dir"/>
       <condition property="amd.app.sdk.dir" value="/opt/AMDAPP">
@@ -68,8 +66,11 @@ First consider editing the properties in build.properties
 
       <echo message=" amd.app.sdk.dir ${amd.app.sdk.dir}"/>
 
-      <available property="msvc.64.9.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 10.0\vc\bin" type="dir"/>
-      <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 10.0">
+	  <!-- Check for Visual Studio -->
+	  <!-- This needs to be in descending order to properly handle multiple installations -->
+	  
+      <available property="msvc.32.11.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 11.0\VC\bin" type="dir"/>
+      <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 11.0">
          <and>
             <not>
                <or>
@@ -78,7 +79,7 @@ First consider editing the properties in build.properties
                </or>
             </not>
             <os family="windows" />
-            <isset property="msvc.64.9.0.exists" />
+            <isset property="msvc.32.11.0.exists" />
             <not>
                <isset property="msvc.dir" />
             </not>
@@ -87,16 +88,14 @@ First consider editing the properties in build.properties
             </not>
          </and>
       </condition>
-
-      <available property="msvc.64.10.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 10.0\vc\bin" type="dir"/>
-      <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 10.0">
+      
+      <available property="msvc.64.10.0.exists" file="c:/Program Files/Microsoft Visual Studio 10.0\vc\bin" type="dir"/>
+      <condition property="msvc.dir" value="c:/Program Files/Microsoft Visual Studio 10.0">
          <and>
-            <not>
-               <or>
-                  <os arch="x86" />
-                  <os arch="i386" />
-               </or>
-            </not>
+            <or>
+               <os arch="x86" />
+               <os arch="i386" />
+            </or>
             <os family="windows" />
             <isset property="msvc.64.10.0.exists" />
             <not>
@@ -107,14 +106,16 @@ First consider editing the properties in build.properties
             </not>
          </and>
       </condition>
-
-      <available property="msvc.32.10.0.exists" file="c:/Program Files/Microsoft Visual Studio 10.0\vc\bin" type="dir"/>
-      <condition property="msvc.dir" value="c:/Program Files/Microsoft Visual Studio 10.0">
+      
+      <available property="msvc.32.10.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 10.0\vc\bin" type="dir"/>
+      <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 10.0">
          <and>
-            <or>
-               <os arch="x86" />
-               <os arch="i386" />
-            </or>
+            <not>
+               <or>
+                  <os arch="x86" />
+                  <os arch="i386" />
+               </or>
+            </not>
             <os family="windows" />
             <isset property="msvc.32.10.0.exists" />
             <not>
@@ -125,7 +126,7 @@ First consider editing the properties in build.properties
             </not>
          </and>
       </condition>
-
+      
       <available property="msvc.32.9.0.exists" file="c:/Program Files/Microsoft Visual Studio 9.0\vc\bin" type="dir"/>
       <condition property="msvc.dir" value="c:/Program Files/Microsoft Visual Studio 9.0">
          <and>
@@ -144,6 +145,65 @@ First consider editing the properties in build.properties
          </and>
       </condition>
 
+	  <!-- Check for SDKs -->
+	  <!-- This needs to be in descending order to properly handle multiple installations -->
+	  
+      <!-- <available property="msvc.sdk.8.0A.32.exists" file="C:/Program Files (x86)/Microsoft SDKs/Windows/v8.0A" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files (x86)/Microsoft SDKs/Windows/v8.0A">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.8.0A.32.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
+         </and>
+      </condition>
+      
+      <available property="msvc.sdk.8.0.32.exists" file="C:/Program Files (x86)/Microsoft SDKs/Windows/v8.0" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files (x86)/Microsoft SDKs/Windows/v8.0">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.8.0.32.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
+         </and>
+      </condition> -->
+      
+      <available property="msvc.sdk.7.1A.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.1A" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v7.1A">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.7.1A.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
+         </and>
+      </condition>
+      
+      <available property="msvc.sdk.7.1A.32.exists" file="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.7.1A.32.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
+         </and>
+      </condition>
+      
       <available property="msvc.sdk.7.1.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.1" type="dir"/>
       <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v7.1">
          <and>
@@ -158,25 +218,11 @@ First consider editing the properties in build.properties
          </and>
       </condition>
 
-      <available property="msvc.sdk.7.0.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.0" type="dir"/>
-      <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v7.0">
+	  <available property="msvc.sdk.7.1.32.exists" file="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1">
          <and>
             <os family="windows" />
-            <isset property="msvc.sdk.7.0.exists" />
-            <not>
-               <isset property="msvc.sdk.dir" />
-            </not>
-            <not>
-               <isset property="mingw.dir" />
-            </not>
-         </and>
-      </condition>
-
-      <available property="msvc.sdk.6.0A.exists" file="C:/Program Files/Microsoft SDKs/Windows/v6.0A" type="dir"/>
-      <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v6.0A">
-         <and>
-            <os family="windows" />
-            <isset property="msvc.sdk.6.0A.exists" />
+            <isset property="msvc.sdk.7.1.32.exists" />
             <not>
                <isset property="msvc.sdk.dir" />
             </not>
@@ -205,6 +251,34 @@ First consider editing the properties in build.properties
          <and>
             <os family="windows" />
             <isset property="msvc.sdk.7.0A.32.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
+         </and>
+      </condition>
+      
+      <available property="msvc.sdk.7.0.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.0" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v7.0">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.7.0.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
+         </and>
+      </condition>
+
+      <available property="msvc.sdk.6.0A.exists" file="C:/Program Files/Microsoft SDKs/Windows/v6.0A" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v6.0A">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.6.0A.exists" />
             <not>
                <isset property="msvc.sdk.dir" />
             </not>
