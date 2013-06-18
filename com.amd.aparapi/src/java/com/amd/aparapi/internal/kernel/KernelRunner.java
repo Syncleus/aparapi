@@ -48,13 +48,17 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.amd.aparapi.Config;
 import com.amd.aparapi.Kernel;
+import com.amd.aparapi.Kernel.Constant;
 import com.amd.aparapi.Kernel.EXECUTION_MODE;
 import com.amd.aparapi.Kernel.KernelState;
+import com.amd.aparapi.Kernel.Local;
 import com.amd.aparapi.ProfileInfo;
 import com.amd.aparapi.Range;
 import com.amd.aparapi.device.Device;
@@ -68,8 +72,6 @@ import com.amd.aparapi.internal.model.Entrypoint;
 import com.amd.aparapi.internal.util.UnsafeWrapper;
 import com.amd.aparapi.internal.writer.KernelWriter;
 import com.amd.aparapi.opencl.OpenCL;
-import com.amd.aparapi.opencl.OpenCL.Constant;
-import com.amd.aparapi.opencl.OpenCL.Local;
 
 /**
  * The class is responsible for executing <code>Kernel</code> implementations. <br/>
@@ -98,7 +100,8 @@ public class KernelRunner extends KernelRunnerJNI{
    private Entrypoint entryPoint;
 
    private int argc;
-
+   
+   private final ExecutorService threadPool = Executors.newCachedThreadPool();
    /**
     * Create a KernelRunner for a specific Kernel instance.
     * 
@@ -117,6 +120,7 @@ public class KernelRunner extends KernelRunnerJNI{
       if (kernel.getExecutionMode().isOpenCL()) {
          disposeJNI(jniContextHandle);
       }
+      threadPool.shutdownNow();
    }
 
    private Set<String> capabilitiesSet;
@@ -287,7 +291,6 @@ public class KernelRunner extends KernelRunnerJNI{
       } else {
          final int threads = _range.getLocalSize(0) * _range.getLocalSize(1) * _range.getLocalSize(2);
          final int globalGroups = _range.getNumGroups(0) * _range.getNumGroups(1) * _range.getNumGroups(2);
-         final Thread threadArray[] = new Thread[threads];
          /**
           * This joinBarrier is the barrier that we provide for the kernel threads to rendezvous with the current dispatch thread.
           * So this barrier is threadCount+1 wide (the +1 is for the dispatch thread)
@@ -354,7 +357,7 @@ public class KernelRunner extends KernelRunnerJNI{
                kernelState.setLocalBarrier(localBarrier);
                kernelState.setPassId(passId);
 
-               threadArray[threadId] = new Thread(new Runnable(){
+               threadPool.submit(new Runnable(){
                   @Override public void run() {
                      for (int globalGroupId = 0; globalGroupId < globalGroups; globalGroupId++) {
 
@@ -478,9 +481,6 @@ public class KernelRunner extends KernelRunnerJNI{
                      await(joinBarrier); // This thread will rendezvous with dispatch thread here. This is effectively a join.                  
                   }
                });
-
-               threadArray[threadId].setName("aparapi-" + threadId + "/" + threads);
-               threadArray[threadId].start();
             }
 
             await(joinBarrier); // This dispatch thread waits for all worker threads here. 

@@ -349,8 +349,8 @@ void updateArray(JNIEnv* jenv, JNIContext* jniContext, KernelArg* arg, int& argP
       if (mask & CL_MEM_READ_ONLY) strcat(arg->arrayBuffer->memSpec,"|CL_MEM_READ_ONLY");
       if (mask & CL_MEM_WRITE_ONLY) strcat(arg->arrayBuffer->memSpec,"|CL_MEM_WRITE_ONLY");
 
-      fprintf(stderr, "%s %d clCreateBuffer(context, %s, size=%08lx bytes, address=%08lx, &status)\n", arg->name, 
-            argIdx, arg->arrayBuffer->memSpec, (unsigned long)arg->arrayBuffer->lengthInBytes, (unsigned long)arg->arrayBuffer->addr);
+      fprintf(stderr, "%s %d clCreateBuffer(context, %s, size=%08lx bytes, address=%p, &status)\n", arg->name, 
+            argIdx, arg->arrayBuffer->memSpec, (unsigned long)arg->arrayBuffer->lengthInBytes, arg->arrayBuffer->addr);
    }
 
    arg->arrayBuffer->mem = clCreateBuffer(jniContext->context, arg->arrayBuffer->memMask, 
@@ -459,11 +459,12 @@ void processArray(JNIEnv* jenv, JNIContext* jniContext, KernelArg* arg, int& arg
    arg->pin(jenv);
 
    if (config->isVerbose()) {
-      fprintf(stderr, "runKernel: arrayOrBuf ref %p, oldAddr=%p, newAddr=%p, ref.mem=%p\n",
+      fprintf(stderr, "runKernel: arrayOrBuf ref %p, oldAddr=%p, newAddr=%p, ref.mem=%p isCopy=%s\n",
             arg->arrayBuffer->javaArray, 
             prevAddr,
             arg->arrayBuffer->addr,
-            arg->arrayBuffer->mem);
+            arg->arrayBuffer->mem,
+            arg->arrayBuffer->isCopy ? "true" : "false");
       fprintf(stderr, "at memory addr %p, contents: ", arg->arrayBuffer->addr);
       unsigned char *pb = (unsigned char *) arg->arrayBuffer->addr;
       for (int k=0; k<8; k++) {
@@ -717,7 +718,7 @@ int processArgs(JNIEnv* jenv, JNIContext* jniContext, int& argPos, int& writeEve
       if (!arg->isPrimitive() && !arg->isLocal()) {
           processObject(jenv, jniContext, arg, argPos, argIdx);
 
-          if (arg->needToEnqueueWrite() && !arg->isConstant()) {
+          if (arg->needToEnqueueWrite() && (!arg->isConstant() || arg->isExplicitWrite())) {
               if (config->isVerbose()) {
                   fprintf(stderr, "%swriting %s%sbuffer argIndex=%d argPos=%d %s\n",  
                         (arg->isExplicit() ? "explicitly " : ""), 
@@ -810,9 +811,9 @@ void enqueueKernel(JNIContext* jniContext, Range& range, int passes, int argPos,
       // we don't block but and we populate the executeEvents
       if (passid == 0) {
 
-         int writeCount = writeEventCount;
+         writeCount = writeEventCount;
          if(writeEventCount > 0) {
-            cl_event* writeEvents = jniContext->writeEvents;
+            writeEvents = jniContext->writeEvents;
          }
 
       // we are in some passid > 0 pass 
@@ -821,7 +822,7 @@ void enqueueKernel(JNIContext* jniContext, Range& range, int passes, int argPos,
       // we block and do supply executeEvents 
       } else {
          //fprintf(stderr, "setting passid to %d of %d not first not last\n", passid, passes);
-
+         
          status = clWaitForEvents(1, &jniContext->executeEvents[0]);
          if (status != CL_SUCCESS) throw CLException(status, "clWaitForEvents() execute event");
 
@@ -1005,7 +1006,7 @@ void checkEvents(JNIEnv* jenv, JNIContext* jniContext, int writeEventCount) {
 
    status = clGetEventInfo(jniContext->executeEvents[0], CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(cl_int), &executeStatus, NULL);
    if (status != CL_SUCCESS) throw CLException(status, "clGetEventInfo() execute event");
-   if (executeStatus != CL_SUCCESS) throw CLException(executeStatus, "Execution status of execute event");
+   if (executeStatus != CL_COMPLETE) throw CLException(executeStatus, "Execution status of execute event");
 
    status = clReleaseEvent(jniContext->executeEvents[0]);
    if (status != CL_SUCCESS) throw CLException(status, "clReleaseEvent() read event");
@@ -1148,7 +1149,7 @@ void writeProfile(JNIEnv* jenv, JNIContext* jniContext) {
    jint pid = getProcess();
 
    //sprintf(fnameStr, "%s.%s.%d.%llx\n", classNameChars, timeStr, pid, jniContext);
-   sprintf(fnameStr, "aparapiprof.%s.%d.%016lx", timeStr, pid, (unsigned long)jniContext);
+   sprintf(fnameStr, "aparapiprof.%s.%d.%p", timeStr, pid, jniContext);
    jenv->ReleaseStringUTFChars(className, classNameChars);
 
    FILE* profileFile = fopen(fnameStr, "w");
@@ -1353,8 +1354,8 @@ JNI_JAVA(jint, KernelRunnerJNI, getJNI)
                                                arg->arrayBuffer->addr , 0, NULL, 
                                                &jniContext->readEvents[0]);
                   if (config->isVerbose()){
-                     fprintf(stderr, "explicitly read %s ptr=%lx len=%d\n", 
-                             arg->name, (unsigned long)arg->arrayBuffer->addr, 
+                     fprintf(stderr, "explicitly read %s ptr=%p len=%d\n", 
+                             arg->name, arg->arrayBuffer->addr, 
                              arg->arrayBuffer->lengthInBytes );
                   }
                   if (status != CL_SUCCESS) throw CLException(status, "clEnqueueReadBuffer()");
@@ -1389,8 +1390,8 @@ JNI_JAVA(jint, KernelRunnerJNI, getJNI)
                                                arg->aparapiBuffer->data, 0, NULL, 
                                                &jniContext->readEvents[0]);
                   if (config->isVerbose()){
-                     fprintf(stderr, "explicitly read %s ptr=%lx len=%d\n", 
-                             arg->name, (unsigned long)arg->aparapiBuffer->data, 
+                     fprintf(stderr, "explicitly read %s ptr=%p len=%d\n", 
+                             arg->name, arg->aparapiBuffer->data, 
                              arg->aparapiBuffer->lengthInBytes );
                   }
                   if (status != CL_SUCCESS) throw CLException(status, "clEnqueueReadBuffer()");
