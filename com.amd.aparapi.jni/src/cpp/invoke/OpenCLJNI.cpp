@@ -250,6 +250,34 @@ void getArg(JNIEnv *jenv, cl_context context, cl_command_queue commandQueue, cl_
    }
 }
 
+JNI_JAVA(void, OpenCLJNI, dispose)
+   (JNIEnv *jenv, jobject jobj, jobject kernelInstance) {
+      cl_kernel kernel = OpenCLKernel::getKernel(jenv, kernelInstance);
+      jobject programInstance = OpenCLKernel::getProgramInstance(jenv, kernelInstance);
+      jobjectArray argDefsArray = OpenCLKernel::getArgsArray(jenv, kernelInstance);
+
+
+      cl_context context = OpenCLProgram::getContext(jenv, programInstance);
+      cl_command_queue commandQueue = OpenCLProgram::getCommandQueue(jenv, programInstance);
+      jsize argc = jenv->GetArrayLength(argDefsArray);
+      fprintf(stderr, "dispose! argc = %d\n", argc);
+      for (jsize argIndex = 0; argIndex < argc; argIndex++){
+         jobject argDef = jenv->GetObjectArrayElement(argDefsArray, argIndex);
+         jlong argBits = OpenCLArgDescriptor::getBits(jenv, argDef);
+         if (argisset(argBits, ARRAY) && argisset(argBits, GLOBAL)){
+            jobject memInstance = OpenCLArgDescriptor::getMemInstance(jenv, argDef);
+            if (memInstance == NULL){
+               fprintf(stderr, "mem instance not set\n");
+            }else{
+               cl_mem mem = OpenCLMem::getMem(jenv, memInstance);
+               size_t sizeInBytes = OpenCLMem::getSizeInBytes(jenv, memInstance);
+               cl_int status = clReleaseMemObject(mem); 
+               fprintf(stderr, "mem instance %d released!\n", sizeInBytes);
+            }
+         }
+      }
+   }
+
 /**
  */
 JNI_JAVA(void, OpenCLJNI, invoke)

@@ -22,6 +22,8 @@ public abstract class OpenCLJNI{
 
    protected native void invoke(OpenCLKernel openCLKernel, Object[] args);
 
+   protected native void dispose(OpenCLKernel openCLKernel);
+
    protected native void remap(OpenCLProgram program, OpenCLMem mem, long address);
 
    protected native byte[] getBytes(String className);

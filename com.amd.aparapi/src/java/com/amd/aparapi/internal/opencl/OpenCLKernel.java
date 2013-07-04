@@ -56,4 +56,8 @@ public class OpenCLKernel extends OpenCLJNI{
    public void invoke(Object[] _args) {
       invoke(this, _args);
    }
+
+   public void dispose(){
+       dispose(this);
+   }
 }

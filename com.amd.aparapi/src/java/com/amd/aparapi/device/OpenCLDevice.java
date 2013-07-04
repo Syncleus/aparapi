@@ -167,7 +167,14 @@ public class OpenCLDevice extends Device{
             } else if (method.getName().equals("begin")) {
                System.out.println("begin not implemented");
             } else if (method.getName().equals("dispose")) {
-               System.out.println("dispose not implemented");
+               System.out.println("dispose");
+               for (OpenCLKernel k:map.values()){
+                   k.dispose();
+               }
+              // args =  map.get(method.getName());
+              // for (OpenCLArgDescriptor argDescriptor:args){
+
+              // }
             } else if (method.getName().equals("end")) {
                System.out.println("end not implemented");
             }

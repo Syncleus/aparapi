@@ -69,6 +69,8 @@ public class SquareExample{
          for (int i = 0; i < size; i++) {
             System.out.println(in[i] + " " + squares[i] + " " + quads[i]);
          }
+
+         squarer.dispose();
       }
    }
 }
