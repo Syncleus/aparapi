@@ -104,4 +104,6 @@ public interface OpenCL<T> {
    public T begin();
 
    public T end();
+
+   public T dispose();
 }

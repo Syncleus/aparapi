@@ -118,6 +118,7 @@ public class OpenCLDevice extends Device{
             }
          } else {
             if (method.getName().equals("put")) {
+               System.out.println("put not implemented");
 
                /*
                for (Object arg : args) {
@@ -141,6 +142,7 @@ public class OpenCLDevice extends Device{
                }
                */
             } else if (method.getName().equals("get")) {
+               System.out.println("get not implemented");
                /*
                for (Object arg : args) {
                   Class<?> argClass = arg.getClass();
@@ -163,7 +165,11 @@ public class OpenCLDevice extends Device{
                }
                */
             } else if (method.getName().equals("begin")) {
+               System.out.println("begin not implemented");
+            } else if (method.getName().equals("dispose")) {
+               System.out.println("dispose not implemented");
             } else if (method.getName().equals("end")) {
+               System.out.println("end not implemented");
             }
          }
          return proxy;
@@ -248,8 +254,11 @@ public class OpenCLDevice extends Device{
    }
 
    private static boolean isReservedInterfaceMethod(Method _methods) {
-      return (_methods.getName().equals("put") || _methods.getName().equals("get") || _methods.getName().equals("begin") || _methods
-            .getName().equals("begin"));
+      return (   _methods.getName().equals("put")
+              || _methods.getName().equals("get")
+              || _methods.getName().equals("dispose")
+              || _methods.getName().equals("begin")
+              || _methods.getName().equals("end"));
    }
 
    private String streamToString(InputStream _inputStream) {

@@ -66,4 +66,8 @@ public class OpenCLAdapter<T> implements OpenCL<T>{
       return ((T) this);
    }
 
+   @SuppressWarnings("unchecked") public T dispose() {
+      return ((T) this);
+   }
+
 }
