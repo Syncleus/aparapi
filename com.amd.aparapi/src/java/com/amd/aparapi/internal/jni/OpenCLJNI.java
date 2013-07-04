@@ -22,7 +22,9 @@ public abstract class OpenCLJNI{
 
    protected native void invoke(OpenCLKernel openCLKernel, Object[] args);
 
-   protected native void dispose(OpenCLKernel openCLKernel);
+   protected native void disposeKernel(OpenCLKernel openCLKernel);
+
+   protected native void disposeProgram(OpenCLProgram openCLProgram);
 
    protected native void remap(OpenCLProgram program, OpenCLMem mem, long address);
 

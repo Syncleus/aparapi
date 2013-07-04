@@ -57,20 +57,23 @@ public class SquareExample{
       if (device instanceof OpenCLDevice) {
          final OpenCLDevice openclDevice = (OpenCLDevice) device;
 
+         for (int l=0; l<1000; l++){
+
          final SquarerWithResource squarer = openclDevice.bind(SquarerWithResource.class);
          squarer.square(range, in, squares);
 
          for (int i = 0; i < size; i++) {
-            System.out.println(in[i] + " " + squares[i]);
+            System.out.println(l+" "+in[i] + " " + squares[i]);
          }
 
-         squarer.square(range, squares, quads);
+        // squarer.square(range, squares, quads);
 
-         for (int i = 0; i < size; i++) {
-            System.out.println(in[i] + " " + squares[i] + " " + quads[i]);
-         }
+        // for (int i = 0; i < size; i++) {
+         //   System.out.println(l+" "+ in[i] + " " + squares[i] + " " + quads[i]);
+         //}
 
          squarer.dispose();
+         }
       }
    }
 }

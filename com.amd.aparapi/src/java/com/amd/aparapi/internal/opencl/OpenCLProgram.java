@@ -84,4 +84,8 @@ public class OpenCLProgram extends OpenCLJNI{
       addressToMem.remove(_oldAddress);
       addressToMem.put(_address, _mem);
    }
+
+   public void dispose(){
+       disposeProgram(this);
+   }
 }

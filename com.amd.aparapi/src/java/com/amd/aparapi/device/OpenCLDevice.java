@@ -104,13 +104,17 @@ public class OpenCLDevice extends Device{
       private final Map<String, OpenCLKernel> map;
 
       private final OpenCLProgram program;
-
+      private boolean disposed = false;
       public OpenCLInvocationHandler(OpenCLProgram _program, Map<String, OpenCLKernel> _map) {
          program = _program;
          map = _map;
+         disposed = false;
       }
 
       @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+         if (disposed){
+            throw new IllegalStateException("bound interface already disposed");
+         }
          if (!isReservedInterfaceMethod(method)) {
             final OpenCLKernel kernel = map.get(method.getName());
             if (kernel != null) {
@@ -171,10 +175,9 @@ public class OpenCLDevice extends Device{
                for (OpenCLKernel k:map.values()){
                    k.dispose();
                }
-              // args =  map.get(method.getName());
-              // for (OpenCLArgDescriptor argDescriptor:args){
-
-              // }
+               program.dispose();
+               map.clear();
+               disposed=true;
             } else if (method.getName().equals("end")) {
                System.out.println("end not implemented");
             }

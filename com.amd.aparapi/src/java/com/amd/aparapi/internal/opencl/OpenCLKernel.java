@@ -58,6 +58,6 @@ public class OpenCLKernel extends OpenCLJNI{
    }
 
    public void dispose(){
-       dispose(this);
+       disposeKernel(this);
    }
 }

@@ -250,7 +250,14 @@ void getArg(JNIEnv *jenv, cl_context context, cl_command_queue commandQueue, cl_
    }
 }
 
-JNI_JAVA(void, OpenCLJNI, dispose)
+JNI_JAVA(void, OpenCLJNI, disposeProgram)
+   (JNIEnv *jenv, jobject jobj, jobject programInstance) {
+      fprintf(stderr, "dispose program \n");
+      cl_program program = OpenCLProgram::getProgram(jenv, programInstance);
+      clReleaseProgram(program);
+}
+
+JNI_JAVA(void, OpenCLJNI, disposeKernel)
    (JNIEnv *jenv, jobject jobj, jobject kernelInstance) {
       cl_kernel kernel = OpenCLKernel::getKernel(jenv, kernelInstance);
       jobject programInstance = OpenCLKernel::getProgramInstance(jenv, kernelInstance);
@@ -276,6 +283,7 @@ JNI_JAVA(void, OpenCLJNI, dispose)
             }
          }
       }
+      clReleaseKernel(kernel);
    }
 
 /**
