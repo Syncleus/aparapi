@@ -274,10 +274,10 @@ public class Range extends RangeJNI{
     * Note that for this range to be valid  <code>_globalWidth > 0 &&  _globalHeight >0 _globalDepth >0 && _localWidth>0 && _localHeight>0 && _localDepth>0 && _localWidth*_localHeight*_localDepth < MAX_GROUP_SIZE && _globalWidth%_localWidth==0 && _globalHeight%_localHeight==0 && _globalDepth%_localDepth==0</code>.
     * 
     * @param _globalWidth the width of the 3D grid we wish to process
-    * @param _globalHieght the height of the 3D grid we wish to process
+    * @param _globalHeight the height of the 3D grid we wish to process
     * @param _globalDepth the depth of the 3D grid we wish to process
     * @param _localWidth the width of the 3D group we wish to process
-    * @param _localHieght the height of the 3D group we wish to process
+    * @param _localHeight the height of the 3D group we wish to process
     * @param _localDepth the depth of the 3D group we wish to process
     * @return
     */
@@ -407,8 +407,8 @@ public class Range extends RangeJNI{
                   + localSize_0 + "x" + localSize_1 + ")");
             break;
          case 3:
-            sb.append("3D(global:" + globalSize_0 + "x" + globalSize_1 + "x" + globalSize_2 + " local:"
-                  + (localIsDerived ? "(derived)" : "") + localSize_0 + "x" + localSize_1 + "x" + localSize_0 + ")");
+             sb.append("3D(global:" + globalSize_0 + "x" + globalSize_1 + "x" + globalSize_2 + " local:"
+                  + (localIsDerived ? "(derived)" : "") + localSize_0 + "x" + localSize_1 + "x" + localSize_2 + ")");
             break;
       }
 

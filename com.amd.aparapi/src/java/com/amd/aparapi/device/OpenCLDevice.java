@@ -171,7 +171,7 @@ public class OpenCLDevice extends Device{
             } else if (method.getName().equals("begin")) {
                System.out.println("begin not implemented");
             } else if (method.getName().equals("dispose")) {
-               System.out.println("dispose");
+              // System.out.println("dispose");
                for (OpenCLKernel k:map.values()){
                    k.dispose();
                }

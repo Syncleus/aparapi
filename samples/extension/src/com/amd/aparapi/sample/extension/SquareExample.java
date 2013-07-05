@@ -66,11 +66,11 @@ public class SquareExample{
             System.out.println(l+" "+in[i] + " " + squares[i]);
          }
 
-        // squarer.square(range, squares, quads);
+         squarer.square(range, squares, quads);
 
-        // for (int i = 0; i < size; i++) {
-         //   System.out.println(l+" "+ in[i] + " " + squares[i] + " " + quads[i]);
-         //}
+         for (int i = 0; i < size; i++) {
+            System.out.println(l+" "+ in[i] + " " + squares[i] + " " + quads[i]);
+         }
 
          squarer.dispose();
          }
