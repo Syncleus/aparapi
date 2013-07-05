@@ -252,9 +252,13 @@ void getArg(JNIEnv *jenv, cl_context context, cl_command_queue commandQueue, cl_
 
 JNI_JAVA(void, OpenCLJNI, disposeProgram)
    (JNIEnv *jenv, jobject jobj, jobject programInstance) {
-      fprintf(stderr, "dispose program \n");
+      //fprintf(stderr, "dispose program \n");
       cl_program program = OpenCLProgram::getProgram(jenv, programInstance);
       clReleaseProgram(program);
+      cl_command_queue commandQueue = OpenCLProgram::getCommandQueue(jenv, programInstance);
+      clReleaseCommandQueue(commandQueue);
+      cl_context context = OpenCLProgram::getContext(jenv, programInstance);
+      clReleaseContext(context);
 }
 
 JNI_JAVA(void, OpenCLJNI, disposeKernel)
@@ -267,7 +271,7 @@ JNI_JAVA(void, OpenCLJNI, disposeKernel)
       cl_context context = OpenCLProgram::getContext(jenv, programInstance);
       cl_command_queue commandQueue = OpenCLProgram::getCommandQueue(jenv, programInstance);
       jsize argc = jenv->GetArrayLength(argDefsArray);
-      fprintf(stderr, "dispose! argc = %d\n", argc);
+      //fprintf(stderr, "dispose! argc = %d\n", argc);
       for (jsize argIndex = 0; argIndex < argc; argIndex++){
          jobject argDef = jenv->GetObjectArrayElement(argDefsArray, argIndex);
          jlong argBits = OpenCLArgDescriptor::getBits(jenv, argDef);
@@ -279,7 +283,7 @@ JNI_JAVA(void, OpenCLJNI, disposeKernel)
                cl_mem mem = OpenCLMem::getMem(jenv, memInstance);
                size_t sizeInBytes = OpenCLMem::getSizeInBytes(jenv, memInstance);
                cl_int status = clReleaseMemObject(mem); 
-               fprintf(stderr, "mem instance %d released!\n", sizeInBytes);
+               //fprintf(stderr, "mem instance %d released!\n", sizeInBytes);
             }
          }
       }
@@ -365,6 +369,9 @@ JNI_JAVA(void, OpenCLJNI, invoke)
          getArg(jenv, context, commandQueue, events, &eventc, argIndex, argDef, arg);
       }
       status = clWaitForEvents(eventc, events);
+      for (int i=0;i<eventc; i++){
+        clReleaseEvent(events[i]);
+      }
       if (status != CL_SUCCESS) {
          fprintf(stderr, "error waiting for events !\n");
       }
