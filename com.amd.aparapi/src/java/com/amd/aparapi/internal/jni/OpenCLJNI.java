@@ -1,5 +1,6 @@
 package com.amd.aparapi.internal.jni;
 
+import com.amd.aparapi.ProfileInfo;
 import java.util.List;
 
 import com.amd.aparapi.device.OpenCLDevice;
@@ -25,6 +26,8 @@ public abstract class OpenCLJNI{
    protected native void disposeKernel(OpenCLKernel openCLKernel);
 
    protected native void disposeProgram(OpenCLProgram openCLProgram);
+
+   protected native List<ProfileInfo> getProfileInfo(OpenCLProgram openCLProgram);
 
    protected native void remap(OpenCLProgram program, OpenCLMem mem, long address);
 

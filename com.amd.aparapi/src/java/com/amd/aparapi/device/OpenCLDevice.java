@@ -1,5 +1,6 @@
 package com.amd.aparapi.device;
 
+import com.amd.aparapi.ProfileInfo;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -180,6 +181,12 @@ public class OpenCLDevice extends Device{
                disposed=true;
             } else if (method.getName().equals("end")) {
                System.out.println("end not implemented");
+            }  else if (method.getName().equals("getProfileInfo")){
+                  //  public List<ProfileInfo> getProfileInfo() {
+                  //  return (kernelRunner.getProfileInfo());
+                  // }
+               System.out.println("get profile info");
+               proxy = (Object)program.getProfileInfo();
             }
          }
          return proxy;
@@ -268,7 +275,8 @@ public class OpenCLDevice extends Device{
               || _methods.getName().equals("get")
               || _methods.getName().equals("dispose")
               || _methods.getName().equals("begin")
-              || _methods.getName().equals("end"));
+              || _methods.getName().equals("end")
+              || _methods.getName().equals("getProfileInfo"));
    }
 
    private String streamToString(InputStream _inputStream) {

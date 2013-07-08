@@ -1,9 +1,11 @@
 package com.amd.aparapi.opencl;
 
+import com.amd.aparapi.ProfileInfo;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.List;
 
 public interface OpenCL<T> {
 
@@ -106,4 +108,6 @@ public interface OpenCL<T> {
    public T end();
 
    public T dispose();
+
+   public List<ProfileInfo> getProfileInfo();
 }

@@ -1,5 +1,9 @@
 package com.amd.aparapi.opencl;
 
+import com.amd.aparapi.ProfileInfo;
+import java.util.ArrayList;
+import java.util.List;
+
 public class OpenCLAdapter<T> implements OpenCL<T>{
 
    @SuppressWarnings("unchecked") public T put(byte[] array) {
@@ -68,6 +72,10 @@ public class OpenCLAdapter<T> implements OpenCL<T>{
 
    @SuppressWarnings("unchecked") public T dispose() {
       return ((T) this);
+   }
+
+   public List<ProfileInfo> getProfileInfo(){
+       return(new ArrayList<ProfileInfo>());
    }
 
 }

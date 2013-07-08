@@ -1,11 +1,13 @@
 package com.amd.aparapi.sample.extension;
 
+import com.amd.aparapi.ProfileInfo;
 import com.amd.aparapi.Range;
 import com.amd.aparapi.device.Device;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.opencl.OpenCL;
 import com.amd.aparapi.opencl.OpenCL.Resource;
 import com.amd.aparapi.opencl.OpenCL.Source;
+import java.util.List;
 
 public class SquareExample{
 
@@ -57,7 +59,7 @@ public class SquareExample{
       if (device instanceof OpenCLDevice) {
          final OpenCLDevice openclDevice = (OpenCLDevice) device;
 
-         for (int l=0; l<1000; l++){
+         for (int l=0; l<5; l++){
 
          final SquarerWithResource squarer = openclDevice.bind(SquarerWithResource.class);
          squarer.square(range, in, squares);
@@ -71,8 +73,12 @@ public class SquareExample{
          for (int i = 0; i < size; i++) {
             System.out.println(l+" "+ in[i] + " " + squares[i] + " " + quads[i]);
          }
-
+         List<ProfileInfo> profileInfo  =squarer.getProfileInfo();
+            for (ProfileInfo pi:profileInfo){
+               System.out.println("whooo");
+            }
          squarer.dispose();
+
          }
       }
    }

@@ -1,6 +1,8 @@
 package com.amd.aparapi.internal.opencl;
 
+import com.amd.aparapi.ProfileInfo;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.amd.aparapi.device.OpenCLDevice;
@@ -87,5 +89,9 @@ public class OpenCLProgram extends OpenCLJNI{
 
    public void dispose(){
        disposeProgram(this);
+   }
+
+   public List<ProfileInfo> getProfileInfo(){
+      return(getProfileInfo(this));
    }
 }

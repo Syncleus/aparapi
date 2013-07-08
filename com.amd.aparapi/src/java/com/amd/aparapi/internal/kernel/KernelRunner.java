@@ -114,7 +114,7 @@ public class KernelRunner extends KernelRunnerJNI{
    /**
     * <code>Kernel.dispose()</code> delegates to <code>KernelRunner.dispose()</code> which delegates to <code>disposeJNI()</code> to actually close JNI data structures.<br/>
     * 
-    * @see KernelRunner#disposeJNI()
+    * @see KernelRunnerJNI#disposeJNI()
     */
    public void dispose() {
       if (kernel.getExecutionMode().isOpenCL()) {
@@ -218,7 +218,7 @@ public class KernelRunner extends KernelRunnerJNI{
    /**
     * Execute using a Java thread pool. Either because we were explicitly asked to do so, or because we 'fall back' after discovering an OpenCL issue.
     * 
-    * @param _globalSize
+    * @param _range
     *          The globalSize requested by the user (via <code>Kernel.execute(globalSize)</code>)
     * @param _passes
     *          The # of passes requested by the user (via <code>Kernel.execute(globalSize, passes)</code>). Note this is usually defaulted to 1 via <code>Kernel.execute(globalSize)</code>.

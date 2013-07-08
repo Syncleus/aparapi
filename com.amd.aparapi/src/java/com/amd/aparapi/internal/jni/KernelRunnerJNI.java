@@ -286,12 +286,11 @@ public abstract class KernelRunnerJNI{
     * synchronized to avoid race in clGetPlatformIDs() in OpenCL lib problem should fixed in some future OpenCL version
     * 
     * @param _kernel
+    * @param _device
     * @param _flags
-    * @param numProcessors
-    * @param maxJTPLocalSize
     * @return
     */
-   @DocMe protected native synchronized long initJNI(Kernel _kernel, OpenCLDevice device, int _flags);
+   @DocMe protected native synchronized long initJNI(Kernel _kernel, OpenCLDevice _device, int _flags);
 
    protected native int getJNI(long _jniContextHandle, Object _array);
 
@@ -304,14 +303,6 @@ public abstract class KernelRunnerJNI{
    protected native int disposeJNI(long _jniContextHandle);
 
    protected native String getExtensionsJNI(long _jniContextHandle);
-
-   // @Deprecated protected native int getMaxWorkGroupSizeJNI(long _jniContextHandle);
-
-   // @Deprecated protected native int getMaxWorkItemSizeJNI(long _jniContextHandle, int _index);
-
-   // @Deprecated protected native int getMaxComputeUnitsJNI(long _jniContextHandle);
-
-   // @Deprecated protected native int getMaxWorkItemDimensionsJNI(long _jniContextHandle);
 
    protected native synchronized List<ProfileInfo> getProfileInfoJNI(long _jniContextHandle);
 }

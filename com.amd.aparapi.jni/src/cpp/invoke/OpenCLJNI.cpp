@@ -250,6 +250,16 @@ void getArg(JNIEnv *jenv, cl_context context, cl_command_queue commandQueue, cl_
    }
 }
 
+JNI_JAVA(jobject, OpenCLJNI, getProfileInfo)
+   (JNIEnv *jenv, jobject jobj, jobject programInstance) {
+   jobject returnList = JNIHelper::createInstance(jenv, ArrayListClass, VoidReturn );
+   for (int i=0; i< 5; i++){
+      jobject writeProfileInfo = NULL;
+      JNIHelper::callVoid(jenv, returnList, "add", ArgsBooleanReturn(ObjectClassArg), writeProfileInfo);
+   }
+   return(returnList);
+}
+
 JNI_JAVA(void, OpenCLJNI, disposeProgram)
    (JNIEnv *jenv, jobject jobj, jobject programInstance) {
       //fprintf(stderr, "dispose program \n");
