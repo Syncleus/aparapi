@@ -55,15 +55,21 @@
 /**
  * calls either clEnqueueMarker or clEnqueueMarkerWithWaitList 
  * depending on the version of OpenCL installed.
- * conveiniece function so we don't have to have #ifdefs all over the code
+ * convenience function so we don't have to have #ifdefs all over the code
+ *
+ * Actually I backed this out (Gary) when issue #123 was reported.  This involved
+ * a build on a 1.2 compatible platform which failed on a platform with a 1.1 runtime. 
+ * Failed to link. 
+ * The answer is to set   -DCL_USE_DEPRECATED_OPENCL_1_1_APIS at compile time and *not* use 
+ * the CL_VERSION_1_2 ifdef.
  */
 int enqueueMarker(cl_command_queue commandQueue, cl_event* firstEvent) {
-#ifdef CL_VERSION_1_2
-   return clEnqueueMarkerWithWaitList(commandQueue, 0, NULL, firstEvent);
-#else
-   // this was deprecated in 1.1
+//#ifdef CL_VERSION_1_2
+//   return clEnqueueMarkerWithWaitList(commandQueue, 0, NULL, firstEvent);
+//#else
+   // this was deprecated in 1.1 make sure we use -DCL_USE_DEPRECATED_OPENCL_1_1_APIS
    return clEnqueueMarker(commandQueue, firstEvent);
-#endif
+//#endif
 }
 
 /**
