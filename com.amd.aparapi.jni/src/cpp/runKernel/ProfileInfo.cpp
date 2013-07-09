@@ -58,3 +58,4 @@ jobject ProfileInfo::createProfileInfoInstance(JNIEnv *jenv){
          ((jlong)submit));
    return(profileInstance);
 }
+

@@ -253,9 +253,12 @@ void getArg(JNIEnv *jenv, cl_context context, cl_command_queue commandQueue, cl_
 JNI_JAVA(jobject, OpenCLJNI, getProfileInfo)
    (JNIEnv *jenv, jobject jobj, jobject programInstance) {
    jobject returnList = JNIHelper::createInstance(jenv, ArrayListClass, VoidReturn );
-   for (int i=0; i< 5; i++){
-      jobject writeProfileInfo = NULL;
-      JNIHelper::callVoid(jenv, returnList, "add", ArgsBooleanReturn(ObjectClassArg), writeProfileInfo);
+   ProfileInfo **profileInfoArr = OpenCLProgram::getProfileInfo(jenv, programInstance);
+   if (profileInfoArr != NULL){
+      for (int i=0; profileInfoArr[i] != NULL; i++){
+         jobject writeProfileInfo = profileInfoArr[i]->createProfileInfoInstance(jenv);
+        JNIHelper::callVoid(jenv, returnList, "add", ArgsBooleanReturn(ObjectClassArg), writeProfileInfo);  
+      }
    }
    return(returnList);
 }
@@ -269,6 +272,14 @@ JNI_JAVA(void, OpenCLJNI, disposeProgram)
       clReleaseCommandQueue(commandQueue);
       cl_context context = OpenCLProgram::getContext(jenv, programInstance);
       clReleaseContext(context);
+   ProfileInfo **profileInfoArr = OpenCLProgram::getProfileInfo(jenv, programInstance);
+   if (profileInfoArr != NULL){
+      for (int i=0; profileInfoArr[i] != NULL; i++){
+          //fprintf(stdout, "removed prev profile %d\n", i);
+          delete profileInfoArr[i];
+      }
+      delete[] profileInfoArr;
+   }
 }
 
 JNI_JAVA(void, OpenCLJNI, disposeKernel)
@@ -299,6 +310,8 @@ JNI_JAVA(void, OpenCLJNI, disposeKernel)
       }
       clReleaseKernel(kernel);
    }
+
+extern cl_int profile(ProfileInfo *profileInfo, cl_event *event, jint type, char* name, cl_ulong profileBaseTime );
 
 /**
  */
@@ -379,9 +392,31 @@ JNI_JAVA(void, OpenCLJNI, invoke)
          getArg(jenv, context, commandQueue, events, &eventc, argIndex, argDef, arg);
       }
       status = clWaitForEvents(eventc, events);
+      ProfileInfo **profileInfoArr = OpenCLProgram::getProfileInfo(jenv, programInstance);
+      if (profileInfoArr != NULL){
+         for (int i=0; profileInfoArr[i] != NULL; i++){
+              //fprintf(stdout, "removed prev profile %d\n", i);
+              delete profileInfoArr[i];
+         }
+         //fprintf(stdout, "removed prev profile list\n");
+         delete[] profileInfoArr;
+      }else{
+         //fprintf(stdout, "prev profile list was NULL\n");
+      }
+      profileInfoArr = NULL;
+  
+      profileInfoArr = new ProfileInfo*[eventc+1]; // add NULL to end!
+      //fprintf(stdout, "allocated a new list %d\n", eventc+1);
       for (int i=0;i<eventc; i++){
+        profileInfoArr[i] = new ProfileInfo();
+        //fprintf(stdout, "allocated a new ProfileInfo for %d\n", i);
+        int type = (i>(writes+1))?2:((i>writes)?1:0);
+        profile(profileInfoArr[i], &events[i], type, "unknown", 0L);
+        //fprintf(stdout, "type = %d\n", type);
         clReleaseEvent(events[i]);
       }
+      profileInfoArr[eventc]=NULL;
+      OpenCLProgram::setProfileInfo(jenv, programInstance, profileInfoArr);
       if (status != CL_SUCCESS) {
          fprintf(stderr, "error waiting for events !\n");
       }

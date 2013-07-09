@@ -16,6 +16,8 @@ public class OpenCLProgram extends OpenCLJNI{
 
    private final long contextId;
 
+   private final long profileInfo = 0L;
+
    private final OpenCLDevice device;
 
    private final String source;

@@ -182,10 +182,6 @@ public class OpenCLDevice extends Device{
             } else if (method.getName().equals("end")) {
                System.out.println("end not implemented");
             }  else if (method.getName().equals("getProfileInfo")){
-                  //  public List<ProfileInfo> getProfileInfo() {
-                  //  return (kernelRunner.getProfileInfo());
-                  // }
-               System.out.println("get profile info");
                proxy = (Object)program.getProfileInfo();
             }
          }

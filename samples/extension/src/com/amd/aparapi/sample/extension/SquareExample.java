@@ -73,12 +73,15 @@ public class SquareExample{
          for (int i = 0; i < size; i++) {
             System.out.println(l+" "+ in[i] + " " + squares[i] + " " + quads[i]);
          }
-         List<ProfileInfo> profileInfo  =squarer.getProfileInfo();
-            for (ProfileInfo pi:profileInfo){
-               System.out.println("whooo");
-            }
+         final List<ProfileInfo> profileInfo = squarer.getProfileInfo();
+         if ((profileInfo != null) && (profileInfo.size() > 0)) {
+             for (final ProfileInfo p : profileInfo) {
+                 System.out.print(" " + p.getType() + " " + p.getLabel() + " " + (p.getStart() / 1000) + " .. "
+                 + (p.getEnd() / 1000) + " " + ((p.getEnd() - p.getStart()) / 1000) + "us");
+                 System.out.println();
+             }
+         }
          squarer.dispose();
-
          }
       }
    }
