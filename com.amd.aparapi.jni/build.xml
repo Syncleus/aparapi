@@ -688,7 +688,10 @@ First consider editing the properties in build.properties
          <arg value="/I${java.home}\..\include" />
          <arg value="/I${java.home}\..\include\win32" />
          <arg value="/Iinclude" />
-         <arg value="/I${amd.app.sdk.dir}\include" />
+	 <arg value="/I${amd.app.sdk.dir}\include" />
+         <arg value="/IC:\Program Files (x86)\Windows Kits\8.0\Include\shared" />
+         <arg value="/IC:\Program Files (x86)\Windows Kits\8.0\Include\um" />
+	 
          <arg value="/Isrc/cpp" />
          <arg value="/Isrc/cpp/runKernel" />
          <arg value="/Isrc/cpp/invoke" />
@@ -711,7 +714,8 @@ First consider editing the properties in build.properties
          <arg value="/link" />
          <arg value="/libpath:${msvc.dir}\vc\lib\${optional.amd64.subdir}" />
          <arg value="/libpath:${msvc.sdk.dir}\lib\${optional.x64.subdir}" />
-         <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
+	 <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
+         <arg value="/libpath:C:\Program Files (x86)\Windows Kits\8.0\Lib\win8\um\x64" />
          <arg value="OpenCL.lib" />
          <arg value="/out:${basedir}\dist\aparapi_${x86_or_x86_64}.dll" />
       </exec>
