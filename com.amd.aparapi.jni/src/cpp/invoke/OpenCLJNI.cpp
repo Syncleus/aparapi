@@ -441,6 +441,7 @@ JNI_JAVA(jobject, OpenCLJNI, getPlatforms)
             // fix this so OpenCL 1.3 or higher will not break!
             if (   !strncmp(platformVersionName, "OpenCL 1.2", 10)
                 || !strncmp(platformVersionName, "OpenCL 1.1", 10)
+				|| !strncmp(platformVersionName, "OpenCL 2.0", 10)
 #ifdef __APPLE__
                 || !strncmp(platformVersionName, "OpenCL 1.0", 10)
 #endif
