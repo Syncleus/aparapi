@@ -20,7 +20,6 @@
       <classpath refid="compiler.class.path"/>
     </javac>
     <copy todir="classes/com/amd/aparapi/examples/nbody" file="src/com/amd/aparapi/examples/nbody/particle.jpg"/>
-    <copy todir="classes/com/amd/aparapi/examples/nbody" file="src/com/amd/aparapi/examples/nbody/star.bmp"/>
     <jar jarfile="${ant.project.name}.jar" basedir="classes"/>
   </target>
 
