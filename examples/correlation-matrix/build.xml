@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+
+<project name="correlation-matrix" default="junit" basedir=".">
+   
+   <!-- 
+         DO NOT EDIT BELOW THIS LINE 
+   -->
+   <echo>OS Name:    	${os.name}</echo>
+   <echo>OS Version: 	${os.version}</echo>
+   <echo>OS Arch:    	${os.arch}</echo>
+   <echo>Java Version:   	${java.version}</echo>
+
+   <target name="clean">
+      <delete dir="classes"/>
+      <delete dir="junit"/>
+      <!-- Legacy cleanup -->
+      <delete file="junit*.jar"/>
+   </target>
+
+   <path id="classpath">
+      <pathelement path="${basedir}/../../com.amd.aparapi/dist/aparapi.jar"/>
+      <pathelement path="${basedir}/../third-party/apache/commons/commons-lang3-3.1.jar"/>
+      <pathelement path="${basedir}/../third-party/apache/logging/log4j-1.2.16.jar"/>
+      <pathelement path="${basedir}/../third-party/apache/lucene/lucene-core-3.5.0.jar"/>
+	  <pathelement path="${basedir}/../third-party/junit/junit-4.10.jar"/>
+      <pathelement path="${junit.home}/${junit.jar.name}"/>
+      <pathelement path="classes"/>
+   </path>
+
+   <target name="junit" depends="clean">
+      <mkdir dir="classes"/>
+      <mkdir dir="junit/data"/>
+      
+      <!-- Runtime Code -->
+      <javac debug="true"
+         debuglevel="lines,vars,source"
+         srcdir="src/java" 
+         destdir="classes" 
+         includeAntRuntime="false"
+         classpathref="classpath">
+         <compilerarg value="-Xlint"/>
+         <compilerarg value="-Xlint:-path"/>
+      </javac>
+      
+      <!-- JUnit Tests -->
+      <javac debug="true"
+         debuglevel="lines,vars,source"
+         srcdir="src/test" 
+         destdir="classes" 
+         includeAntRuntime="false"
+         classpathref="classpath">
+         <compilerarg value="-Xlint"/>
+         <compilerarg value="-Xlint:-path"/>
+      </javac>
+      
+      <copy todir="classes" file="src/java/log4j.xml"/>
+
+      <!-- even though fork is slower we need to set the library path and this requires fork -->
+      <junit printsummary="false" fork="true" haltonfailure="false" failureproperty="tests.failed" showoutput="true">
+         <sysproperty key="java.library.path" value="${basedir}/../../com.amd.aparapi.jni/dist"/>
+         
+         <!-- USER DEFINED PROPERTIES -->
+         <sysproperty key="numRows" value="1024"/>
+         <sysproperty key="numColumns" value="16384"/>
+         <sysproperty key="useGPU" value="true"/>
+         
+         <formatter type="xml" />
+         <classpath refid="classpath"/>
+         <batchtest todir="junit/data">
+            <fileset dir="src/test"/>
+         </batchtest>
+      </junit>
+
+      <junitreport todir="junit/data">
+         <fileset dir="junit/data"/>
+      </junitreport>
+   </target>
+
+</project>
