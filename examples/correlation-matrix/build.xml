@@ -13,8 +13,7 @@
    <target name="clean">
       <delete dir="classes"/>
       <delete dir="junit"/>
-      <!-- Legacy cleanup -->
-      <delete file="junit*.jar"/>
+      <delete file="correlation-matrix.jar"/>
    </target>
 
    <path id="classpath">
