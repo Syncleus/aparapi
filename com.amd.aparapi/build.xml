@@ -72,8 +72,8 @@
    		  srcdir="${basedir}/src/java"
    		  destdir="${basedir}/classes"
    		  includeantruntime="false">
-   		     <compilerarg value="-Xlint"/>
-   			 <compilerarg value="-Xlint:-path"/>
+                  <!--<compilerarg value="-Xlint"/>
+                         <compilerarg value="-Xlint:-path"/> -->
        </javac>
        <jar jarfile="${basedir}/dist/aparapi.jar" basedir="${basedir}/classes">
        		<manifest>
