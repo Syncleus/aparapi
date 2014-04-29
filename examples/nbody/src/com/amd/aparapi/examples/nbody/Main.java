@@ -211,7 +211,7 @@ public class Main{
 
       final JPanel panel = new JPanel(new BorderLayout());
       final JPanel controlPanel = new JPanel(new FlowLayout());
-      panel.add(controlPanel, BorderLayout.SOUTH);
+      panel.add(controlPanel, BorderLayout.NORTH);
 
       final JButton startButton = new JButton("Start");
 
@@ -277,7 +277,6 @@ public class Main{
          @Override public void display(GLAutoDrawable drawable) {
 
             final GL2 gl = drawable.getGL().getGL2();
-
             texture.enable(gl);
             texture.bind(gl);
             gl.glLoadIdentity();
@@ -335,15 +334,6 @@ public class Main{
                final InputStream textureStream = Main.class.getResourceAsStream("particle.jpg");
                TextureData data = TextureIO.newTextureData(profile, textureStream, false, "jpg");
                texture = TextureIO.newTexture(data);
-               //final Texture texture = TextureIO.newTexture(textureStream, false, null);
-               // texture.enable(gl);
-               // texture.bind(gl);
-
-               //gl.glEnable(GL.GL_TEXTURE_2D);
-               //gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
-               //gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
-               //gl.glBindTexture(GL.GL_TEXTURE_2D, texture.);
-
             } catch (final IOException e) {
                e.printStackTrace();
             } catch (final GLException e) {
@@ -367,11 +357,11 @@ public class Main{
 
       panel.add(canvas, BorderLayout.CENTER);
       frame.getContentPane().add(panel, BorderLayout.CENTER);
-      final FPSAnimator animator = new FPSAnimator(canvas, 100);
 
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
       frame.pack();
       frame.setVisible(true);
+      final FPSAnimator animator = new FPSAnimator(canvas, 100);
 
       animator.start();
 
