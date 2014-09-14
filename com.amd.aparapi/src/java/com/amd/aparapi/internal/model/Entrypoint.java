@@ -37,46 +37,18 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.amd.aparapi.internal.model;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.amd.aparapi.*;
+import com.amd.aparapi.internal.exception.*;
+import com.amd.aparapi.internal.instruction.*;
+import com.amd.aparapi.internal.instruction.InstructionSet.*;
+import com.amd.aparapi.internal.model.ClassModel.*;
+import com.amd.aparapi.internal.model.ClassModel.ConstantPool.*;
+import com.amd.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.*;
+import com.amd.aparapi.internal.util.*;
 
-import com.amd.aparapi.Config;
-import com.amd.aparapi.Kernel;
-import com.amd.aparapi.internal.exception.AparapiException;
-import com.amd.aparapi.internal.exception.ClassParseException;
-import com.amd.aparapi.internal.instruction.Instruction;
-import com.amd.aparapi.internal.instruction.InstructionSet;
-import com.amd.aparapi.internal.instruction.InstructionSet.AccessArrayElement;
-import com.amd.aparapi.internal.instruction.InstructionSet.AccessField;
-import com.amd.aparapi.internal.instruction.InstructionSet.AssignToArrayElement;
-import com.amd.aparapi.internal.instruction.InstructionSet.AssignToField;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_ARRAYLENGTH;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_AALOAD;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_GETFIELD;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_INVOKESPECIAL;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_INVOKESTATIC;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_INVOKEVIRTUAL;
-import com.amd.aparapi.internal.instruction.InstructionSet.MethodCall;
-import com.amd.aparapi.internal.instruction.InstructionSet.TypeSpec;
-import com.amd.aparapi.internal.instruction.InstructionSet.VirtualMethodCall;
-import com.amd.aparapi.internal.model.ClassModel.ClassModelField;
-import com.amd.aparapi.internal.model.ClassModel.ClassModelMethod;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool.MethodEntry;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.Arg;
-import com.amd.aparapi.internal.util.UnsafeWrapper;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.logging.*;
 
 public class Entrypoint{
 
@@ -191,6 +163,9 @@ public class Entrypoint{
          final Class<?> type = field.getType();
          if (type.isPrimitive() || type.isArray()) {
             return field;
+         }
+         if (field.getAnnotation(Kernel.NoCL.class) != null) {
+            return null;
          }
          if (logger.isLoggable(Level.FINE)) {
             logger.fine("field type is " + type.getName());
@@ -489,7 +464,7 @@ public class Entrypoint{
       for (final MethodCall methodCall : methodModel.getMethodCalls()) {
 
          ClassModelMethod m = resolveCalledMethod(methodCall, classModel);
-         if ((m != null) && !methodMap.keySet().contains(m)) {
+         if ((m != null) && !methodMap.keySet().contains(m) && !noCL(m)) {
             final MethodModel target = new MethodModel(m, this);
             methodMap.put(m, target);
             methodModel.getCalledMethods().add(target);
@@ -505,7 +480,7 @@ public class Entrypoint{
             for (final MethodCall methodCall : mm.getMethodCalls()) {
 
                ClassModelMethod m = resolveCalledMethod(methodCall, classModel);
-               if (m != null) {
+               if (m != null && !noCL(m)) {
                   MethodModel target = null;
                   if (methodMap.keySet().contains(m)) {
                      // we remove and then add again.  Because this is a LinkedHashMap this 
@@ -678,30 +653,39 @@ public class Entrypoint{
 
                   }
 
-               } else if (instruction instanceof I_INVOKEVIRTUAL) {
+               }
+               else if (instruction instanceof I_INVOKEVIRTUAL) {
                   final I_INVOKEVIRTUAL invokeInstruction = (I_INVOKEVIRTUAL) instruction;
-                  final MethodEntry methodEntry = invokeInstruction.getConstantPoolMethodEntry();
-                  if (Kernel.isMappedMethod(methodEntry)) { //only do this for intrinsics
+                  MethodModel invokedMethod = invokeInstruction.getMethod();
+                  FieldEntry getterField = getSimpleGetterField(invokedMethod);
+                  if (getterField != null) {
+                     referencedFieldNames.add(getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
+                  }
+                  else {
+                     final MethodEntry methodEntry = invokeInstruction.getConstantPoolMethodEntry();
+                     if (Kernel.isMappedMethod(methodEntry)) { //only do this for intrinsics
 
-                     if (Kernel.usesAtomic32(methodEntry)) {
-                        setRequiresAtomics32Pragma(true);
-                     }
+                        if (Kernel.usesAtomic32(methodEntry)) {
+                           setRequiresAtomics32Pragma(true);
+                        }
 
-                     final Arg methodArgs[] = methodEntry.getArgs();
-                     if ((methodArgs.length > 0) && methodArgs[0].isArray()) { //currently array arg can only take slot 0
-                        final Instruction arrInstruction = invokeInstruction.getArg(0);
-                        if (arrInstruction instanceof AccessField) {
-                           final AccessField access = (AccessField) arrInstruction;
-                           final FieldEntry field = access.getConstantPoolFieldEntry();
-                           final String accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-                           arrayFieldAssignments.add(accessedFieldName);
-                           referencedFieldNames.add(accessedFieldName);
-                        } else {
-                           throw new ClassParseException(ClassParseException.TYPE.ACCESSEDOBJECTSETTERARRAY);
+                        final Arg methodArgs[] = methodEntry.getArgs();
+                        if ((methodArgs.length > 0) && methodArgs[0].isArray()) { //currently array arg can only take slot 0
+                           final Instruction arrInstruction = invokeInstruction.getArg(0);
+                           if (arrInstruction instanceof AccessField) {
+                              final AccessField access = (AccessField) arrInstruction;
+                              final FieldEntry field = access.getConstantPoolFieldEntry();
+                              final String accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+                              arrayFieldAssignments.add(accessedFieldName);
+                              referencedFieldNames.add(accessedFieldName);
+                           }
+                           else {
+                              throw new ClassParseException(ClassParseException.TYPE.ACCESSEDOBJECTSETTERARRAY);
+                           }
                         }
                      }
-                  }
 
+                  }
                }
             }
          }
@@ -812,6 +796,15 @@ public class Entrypoint{
          }
 
       }
+   }
+
+   private boolean noCL(ClassModelMethod m) {
+      boolean found = m.getClassModel().getNoCLMethods().contains(m.getName());
+      return found;
+   }
+
+   private FieldEntry getSimpleGetterField(MethodModel method) {
+      return method.getAccessorVariableFieldEntry();
    }
 
    public boolean shouldFallback() {

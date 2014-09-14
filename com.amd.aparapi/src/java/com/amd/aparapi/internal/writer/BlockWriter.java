@@ -37,61 +37,16 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.amd.aparapi.internal.writer;
 
-import java.util.Stack;
+import com.amd.aparapi.*;
+import com.amd.aparapi.internal.exception.*;
+import com.amd.aparapi.internal.instruction.*;
+import com.amd.aparapi.internal.instruction.BranchSet.*;
+import com.amd.aparapi.internal.instruction.InstructionSet.*;
+import com.amd.aparapi.internal.model.ClassModel.ConstantPool.*;
+import com.amd.aparapi.internal.model.ClassModel.*;
+import com.amd.aparapi.internal.model.*;
 
-import com.amd.aparapi.Config;
-import com.amd.aparapi.internal.exception.CodeGenException;
-import com.amd.aparapi.internal.instruction.BranchSet;
-import com.amd.aparapi.internal.instruction.Instruction;
-import com.amd.aparapi.internal.instruction.BranchSet.CompoundLogicalExpressionNode;
-import com.amd.aparapi.internal.instruction.BranchSet.LogicalExpressionNode;
-import com.amd.aparapi.internal.instruction.BranchSet.SimpleLogicalExpressionNode;
-import com.amd.aparapi.internal.instruction.InstructionSet.AccessArrayElement;
-import com.amd.aparapi.internal.instruction.InstructionSet.AccessField;
-import com.amd.aparapi.internal.instruction.InstructionSet.AccessInstanceField;
-import com.amd.aparapi.internal.instruction.InstructionSet.AccessLocalVariable;
-import com.amd.aparapi.internal.instruction.InstructionSet.AssignToArrayElement;
-import com.amd.aparapi.internal.instruction.InstructionSet.AssignToField;
-import com.amd.aparapi.internal.instruction.InstructionSet.AssignToInstanceField;
-import com.amd.aparapi.internal.instruction.InstructionSet.AssignToLocalVariable;
-import com.amd.aparapi.internal.instruction.InstructionSet.BinaryOperator;
-import com.amd.aparapi.internal.instruction.InstructionSet.Branch;
-import com.amd.aparapi.internal.instruction.InstructionSet.ByteCode;
-import com.amd.aparapi.internal.instruction.InstructionSet.CastOperator;
-import com.amd.aparapi.internal.instruction.InstructionSet.CloneInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.CompositeArbitraryScopeInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.CompositeDoWhileInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.CompositeEmptyLoopInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.CompositeForEclipseInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.CompositeForSunInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.CompositeIfElseInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.CompositeIfInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.CompositeWhileInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.ConditionalBranch16;
-import com.amd.aparapi.internal.instruction.InstructionSet.Constant;
-import com.amd.aparapi.internal.instruction.InstructionSet.FieldArrayElementAssign;
-import com.amd.aparapi.internal.instruction.InstructionSet.FieldArrayElementIncrement;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_ALOAD_0;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_AALOAD;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_ARRAYLENGTH;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_IFNONNULL;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_IFNULL;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_IINC;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_POP;
-import com.amd.aparapi.internal.instruction.InstructionSet.If;
-import com.amd.aparapi.internal.instruction.InstructionSet.IfUnary;
-import com.amd.aparapi.internal.instruction.InstructionSet.IncrementInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.InlineAssignInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.MethodCall;
-import com.amd.aparapi.internal.instruction.InstructionSet.MultiAssignInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.Return;
-import com.amd.aparapi.internal.instruction.InstructionSet.UnaryOperator;
-import com.amd.aparapi.internal.instruction.InstructionSet.VirtualMethodCall;
-import com.amd.aparapi.internal.model.Entrypoint;
-import com.amd.aparapi.internal.model.MethodModel;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool.MethodEntry;
-import com.amd.aparapi.internal.model.ClassModel.LocalVariableInfo;
+import java.util.*;
 
 /**
  * Base abstract class for converting <code>Aparapi</code> IR to text.<br/>
@@ -328,6 +283,19 @@ public abstract class BlockWriter{
          }
       }
 
+   }
+
+   protected void writeGetterBlock(FieldEntry accessorVariableFieldEntry) {
+      write("{");
+      in();
+      newLine();
+      write("return this->");
+      write(accessorVariableFieldEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
+      write(";");
+      out();
+      newLine();
+
+      write("}");
    }
 
    public void writeBlock(Instruction _first, Instruction _last) throws CodeGenException {
@@ -756,6 +724,10 @@ public abstract class BlockWriter{
    }
 
    public void writeMethod(MethodCall _methodCall, MethodEntry _methodEntry) throws CodeGenException {
+      boolean noCL = _methodEntry.getOwnerClassModel().getNoCLMethods().contains(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
+      if (noCL) {
+          return;
+      }
 
       if (_methodCall instanceof VirtualMethodCall) {
          final Instruction instanceInstruction = ((VirtualMethodCall) _methodCall).getInstanceReference();
@@ -785,7 +757,13 @@ public abstract class BlockWriter{
    }
 
    public void writeMethodBody(MethodModel _methodModel) throws CodeGenException {
-      writeBlock(_methodModel.getExprHead(), null);
+      if (_methodModel.isGetter() && !_methodModel.isNoCL()) {
+         FieldEntry accessorVariableFieldEntry = _methodModel.getAccessorVariableFieldEntry();
+         writeGetterBlock(accessorVariableFieldEntry);
+      }
+      else {
+         writeBlock(_methodModel.getExprHead(), null);
+      }
    }
 
    public abstract void write(Entrypoint entryPoint) throws CodeGenException;

@@ -37,42 +37,20 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
  */
 package com.amd.aparapi.internal.writer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import com.amd.aparapi.Config;
+import com.amd.aparapi.*;
 import com.amd.aparapi.Kernel;
-import com.amd.aparapi.internal.exception.CodeGenException;
-import com.amd.aparapi.internal.instruction.Instruction;
-import com.amd.aparapi.internal.instruction.InstructionSet;
-import com.amd.aparapi.internal.instruction.InstructionSet.AccessArrayElement;
-import com.amd.aparapi.internal.instruction.InstructionSet.AccessField;
-import com.amd.aparapi.internal.instruction.InstructionSet.AssignToArrayElement;
-import com.amd.aparapi.internal.instruction.InstructionSet.AssignToField;
-import com.amd.aparapi.internal.instruction.InstructionSet.AssignToLocalVariable;
-import com.amd.aparapi.internal.instruction.InstructionSet.BinaryOperator;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_ALOAD_0;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_GETFIELD;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_INVOKESPECIAL;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_IUSHR;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_LUSHR;
-import com.amd.aparapi.internal.instruction.InstructionSet.MethodCall;
-import com.amd.aparapi.internal.instruction.InstructionSet.VirtualMethodCall;
-import com.amd.aparapi.internal.model.ClassModel;
-import com.amd.aparapi.internal.model.ClassModel.ClassModelField;
-import com.amd.aparapi.internal.model.ClassModel.LocalVariableInfo;
-import com.amd.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
-import com.amd.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEntry;
-import com.amd.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEntry.AnnotationInfo;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool.MethodEntry;
-import com.amd.aparapi.internal.model.Entrypoint;
-import com.amd.aparapi.internal.model.MethodModel;
+import com.amd.aparapi.internal.exception.*;
+import com.amd.aparapi.internal.instruction.*;
+import com.amd.aparapi.internal.instruction.InstructionSet.*;
+import com.amd.aparapi.internal.model.*;
+import com.amd.aparapi.internal.model.ClassModel.AttributePool.*;
+import com.amd.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEntry.*;
+import com.amd.aparapi.internal.model.ClassModel.*;
+import com.amd.aparapi.internal.model.ClassModel.ConstantPool.*;
 import com.amd.aparapi.opencl.OpenCL.Constant;
-import com.amd.aparapi.opencl.OpenCL.Local;
+import com.amd.aparapi.opencl.OpenCL.*;
+
+import java.util.*;
 
 public abstract class KernelWriter extends BlockWriter{
 
@@ -189,10 +167,6 @@ public abstract class KernelWriter extends BlockWriter{
    }
 
    @Override public void writeMethod(MethodCall _methodCall, MethodEntry _methodEntry) throws CodeGenException {
-
-      // System.out.println("_methodEntry = " + _methodEntry);
-      // special case for buffers
-
       final int argc = _methodEntry.getStackConsumeCount();
 
       final String methodName = _methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
@@ -217,16 +191,30 @@ public abstract class KernelWriter extends BlockWriter{
             write(barrierAndGetterMappings);
          }
       } else {
+         final boolean isSpecial = _methodCall instanceof I_INVOKESPECIAL;
+         MethodModel m = entryPoint.getCallTarget(_methodEntry, isSpecial);
 
+         FieldEntry getterField = null;
+         if (m != null && m.isGetter()) {
+            getterField = m.getAccessorVariableFieldEntry();
+         }
+         if (getterField != null) {
+             String fieldName = getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+             write("this->");
+             write(fieldName);
+             return;
+         }
+         boolean noCL = _methodEntry.getOwnerClassModel().getNoCLMethods().contains(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
+         if (noCL) {
+             return;
+         }
          final String intrinsicMapping = Kernel.getMappedMethodName(_methodEntry);
          // System.out.println("getMappedMethodName for " + methodName + " returned " + mapping);
          boolean isIntrinsic = false;
 
          if (intrinsicMapping == null) {
             assert entryPoint != null : "entryPoint should not be null";
-            final boolean isSpecial = _methodCall instanceof I_INVOKESPECIAL;
             boolean isMapped = Kernel.isMappedMethod(_methodEntry);
-            final MethodModel m = entryPoint.getCallTarget(_methodEntry, isSpecial);
 
             if (m != null) {
                write(m.getName());
@@ -283,6 +271,8 @@ public abstract class KernelWriter extends BlockWriter{
 
    public final static String __constant = "__constant";
 
+   public final static String __private = "__private";
+
    public final static String LOCAL_ANNOTATION_NAME = "L" + Local.class.getName().replace(".", "/") + ";";
 
    public final static String CONSTANT_ANNOTATION_NAME = "L" + Constant.class.getName().replace(".", "/") + ";";
@@ -306,9 +296,20 @@ public abstract class KernelWriter extends BlockWriter{
 
          int numDimensions = 0;
 
-         // check the suffix 
+         // check the suffix
+
          String type = field.getName().endsWith(Kernel.LOCAL_SUFFIX) ? __local
                : (field.getName().endsWith(Kernel.CONSTANT_SUFFIX) ? __constant : __global);
+         Integer privateMemorySize = null;
+         try {
+            privateMemorySize = _entryPoint.getClassModel().getPrivateMemorySize(field.getName());
+         } catch (ClassParseException e) {
+            throw new CodeGenException(e);
+         }
+
+         if (privateMemorySize != null) {
+             type = __private;
+         }
          final RuntimeAnnotationsEntry visibleAnnotations = field.getAttributePool().getRuntimeVisibleAnnotationsEntry();
 
          if (visibleAnnotations != null) {
@@ -322,11 +323,13 @@ public abstract class KernelWriter extends BlockWriter{
             }
          }
 
+         String argType = (__private.equals(type)) ? __constant : type;
+
          //if we have a an array we want to mark the object as a pointer
          //if we have a multiple dimensional array we want to remember the number of dimensions
          while (signature.startsWith("[")) {
             if(isPointer == false) {
-               argLine.append(type + " ");
+               argLine.append(argType + " ");
                thisStructLine.append(type + " ");
             }
             isPointer = true;
@@ -342,7 +345,6 @@ public abstract class KernelWriter extends BlockWriter{
             // if (logger.isLoggable(Level.FINE)) {
             // logger.fine("Examining object parameter: " + signature + " new: " + className);
             // }
-
             argLine.append(className);
             thisStructLine.append(className);
          } else {
@@ -355,16 +357,27 @@ public abstract class KernelWriter extends BlockWriter{
 
          if (isPointer) {
             argLine.append("*");
-            thisStructLine.append("*");
+            if (privateMemorySize == null) {
+               thisStructLine.append("*");
+            }
          }
-         assignLine.append("this->");
-         assignLine.append(field.getName());
-         assignLine.append(" = ");
-         assignLine.append(field.getName());
+
+         if (privateMemorySize == null) {
+            assignLine.append("this->");
+            assignLine.append(field.getName());
+            assignLine.append(" = ");
+            assignLine.append(field.getName());
+         }
+
          argLine.append(field.getName());
          thisStructLine.append(field.getName());
-         assigns.add(assignLine.toString());
+         if (privateMemorySize == null) {
+            assigns.add(assignLine.toString());
+         }
          argLines.add(argLine.toString());
+         if (privateMemorySize != null) {
+            thisStructLine.append("[").append(privateMemorySize).append("]");
+         }
          thisStruct.add(thisStructLine.toString());
 
          // Add int field into "this" struct for supporting java arraylength op
@@ -538,9 +551,12 @@ public abstract class KernelWriter extends BlockWriter{
 
       for (final MethodModel mm : _entryPoint.getCalledMethods()) {
          // write declaration :)
+         if (mm.isPrivateMemoryGetter()) {
+            continue;
+         }
 
          final String returnType = mm.getReturnType();
-         // Arrays always map to __global arrays
+         // Arrays always map to __private or__global arrays
          if (returnType.startsWith("[")) {
             write(" __global ");
          }

@@ -1,7 +1,5 @@
 package com.amd.aparapi.internal.jni;
 
-import java.util.List;
-
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.ProfileInfo;
 import com.amd.aparapi.Range;
@@ -9,6 +7,8 @@ import com.amd.aparapi.annotation.Experimental;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.annotation.DocMe;
 import com.amd.aparapi.internal.annotation.UsedByJNICode;
+
+import java.util.List;
 
 /**
  * This class is intended to be used as a 'proxy' or 'facade' object for Java code to interact with JNI

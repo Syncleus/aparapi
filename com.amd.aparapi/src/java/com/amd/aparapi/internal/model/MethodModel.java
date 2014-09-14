@@ -37,79 +37,19 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
  */
 package com.amd.aparapi.internal.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.amd.aparapi.*;
+import com.amd.aparapi.internal.exception.*;
+import com.amd.aparapi.internal.instruction.*;
+import com.amd.aparapi.internal.instruction.InstructionPattern.*;
+import com.amd.aparapi.internal.instruction.InstructionSet.*;
+import com.amd.aparapi.internal.model.ClassModel.*;
+import com.amd.aparapi.internal.model.ClassModel.ConstantPool.*;
+import com.amd.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.*;
+import com.amd.aparapi.internal.reader.*;
 
-import com.amd.aparapi.Config;
-import com.amd.aparapi.Kernel;
-import com.amd.aparapi.internal.exception.AparapiException;
-import com.amd.aparapi.internal.exception.ClassParseException;
-import com.amd.aparapi.internal.instruction.ExpressionList;
-import com.amd.aparapi.internal.instruction.Instruction;
-import com.amd.aparapi.internal.instruction.InstructionPattern;
-import com.amd.aparapi.internal.instruction.InstructionSet;
-import com.amd.aparapi.internal.instruction.InstructionTransformer;
-import com.amd.aparapi.internal.instruction.InstructionPattern.InstructionMatch;
-import com.amd.aparapi.internal.instruction.InstructionSet.AccessArrayElement;
-import com.amd.aparapi.internal.instruction.InstructionSet.AccessField;
-import com.amd.aparapi.internal.instruction.InstructionSet.AccessInstanceField;
-import com.amd.aparapi.internal.instruction.InstructionSet.AccessLocalVariable;
-import com.amd.aparapi.internal.instruction.InstructionSet.AssignToArrayElement;
-import com.amd.aparapi.internal.instruction.InstructionSet.AssignToInstanceField;
-import com.amd.aparapi.internal.instruction.InstructionSet.AssignToLocalVariable;
-import com.amd.aparapi.internal.instruction.InstructionSet.Branch;
-import com.amd.aparapi.internal.instruction.InstructionSet.CastOperator;
-import com.amd.aparapi.internal.instruction.InstructionSet.CloneInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.DUP;
-import com.amd.aparapi.internal.instruction.InstructionSet.FieldArrayElementAssign;
-import com.amd.aparapi.internal.instruction.InstructionSet.FieldArrayElementIncrement;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_AASTORE;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_ARETURN;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_ATHROW;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_BASTORE;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_CASTORE;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_DUP;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_DUP2;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_DUP_X1;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_DUP_X2;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_GETSTATIC;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_IADD;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_ICONST_1;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_IINC;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_INVOKEINTERFACE;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_LOOKUPSWITCH;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_MONITORENTER;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_MONITOREXIT;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_PUTFIELD;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_PUTSTATIC;
-import com.amd.aparapi.internal.instruction.InstructionSet.I_TABLESWITCH;
-import com.amd.aparapi.internal.instruction.InstructionSet.IncrementInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.InlineAssignInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.MethodCall;
-import com.amd.aparapi.internal.instruction.InstructionSet.MultiAssignInstruction;
-import com.amd.aparapi.internal.instruction.InstructionSet.New;
-import com.amd.aparapi.internal.instruction.InstructionSet.Return;
-import com.amd.aparapi.internal.instruction.InstructionSet.StoreSpec;
-import com.amd.aparapi.internal.model.ClassModel.ClassModelMethod;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool;
-import com.amd.aparapi.internal.model.ClassModel.LocalVariableInfo;
-import com.amd.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
-import com.amd.aparapi.internal.model.ClassModel.MethodDescription;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.Arg;
-import com.amd.aparapi.internal.reader.ByteReader;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.logging.*;
 
 public class MethodModel{
 
@@ -133,10 +73,14 @@ public class MethodModel{
 
    private boolean methodIsSetter;
 
+   private boolean methodIsPrivateMemoryGetter = false;
+
    // Only setters can use putfield
    private boolean usesPutfield;
 
    private FieldEntry accessorVariableFieldEntry;
+
+   private boolean noCL = false;
 
    public boolean isGetter() {
       return methodIsGetter;
@@ -148,6 +92,15 @@ public class MethodModel{
 
    public boolean methodUsesPutfield() {
       return usesPutfield;
+   }
+
+   public boolean isNoCL() {
+      return noCL;
+   }
+
+
+   public boolean isPrivateMemoryGetter() {
+      return methodIsPrivateMemoryGetter;
    }
 
    public ClassModelMethod getMethod() {
@@ -339,10 +292,6 @@ public class MethodModel{
     * have the branch node (at 100) added to it's forwardUnconditional list.
     * 
     * @see InstructionSet.Branch#getTarget()
-    * @see Instruction#getForwardConditionalTargets()
-    * @see Instruction#getForwardUnconditionalTargets()
-    * @see Instruction#getReverseConditionalTargets()
-    * @see Instruction#getReverseUnconditionalTargets()
     */
    public void buildBranchGraphs(Map<Integer, Instruction> pcMap) {
       for (Instruction instruction = pcHead; instruction != null; instruction = instruction.getNextPC()) {
@@ -1344,65 +1293,84 @@ public class MethodModel{
    void checkForGetter(Map<Integer, Instruction> pcMap) throws ClassParseException {
       final String methodName = getMethod().getName();
       String rawVarNameCandidate = null;
-      boolean mightBeSetter = true;
+      boolean mightBeGetter = true;
 
       if (methodName.startsWith("get")) {
          rawVarNameCandidate = methodName.substring(3);
       } else if (methodName.startsWith("is")) {
          rawVarNameCandidate = methodName.substring(2);
       } else {
-         mightBeSetter = false;
+         mightBeGetter = false;
       }
 
       // Getters should have 3 bcs: aload_0, getfield, ?return
-      if (mightBeSetter) {
-         if ((rawVarNameCandidate != null) && (pcMap.size() == 3)) {
+      if (mightBeGetter) {
+         boolean possiblySimpleGetImplementation = pcMap.size() == 3;
+         if ((rawVarNameCandidate != null) && (isNoCL() || possiblySimpleGetImplementation)) {
             final String firstLetter = rawVarNameCandidate.substring(0, 1).toLowerCase();
-            final String varNameCandidateCamelCased = rawVarNameCandidate.replaceFirst(rawVarNameCandidate.substring(0, 1),
-                  firstLetter);
-            String accessedFieldName = null;
-            Instruction instruction = expressionList.getHead();
+            final String varNameCandidateCamelCased = rawVarNameCandidate.replaceFirst(rawVarNameCandidate.substring(0, 1), firstLetter);
+            String accessedFieldName;
 
-            if ((instruction instanceof Return) && (expressionList.getHead() == expressionList.getTail())) {
-               instruction = instruction.getPrevPC();
-               if (instruction instanceof AccessInstanceField) {
-                  final FieldEntry field = ((AccessInstanceField) instruction).getConstantPoolFieldEntry();
-                  accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-                  if (accessedFieldName.equals(varNameCandidateCamelCased)) {
+            if (!isNoCL()) {
 
-                     // Verify field type matches return type
-                     final String fieldType = field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-                     final String returnType = getMethod().getDescriptor().substring(2);
-                     //System.out.println( "### field type = " + fieldType );
-                     //System.out.println( "### method args = " + returnType );
-                     assert (fieldType.length() == 1) && (returnType.length() == 1) : " can only use basic type getters";
+               Instruction instruction = expressionList.getHead();
 
-                     // Allow isFoo style for boolean fields
-                     if ((methodName.startsWith("is") && fieldType.equals("Z")) || (methodName.startsWith("get"))) {
-                        if (fieldType.equals(returnType)) {
-                           if (logger.isLoggable(Level.FINE)) {
-                              logger.fine("Found " + methodName + " as a getter for " + varNameCandidateCamelCased.toLowerCase());
+               if ((instruction instanceof Return) && (expressionList.getHead() == expressionList.getTail())) {
+                  instruction = instruction.getPrevPC();
+                  if (instruction instanceof AccessInstanceField) {
+                     final FieldEntry field = ((AccessInstanceField) instruction).getConstantPoolFieldEntry();
+                     accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+                     if (accessedFieldName.equals(varNameCandidateCamelCased)) {
+
+                        // Verify field type matches return type
+                        final String fieldType = field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
+                        final String returnType = getMethod().getDescriptor().substring(2);
+                        //System.out.println( "### field type = " + fieldType );
+                        //System.out.println( "### method args = " + returnType );
+                        assert (fieldType.length() == 1) && (returnType.length() == 1) : " can only use basic type getters";
+
+                        // Allow isFoo style for boolean fields
+                        if ((methodName.startsWith("is") && fieldType.equals("Z")) || (methodName.startsWith("get"))) {
+                           if (fieldType.equals(returnType)) {
+                              if (logger.isLoggable(Level.FINE)) {
+                                 logger.fine("Found " + methodName + " as a getter for " + varNameCandidateCamelCased.toLowerCase());
+                              }
+
+                              methodIsGetter = true;
+                              setAccessorVariableFieldEntry(field);
+                              assert methodIsSetter == false : " cannot be both";
+                           } else {
+                              throw new ClassParseException(ClassParseException.TYPE.BADGETTERTYPEMISMATCH, methodName);
+
                            }
-
-                           methodIsGetter = true;
-                           accessorVariableFieldEntry = field;
-                           assert methodIsSetter == false : " cannot be both";
-                        } else {
-                           throw new ClassParseException(ClassParseException.TYPE.BADGETTERTYPEMISMATCH, methodName);
-
                         }
+                     } else {
+                        throw new ClassParseException(ClassParseException.TYPE.BADGETTERNAMEMISMATCH, methodName);
                      }
-                  } else {
-                     throw new ClassParseException(ClassParseException.TYPE.BADGETTERNAMEMISMATCH, methodName);
                   }
+               } else {
+                  throw new ClassParseException(ClassParseException.TYPE.BADGETTERNAMENOTFOUND, methodName);
                }
             } else {
-               throw new ClassParseException(ClassParseException.TYPE.BADGETTERNAMENOTFOUND, methodName);
+               FieldEntry fieldEntry = getMethod().getOwnerClassModel().getConstantPool().getFieldEntry(varNameCandidateCamelCased);
+               setAccessorVariableFieldEntry(fieldEntry);
+               if (getAccessorVariableFieldEntry() == null) {
+                  throw new ClassParseException(ClassParseException.TYPE.BADGETTERNAMEMISMATCH, methodName);
+               }
+               methodIsGetter = true;
+               if (method.getClassModel().getPrivateMemorySize(fieldEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8()) != null)
+               {
+                  methodIsPrivateMemoryGetter = true;
+               }
             }
          } else {
             throw new ClassParseException(ClassParseException.TYPE.BADGETTERNAMENOTFOUND, methodName);
          }
       }
+   }
+
+   private void setAccessorVariableFieldEntry(FieldEntry field) {
+      accessorVariableFieldEntry = field;
    }
 
    /**
@@ -1441,7 +1409,7 @@ public class MethodModel{
                      }
 
                      methodIsSetter = true;
-                     accessorVariableFieldEntry = field;
+                     setAccessorVariableFieldEntry(field);
 
                      // Setters use putfield which will miss the normal store check
                      if (fieldType.equals("B") || fieldType.equals("Z")) {
@@ -1638,6 +1606,10 @@ public class MethodModel{
       try {
          method = _method;
          expressionList = new ExpressionList(this);
+         ClassModel owner = _method.getOwnerClassModel();
+         if (owner.getNoCLMethods().contains(method.getName())) {
+             noCL = true;
+         }
 
          // check if we have any exception handlers
          final int exceptionsSize = method.getCodeEntry().getExceptionPoolEntries().size();
@@ -1676,7 +1648,7 @@ public class MethodModel{
          foldExpressions();
 
          // Accessor conversion only works on member object arrays
-         if ((entrypoint != null) && (_method.getClassModel() != entrypoint.getClassModel())) {
+         if (isNoCL() || (entrypoint != null) && (_method.getClassModel() != entrypoint.getClassModel())) {
             if (logger.isLoggable(Level.FINE)) {
                logger.fine("Considering accessor call: " + getName());
             }

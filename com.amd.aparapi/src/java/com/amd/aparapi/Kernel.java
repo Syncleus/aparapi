@@ -37,25 +37,18 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.amd.aparapi;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
-import java.util.logging.Logger;
+import com.amd.aparapi.annotation.*;
+import com.amd.aparapi.exception.*;
+import com.amd.aparapi.internal.kernel.*;
+import com.amd.aparapi.internal.model.ClassModel.ConstantPool.*;
+import com.amd.aparapi.internal.opencl.*;
+import com.amd.aparapi.internal.util.*;
 
-import com.amd.aparapi.annotation.Experimental;
-import com.amd.aparapi.exception.DeprecatedException;
-import com.amd.aparapi.internal.kernel.KernelRunner;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry;
-import com.amd.aparapi.internal.opencl.OpenCLLoader;
-import com.amd.aparapi.internal.util.UnsafeWrapper;
+import java.lang.annotation.*;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.logging.*;
 
 /**
  * A <i>kernel</i> encapsulates a data parallel algorithm that will execute either on a GPU
@@ -159,7 +152,7 @@ public abstract class Kernel implements Cloneable {
     *  int[] buffer_$local$ = new int[1024];
     *  </code></pre>
     *  
-    *  @see LOCAL_SUFFIX
+    *  @see #LOCAL_SUFFIX
     * 
     * 
     */
@@ -180,13 +173,53 @@ public abstract class Kernel implements Cloneable {
     *  int[] buffer_$constant$ = new int[1024];
     *  </code></pre>
     *  
-    *  @see LOCAL_SUFFIX
+    *  @see #LOCAL_SUFFIX
     * 
     * 
     */
    @Retention(RetentionPolicy.RUNTIME)
    public @interface Constant {
 
+   }
+
+   /**
+    *
+    *  We can use this Annotation to 'tag' __private (unshared) array fields. Data in the __private address space in OpenCL is accessible only from
+    *  the current kernel instance.
+    *
+    *  To so mark a field with a buffer size of 99, we can either annotate the buffer
+    *  <pre><code>
+    *  &#64PrivateMemorySpace(99) int[] buffer = new int[99];
+    *  </code></pre>
+    *   Or use a special suffix
+    *  <pre><code>
+    *  int[] buffer_$private$99 = new int[99];
+    *  </code></pre>
+    *
+    *  <p>Note that any code which must be runnable in {@link EXECUTION_MODE#JTP} will fail to work correctly if it uses such an
+    *  array, as the array will be shared by all threads. The solution is to create a {@link NoCL} method called at the start of {@link #run()} which sets
+    *  the field to an array returned from a static <code>ThreadLocal<foo[]></code></p>. Please see <code>MedianKernel7x7</code> in the samples for an example.
+    *
+    *  @see #PRIVATE_SUFFIX
+    */
+   @Retention(RetentionPolicy.RUNTIME)
+   @Target({ElementType.FIELD})
+   public @interface PrivateMemorySpace {
+      /** Size of the array used as __private buffer. */
+      int value();
+   }
+
+    /**
+     * Annotation which can be applied to either a getter (with usual java bean naming convention relative to an instance field), or to any method
+     * with void return type, which prevents both the method body and any calls to the method being emitted in the generated OpenCL. (In the case of a getter, the
+     * underlying field is used in place of the NoCL getter method.) This allows for code specialization within a java/JTP execution path, for example to
+     * allow logging/breakpointing when debugging, or to apply ThreadLocal processing (see {@link PrivateMemorySpace}) in java to simulate OpenCL __private
+     * memory.
+     */
+   @Retention(RetentionPolicy.RUNTIME)
+   @Target({ElementType.METHOD, ElementType.FIELD})
+   public @interface NoCL {
+      // empty
    }
 
    /**
@@ -218,6 +251,22 @@ public abstract class Kernel implements Cloneable {
     *  </code></pre>
     */
    public final static String CONSTANT_SUFFIX = "_$constant$";
+
+   /**
+    *  We can use this suffix to 'tag' __private buffers.
+    *
+    *  <p>So either name the buffer
+    *  <pre><code>
+    *  int[] buffer_$private$32 = new int[32];
+    *  </code></pre>
+    *  Or use the Annotation form
+    *  <pre><code>
+    *  &#64PrivateMemorySpace(32) int[] buffer = new int[32];
+    *  </code></pre>
+    *
+    *  @see PrivateMemorySpace for a more detailed usage summary
+    */
+   public final static String PRIVATE_SUFFIX = "_$private$";
 
    /**
     * This annotation is for internal use only
@@ -448,8 +497,6 @@ public abstract class Kernel implements Cloneable {
 
       /**
        * Copy constructor
-       * 
-       * @param KernelState
        */
       protected KernelState(KernelState kernelState) {
          globalIds = kernelState.getGlobalIds();
@@ -1826,8 +1873,8 @@ public abstract class Kernel implements Cloneable {
     * 
     * @return The time spent executing the kernel (ms) 
     * 
-    * @see getConversionTime();
-    * @see getAccumulatedExectutionTime();
+    * @see #getConversionTime();
+    * @see #getAccumulatedExecutionTime();
     * 
     */
    public synchronized long getExecutionTime() {
@@ -1845,8 +1892,8 @@ public abstract class Kernel implements Cloneable {
     * 
     * @return The total time spent executing the kernel (ms) 
     * 
-    * @see getExecutionTime();
-    * @see getConversionTime();
+    * @see #getExecutionTime();
+    * @see #getConversionTime();
     * 
     */
    public synchronized long getAccumulatedExecutionTime() {
@@ -1861,8 +1908,8 @@ public abstract class Kernel implements Cloneable {
     * Determine the time taken to convert bytecode to OpenCL for first Kernel.execute(range) call.
     * @return The time spent preparing the kernel for execution using GPU
     * 
-    * @see getExecutionTime();
-    * @see getAccumulatedExectutionTime();
+    * @see #getExecutionTime();
+    * @see #getAccumulatedExecutionTime();
     */
    public synchronized long getConversionTime() {
       if (kernelRunner == null) {
@@ -1878,7 +1925,7 @@ public abstract class Kernel implements Cloneable {
     * When <code>kernel.execute(globalSize)</code> is invoked, Aparapi will schedule the execution of <code>globalSize</code> kernels. If the execution mode is GPU then 
     * the kernels will execute as OpenCL code on the GPU device. Otherwise, if the mode is JTP, the kernels will execute as a pool of Java threads on the CPU. 
     * <p>
-    * @param range The number of Kernels that we would like to initiate.
+    * @param _range The number of Kernels that we would like to initiate.
     * @returnThe Kernel instance (this) so we can chain calls to put(arr).execute(range).get(arr)
     * 
     */
@@ -1907,7 +1954,6 @@ public abstract class Kernel implements Cloneable {
     * When <code>kernel.execute(_range, _passes)</code> is invoked, Aparapi will schedule the execution of <code>_reange</code> kernels. If the execution mode is GPU then 
     * the kernels will execute as OpenCL code on the GPU device. Otherwise, if the mode is JTP, the kernels will execute as a pool of Java threads on the CPU. 
     * <p>
-    * @param _globalSize The number of Kernels that we would like to initiate.
     * @param _passes The number of passes to make
     * @return The Kernel instance (this) so we can chain calls to put(arr).execute(range).get(arr)
     * 
@@ -1937,8 +1983,7 @@ public abstract class Kernel implements Cloneable {
     * When <code>kernel.execute("entrypoint", globalSize)</code> is invoked, Aparapi will schedule the execution of <code>globalSize</code> kernels. If the execution mode is GPU then 
     * the kernels will execute as OpenCL code on the GPU device. Otherwise, if the mode is JTP, the kernels will execute as a pool of Java threads on the CPU. 
     * <p>
-    * @param _entrypoint is the name of the method we wish to use as the entrypoint to the kernel
-    * @param _globalSize The number of Kernels that we would like to initiate.
+    * @param _entry is the name of the method we wish to use as the entrypoint to the kernel
     * @return The Kernel instance (this) so we can chain calls to put(arr).execute(range).get(arr)
     * 
     */
@@ -1957,7 +2002,6 @@ public abstract class Kernel implements Cloneable {
     * the kernels will execute as OpenCL code on the GPU device. Otherwise, if the mode is JTP, the kernels will execute as a pool of Java threads on the CPU. 
     * <p>
     * @param _entrypoint is the name of the method we wish to use as the entrypoint to the kernel
-    * @param _globalSize The number of Kernels that we would like to initiate.
     * @return The Kernel instance (this) so we can chain calls to put(arr).execute(range).get(arr)
     * 
     */
@@ -1972,7 +2016,6 @@ public abstract class Kernel implements Cloneable {
     * the kernels will execute as OpenCL code on the GPU device. Otherwise, if the mode is JTP, the kernels will execute as a pool of Java threads on the CPU. 
     * <p>
     * @param _entrypoint is the name of the method we wish to use as the entrypoint to the kernel
-    * @param _globalSize The number of Kernels that we would like to initiate.
     * @return The Kernel instance (this) so we can chain calls to put(arr).execute(range).get(arr)
     * 
     */

@@ -114,7 +114,7 @@ public class KernelRunner extends KernelRunnerJNI{
    /**
     * <code>Kernel.dispose()</code> delegates to <code>KernelRunner.dispose()</code> which delegates to <code>disposeJNI()</code> to actually close JNI data structures.<br/>
     * 
-    * @see KernelRunnerJNI#disposeJNI()
+    * @see KernelRunnerJNI#disposeJNI(long)
     */
    public void dispose() {
       if (kernel.getExecutionMode().isOpenCL()) {
@@ -778,12 +778,24 @@ public class KernelRunner extends KernelRunnerJNI{
                   throw new IllegalStateException("Cannot send null refs to kernel, reverting to java");
                }
 
+               String fieldName = arg.getField().getName();
+               int arrayLength = Array.getLength(newArrayRef);
+               Integer privateMemorySize = ClassModel.getPrivateMemorySizeFromField(arg.getField());
+               if (privateMemorySize == null) {
+                  privateMemorySize = ClassModel.getPrivateMemorySizeFromFieldName(fieldName);
+               }
+               if (privateMemorySize != null) {
+                  if (arrayLength > privateMemorySize) {
+                     throw new IllegalStateException("__private array field " + fieldName + " has illegal length " + arrayLength + " > " + privateMemorySize);
+                  }
+               }
+
                if ((arg.getType() & ARG_OBJ_ARRAY_STRUCT) != 0) {
                   prepareOopConversionBuffer(arg);
                } else {
                   // set up JNI fields for normal arrays
                   arg.setJavaArray(newArrayRef);
-                  arg.setNumElements(Array.getLength(newArrayRef));
+                  arg.setNumElements(arrayLength);
                   arg.setSizeInBytes(arg.getNumElements() * arg.getPrimitiveSize());
 
                   if (((args[i].getType() & ARG_EXPLICIT) != 0) && puts.contains(newArrayRef)) {
@@ -1070,9 +1082,9 @@ public class KernelRunner extends KernelRunnerJNI{
 
                            if (type.getName().startsWith("[L")) {
                               args[i].setType(args[i].getType()
-                                    | (ARG_OBJ_ARRAY_STRUCT | 
-                                       ARG_WRITE | 
-                                       ARG_READ | 
+                                    | (ARG_OBJ_ARRAY_STRUCT |
+                                       ARG_WRITE |
+                                       ARG_READ |
                                        ARG_APARAPI_BUFFER));
 
                               if (logger.isLoggable(Level.FINE)) {
@@ -1288,7 +1300,6 @@ public class KernelRunner extends KernelRunnerJNI{
     *          It is assumed that this parameter is indeed an array (of int, float, short etc).
     * 
     * @see Kernel#get(int[] arr)
-    * @see Kernel#get(short[] arr)
     * @see Kernel#get(float[] arr)
     * @see Kernel#get(double[] arr)
     * @see Kernel#get(long[] arr)
@@ -1320,7 +1331,6 @@ public class KernelRunner extends KernelRunnerJNI{
     * @param array
     *          It is assumed that this parameter is indeed an array (of int, float, short etc).
     * @see Kernel#put(int[] arr)
-    * @see Kernel#put(short[] arr)
     * @see Kernel#put(float[] arr)
     * @see Kernel#put(double[] arr)
     * @see Kernel#put(long[] arr)

@@ -37,25 +37,18 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.amd.aparapi.internal.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Stack;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.amd.aparapi.*;
+import com.amd.aparapi.internal.annotation.*;
+import com.amd.aparapi.internal.exception.*;
+import com.amd.aparapi.internal.instruction.InstructionSet.*;
+import com.amd.aparapi.internal.model.ClassModel.AttributePool.*;
+import com.amd.aparapi.internal.model.ClassModel.ConstantPool.*;
+import com.amd.aparapi.internal.reader.*;
 
-import com.amd.aparapi.Config;
-import com.amd.aparapi.Kernel;
-import com.amd.aparapi.internal.annotation.DocMe;
-import com.amd.aparapi.internal.exception.AparapiException;
-import com.amd.aparapi.internal.exception.ClassParseException;
-import com.amd.aparapi.internal.instruction.InstructionSet.TypeSpec;
-import com.amd.aparapi.internal.model.ClassModel.AttributePool.CodeEntry;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool.MethodEntry;
-import com.amd.aparapi.internal.reader.ByteReader;
+import java.io.*;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.logging.*;
 
 /**
  * Class represents a ClassFile (MyClass.class).
@@ -129,6 +122,11 @@ public class ClassModel{
 
    private ClassModel superClazz = null;
 
+   private HashSet<String> noClMethods = null;
+
+   private HashMap<String, Kernel.PrivateMemorySpace> privateMemoryFields = null;
+
+
    /**
     * Create a ClassModel representing a given Class.
     * 
@@ -183,7 +181,7 @@ public class ClassModel{
    /**
     * Determine if this is the superclass of some other class.
     * 
-    * @param otherClass The class to compare against
+    * @param other The class to compare against
     * @return true if 'this' a superclass of another class   
     */
    public boolean isSuperClass(Class<?> other) {
@@ -256,6 +254,80 @@ public class ClassModel{
       }
 
       return (returnName);
+   }
+
+   /**
+    * If a field does not satisfy the private memory conditions, null, otherwise the size of private memory required.
+    */
+   public Integer getPrivateMemorySize(String fieldName) throws ClassParseException {
+      if (privateMemoryFields == null) {
+         privateMemoryFields = new HashMap<String, Kernel.PrivateMemorySpace>();
+         HashMap<Field, Kernel.PrivateMemorySpace> privateMemoryFields = new HashMap<Field, Kernel.PrivateMemorySpace>();
+         for (Field field : getClassWeAreModelling().getDeclaredFields()) {
+            Kernel.PrivateMemorySpace privateMemorySpace = field.getAnnotation(Kernel.PrivateMemorySpace.class);
+            if (privateMemorySpace != null) {
+               privateMemoryFields.put(field, privateMemorySpace);
+            }
+         }
+         for (Field field : getClassWeAreModelling().getFields()) {
+            Kernel.PrivateMemorySpace privateMemorySpace = field.getAnnotation(Kernel.PrivateMemorySpace.class);
+            if (privateMemorySpace != null) {
+               privateMemoryFields.put(field, privateMemorySpace);
+            }
+         }
+         for (Map.Entry<Field, Kernel.PrivateMemorySpace> entry : privateMemoryFields.entrySet()) {
+            this.privateMemoryFields.put(entry.getKey().getName(), entry.getValue());
+         }
+      }
+      Kernel.PrivateMemorySpace annotation = privateMemoryFields.get(fieldName);
+      if (annotation != null) {
+         return annotation.value();
+      }
+      return getPrivateMemorySizeFromFieldName(fieldName);
+   }
+
+   public static Integer getPrivateMemorySizeFromField(Field field) {
+      Kernel.PrivateMemorySpace privateMemorySpace = field.getAnnotation(Kernel.PrivateMemorySpace.class);
+      if (privateMemorySpace != null) {
+         return privateMemorySpace.value();
+      } else {
+         return null;
+      }
+   }
+
+   public static Integer getPrivateMemorySizeFromFieldName(String fieldName) throws ClassParseException {
+      if (fieldName.contains(Kernel.PRIVATE_SUFFIX)) {
+         int lastDollar = fieldName.lastIndexOf('$');
+         String sizeText = fieldName.substring(lastDollar + 1);
+         try {
+            return new Integer(Integer.parseInt(sizeText));
+         } catch (NumberFormatException e) {
+            throw new ClassParseException(ClassParseException.TYPE.IMPROPERPRIVATENAMEMANGLING, fieldName);
+         }
+      }
+      return null;
+   }
+
+   public Set<String> getNoCLMethods() {
+      if (this.noClMethods == null) {
+         noClMethods = new HashSet<String>();
+         HashSet<Method> methods = new HashSet<Method>();
+         for (Method method : getClassWeAreModelling().getDeclaredMethods()) {
+            if (method.getAnnotation(Kernel.NoCL.class) != null) {
+               methods.add(method);
+            }
+         }
+         for (Method method : getClassWeAreModelling().getMethods()) {
+            if (method.getAnnotation(Kernel.NoCL.class) != null) {
+               methods.add(method);
+            }
+         }
+         for (Method method : methods) {
+            noClMethods.add(method.getName());
+         }
+
+      }
+      return noClMethods;
    }
 
    public static String convert(String _string) {
@@ -642,6 +714,10 @@ public class ClassModel{
 
          public int getSlot() {
             return (slot);
+         }
+
+         public ClassModel getOwnerClassModel() {
+            return ClassModel.this;
          }
       }
 
@@ -1155,6 +1231,18 @@ public class ClassModel{
          }
       }
 
+      FieldEntry getFieldEntry(String _name) {
+         for (Entry entry : entries) {
+            if (entry instanceof FieldEntry) {
+               String fieldName = ((FieldEntry) entry).getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+               if (_name.equals(fieldName)) {
+                  return (FieldEntry) entry;
+               }
+            }
+         }
+         return null;
+      }
+
       public FloatEntry getFloatEntry(int _index) {
          try {
             return ((FloatEntry) entries.get(_index));
@@ -1490,7 +1578,7 @@ public class ClassModel{
                exceptionPoolEntries.add(new ExceptionPoolEntry(_byteReader));
             }
 
-            codeEntryAttributePool = new AttributePool(_byteReader);
+            codeEntryAttributePool = new AttributePool(_byteReader, getName());
          }
 
          @Override public AttributePool getAttributePool() {
@@ -1969,7 +2057,8 @@ public class ClassModel{
                   public PrimitiveValue(int _tag, ByteReader _byteReader) {
                      super(_tag);
                      typeNameIndex = _byteReader.u2();
-                     constNameIndex = _byteReader.u2();
+                     //constNameIndex = _byteReader.u2();
+                     constNameIndex = 0;
                   }
 
                   public int getConstNameIndex() {
@@ -2125,13 +2214,17 @@ public class ClassModel{
 
       private final static String LOCALVARIABLETYPETABLE_TAG = "LocalVariableTypeTable";
 
-      public AttributePool(ByteReader _byteReader) {
+      public AttributePool(ByteReader _byteReader, String name) {
          final int attributeCount = _byteReader.u2();
          AttributePoolEntry entry = null;
          for (int i = 0; i < attributeCount; i++) {
             final int attributeNameIndex = _byteReader.u2();
             final int length = _byteReader.u4();
-            final String attributeName = constantPool.getUTF8Entry(attributeNameIndex).getUTF8();
+            UTF8Entry utf8Entry = constantPool.getUTF8Entry(attributeNameIndex);
+            if (utf8Entry == null) {
+               throw new IllegalStateException("corrupted state reading attributes for " + name);
+            }
+            final String attributeName = utf8Entry.getUTF8();
             if (attributeName.equals(LOCALVARIABLETABLE_TAG)) {
                localVariableTableEntry = new RealLocalVariableTableEntry(_byteReader, attributeNameIndex, length);
                entry = (RealLocalVariableTableEntry) localVariableTableEntry;
@@ -2182,8 +2275,8 @@ public class ClassModel{
             } else {
                logger.warning("Found unexpected Attribute (name = " + attributeName + ")");
                entry = new OtherEntry(_byteReader, attributeNameIndex, length);
-               attributePoolEntries.add(entry);
             }
+            attributePoolEntries.add(entry);
 
          }
       }
@@ -2248,7 +2341,7 @@ public class ClassModel{
          fieldAccessFlags = _byteReader.u2();
          nameIndex = _byteReader.u2();
          descriptorIndex = _byteReader.u2();
-         fieldAttributePool = new AttributePool(_byteReader);
+         fieldAttributePool = new AttributePool(_byteReader, getName());
       }
 
       public int getAccessFlags() {
@@ -2318,7 +2411,7 @@ public class ClassModel{
          methodAccessFlags = _byteReader.u2();
          nameIndex = _byteReader.u2();
          descriptorIndex = _byteReader.u2();
-         methodAttributePool = new AttributePool(_byteReader);
+         methodAttributePool = new AttributePool(_byteReader, getName());
          codeEntry = methodAttributePool.getCodeEntry();
       }
 
@@ -2396,6 +2489,10 @@ public class ClassModel{
 
       public String toString() {
          return getClassModel().getClassWeAreModelling().getName() + "." + getName() + " " + getDescriptor();
+      }
+
+      public ClassModel getOwnerClassModel() {
+         return ClassModel.this;
       }
    }
 
@@ -2475,7 +2572,7 @@ public class ClassModel{
          methods.add(method);
       }
 
-      attributePool = new AttributePool(byteReader);
+      attributePool = new AttributePool(byteReader, getClassWeAreModelling().getSimpleName());
    }
 
    public int getMagic() {
