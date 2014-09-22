@@ -18,9 +18,11 @@
 	<echo>OS Version: ${os.version}</echo>
 	<echo>OS Arch:    ${os.arch}</echo>
 
-	<!-- <property name="build.compiler" value="javac1.6"/>
-	<property name="ant.build.javac.source" value="1.6"/>
-	<property name="ant.build.javac.target" value="1.6"/> -->
+    <!-- Ideally this would be the latest version of Java but not everyone is going to have it installed -->
+    <!-- Additionally we want to avoid "Class not found: javac1.8" errors from old Ant versions (i.e. Eclipse) -->
+	<property name="build.compiler" value="javac1.7"/>
+	<property name="ant.build.javac.source" value="1.7"/>
+	<property name="ant.build.javac.target" value="1.7"/>
 
 	<available property="findbugs.installed" file="${findbugs.home}"/>
 
@@ -72,8 +74,8 @@
    		  srcdir="${basedir}/src/java"
    		  destdir="${basedir}/classes"
    		  includeantruntime="false">
-                  <!--<compilerarg value="-Xlint"/>
-                         <compilerarg value="-Xlint:-path"/> -->
+          <compilerarg value="-Xlint"/>
+          <compilerarg value="-Xlint:-path"/>
        </javac>
        <jar jarfile="${basedir}/dist/aparapi.jar" basedir="${basedir}/classes">
        		<manifest>

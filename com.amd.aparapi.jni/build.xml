@@ -14,9 +14,11 @@ First consider editing the properties in build.properties
    <echo>OS Arch:    ${os.arch}</echo>
    <echo>Java Ver:   ${java.version}</echo>
 
-   <!--<property name="build.compiler" value="javac1.6"/>-->
-   <!--  <property name="ant.build.javac.source" value="1.6"/>-->
-   <!-- <property name="ant.build.javac.target" value="1.6"/> -->
+   <!-- Ideally this would be the latest version of Java but not everyone is going to have it installed -->
+   <!-- Additionally we want to avoid "Class not found: javac1.8" errors from old Ant versions (i.e. Eclipse) -->
+   <property name="build.compiler" value="javac1.7"/>
+   <property name="ant.build.javac.source" value="1.7"/>
+   <property name="ant.build.javac.target" value="1.7"/>
 
    <property environment="env" />
    <!-- we need env.PATH for msvc only -->
@@ -646,9 +648,9 @@ First consider editing the properties in build.properties
          <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <!-- JDK 6 -->
          <arg value="-I/System/Library/Frameworks/JavaVM.framework/Headers" />
-         <!-- JDK 7u51 without JDK 6 -->
-         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_12.jdk/Contents/Home/include/" />
-         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_12.jdk/Contents/Home/include/darwin/" />
+         <!-- LATEST JDK 7 without JDK 6 -->
+         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/include/" />
+         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/include/darwin/" />
          <arg value="-Iinclude" />
          <arg value="-Isrc/cpp" />
          <arg value="-Isrc/cpp/runKernel" />
