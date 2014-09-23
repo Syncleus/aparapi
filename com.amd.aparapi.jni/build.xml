@@ -20,16 +20,21 @@ First consider editing the properties in build.properties
    <property name="ant.build.javac.source" value="1.7"/>
    <property name="ant.build.javac.target" value="1.7"/>
 
+   <property name="amd.app.sdk.version" value="2.9-1"/>
    <property environment="env" />
-   <!-- we need env.PATH for msvc only -->
 
    <!-- uncomment this if you want to use mingw! -->
    <!--<property name="mingw.dir" value="c:\\MinGW"/>-->
+   
+   <!-- Check for AMD APP SDK -->
+   <echo>
+      Since AMD APP SDK 2.9 you can have multiple versions installed/co-exist on same machine, 
+      so AMD introduced a completely new naming convention for their installation directories 
+   </echo>
 
    <target name="init">
-      <available property="win32.amd.app.sdk.exists" file="C:/Program Files/AMD APP" type="dir"/>
-
-      <condition property="amd.app.sdk.dir" value="C:/Program Files/AMD APP">
+      <available property="win32.amd.app.sdk.exists" file="C:/Program Files/AMD APP SDK/${amd.app.sdk.version}" type="dir"/>
+      <condition property="amd.app.sdk.dir" value="C:/Program Files/AMD APP SDK/${amd.app.sdk.version}">
          <and>
             <os family="windows" />
             <isset property="win32.amd.app.sdk.exists" />
@@ -39,8 +44,8 @@ First consider editing the properties in build.properties
          </and>
       </condition>
 
-      <available property="win64.amd.app.sdk.exists" file="C:/Program Files (x86)/AMD APP" type="dir"/>
-      <condition property="amd.app.sdk.dir" value="C:/Program Files (x86)/AMD APP">
+      <available property="win64.amd.app.sdk.exists" file="C:/Program Files (x86)/AMD APP SDK/${amd.app.sdk.version}" type="dir"/>
+      <condition property="amd.app.sdk.dir" value="C:/Program Files (x86)/AMD APP SDK/${amd.app.sdk.version}">
          <and>
             <os family="windows" />
             <isset property="win64.amd.app.sdk.exists" />
@@ -50,8 +55,8 @@ First consider editing the properties in build.properties
          </and>
       </condition>
 
-      <available property="linux.amd.app.sdk.exists" file="/opt/AMDAPP" type="dir"/>
-      <condition property="amd.app.sdk.dir" value="/opt/AMDAPP">
+      <available property="linux.amd.app.sdk.exists" file="/opt/AMDAPPSDK-${amd.app.sdk.version}" type="dir"/>
+      <condition property="amd.app.sdk.dir" value="/opt/AMDAPPSDK-${amd.app.sdk.version}">
          <and>
             <os family="unix" />
             <not>
@@ -72,7 +77,7 @@ First consider editing the properties in build.properties
 	  <!-- Check for Visual Studio -->
 	  <!-- This needs to be in descending order to properly handle multiple installations -->
 	  
-      <available property="msvc.32.11.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 11.0\VC\bin" type="dir"/>
+      <available property="msvc.32.11.0.exists" file="C:/Program Files (x86)/Microsoft Visual Studio 11.0\VC\bin" type="dir"/>
       <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 11.0">
          <and>
             <not>
@@ -308,9 +313,9 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
 
-         At present msvc.dir seems to be Configured but not msvc.sdk.dir
+         At present msvc.dir seems to be configured but not msvc.sdk.dir
          ]]>
       </fail>
 
@@ -325,11 +330,12 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
 
-         At present msvc.sdk.dir seems to be Configured but not msvc.dir
+         At present msvc.sdk.dir seems to be configured but not msvc.dir
          ]]>
       </fail>
+      
       <available file="${msvc.dir}" type="dir" property="msvc.dir.exists" />
       <available file="${msvc.sdk.dir}" type="dir" property="msvc.sdk.dir.exists" />
 
@@ -344,11 +350,12 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
 
          At present msvc.dir is set (to ${msvc.dir}) but that dir does not exist
          ]]>
       </fail>
+      
       <fail message="Error:">
          <condition>
             <and>
@@ -360,7 +367,7 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
 
          At present msvc.sdk.dir is set (to ${msvc.sdk.dir}) but that dir does not exist
          ]]>
@@ -379,15 +386,17 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
 
          At present mingw.dir is set (to ${mingw.dir}) but that dir does not exist
          ]]>
       </fail>
+      
       <!--<echo message="java.home ${java.home}"/>-->
       <!--<echo message="msvc.dir.exists ${msvc.dir.exists}"/>-->
       <!--<echo message="msvc.sdk.dir.exists ${msvc.sdk.dir.exists}"/>-->
       <!--<echo message="mingw.dir.exists ${mingw.dir.exists}"/>-->
+      
       <condition property="use.msvc">
          <and>
             <os family="windows" />
@@ -413,9 +422,9 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
 
-         At present ant is Configured for both MinGW AND Microsoft Visual Studio. You need to pick one or the other :) !
+         At present Ant is Configured for both MinGW AND Microsoft Visual Studio. You need to pick one or the other :) !
 
          Just comment out the properties for the compiler that you *do not* wish to use.
          ]]>
@@ -434,9 +443,9 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
 
-         This looks like a windows machine so you probably need to Configure either:-
+         This looks like a Windows machine so you probably need to configure either:
 
          * msvc.dir and msvc.sdk.dir if you wish to use Microsoft Visual Studio compiler
 
@@ -491,7 +500,7 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
 
          Could not find vc\bin\${optional.amd64.subdir}cl under Configured msvc.dir. Check if msvc.dir is pointing
          to a valid visual studio installation
@@ -510,7 +519,7 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
 
          You need to set amd.app.sdk.dir to point to the location where AMD APP SDK is installed
          ]]>
@@ -529,7 +538,7 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
 
          At present amd.app.sdk.dir is set (to ${amd.app.sdk.dir}) but that dir does not exist
          ]]>
@@ -598,11 +607,10 @@ First consider editing the properties in build.properties
       </javah>
    </target>
 
-
    <target name="gcc" if="use.gcc">
       <mkdir dir="${basedir}/dist"/>
       <echo message="linuxcc ${os.arch}" />
-      <exec executable="g++">
+      <exec executable="g++" failonerror="true">
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
@@ -640,7 +648,7 @@ First consider editing the properties in build.properties
    <target name="gcc_mac" if="use.gcc_mac">
       <mkdir dir="${basedir}/dist"/>
       <echo message="gcc ${os.arch}" />
-      <exec executable="g++">
+      <exec executable="g++" failonerror="true">
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
@@ -682,7 +690,7 @@ First consider editing the properties in build.properties
    <target name="msvc" if="use.msvc">
       <mkdir dir="${basedir}\dist"/>
       <echo message="msvc ${os.arch}" />
-      <exec executable="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe">
+      <exec executable="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe" failonerror="true">
          <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE" />
          <arg value="/nologo" />
          <arg value="/TP" />
@@ -695,10 +703,9 @@ First consider editing the properties in build.properties
          <arg value="/I${java.home}\..\include" />
          <arg value="/I${java.home}\..\include\win32" />
          <arg value="/Iinclude" />
-	 <arg value="/I${amd.app.sdk.dir}\include" />
+	     <arg value="/I${amd.app.sdk.dir}\include" />
          <arg value="/IC:\Program Files (x86)\Windows Kits\8.0\Include\shared" />
          <arg value="/IC:\Program Files (x86)\Windows Kits\8.0\Include\um" />
-	 
          <arg value="/Isrc/cpp" />
          <arg value="/Isrc/cpp/runKernel" />
          <arg value="/Isrc/cpp/invoke" />
@@ -721,7 +728,7 @@ First consider editing the properties in build.properties
          <arg value="/link" />
          <arg value="/libpath:${msvc.dir}\vc\lib\${optional.amd64.subdir}" />
          <arg value="/libpath:${msvc.sdk.dir}\lib\${optional.x64.subdir}" />
-	 <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
+	     <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
          <arg value="/libpath:C:\Program Files (x86)\Windows Kits\8.0\Lib\win8\um\x64" />
          <arg value="OpenCL.lib" />
          <arg value="/out:${basedir}\dist\aparapi_${x86_or_x86_64}.dll" />
@@ -731,7 +738,7 @@ First consider editing the properties in build.properties
    <target name="mingw" if="use.mingw">
       <mkdir dir="${basedir}\dist"/>
       <echo message="mingw ${os.arch}" /> 
-      <exec executable="${mingw.dir}/bin/g++">
+      <exec executable="${mingw.dir}/bin/g++" failonerror="true">
          <env key="PATH" path="${env.PATH};${mingw.dir}/bin" />
          <arg value="-Wall" />
          <arg value="-O3" />
@@ -772,7 +779,7 @@ First consider editing the properties in build.properties
    <target name="msvc_cltest" if="use.msvc">
       <mkdir dir="${basedir}\dist"/>
       <echo message="msvc_cltest ${os.arch}" />
-      <exec executable="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe">
+      <exec executable="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe" failonerror="true">
          <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE" />
          <arg value="/nologo" />
          <arg value="/TP" />
@@ -797,16 +804,16 @@ First consider editing the properties in build.properties
    <target name="mac_cltest" if="use.gcc_mac">
       <mkdir dir="${basedir}/dist"/>
       <echo message="gcc cltest ${os.arch}" />
-      <exec executable="g++">
+      <exec executable="g++" failonerror="true">
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
          <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <!-- JDK 6 -->
          <arg value="-I/System/Library/Frameworks/JavaVM.framework/Headers" />
-         <!-- JDK 7u51 without JDK 6 -->
-         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_51.jdk/Contents/Home/include/" />
-         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_51.jdk/Contents/Home/include/darwin/" />
+         <!-- Latest JDK 7 without JDK 6 -->
+         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/include/" />
+         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/include/darwin/" />
          <arg value="-Iinclude" />
          <arg value="-Isrc/cpp" />
          <arg value="-Isrc/cpp/runKernel" />
@@ -822,7 +829,7 @@ First consider editing the properties in build.properties
    <target name="gcc_cltest" if="use.gcc">
       <mkdir dir="${basedir}/dist"/>
       <echo message="gcc cltest ${os.arch}" />
-      <exec executable="g++">
+      <exec executable="g++" failonerror="true">
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
@@ -841,7 +848,7 @@ First consider editing the properties in build.properties
    <target name="gcc_clt" if="use.gcc">
       <mkdir dir="${basedir}/dist"/>
       <echo message="gcc cltest ${os.arch}" />
-      <exec executable="g++">
+      <exec executable="g++" failonerror="true">
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
@@ -852,11 +859,10 @@ First consider editing the properties in build.properties
       </exec>
   </target>
 
-
    <target name="mac_clt" if="use.gcc_mac">
       <mkdir dir="${basedir}/dist"/>
       <echo message="gcc clt ${os.arch}" />
-      <exec executable="g++">
+      <exec executable="g++" failonerror="true">
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
