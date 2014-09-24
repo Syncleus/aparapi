@@ -321,7 +321,10 @@ First consider editing the properties in build.properties
       <condition property="optional.x64.subdir" value="" else="x64\">
         <equals arg1="${x86_or_x86_64}" arg2="x86"/>
       </condition>
-
+      
+      <condition property="gcc.m.value" value="32" else="64">
+        <equals arg1="${x86_or_x86_64}" arg2="x86"/>
+      </condition>
 
       <available file="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe" type="file" property="cl.exists" />
 
@@ -447,6 +450,7 @@ First consider editing the properties in build.properties
       <mkdir dir="${basedir}/dist"/>
       <echo message="linuxcc ${os.arch}" />
       <exec executable="g++" failonerror="true">
+         <arg value="-m${gcc.m.value}" />
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
