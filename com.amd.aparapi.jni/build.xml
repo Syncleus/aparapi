@@ -315,17 +315,11 @@ First consider editing the properties in build.properties
       </condition>
 
       <condition property="optional.amd64.subdir" value="" else="amd64\">
-         <or>
-            <os arch="x86" />
-            <os arch="i386" />
-         </or>
+         <equals arg1="${x86_or_x86_64}" arg2="x86"/>
       </condition>
 
       <condition property="optional.x64.subdir" value="" else="x64\">
-         <or>
-            <os arch="x86" />
-            <os arch="i386" />
-         </or>
+        <equals arg1="${x86_or_x86_64}" arg2="x86"/>
       </condition>
 
 
