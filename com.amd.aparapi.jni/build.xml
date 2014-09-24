@@ -55,7 +55,7 @@ First consider editing the properties in build.properties
       </condition>
 
       <available property="linux.amd.app.sdk.exists" file="/opt/AMDAPPSDK-${amd.app.sdk.version}" type="dir"/>
-      <condition property="amd.app.sdk.dir" value="/opt/AMDAPPSDK-${amd.app.sdk.version}¬">
+      <condition property="amd.app.sdk.dir" value="/opt/AMDAPPSDK-${amd.app.sdk.version}">
          <and>
             <os family="unix" />
             <not>
