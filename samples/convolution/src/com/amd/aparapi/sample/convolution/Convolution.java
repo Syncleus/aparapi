@@ -34,7 +34,7 @@ to national security controls as identified on the Commerce Control List (curren
 of EAR).  For the most current Country Group listings, or for additional information about the EAR or your obligations
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
-*/
+ */
 
 package com.amd.aparapi.sample.convolution;
 
@@ -42,75 +42,79 @@ import java.io.File;
 
 import com.amd.aparapi.Kernel;
 
-public class Convolution{
+public class Convolution {
 
-   final static class ImageConvolution extends Kernel{
-      private float convMatrix3x3[];
+    public static void main(final String[] _args) {
 
-      private int width, height;
+        final File file = new File(_args.length == 1 ? _args[0] : "testcard.jpg");
 
-      private byte imageIn[], imageOut[];
+        final ImageConvolution convolution = new ImageConvolution();
 
-      public void processPixel(int x, int y, int w, int h) {
-         float accum = 0f;
-         int count = 0;
-         for (int dx = -3; dx < 6; dx += 3) {
-            for (int dy = -1; dy < 2; dy += 1) {
-               int rgb = 0xff & imageIn[((y + dy) * w) + (x + dx)];
+        final float convMatrix3x3[] = new float[] {
+                0f,
+                -10f,
+                0f,
+                -10f,
+                40f,
+                -10f,
+                0f,
+                -10f,
+                0f,
+        };
 
-               accum += rgb * convMatrix3x3[count++];
+        new ConvolutionViewer(file, convMatrix3x3) {
+
+            private static final long serialVersionUID = 7858079467616904028L;
+
+            @Override
+            protected void applyConvolution(float[] _convMatrix3x3, byte[] _inBytes, byte[] _outBytes, int _width,
+                    int _height) {
+                convolution.applyConvolution(_convMatrix3x3, _inBytes, _outBytes, _width, _height);
             }
-         }
-         byte value = (byte) (max(0, min((int) accum, 255)));
-         imageOut[y * w + x] = value;
+        };
+    }
 
-      }
+    final static class ImageConvolution extends Kernel {
 
-      @Override public void run() {
-         int x = getGlobalId(0) % (width * 3);
-         int y = getGlobalId(0) / (width * 3);
+        private float convMatrix3x3[];
 
-         if (x > 3 && x < (width * 3 - 3) && y > 1 && y < (height - 1)) {
-            processPixel(x, y, width * 3, height);
-         }
+        private int width, height;
 
-      }
+        private byte imageIn[], imageOut[];
 
-      public void applyConvolution(float[] _convMatrix3x3, byte[] _imageIn, byte[] _imageOut, int _width, int _height) {
-         imageIn = _imageIn;
-         imageOut = _imageOut;
-         width = _width;
-         height = _height;
-         convMatrix3x3 = _convMatrix3x3;
-         execute(3 * width * height);
-      }
+        public void processPixel(int x, int y, int w, int h) {
+            float accum = 0f;
+            int count = 0;
+            for (int dx = -3; dx < 6; dx += 3) {
+                for (int dy = -1; dy < 2; dy += 1) {
+                    final int rgb = 0xff & imageIn[((y + dy) * w) + (x + dx)];
 
-   }
+                    accum += rgb * convMatrix3x3[count++];
+                }
+            }
+            final byte value = (byte) (max(0, min((int) accum, 255)));
+            imageOut[(y * w) + x] = value;
 
-   public static void main(final String[] _args) {
-      File file = new File(_args.length == 1 ? _args[0] : "testcard.jpg");
+        }
 
-      final ImageConvolution convolution = new ImageConvolution();
+        @Override
+        public void run() {
+            final int x = getGlobalId(0) % (width * 3);
+            final int y = getGlobalId(0) / (width * 3);
 
-      float convMatrix3x3[] = new float[] {
-            0f,
-            -10f,
-            0f,
-            -10f,
-            40f,
-            -10f,
-            0f,
-            -10f,
-            0f,
-      };
+            if ((x > 3) && (x < ((width * 3) - 3)) && (y > 1) && (y < (height - 1))) {
+                processPixel(x, y, width * 3, height);
+            }
 
-      new ConvolutionViewer(file, convMatrix3x3){
-         @Override protected void applyConvolution(float[] _convMatrix3x3, byte[] _inBytes, byte[] _outBytes, int _width,
-               int _height) {
-            convolution.applyConvolution(_convMatrix3x3, _inBytes, _outBytes, _width, _height);
-         }
-      };
+        }
 
-   }
-
+        public void applyConvolution(float[] _convMatrix3x3, byte[] _imageIn, byte[] _imageOut, int _width, int _height) {
+            imageIn = _imageIn;
+            imageOut = _imageOut;
+            width = _width;
+            height = _height;
+            convMatrix3x3 = _convMatrix3x3;
+            execute(3 * width * height);
+        }
+    }
 }
