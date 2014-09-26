@@ -4,4 +4,4 @@ java \
    -Dsize=$2  \
    -Diterations=$3 \
    -classpath blackscholes.jar:..\..\com.amd.aparapi\dist\aparapi.jar \
-   com.amd.aparapi.samples.blackscholes.Main 
+   com.amd.aparapi.sample.blackscholes.Main 

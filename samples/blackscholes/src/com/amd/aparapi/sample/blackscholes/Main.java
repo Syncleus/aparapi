@@ -35,7 +35,7 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
 */
-package com.amd.aparapi.samples.blackscholes;
+package com.amd.aparapi.sample.blackscholes;
 
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.Range;
