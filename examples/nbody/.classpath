@@ -8,11 +8,7 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="com.amd.aparapi.jni/dist"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/third-party/jogamp/gluegen-rt.jar">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="third-party/jogamp"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/third-party/jogamp/jogl-all.jar"/>
+	<classpathentry kind="lib" path=".libs/gluegen-rt.jar"/>
+	<classpathentry kind="lib" path=".libs/jogl-all.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
