@@ -45,6 +45,7 @@
 			<sysproperty key="com.amd.aparapi.executionMode" value="JTP" />
 		</java>
 	</target>
+	
 	<target name="run" depends="run-gpu" />
 
 </project>
