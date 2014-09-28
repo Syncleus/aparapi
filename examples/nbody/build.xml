@@ -12,22 +12,48 @@
 
 	<property name="jogl.all.jar" value="jogl-all.jar" />
 	<property name="jogl.all.natives.macosx.jar" value="jogl-all-natives-macosx-universal.jar" />
+	<property name="jogl.all.natives.windows.i586.jar" value="jogl-all-natives-windows-i586.jar" />
+	<property name="jogl.all.natives.windows.amd64.jar" value="jogl-all-natives-windows-amd64.jar" />
+	<property name="jogl.all.natives.linux.i586.jar" value="jogl-all-natives-linux-i586.jar" />
+	<property name="jogl.all.natives.linux.amd64.jar" value="jogl-all-natives-linux-amd64.jar" />
+
 	<property name="gluegen.rt.jar" value="gluegen-rt.jar" />
 	<property name="gluegen.rt.natives.macosx.jar" value="gluegen-rt-natives-macosx-universal.jar" />
-	
+	<property name="gluegen.rt.natives.windows.i586.jar" value="gluegen-rt-natives-windows-i586.jar" />
+	<property name="gluegen.rt.natives.windows.amd64.jar" value="gluegen-rt-natives-windows-amd64.jar" />
+	<property name="gluegen.rt.natives.linux.i586.jar" value="gluegen-rt-natives-linux-i586.jar" />
+	<property name="gluegen.rt.natives.linux.amd64.jar" value="gluegen-rt-natives-linux-amd64.jar" />
+
 	<property name="jogamp.url" value="http://jogamp.org/deployment/archive/rc/gluegen_52-joal_32-jogl_66-jocl_41/jar" />
-	
+
 	<property name="jogl.all.url" value="${jogamp.url}/${jogl.all.jar}" />
-	<property name="jogl.all.natives.macosx.url" value="${jogamp.url}/${jogl.all.natives.macosx.jar}" />	
+	<property name="jogl.all.natives.macosx.url" value="${jogamp.url}/${jogl.all.natives.macosx.jar}" />
+	<property name="jogl.all.natives.windows.i586.url" value="${jogamp.url}/${jogl.all.natives.windows.i586.jar}" />
+	<property name="jogl.all.natives.windows.amd64.url" value="${jogamp.url}/${jogl.all.natives.windows.amd64.jar}" />
+	<property name="jogl.all.natives.linux.i586.url" value="${jogamp.url}/${jogl.all.natives.linux.i586.jar}" />
+	<property name="jogl.all.natives.linux.amd64.url" value="${jogamp.url}/${jogl.all.natives.linux.amd64.jar}" />
+
 	<property name="gluegen.rt.url" value="${jogamp.url}/${gluegen.rt.jar}" />
 	<property name="gluegen.rt.natives.macosx.url" value="${jogamp.url}/${gluegen.rt.natives.macosx.jar}" />
-	
+	<property name="gluegen.rt.natives.windows.i586.url" value="${jogamp.url}/${gluegen.rt.natives.windows.1586.jar}" />
+	<property name="gluegen.rt.natives.windows.amd64.url" value="${jogamp.url}/${gluegen.rt.natives.windows.amd64.jar}" />
+	<property name="gluegen.rt.natives.linux.i586.url" value="${jogamp.url}/${gluegen.rt.natives.linux.i586.jar}" />
+	<property name="gluegen.rt.natives.linux.amd64.url" value="${jogamp.url}/${gluegen.rt.natives.linux.amd64.jar}" />
+
 	<path id="compiler.class.path">
 		<pathelement path="../../com.amd.aparapi/dist/aparapi.jar" />
 		<pathelement path="${libs.root}/${jogl.all.jar}" />
 		<pathelement path="${libs.root}/${jogl.all.natives.macosx.jar}" />
+		<pathelement path="${libs.root}/${jogl.all.natives.windows.i586.jar}" />
+		<pathelement path="${libs.root}/${jogl.all.natives.windows.amd64.jar}" />
+		<pathelement path="${libs.root}/${jogl.all.natives.linux.i586.jar}" />
+		<pathelement path="${libs.root}/${jogl.all.natives.linux.amd64.jar}" />
 		<pathelement path="${libs.root}/${gluegen.rt.jar}" />
 		<pathelement path="${libs.root}/${gluegen.rt.natives.macosx.jar}" />
+		<pathelement path="${libs.root}/${gluegen.rt.natives.windows.i586.jar}" />
+		<pathelement path="${libs.root}/${gluegen.rt.natives.windows.amd64.jar}" />
+		<pathelement path="${libs.root}/${gluegen.rt.natives.linux.i586.jar}" />
+		<pathelement path="${libs.root}/${gluegen.rt.natives.linux.amd64.jar}" />
 		<pathelement path="classes" />
 	</path>
 
@@ -45,8 +71,16 @@
 		<!-- Download and unzip requested deps -->
 		<get src="${jogl.all.url}" dest="${libs.root}/${jogl.all.jar}" />
 		<get src="${jogl.all.natives.macosx.url}" dest="${libs.root}/${jogl.all.natives.macosx.jar}" />
+		<get src="${jogl.all.natives.macosx.url}" dest="${libs.root}/${jogl.all.natives.windows.i586.jar}" />
+		<get src="${jogl.all.natives.macosx.url}" dest="${libs.root}/${jogl.all.natives.windows.amd64.jar}" />
+		<get src="${jogl.all.natives.macosx.url}" dest="${libs.root}/${jogl.all.natives.linux.i586.jar}" />
+		<get src="${jogl.all.natives.macosx.url}" dest="${libs.root}/${jogl.all.natives.linux.amd64.jar}" />
 		<get src="${gluegen.rt.url}" dest="${libs.root}/${gluegen.rt.jar}" />
 		<get src="${gluegen.rt.natives.macosx.url}" dest="${libs.root}/${gluegen.rt.natives.macosx.jar}" />
+		<get src="${gluegen.rt.natives.macosx.url}" dest="${libs.root}/${gluegen.rt.natives.windows.i586.jar}" />
+		<get src="${gluegen.rt.natives.macosx.url}" dest="${libs.root}/${gluegen.rt.natives.windows.amd64.jar}" />
+		<get src="${gluegen.rt.natives.macosx.url}" dest="${libs.root}/${gluegen.rt.natives.linux.i586.jar}" />
+		<get src="${gluegen.rt.natives.macosx.url}" dest="${libs.root}/${gluegen.rt.natives.linux.amd64.jar}" />
 	</target>
 
 	<target name="build" depends="clean">
