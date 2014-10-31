@@ -78,7 +78,7 @@ public class Config extends ConfigJNI{
    /**
     * Allows the user to request a specific Kernel.EXECUTION_MODE enum value for all Kernels.
     *
-    *  Usage -Dcom.amd.aparapi.executionMode={SEQ|JTP|CPU|GPU}
+    *  Usage -Dcom.amd.aparapi.executionMode={SEQ|JTP|CPU|GPU|ACC}
     *  
     *  @see com.amd.aparapi.Kernel.EXECUTION_MODE
     */
@@ -188,7 +188,7 @@ public class Config extends ConfigJNI{
       }
 
       if (dumpFlags) {
-         System.out.println(propPkgName + ".executionMode{GPU|CPU|JTP|SEQ}=" + executionMode);
+         System.out.println(propPkgName + ".executionMode{GPU|ACC|CPU|JTP|SEQ}=" + executionMode);
          System.out.println(propPkgName + ".logLevel{OFF|FINEST|FINER|FINE|WARNING|SEVERE|ALL}=" + logger.getLevel());
          System.out.println(propPkgName + ".enableProfiling{true|false}=" + enableProfiling);
          System.out.println(propPkgName + ".enableProfilingCSV{true|false}=" + enableProfilingCSV);

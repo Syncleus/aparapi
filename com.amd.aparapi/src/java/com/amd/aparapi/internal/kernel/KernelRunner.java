@@ -100,6 +100,8 @@ public class KernelRunner extends KernelRunnerJNI{
    private Entrypoint entryPoint;
 
    private int argc;
+  
+   private boolean isFallBack = false;  // If isFallBack, rebuild the kernel (necessary?)
    
    private final ExecutorService threadPool = Executors.newCachedThreadPool();
    /**
@@ -902,6 +904,7 @@ public class KernelRunner extends KernelRunnerJNI{
    }
 
    synchronized private Kernel fallBackAndExecute(String _entrypointName, final Range _range, final int _passes) {
+      isFallBack = true;
       if (kernel.hasNextExecutionMode()) {
          kernel.tryNextExecutionMode();
       } else {
@@ -914,14 +917,14 @@ public class KernelRunner extends KernelRunnerJNI{
    synchronized private Kernel warnFallBackAndExecute(String _entrypointName, final Range _range, final int _passes,
          Exception _exception) {
       if (logger.isLoggable(Level.WARNING)) {
-         logger.warning("Reverting to Java Thread Pool (JTP) for " + kernel.getClass() + ": " + _exception.getMessage());
+         logger.warning("Reverting to the next execution mode for " + kernel.getClass() + ": " + _exception.getMessage());
          _exception.printStackTrace();
       }
       return fallBackAndExecute(_entrypointName, _range, _passes);
    }
 
    synchronized private Kernel warnFallBackAndExecute(String _entrypointName, final Range _range, final int _passes, String _excuse) {
-      logger.warning("Reverting to Java Thread Pool (JTP) for " + kernel.getClass() + ": " + _excuse);
+      logger.warning("Reverting to the next execution mode for " + kernel.getClass() + ": " + _excuse);
       return fallBackAndExecute(_entrypointName, _range, _passes);
    }
 
@@ -941,12 +944,14 @@ public class KernelRunner extends KernelRunnerJNI{
          Device device = _range.getDevice();
 
          if ((device == null) || (device instanceof OpenCLDevice)) {
-            if (entryPoint == null) {
-               try {
-                  final ClassModel classModel = new ClassModel(kernel.getClass());
-                  entryPoint = classModel.getEntrypoint(_entrypointName, kernel);
-               } catch (final Exception exception) {
-                  return warnFallBackAndExecute(_entrypointName, _range, _passes, exception);
+            if ((entryPoint == null) || (isFallBack)) {
+               if (entryPoint == null) {
+                  try {
+                     final ClassModel classModel = new ClassModel(kernel.getClass());
+                     entryPoint = classModel.getEntrypoint(_entrypointName, kernel);
+                  } catch (final Exception exception) {
+                     return warnFallBackAndExecute(_entrypointName, _range, _passes, exception);
+                  }
                }
 
                if ((entryPoint != null) && !entryPoint.shouldFallback()) {
@@ -960,10 +965,19 @@ public class KernelRunner extends KernelRunnerJNI{
                      int jniFlags = 0;
                      if (openCLDevice == null) {
                         if (kernel.getExecutionMode().equals(EXECUTION_MODE.GPU)) {
-                           // We used to treat as before by getting first GPU device
-                           // now we get the best GPU
-                           openCLDevice = (OpenCLDevice) OpenCLDevice.best();
+                           // Get the best GPU
+                           openCLDevice = (OpenCLDevice) OpenCLDevice.bestGPU();
                            jniFlags |= JNI_FLAG_USE_GPU; // this flag might be redundant now. 
+                           if (openCLDevice == null) {
+                              return warnFallBackAndExecute(_entrypointName, _range, _passes, "GPU request can't be honored");
+                           }
+                        } else if (kernel.getExecutionMode().equals(EXECUTION_MODE.ACC)) {
+                           // Get the best ACC
+                           openCLDevice = (OpenCLDevice) OpenCLDevice.bestACC();
+                           jniFlags |= JNI_FLAG_USE_ACC; // this flag might be redundant now. 
+                           if (openCLDevice == null) {
+                              return warnFallBackAndExecute(_entrypointName, _range, _passes, "ACC request can't be honored");
+                           }
                         } else {
                            // We fetch the first CPU device 
                            openCLDevice = (OpenCLDevice) OpenCLDevice.firstCPU();
@@ -972,9 +986,11 @@ public class KernelRunner extends KernelRunnerJNI{
                                     "CPU request can't be honored not CPU device");
                            }
                         }
-                     } else {
+                     } else { // openCLDevice == null
                         if (openCLDevice.getType() == Device.TYPE.GPU) {
                            jniFlags |= JNI_FLAG_USE_GPU; // this flag might be redundant now. 
+                        } else if (openCLDevice.getType() == Device.TYPE.ACC) {
+                           jniFlags |= JNI_FLAG_USE_ACC; // this flag might be redundant now. 
                         }
                      }
 
@@ -1018,6 +1034,7 @@ public class KernelRunner extends KernelRunnerJNI{
                   final boolean all32AtomicsAvailable = hasGlobalInt32BaseAtomicsSupport()
                         && hasGlobalInt32ExtendedAtomicsSupport() && hasLocalInt32BaseAtomicsSupport()
                         && hasLocalInt32ExtendedAtomicsSupport();
+
 
                   if (entryPoint.requiresAtomic32Pragma() && !all32AtomicsAvailable) {
 
@@ -1162,11 +1179,11 @@ public class KernelRunner extends KernelRunnerJNI{
                      }
 
                      i++;
-                  }
+                  } 
 
                   // at this point, i = the actual used number of arguments
                   // (private buffers do not get treated as arguments)
-
+   
                   argc = i;
 
                   setArgsJNI(jniContextHandle, args, argc);
@@ -1175,24 +1192,26 @@ public class KernelRunner extends KernelRunnerJNI{
 
                   try {
                      executeOpenCL(_entrypointName, _range, _passes);
+                     isFallBack = false;
                   } catch (final AparapiException e) {
                      warnFallBackAndExecute(_entrypointName, _range, _passes, e);
                   }
-               } else {
+               } else { // (entryPoint != null) && !entryPoint.shouldFallback()
                   warnFallBackAndExecute(_entrypointName, _range, _passes, "failed to locate entrypoint");
                }
-            } else {
+            } else { // (entryPoint == null) || (isFallBack)
                try {
                   executeOpenCL(_entrypointName, _range, _passes);
+                  isFallBack = false;
                } catch (final AparapiException e) {
                   warnFallBackAndExecute(_entrypointName, _range, _passes, e);
                }
             }
-         } else {
+         } else { // (device == null) || (device instanceof OpenCLDevice)
             warnFallBackAndExecute(_entrypointName, _range, _passes,
                   "OpenCL was requested but Device supplied was not an OpenCLDevice");
          }
-      } else {
+      } else { // kernel.getExecutionMode().isOpenCL()
          executeJava(_range, _passes);
       }
 
@@ -1308,14 +1327,14 @@ public class KernelRunner extends KernelRunnerJNI{
     */
    public void get(Object array) {
       if (explicit
-            && ((kernel.getExecutionMode() == Kernel.EXECUTION_MODE.GPU) || (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.CPU))) {
+            && ((kernel.getExecutionMode() == Kernel.EXECUTION_MODE.GPU) || (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.ACC) || (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.CPU))) {
          // Only makes sense when we are using OpenCL
          getJNI(jniContextHandle, array);
       }
    }
 
    public List<ProfileInfo> getProfileInfo() {
-      if (((kernel.getExecutionMode() == Kernel.EXECUTION_MODE.GPU) || (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.CPU))) {
+      if (((kernel.getExecutionMode() == Kernel.EXECUTION_MODE.GPU) || (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.ACC) || (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.CPU))) {
          // Only makes sense when we are using OpenCL
          return (getProfileInfoJNI(jniContextHandle));
       } else {
@@ -1340,7 +1359,7 @@ public class KernelRunner extends KernelRunnerJNI{
 
    public void put(Object array) {
       if (explicit
-            && ((kernel.getExecutionMode() == Kernel.EXECUTION_MODE.GPU) || (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.CPU))) {
+            && ((kernel.getExecutionMode() == Kernel.EXECUTION_MODE.GPU) || (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.ACC) || (kernel.getExecutionMode() == Kernel.EXECUTION_MODE.CPU))) {
          // Only makes sense when we are using OpenCL
          puts.add(array);
       }
