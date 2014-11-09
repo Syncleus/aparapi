@@ -40,6 +40,10 @@ package com.amd.aparapi;
 import com.amd.aparapi.annotation.*;
 import com.amd.aparapi.exception.*;
 import com.amd.aparapi.internal.kernel.*;
+import com.amd.aparapi.internal.model.CacheEnabler;
+import com.amd.aparapi.internal.model.ValueCache;
+import com.amd.aparapi.internal.model.ValueCache.ThrowingValueComputer;
+import com.amd.aparapi.internal.model.ValueCache.ValueComputer;
 import com.amd.aparapi.internal.model.ClassModel.ConstantPool.*;
 import com.amd.aparapi.internal.opencl.*;
 import com.amd.aparapi.internal.util.*;
@@ -488,6 +492,8 @@ public abstract class Kernel implements Cloneable {
 
       private volatile CyclicBarrier localBarrier;
 
+      private boolean localBarrierDisabled;
+
       /**
        * Default constructor
        */
@@ -619,6 +625,24 @@ public abstract class Kernel implements Cloneable {
        */
       public void setLocalBarrier(CyclicBarrier localBarrier) {
          this.localBarrier = localBarrier;
+      }
+
+      public void awaitOnLocalBarrier() {
+         if (!localBarrierDisabled) {
+            try {
+               kernelState.getLocalBarrier().await();
+            } catch (final InterruptedException e) {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            } catch (final BrokenBarrierException e) {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            }
+         }
+      }
+
+      public void disableLocalBarrier() {
+         localBarrierDisabled = true;
       }
    }
 
@@ -1834,15 +1858,7 @@ public abstract class Kernel implements Cloneable {
    @OpenCLDelegate
    @Experimental
    protected final void localBarrier() {
-      try {
-         kernelState.getLocalBarrier().await();
-      } catch (final InterruptedException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final BrokenBarrierException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      }
+      kernelState.awaitOnLocalBarrier();
    }
 
    /**
@@ -1860,6 +1876,16 @@ public abstract class Kernel implements Cloneable {
    protected final void globalBarrier() throws DeprecatedException {
       throw new DeprecatedException(
             "Kernel.globalBarrier() has been deprecated. It was based an incorrect understanding of OpenCL functionality.");
+   }
+
+   @OpenCLMapping(mapTo = "hypot")
+   protected float hypot(final float a, final float b) {
+      return (float) Math.hypot(a, b);
+   }
+
+   @OpenCLMapping(mapTo = "hypot")
+   protected double hypot(final double a, final double b) {
+      return Math.hypot(a, b);
    }
 
    public KernelState getKernelState() {
@@ -2100,49 +2126,64 @@ public abstract class Kernel implements Cloneable {
    }
 
    private static String getReturnTypeLetter(Method meth) {
-      final Class<?> retClass = meth.getReturnType();
+      return toClassShortNameIfAny(meth.getReturnType());
+   }
+
+   private static String toClassShortNameIfAny(final Class<?> retClass) {
+      if (retClass.isArray()) {
+         return "[" + toClassShortNameIfAny(retClass.getComponentType());
+      }
       final String strRetClass = retClass.toString();
       final String mapping = typeToLetterMap.get(strRetClass);
       // System.out.println("strRetClass = <" + strRetClass + ">, mapping = " + mapping);
+      if (mapping == null)
+         return "[" + retClass.getName() + ";";
       return mapping;
    }
 
    public static String getMappedMethodName(MethodReferenceEntry _methodReferenceEntry) {
+      if (CacheEnabler.areCachesEnabled())
+         return getProperty(mappedMethodNamesCache, _methodReferenceEntry, null);
       String mappedName = null;
       final String name = _methodReferenceEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-      for (final Method kernelMethod : Kernel.class.getDeclaredMethods()) {
-         if (kernelMethod.isAnnotationPresent(OpenCLMapping.class)) {
-            // ultimately, need a way to constrain this based upon signature (to disambiguate abs(float) from abs(int);
-            // for Alpha, we will just disambiguate based on the return type
-            if (false) {
-               System.out.println("kernelMethod is ... " + kernelMethod.toGenericString());
-               System.out.println("returnType = " + kernelMethod.getReturnType());
-               System.out.println("returnTypeLetter = " + getReturnTypeLetter(kernelMethod));
-               System.out.println("kernelMethod getName = " + kernelMethod.getName());
-               System.out.println("methRefName = " + name + " descriptor = "
-                     + _methodReferenceEntry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8());
-               System.out
-                     .println("descToReturnTypeLetter = "
-                           + descriptorToReturnTypeLetter(_methodReferenceEntry.getNameAndTypeEntry().getDescriptorUTF8Entry()
-                                 .getUTF8()));
-            }
-            if (_methodReferenceEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8().equals(kernelMethod.getName())
-                  && descriptorToReturnTypeLetter(_methodReferenceEntry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8())
-                        .equals(getReturnTypeLetter(kernelMethod))) {
-               final OpenCLMapping annotation = kernelMethod.getAnnotation(OpenCLMapping.class);
-               final String mapTo = annotation.mapTo();
-               if (!mapTo.equals("")) {
-                  mappedName = mapTo;
-                  // System.out.println("mapTo = " + mapTo);
+      Class<?> currentClass = _methodReferenceEntry.getOwnerClassModel().getClassWeAreModelling();
+      while (currentClass != Object.class) {
+         for (final Method kernelMethod : currentClass.getDeclaredMethods()) {
+            if (kernelMethod.isAnnotationPresent(OpenCLMapping.class)) {
+               // ultimately, need a way to constrain this based upon signature (to disambiguate abs(float) from abs(int);
+               // for Alpha, we will just disambiguate based on the return type
+               if (false) {
+                  System.out.println("kernelMethod is ... " + kernelMethod.toGenericString());
+                  System.out.println("returnType = " + kernelMethod.getReturnType());
+                  System.out.println("returnTypeLetter = " + getReturnTypeLetter(kernelMethod));
+                  System.out.println("kernelMethod getName = " + kernelMethod.getName());
+                  System.out.println("methRefName = " + name + " descriptor = "
+                        + _methodReferenceEntry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8());
+                  System.out.println("descToReturnTypeLetter = "
+                        + descriptorToReturnTypeLetter(_methodReferenceEntry.getNameAndTypeEntry().getDescriptorUTF8Entry()
+                              .getUTF8()));
+               }
+               if (toSignature(_methodReferenceEntry).equals(toSignature(kernelMethod))) {
+                  final OpenCLMapping annotation = kernelMethod.getAnnotation(OpenCLMapping.class);
+                  final String mapTo = annotation.mapTo();
+                  if (!mapTo.equals("")) {
+                     mappedName = mapTo;
+                     // System.out.println("mapTo = " + mapTo);
+                  }
                }
             }
          }
+         if (mappedName != null)
+            break;
+         currentClass = currentClass.getSuperclass();
       }
       // System.out.println("... in getMappedMethodName, returning = " + mappedName);
       return (mappedName);
    }
 
    public static boolean isMappedMethod(MethodReferenceEntry methodReferenceEntry) {
+      if (CacheEnabler.areCachesEnabled())
+         return getBoolean(mappedMethodFlags, methodReferenceEntry);
       boolean isMapped = false;
       for (final Method kernelMethod : Kernel.class.getDeclaredMethods()) {
          if (kernelMethod.isAnnotationPresent(OpenCLMapping.class)) {
@@ -2157,6 +2198,8 @@ public abstract class Kernel implements Cloneable {
    }
 
    public static boolean isOpenCLDelegateMethod(MethodReferenceEntry methodReferenceEntry) {
+      if (CacheEnabler.areCachesEnabled())
+         return getBoolean(openCLDelegateMethodFlags, methodReferenceEntry);
       boolean isMapped = false;
       for (final Method kernelMethod : Kernel.class.getDeclaredMethods()) {
          if (kernelMethod.isAnnotationPresent(OpenCLDelegate.class)) {
@@ -2171,6 +2214,8 @@ public abstract class Kernel implements Cloneable {
    }
 
    public static boolean usesAtomic32(MethodReferenceEntry methodReferenceEntry) {
+      if (CacheEnabler.areCachesEnabled())
+         return getProperty(atomic32Cache, methodReferenceEntry, false);
       for (final Method kernelMethod : Kernel.class.getDeclaredMethods()) {
          if (kernelMethod.isAnnotationPresent(OpenCLMapping.class)) {
             if (methodReferenceEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8().equals(kernelMethod.getName())) {
@@ -2184,6 +2229,8 @@ public abstract class Kernel implements Cloneable {
 
    // For alpha release atomic64 is not supported
    public static boolean usesAtomic64(MethodReferenceEntry methodReferenceEntry) {
+      //      if (CacheEnabler.areCachesEnabled())
+      //      return getProperty(atomic64Cache, methodReferenceEntry, false);
       //for (java.lang.reflect.Method kernelMethod : Kernel.class.getDeclaredMethods()) {
       //   if (kernelMethod.isAnnotationPresent(Kernel.OpenCLMapping.class)) {
       //      if (methodReferenceEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8().equals(kernelMethod.getName())) {
@@ -2858,5 +2905,132 @@ public abstract class Kernel implements Cloneable {
       if (currentMode.hasNext()) {
          executionMode = currentMode.next();
       }
+   }
+
+   private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> mappedMethodFlags = markedWith(OpenCLMapping.class);
+
+   private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> openCLDelegateMethodFlags = markedWith(OpenCLDelegate.class);
+
+   private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> atomic32Cache = cacheProperty(new ValueComputer<Class<?>, Map<String, Boolean>>(){
+      @Override
+      public Map<String, Boolean> compute(Class<?> key) {
+         Map<String, Boolean> properties = new HashMap<>();
+         for (final Method method : key.getDeclaredMethods()) {
+            if (isRelevant(method) && method.isAnnotationPresent(OpenCLMapping.class)) {
+               properties.put(toSignature(method), method.getAnnotation(OpenCLMapping.class).atomic32());
+            }
+         }
+         return properties;
+      }
+   });
+
+   private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> atomic64Cache = cacheProperty(new ValueComputer<Class<?>, Map<String, Boolean>>(){
+      @Override
+      public Map<String, Boolean> compute(Class<?> key) {
+         Map<String, Boolean> properties = new HashMap<>();
+         for (final Method method : key.getDeclaredMethods()) {
+            if (isRelevant(method) && method.isAnnotationPresent(OpenCLMapping.class)) {
+               properties.put(toSignature(method), method.getAnnotation(OpenCLMapping.class).atomic64());
+            }
+         }
+         return properties;
+      }
+   });
+
+   private static boolean getBoolean(ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> methodNamesCache,
+         MethodReferenceEntry methodReferenceEntry) {
+      return getProperty(methodNamesCache, methodReferenceEntry, false);
+   }
+
+   private static <A extends Annotation> ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> markedWith(
+         final Class<A> annotationClass) {
+      return cacheProperty(new ValueComputer<Class<?>, Map<String, Boolean>>(){
+         @Override
+         public Map<String, Boolean> compute(Class<?> key) {
+            Map<String, Boolean> markedMethodNames = new HashMap<>();
+            for (final Method method : key.getDeclaredMethods()) {
+               markedMethodNames.put(toSignature(method), method.isAnnotationPresent(annotationClass));
+            }
+            return markedMethodNames;
+         }
+      });
+   }
+
+   static String toSignature(Method method) {
+      return method.getName() + getArgumentsLetters(method) + getReturnTypeLetter(method);
+   }
+
+   private static String getArgumentsLetters(Method method) {
+      StringBuilder sb = new StringBuilder("(");
+      for (Class<?> parameterClass : method.getParameterTypes()) {
+         sb.append(toClassShortNameIfAny(parameterClass));
+      }
+      sb.append(")");
+      return sb.toString();
+   }
+
+   private static boolean isRelevant(Method method) {
+      return !method.isSynthetic() && !method.isBridge();
+   }
+
+   private static <V, T extends Throwable> V getProperty(ValueCache<Class<?>, Map<String, V>, T> cache,
+         MethodReferenceEntry methodReferenceEntry, V defaultValue) throws T {
+      Map<String, V> map = cache.computeIfAbsent(methodReferenceEntry.getOwnerClassModel().getClassWeAreModelling());
+      String key = toSignature(methodReferenceEntry);
+      if (map.containsKey(key))
+         return map.get(key);
+      return defaultValue;
+   }
+
+   private static String toSignature(MethodReferenceEntry methodReferenceEntry) {
+      NameAndTypeEntry nameAndTypeEntry = methodReferenceEntry.getNameAndTypeEntry();
+      return nameAndTypeEntry.getNameUTF8Entry().getUTF8() + nameAndTypeEntry.getDescriptorUTF8Entry().getUTF8();
+   }
+
+   private static final ValueCache<Class<?>, Map<String, String>, RuntimeException> mappedMethodNamesCache = cacheProperty(new ValueComputer<Class<?>, Map<String, String>>(){
+      @Override
+      public Map<String, String> compute(Class<?> key) {
+         Map<String, String> properties = new HashMap<>();
+         for (final Method method : key.getDeclaredMethods()) {
+            if (isRelevant(method) && method.isAnnotationPresent(OpenCLMapping.class)) {
+               // ultimately, need a way to constrain this based upon signature (to disambiguate abs(float) from abs(int);
+               final OpenCLMapping annotation = method.getAnnotation(OpenCLMapping.class);
+               final String mapTo = annotation.mapTo();
+               if (mapTo != null && !mapTo.equals("")) {
+                  properties.put(toSignature(method), mapTo);
+               }
+            }
+         }
+         return properties;
+      }
+   });
+
+   private static <K, V, T extends Throwable> ValueCache<Class<?>, Map<K, V>, T> cacheProperty(
+         final ThrowingValueComputer<Class<?>, Map<K, V>, T> throwingValueComputer) {
+      return ValueCache.on(new ThrowingValueComputer<Class<?>, Map<K, V>, T>(){
+         @Override
+         public Map<K, V> compute(Class<?> key) throws T {
+            Map<K, V> properties = new HashMap<>();
+            Deque<Class<?>> superclasses = new ArrayDeque<>();
+            Class<?> currentSuperClass = key;
+            do {
+               superclasses.push(currentSuperClass);
+               currentSuperClass = currentSuperClass.getSuperclass();
+            } while (currentSuperClass != Object.class);
+            for (Class<?> clazz : superclasses) {
+               // Overwrite property values for shadowed/overriden methods
+               properties.putAll(throwingValueComputer.compute(clazz));
+            }
+            return properties;
+         }
+      });
+   }
+
+   public static void invalidateCaches() {
+      atomic32Cache.invalidate();
+      atomic64Cache.invalidate();
+      mappedMethodFlags.invalidate();
+      mappedMethodNamesCache.invalidate();
+      openCLDelegateMethodFlags.invalidate();
    }
 }

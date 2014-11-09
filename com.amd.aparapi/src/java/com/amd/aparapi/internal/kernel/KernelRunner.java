@@ -48,8 +48,10 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
+import java.util.concurrent.ForkJoinPool.ManagedBlocker;
+import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -100,8 +102,18 @@ public class KernelRunner extends KernelRunnerJNI{
    private Entrypoint entryPoint;
 
    private int argc;
-   
-   private final ExecutorService threadPool = Executors.newCachedThreadPool();
+
+   private static final ForkJoinWorkerThreadFactory lowPriorityThreadFactory = new ForkJoinWorkerThreadFactory(){
+      @Override public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
+         ForkJoinWorkerThread newThread = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
+         newThread.setPriority(Thread.MIN_PRIORITY);
+         return newThread;
+      }
+   };
+
+   private static final ForkJoinPool threadPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors(),
+         lowPriorityThreadFactory, null, false);
+
    /**
     * Create a KernelRunner for a specific Kernel instance.
     * 
@@ -120,7 +132,8 @@ public class KernelRunner extends KernelRunnerJNI{
       if (kernel.getExecutionMode().isOpenCL()) {
          disposeJNI(jniContextHandle);
       }
-      threadPool.shutdownNow();
+      // We are using a shared pool, so there's no need no shutdown it when kernel is disposed
+      //      threadPool.shutdownNow();
    }
 
    private Set<String> capabilitiesSet;
@@ -215,6 +228,50 @@ public class KernelRunner extends KernelRunnerJNI{
       return capabilitiesSet.contains(OpenCL.CL_KHR_GL_SHARING);
    }
 
+   private static final class FJSafeCyclicBarrier extends CyclicBarrier{
+      FJSafeCyclicBarrier(final int threads) {
+         super(threads);
+      }
+
+      @Override public int await() throws InterruptedException, BrokenBarrierException {
+         class Awaiter implements ManagedBlocker{
+            private int value;
+
+            private boolean released;
+
+            @Override public boolean block() throws InterruptedException {
+               try {
+                  value = superAwait();
+                  released = true;
+                  return true;
+               } catch (final BrokenBarrierException e) {
+                  throw new RuntimeException(e);
+               }
+            }
+
+            @Override public boolean isReleasable() {
+               return released;
+            }
+
+            int getValue() {
+               return value;
+            }
+         }
+         final Awaiter awaiter = new Awaiter();
+         ForkJoinPool.managedBlock(awaiter);
+         return awaiter.getValue();
+      }
+
+      int superAwait() throws InterruptedException, BrokenBarrierException {
+         return super.await();
+      }
+   }
+
+   //   @FunctionalInterface
+   private interface ThreadIdSetter{
+      void set(KernelState kernelState, int globalGroupId, int threadId);
+   }
+
    /**
     * Execute using a Java thread pool. Either because we were explicitly asked to do so, or because we 'fall back' after discovering an OpenCL issue.
     * 
@@ -224,11 +281,15 @@ public class KernelRunner extends KernelRunnerJNI{
     *          The # of passes requested by the user (via <code>Kernel.execute(globalSize, passes)</code>). Note this is usually defaulted to 1 via <code>Kernel.execute(globalSize)</code>.
     * @return
     */
-   private long executeJava(final Range _range, final int _passes) {
+   protected long executeJava(final Range _range, final int _passes) {
       if (logger.isLoggable(Level.FINE)) {
          logger.fine("executeJava: range = " + _range);
       }
 
+      final int localSize0 = _range.getLocalSize(0);
+      final int localSize1 = _range.getLocalSize(1);
+      final int localSize2 = _range.getLocalSize(2);
+      final int globalSize1 = _range.getGlobalSize(1);
       if (kernel.getExecutionMode().equals(EXECUTION_MODE.SEQ)) {
          /**
           * SEQ mode is useful for testing trivial logic, but kernels which use SEQ mode cannot be used if the
@@ -238,7 +299,7 @@ public class KernelRunner extends KernelRunnerJNI{
           * 
           * So we need to check if the range is valid here. If not we have no choice but to punt.
           */
-         if ((_range.getLocalSize(0) * _range.getLocalSize(1) * _range.getLocalSize(2)) > 1) {
+         if ((localSize0 * localSize1 * localSize2) > 1) {
             throw new IllegalStateException("Can't run range with group size >1 sequentially. Barriers would deadlock!");
          }
 
@@ -252,7 +313,7 @@ public class KernelRunner extends KernelRunnerJNI{
          kernelState.setLocalId(0, 0);
          kernelState.setLocalId(1, 0);
          kernelState.setLocalId(2, 0);
-         kernelState.setLocalBarrier(new CyclicBarrier(1));
+         kernelState.setLocalBarrier(new FJSafeCyclicBarrier(1));
 
          for (int passId = 0; passId < _passes; passId++) {
             kernelState.setPassId(passId);
@@ -266,7 +327,7 @@ public class KernelRunner extends KernelRunnerJNI{
                for (int x = 0; x < _range.getGlobalSize(0); x++) {
                   kernelState.setGlobalId(0, x);
 
-                  for (int y = 0; y < _range.getGlobalSize(1); y++) {
+                  for (int y = 0; y < globalSize1; y++) {
                      kernelState.setGlobalId(1, y);
                      kernelClone.run();
                   }
@@ -275,7 +336,7 @@ public class KernelRunner extends KernelRunnerJNI{
                for (int x = 0; x < _range.getGlobalSize(0); x++) {
                   kernelState.setGlobalId(0, x);
 
-                  for (int y = 0; y < _range.getGlobalSize(1); y++) {
+                  for (int y = 0; y < globalSize1; y++) {
                      kernelState.setGlobalId(1, y);
 
                      for (int z = 0; z < _range.getGlobalSize(2); z++) {
@@ -289,13 +350,15 @@ public class KernelRunner extends KernelRunnerJNI{
             }
          }
       } else {
-         final int threads = _range.getLocalSize(0) * _range.getLocalSize(1) * _range.getLocalSize(2);
-         final int globalGroups = _range.getNumGroups(0) * _range.getNumGroups(1) * _range.getNumGroups(2);
+         final int threads = localSize0 * localSize1 * localSize2;
+         final int numGroups0 = _range.getNumGroups(0);
+         final int numGroups1 = _range.getNumGroups(1);
+         final int globalGroups = numGroups0 * numGroups1 * _range.getNumGroups(2);
          /**
           * This joinBarrier is the barrier that we provide for the kernel threads to rendezvous with the current dispatch thread.
           * So this barrier is threadCount+1 wide (the +1 is for the dispatch thread)
           */
-         final CyclicBarrier joinBarrier = new CyclicBarrier(threads + 1);
+         final CyclicBarrier joinBarrier = new FJSafeCyclicBarrier(threads + 1);
 
          /**
           * This localBarrier is only ever used by the kernels.  If the kernel does not use the barrier the threads 
@@ -308,8 +371,130 @@ public class KernelRunner extends KernelRunnerJNI{
           * 
           * This barrier is threadCount wide.  We never hit the barrier from the dispatch thread.
           */
-         final CyclicBarrier localBarrier = new CyclicBarrier(threads);
+         final CyclicBarrier localBarrier = new FJSafeCyclicBarrier(threads);
 
+         final ThreadIdSetter threadIdSetter;
+
+         if (_range.getDims() == 1) {
+            threadIdSetter = new ThreadIdSetter(){
+               @Override public void set(KernelState kernelState, int globalGroupId, int threadId) {
+                  //                   (kernelState, globalGroupId, threadId) ->{
+                  kernelState.setLocalId(0, (threadId % localSize0));
+                  kernelState.setGlobalId(0, (threadId + (globalGroupId * threads)));
+                  kernelState.setGroupId(0, globalGroupId);
+               }
+            };
+         } else if (_range.getDims() == 2) {
+
+            /**
+             * Consider a 12x4 grid of 4*2 local groups
+             * <pre>
+             *                                             threads = 4*2 = 8
+             *                                             localWidth=4
+             *                                             localHeight=2
+             *                                             globalWidth=12
+             *                                             globalHeight=4
+             * 
+             *    00 01 02 03 | 04 05 06 07 | 08 09 10 11  
+             *    12 13 14 15 | 16 17 18 19 | 20 21 22 23
+             *    ------------+-------------+------------
+             *    24 25 26 27 | 28 29 30 31 | 32 33 34 35
+             *    36 37 38 39 | 40 41 42 43 | 44 45 46 47  
+             *    
+             *    00 01 02 03 | 00 01 02 03 | 00 01 02 03  threadIds : [0..7]*6
+             *    04 05 06 07 | 04 05 06 07 | 04 05 06 07
+             *    ------------+-------------+------------
+             *    00 01 02 03 | 00 01 02 03 | 00 01 02 03
+             *    04 05 06 07 | 04 05 06 07 | 04 05 06 07  
+             *    
+             *    00 00 00 00 | 01 01 01 01 | 02 02 02 02  groupId[0] : 0..6 
+             *    00 00 00 00 | 01 01 01 01 | 02 02 02 02   
+             *    ------------+-------------+------------
+             *    00 00 00 00 | 01 01 01 01 | 02 02 02 02  
+             *    00 00 00 00 | 01 01 01 01 | 02 02 02 02
+             *    
+             *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  groupId[1] : 0..6 
+             *    00 00 00 00 | 00 00 00 00 | 00 00 00 00   
+             *    ------------+-------------+------------
+             *    01 01 01 01 | 01 01 01 01 | 01 01 01 01 
+             *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
+             *         
+             *    00 01 02 03 | 08 09 10 11 | 16 17 18 19  globalThreadIds == threadId + groupId * threads;
+             *    04 05 06 07 | 12 13 14 15 | 20 21 22 23
+             *    ------------+-------------+------------
+             *    24 25 26 27 | 32[33]34 35 | 40 41 42 43
+             *    28 29 30 31 | 36 37 38 39 | 44 45 46 47   
+             *          
+             *    00 01 02 03 | 00 01 02 03 | 00 01 02 03  localX = threadId % localWidth; (for globalThreadId 33 = threadId = 01 : 01%4 =1)
+             *    00 01 02 03 | 00 01 02 03 | 00 01 02 03   
+             *    ------------+-------------+------------
+             *    00 01 02 03 | 00[01]02 03 | 00 01 02 03 
+             *    00 01 02 03 | 00 01 02 03 | 00 01 02 03
+             *     
+             *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  localY = threadId /localWidth  (for globalThreadId 33 = threadId = 01 : 01/4 =0)
+             *    01 01 01 01 | 01 01 01 01 | 01 01 01 01   
+             *    ------------+-------------+------------
+             *    00 00 00 00 | 00[00]00 00 | 00 00 00 00 
+             *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
+             *     
+             *    00 01 02 03 | 04 05 06 07 | 08 09 10 11  globalX=
+             *    00 01 02 03 | 04 05 06 07 | 08 09 10 11     groupsPerLineWidth=globalWidth/localWidth (=12/4 =3)
+             *    ------------+-------------+------------     groupInset =groupId%groupsPerLineWidth (=4%3 = 1)
+             *    00 01 02 03 | 04[05]06 07 | 08 09 10 11 
+             *    00 01 02 03 | 04 05 06 07 | 08 09 10 11     globalX = groupInset*localWidth+localX (= 1*4+1 = 5)
+             *     
+             *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  globalY
+             *    01 01 01 01 | 01 01 01 01 | 01 01 01 01      
+             *    ------------+-------------+------------
+             *    02 02 02 02 | 02[02]02 02 | 02 02 02 02 
+             *    03 03 03 03 | 03 03 03 03 | 03 03 03 03
+             *    
+             * </pre>
+             * Assume we are trying to locate the id's for #33 
+             *
+             */
+            threadIdSetter = new ThreadIdSetter(){
+               @Override public void set(KernelState kernelState, int globalGroupId, int threadId) {
+                  //                   (kernelState, globalGroupId, threadId) ->{
+                  kernelState.setLocalId(0, (threadId % localSize0)); // threadId % localWidth =  (for 33 = 1 % 4 = 1)
+                  kernelState.setLocalId(1, (threadId / localSize0)); // threadId / localWidth = (for 33 = 1 / 4 == 0)
+
+                  final int groupInset = globalGroupId % numGroups0; // 4%3 = 1
+                  kernelState.setGlobalId(0, ((groupInset * localSize0) + kernelState.getLocalIds()[0])); // 1*4+1=5
+
+                  final int completeLines = (globalGroupId / numGroups0) * localSize1;// (4/3) * 2
+                  kernelState.setGlobalId(1, (completeLines + kernelState.getLocalIds()[1])); // 2+0 = 2
+                  kernelState.setGroupId(0, (globalGroupId % numGroups0));
+                  kernelState.setGroupId(1, (globalGroupId / numGroups0));
+               }
+            };
+         } else if (_range.getDims() == 3) {
+            //Same as 2D actually turns out that localId[0] is identical for all three dims so could be hoisted out of conditional code
+            threadIdSetter = new ThreadIdSetter(){
+               @Override public void set(KernelState kernelState, int globalGroupId, int threadId) {
+                  //                   (kernelState, globalGroupId, threadId) ->{
+                  kernelState.setLocalId(0, (threadId % localSize0));
+
+                  kernelState.setLocalId(1, ((threadId / localSize0) % localSize1));
+
+                  // the thread id's span WxHxD so threadId/(WxH) should yield the local depth  
+                  kernelState.setLocalId(2, (threadId / (localSize0 * localSize1)));
+
+                  kernelState.setGlobalId(0, (((globalGroupId % numGroups0) * localSize0) + kernelState.getLocalIds()[0]));
+
+                  kernelState.setGlobalId(1,
+                        ((((globalGroupId / numGroups0) * localSize1) % globalSize1) + kernelState.getLocalIds()[1]));
+
+                  kernelState.setGlobalId(2,
+                        (((globalGroupId / (numGroups0 * numGroups1)) * localSize2) + kernelState.getLocalIds()[2]));
+
+                  kernelState.setGroupId(0, (globalGroupId % numGroups0));
+                  kernelState.setGroupId(1, ((globalGroupId / numGroups0) % numGroups1));
+                  kernelState.setGroupId(2, (globalGroupId / (numGroups0 * numGroups1)));
+               }
+            };
+         } else
+            throw new IllegalArgumentException("Expected 1,2 or 3 dimensions, found " + _range.getDims());
          for (int passId = 0; passId < _passes; passId++) {
             /**
               * Note that we emulate OpenCL by creating one thread per localId (across the group).
@@ -352,135 +537,31 @@ public class KernelRunner extends KernelRunnerJNI{
                 */
                final Kernel kernelClone = kernel.clone();
                final KernelState kernelState = kernelClone.getKernelState();
-
                kernelState.setRange(_range);
-               kernelState.setLocalBarrier(localBarrier);
                kernelState.setPassId(passId);
 
-               threadPool.submit(new Runnable(){
-                  @Override public void run() {
-                     for (int globalGroupId = 0; globalGroupId < globalGroups; globalGroupId++) {
+               if (threads == 1) {
+                  kernelState.disableLocalBarrier();
+               } else {
+                  kernelState.setLocalBarrier(localBarrier);
+               }
 
-                        if (_range.getDims() == 1) {
-                           kernelState.setLocalId(0, (threadId % _range.getLocalSize(0)));
-                           kernelState.setGlobalId(0, (threadId + (globalGroupId * threads)));
-                           kernelState.setGroupId(0, globalGroupId);
-                        } else if (_range.getDims() == 2) {
-
-                           /**
-                            * Consider a 12x4 grid of 4*2 local groups
-                            * <pre>
-                            *                                             threads = 4*2 = 8
-                            *                                             localWidth=4
-                            *                                             localHeight=2
-                            *                                             globalWidth=12
-                            *                                             globalHeight=4
-                            * 
-                            *    00 01 02 03 | 04 05 06 07 | 08 09 10 11  
-                            *    12 13 14 15 | 16 17 18 19 | 20 21 22 23
-                            *    ------------+-------------+------------
-                            *    24 25 26 27 | 28 29 30 31 | 32 33 34 35
-                            *    36 37 38 39 | 40 41 42 43 | 44 45 46 47  
-                            *    
-                            *    00 01 02 03 | 00 01 02 03 | 00 01 02 03  threadIds : [0..7]*6
-                            *    04 05 06 07 | 04 05 06 07 | 04 05 06 07
-                            *    ------------+-------------+------------
-                            *    00 01 02 03 | 00 01 02 03 | 00 01 02 03
-                            *    04 05 06 07 | 04 05 06 07 | 04 05 06 07  
-                            *    
-                            *    00 00 00 00 | 01 01 01 01 | 02 02 02 02  groupId[0] : 0..6 
-                            *    00 00 00 00 | 01 01 01 01 | 02 02 02 02   
-                            *    ------------+-------------+------------
-                            *    00 00 00 00 | 01 01 01 01 | 02 02 02 02  
-                            *    00 00 00 00 | 01 01 01 01 | 02 02 02 02
-                            *    
-                            *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  groupId[1] : 0..6 
-                            *    00 00 00 00 | 00 00 00 00 | 00 00 00 00   
-                            *    ------------+-------------+------------
-                            *    01 01 01 01 | 01 01 01 01 | 01 01 01 01 
-                            *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
-                            *         
-                            *    00 01 02 03 | 08 09 10 11 | 16 17 18 19  globalThreadIds == threadId + groupId * threads;
-                            *    04 05 06 07 | 12 13 14 15 | 20 21 22 23
-                            *    ------------+-------------+------------
-                            *    24 25 26 27 | 32[33]34 35 | 40 41 42 43
-                            *    28 29 30 31 | 36 37 38 39 | 44 45 46 47   
-                            *          
-                            *    00 01 02 03 | 00 01 02 03 | 00 01 02 03  localX = threadId % localWidth; (for globalThreadId 33 = threadId = 01 : 01%4 =1)
-                            *    00 01 02 03 | 00 01 02 03 | 00 01 02 03   
-                            *    ------------+-------------+------------
-                            *    00 01 02 03 | 00[01]02 03 | 00 01 02 03 
-                            *    00 01 02 03 | 00 01 02 03 | 00 01 02 03
-                            *     
-                            *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  localY = threadId /localWidth  (for globalThreadId 33 = threadId = 01 : 01/4 =0)
-                            *    01 01 01 01 | 01 01 01 01 | 01 01 01 01   
-                            *    ------------+-------------+------------
-                            *    00 00 00 00 | 00[00]00 00 | 00 00 00 00 
-                            *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
-                            *     
-                            *    00 01 02 03 | 04 05 06 07 | 08 09 10 11  globalX=
-                            *    00 01 02 03 | 04 05 06 07 | 08 09 10 11     groupsPerLineWidth=globalWidth/localWidth (=12/4 =3)
-                            *    ------------+-------------+------------     groupInset =groupId%groupsPerLineWidth (=4%3 = 1)
-                            *    00 01 02 03 | 04[05]06 07 | 08 09 10 11 
-                            *    00 01 02 03 | 04 05 06 07 | 08 09 10 11     globalX = groupInset*localWidth+localX (= 1*4+1 = 5)
-                            *     
-                            *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  globalY
-                            *    01 01 01 01 | 01 01 01 01 | 01 01 01 01      
-                            *    ------------+-------------+------------
-                            *    02 02 02 02 | 02[02]02 02 | 02 02 02 02 
-                            *    03 03 03 03 | 03 03 03 03 | 03 03 03 03
-                            *    
-                            * </pre>
-                            * Assume we are trying to locate the id's for #33 
-                            *
-                            */
-
-                           kernelState.setLocalId(0, (threadId % _range.getLocalSize(0))); // threadId % localWidth =  (for 33 = 1 % 4 = 1)
-                           kernelState.setLocalId(1, (threadId / _range.getLocalSize(0))); // threadId / localWidth = (for 33 = 1 / 4 == 0)
-
-                           final int groupInset = globalGroupId % _range.getNumGroups(0); // 4%3 = 1
-                           kernelState.setGlobalId(0, ((groupInset * _range.getLocalSize(0)) + kernelState.getLocalIds()[0])); // 1*4+1=5
-
-                           final int completeLines = (globalGroupId / _range.getNumGroups(0)) * _range.getLocalSize(1);// (4/3) * 2
-                           kernelState.setGlobalId(1, (completeLines + kernelState.getLocalIds()[1])); // 2+0 = 2
-                           kernelState.setGroupId(0, (globalGroupId % _range.getNumGroups(0)));
-                           kernelState.setGroupId(1, (globalGroupId / _range.getNumGroups(0)));
-                        } else if (_range.getDims() == 3) {
-
-                           //Same as 2D actually turns out that localId[0] is identical for all three dims so could be hoisted out of conditional code
-
-                           kernelState.setLocalId(0, (threadId % _range.getLocalSize(0)));
-
-                           kernelState.setLocalId(1, ((threadId / _range.getLocalSize(0)) % _range.getLocalSize(1)));
-
-                           // the thread id's span WxHxD so threadId/(WxH) should yield the local depth  
-                           kernelState.setLocalId(2, (threadId / (_range.getLocalSize(0) * _range.getLocalSize(1))));
-
-                           kernelState.setGlobalId(
-                                 0,
-                                 (((globalGroupId % _range.getNumGroups(0)) * _range.getLocalSize(0)) + kernelState.getLocalIds()[0]));
-
-                           kernelState.setGlobalId(
-                                 1,
-                                 ((((globalGroupId / _range.getNumGroups(0)) * _range.getLocalSize(1)) % _range.getGlobalSize(1)) + kernelState
-                                       .getLocalIds()[1]));
-
-                           kernelState.setGlobalId(
-                                 2,
-                                 (((globalGroupId / (_range.getNumGroups(0) * _range.getNumGroups(1))) * _range.getLocalSize(2)) + kernelState
-                                       .getLocalIds()[2]));
-
-                           kernelState.setGroupId(0, (globalGroupId % _range.getNumGroups(0)));
-                           kernelState.setGroupId(1, ((globalGroupId / _range.getNumGroups(0)) % _range.getNumGroups(1)));
-                           kernelState.setGroupId(2, (globalGroupId / (_range.getNumGroups(0) * _range.getNumGroups(1))));
+               threadPool.submit(
+               //                     () -> {
+                     new Runnable(){
+                        public void run() {
+                           try {
+                              for (int globalGroupId = 0; globalGroupId < globalGroups; globalGroupId++) {
+                                 threadIdSetter.set(kernelState, globalGroupId, threadId);
+                                 kernelClone.run();
+                              }
+                           } catch (RuntimeException | Error e) {
+                              logger.log(Level.SEVERE, "Execution failed", e);
+                           } finally {
+                              await(joinBarrier); // This thread will rendezvous with dispatch thread here. This is effectively a join.
+                           }
                         }
-
-                        kernelClone.run();
-                     }
-
-                     await(joinBarrier); // This thread will rendezvous with dispatch thread here. This is effectively a join.                  
-                  }
-               });
+                     });
             }
 
             await(joinBarrier); // This dispatch thread waits for all worker threads here. 
@@ -519,7 +600,7 @@ public class KernelRunner extends KernelRunnerJNI{
       boolean didReallocate = false;
 
       if (arg.getObjArrayElementModel() == null) {
-         final String tmp = arrayClass.getName().substring(2).replace("/", ".");
+         final String tmp = arrayClass.getName().substring(2).replace('/', '.');
          final String arrayClassInDotForm = tmp.substring(0, tmp.length() - 1);
 
          if (logger.isLoggable(Level.FINE)) {
@@ -786,7 +867,8 @@ public class KernelRunner extends KernelRunnerJNI{
                }
                if (privateMemorySize != null) {
                   if (arrayLength > privateMemorySize) {
-                     throw new IllegalStateException("__private array field " + fieldName + " has illegal length " + arrayLength + " > " + privateMemorySize);
+                     throw new IllegalStateException("__private array field " + fieldName + " has illegal length " + arrayLength
+                           + " > " + privateMemorySize);
                   }
                }
 
@@ -943,7 +1025,7 @@ public class KernelRunner extends KernelRunnerJNI{
          if ((device == null) || (device instanceof OpenCLDevice)) {
             if (entryPoint == null) {
                try {
-                  final ClassModel classModel = new ClassModel(kernel.getClass());
+                  final ClassModel classModel = ClassModel.createClassModel(kernel.getClass());
                   entryPoint = classModel.getEntrypoint(_entrypointName, kernel);
                } catch (final Exception exception) {
                   return warnFallBackAndExecute(_entrypointName, _range, _passes, exception);
@@ -1079,13 +1161,9 @@ public class KernelRunner extends KernelRunnerJNI{
                                  | (entryPoint.getArrayFieldAccesses().contains(field.getName()) ? ARG_READ : 0));
                            // args[i].type |= ARG_GLOBAL;
 
-
                            if (type.getName().startsWith("[L")) {
                               args[i].setType(args[i].getType()
-                                    | (ARG_OBJ_ARRAY_STRUCT |
-                                       ARG_WRITE |
-                                       ARG_READ |
-                                       ARG_APARAPI_BUFFER));
+                                    | (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ | ARG_APARAPI_BUFFER));
 
                               if (logger.isLoggable(Level.FINE)) {
                                  logger.fine("tagging " + args[i].getName() + " as (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ)");
@@ -1094,8 +1172,9 @@ public class KernelRunner extends KernelRunnerJNI{
 
                               try {
                                  setMultiArrayType(args[i], type);
-                              } catch(AparapiException e) {
-                                 return warnFallBackAndExecute(_entrypointName, _range, _passes, "failed to set kernel arguement " + args[i].getName() + ".  Aparapi only supports 2D and 3D arrays.");
+                              } catch (AparapiException e) {
+                                 return warnFallBackAndExecute(_entrypointName, _range, _passes, "failed to set kernel arguement "
+                                       + args[i].getName() + ".  Aparapi only supports 2D and 3D arrays.");
                               }
                            } else {
 
@@ -1120,7 +1199,8 @@ public class KernelRunner extends KernelRunnerJNI{
                               if (type.getName().startsWith("[L")) {
                                  args[i].setType(args[i].getType() | (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ));
                                  if (logger.isLoggable(Level.FINE)) {
-                                    logger.fine("tagging " + args[i].getName() + " as (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ)");
+                                    logger.fine("tagging " + args[i].getName()
+                                          + " as (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ)");
                                  }
                               }
                            }
@@ -1206,7 +1286,6 @@ public class KernelRunner extends KernelRunnerJNI{
       return kernel;
    }
 
-
    private int getPrimitiveSize(int type) {
       if ((type & ARG_FLOAT) != 0) {
          return 4;
@@ -1231,28 +1310,28 @@ public class KernelRunner extends KernelRunnerJNI{
    private void setMultiArrayType(KernelArg arg, Class<?> type) throws AparapiException {
       arg.setType(arg.getType() | (ARG_WRITE | ARG_READ | ARG_APARAPI_BUFFER));
       int numDims = 0;
-      while(type.getName().startsWith("[[[[")) {
+      while (type.getName().startsWith("[[[[")) {
          throw new AparapiException("Aparapi only supports 2D and 3D arrays.");
       }
       arg.setType(arg.getType() | ARG_ARRAYLENGTH);
-      while(type.getName().charAt(numDims) == '[') {
+      while (type.getName().charAt(numDims) == '[') {
          numDims++;
       }
       Object buffer = new Object();
       try {
          buffer = arg.getField().get(kernel);
-      } catch(IllegalAccessException e) {
+      } catch (IllegalAccessException e) {
          e.printStackTrace();
       }
       arg.setJavaBuffer(buffer);
       arg.setNumDims(numDims);
       Object subBuffer = buffer;
       int[] dims = new int[numDims];
-      for(int i = 0; i < numDims-1; i++) {
+      for (int i = 0; i < numDims - 1; i++) {
          dims[i] = Array.getLength(subBuffer);
          subBuffer = Array.get(subBuffer, 0);
       }
-      dims[numDims-1] = Array.getLength(subBuffer);
+      dims[numDims - 1] = Array.getLength(subBuffer);
       arg.setDims(dims);
 
       if (subBuffer.getClass().isAssignableFrom(float[].class)) {
@@ -1281,7 +1360,7 @@ public class KernelRunner extends KernelRunnerJNI{
       }
       int primitiveSize = getPrimitiveSize(arg.getType());
       int totalElements = 1;
-      for(int i = 0; i < numDims; i++) {
+      for (int i = 0; i < numDims; i++) {
          totalElements *= dims[i];
       }
       arg.setSizeInBytes(totalElements * primitiveSize);
