@@ -140,7 +140,7 @@ import java.util.logging.*;
  * @author  gfrost AMD Javalabs
  * @version Alpha, 21/09/2010
  */
-public abstract class Kernel implements Cloneable {
+public abstract class Kernel implements Cloneable{
 
    private static Logger logger = Logger.getLogger(Config.getLoggerName());
 
@@ -207,21 +207,25 @@ public abstract class Kernel implements Cloneable {
     *  @see #PRIVATE_SUFFIX
     */
    @Retention(RetentionPolicy.RUNTIME)
-   @Target({ElementType.FIELD})
+   @Target({
+      ElementType.FIELD
+   })
    public @interface PrivateMemorySpace {
       /** Size of the array used as __private buffer. */
       int value();
    }
 
-    /**
-     * Annotation which can be applied to either a getter (with usual java bean naming convention relative to an instance field), or to any method
-     * with void return type, which prevents both the method body and any calls to the method being emitted in the generated OpenCL. (In the case of a getter, the
-     * underlying field is used in place of the NoCL getter method.) This allows for code specialization within a java/JTP execution path, for example to
-     * allow logging/breakpointing when debugging, or to apply ThreadLocal processing (see {@link PrivateMemorySpace}) in java to simulate OpenCL __private
-     * memory.
-     */
+   /**
+    * Annotation which can be applied to either a getter (with usual java bean naming convention relative to an instance field), or to any method
+    * with void return type, which prevents both the method body and any calls to the method being emitted in the generated OpenCL. (In the case of a getter, the
+    * underlying field is used in place of the NoCL getter method.) This allows for code specialization within a java/JTP execution path, for example to
+    * allow logging/breakpointing when debugging, or to apply ThreadLocal processing (see {@link PrivateMemorySpace}) in java to simulate OpenCL __private
+    * memory.
+    */
    @Retention(RetentionPolicy.RUNTIME)
-   @Target({ElementType.METHOD, ElementType.FIELD})
+   @Target({
+         ElementType.METHOD, ElementType.FIELD
+   })
    public @interface NoCL {
       // empty
    }
@@ -292,7 +296,7 @@ public abstract class Kernel implements Cloneable {
       boolean atomic64() default false;
    }
 
-   public abstract class Entry {
+   public abstract class Entry{
       public abstract void run();
 
       public Kernel execute(Range _range) {
@@ -466,24 +470,18 @@ public abstract class Kernel implements Cloneable {
     * This class is for internal Kernel state management<p>
     * NOT INTENDED FOR USE BY USERS
     */
-   public final class KernelState {
+   public final class KernelState{
 
       private int[] globalIds = new int[] {
-            0,
-            0,
-            0
+            0, 0, 0
       };
 
       private int[] localIds = new int[] {
-            0,
-            0,
-            0
+            0, 0, 0
       };
 
       private int[] groupIds = new int[] {
-            0,
-            0,
-            0
+            0, 0, 0
       };
 
       private Range range;
@@ -965,21 +963,15 @@ public abstract class Kernel implements Cloneable {
          worker.kernelState = worker.new KernelState(kernelState); // Qualified copy constructor
 
          worker.kernelState.setGroupIds(new int[] {
-               0,
-               0,
-               0
+               0, 0, 0
          });
 
          worker.kernelState.setLocalIds(new int[] {
-               0,
-               0,
-               0
+               0, 0, 0
          });
 
          worker.kernelState.setGlobalIds(new int[] {
-               0,
-               0,
-               0
+               0, 0, 0
          });
 
          return worker;
@@ -1904,11 +1896,14 @@ public abstract class Kernel implements Cloneable {
     * 
     */
    public synchronized long getExecutionTime() {
+      return prepareKernelRunner().getExecutionTime();
+   }
+
+   private KernelRunner prepareKernelRunner() {
       if (kernelRunner == null) {
          kernelRunner = new KernelRunner(this);
       }
-
-      return (kernelRunner.getExecutionTime());
+      return kernelRunner;
    }
 
    /**
@@ -1923,11 +1918,7 @@ public abstract class Kernel implements Cloneable {
     * 
     */
    public synchronized long getAccumulatedExecutionTime() {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      return (kernelRunner.getAccumulatedExecutionTime());
+      return prepareKernelRunner().getAccumulatedExecutionTime();
    }
 
    /**
@@ -1938,11 +1929,7 @@ public abstract class Kernel implements Cloneable {
     * @see #getAccumulatedExecutionTime();
     */
    public synchronized long getConversionTime() {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      return (kernelRunner.getConversionTime());
+      return prepareKernelRunner().getConversionTime();
    }
 
    /**
@@ -2014,11 +2001,7 @@ public abstract class Kernel implements Cloneable {
     * 
     */
    public synchronized Kernel execute(Entry _entry, Range _range) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      return (kernelRunner.execute(_entry, _range, 1));
+      return prepareKernelRunner().execute(_entry, _range, 1);
    }
 
    /**
@@ -2046,12 +2029,7 @@ public abstract class Kernel implements Cloneable {
     * 
     */
    public synchronized Kernel execute(String _entrypoint, Range _range, int _passes) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-
-      }
-
-      return (kernelRunner.execute(_entrypoint, _range, _passes));
+      return prepareKernelRunner().execute(_entrypoint, _range, _passes);
    }
 
    /**
@@ -2255,11 +2233,7 @@ public abstract class Kernel implements Cloneable {
     * @param _explicit (true if we want explicit memory management)
     */
    public void setExplicit(boolean _explicit) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.setExplicit(_explicit);
+      prepareKernelRunner().setExplicit(_explicit);
    }
 
    /**
@@ -2267,11 +2241,7 @@ public abstract class Kernel implements Cloneable {
     * @return  (true if we kernel is using explicit memory management)
     */
    public boolean isExplicit() {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      return (kernelRunner.isExplicit());
+      return prepareKernelRunner().isExplicit();
    }
 
    /**
@@ -2280,11 +2250,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(long[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2294,11 +2260,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(long[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2308,11 +2270,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(long[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2322,11 +2280,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(double[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2336,11 +2290,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(double[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2350,11 +2300,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(double[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2364,11 +2310,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(float[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2378,11 +2320,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(float[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2392,11 +2330,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(float[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2406,11 +2340,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(int[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2420,11 +2350,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(int[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2434,11 +2360,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(int[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2448,11 +2370,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(byte[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2462,11 +2380,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(byte[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2476,11 +2390,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(byte[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2490,11 +2400,7 @@ public abstract class Kernel implements Cloneable {
      * @return This kernel so that we can use the 'fluent' style API
      */
    public Kernel put(char[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2504,11 +2410,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(char[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2518,11 +2420,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(char[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2532,11 +2430,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(boolean[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2546,11 +2440,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(boolean[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2560,11 +2450,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel put(boolean[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.put(array);
+      prepareKernelRunner().put(array);
       return (this);
    }
 
@@ -2574,11 +2460,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(long[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2588,11 +2470,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(long[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2602,11 +2480,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(long[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2616,11 +2490,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(double[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2630,11 +2500,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(double[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2644,11 +2510,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(double[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2658,11 +2520,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(float[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2672,11 +2530,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(float[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2686,11 +2540,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(float[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2700,11 +2550,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(int[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2714,11 +2560,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(int[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2728,11 +2570,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(int[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2742,11 +2580,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(byte[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2756,11 +2590,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(byte[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2770,11 +2600,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(byte[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2784,11 +2610,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(char[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2798,11 +2620,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(char[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2812,11 +2630,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(char[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2826,11 +2640,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(boolean[] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2840,11 +2650,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(boolean[][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2854,11 +2660,7 @@ public abstract class Kernel implements Cloneable {
     * @return This kernel so that we can use the 'fluent' style API
     */
    public Kernel get(boolean[][][] array) {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      kernelRunner.get(array);
+      prepareKernelRunner().get(array);
       return (this);
    }
 
@@ -2867,11 +2669,7 @@ public abstract class Kernel implements Cloneable {
     * @return A list of ProfileInfo records
     */
    public List<ProfileInfo> getProfileInfo() {
-      if (kernelRunner == null) {
-         kernelRunner = new KernelRunner(this);
-      }
-
-      return (kernelRunner.getProfileInfo());
+      return prepareKernelRunner().getProfileInfo();
    }
 
    private final LinkedHashSet<EXECUTION_MODE> executionModes = EXECUTION_MODE.getDefaultExecutionModes();
