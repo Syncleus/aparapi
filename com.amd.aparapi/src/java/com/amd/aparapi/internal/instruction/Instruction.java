@@ -181,7 +181,7 @@ public abstract class Instruction{
    }
 
    @Override public String toString() {
-      return (String.format("%d %s", pc, byteCode.getName()));
+      return pc + " " + byteCode.getName();
    }
 
    public boolean isBranch() {
