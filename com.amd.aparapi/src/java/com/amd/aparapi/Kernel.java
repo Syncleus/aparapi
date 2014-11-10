@@ -140,7 +140,7 @@ import java.util.logging.*;
  * @author  gfrost AMD Javalabs
  * @version Alpha, 21/09/2010
  */
-public abstract class Kernel implements Cloneable{
+public abstract class Kernel implements Cloneable {
 
    private static Logger logger = Logger.getLogger(Config.getLoggerName());
 
@@ -207,9 +207,7 @@ public abstract class Kernel implements Cloneable{
     *  @see #PRIVATE_SUFFIX
     */
    @Retention(RetentionPolicy.RUNTIME)
-   @Target({
-      ElementType.FIELD
-   })
+   @Target({ElementType.FIELD})
    public @interface PrivateMemorySpace {
       /** Size of the array used as __private buffer. */
       int value();
@@ -223,9 +221,7 @@ public abstract class Kernel implements Cloneable{
     * memory.
     */
    @Retention(RetentionPolicy.RUNTIME)
-   @Target({
-         ElementType.METHOD, ElementType.FIELD
-   })
+   @Target({ElementType.METHOD, ElementType.FIELD})
    public @interface NoCL {
       // empty
    }
@@ -296,7 +292,7 @@ public abstract class Kernel implements Cloneable{
       boolean atomic64() default false;
    }
 
-   public abstract class Entry{
+   public abstract class Entry {
       public abstract void run();
 
       public Kernel execute(Range _range) {
@@ -470,19 +466,13 @@ public abstract class Kernel implements Cloneable{
     * This class is for internal Kernel state management<p>
     * NOT INTENDED FOR USE BY USERS
     */
-   public final class KernelState{
+   public final class KernelState {
 
-      private int[] globalIds = new int[] {
-            0, 0, 0
-      };
+      private int[] globalIds = new int[] {0, 0, 0};
 
-      private int[] localIds = new int[] {
-            0, 0, 0
-      };
+      private int[] localIds = new int[] {0, 0, 0};
 
-      private int[] groupIds = new int[] {
-            0, 0, 0
-      };
+      private int[] groupIds = new int[] {0, 0, 0};
 
       private Range range;
 
@@ -962,17 +952,11 @@ public abstract class Kernel implements Cloneable{
          // We need to be careful to also clone the KernelState
          worker.kernelState = worker.new KernelState(kernelState); // Qualified copy constructor
 
-         worker.kernelState.setGroupIds(new int[] {
-               0, 0, 0
-         });
+         worker.kernelState.setGroupIds(new int[] {0, 0, 0});
 
-         worker.kernelState.setLocalIds(new int[] {
-               0, 0, 0
-         });
+         worker.kernelState.setLocalIds(new int[] {0, 0, 0});
 
-         worker.kernelState.setGlobalIds(new int[] {
-               0, 0, 0
-         });
+         worker.kernelState.setGlobalIds(new int[] {0, 0, 0});
 
          return worker;
       } catch (final CloneNotSupportedException e) {
@@ -2709,7 +2693,7 @@ public abstract class Kernel implements Cloneable{
 
    private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> openCLDelegateMethodFlags = markedWith(OpenCLDelegate.class);
 
-   private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> atomic32Cache = cacheProperty(new ValueComputer<Class<?>, Map<String, Boolean>>(){
+   private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> atomic32Cache = cacheProperty(new ValueComputer<Class<?>, Map<String, Boolean>>() {
       @Override
       public Map<String, Boolean> compute(Class<?> key) {
          Map<String, Boolean> properties = new HashMap<>();
@@ -2722,7 +2706,7 @@ public abstract class Kernel implements Cloneable{
       }
    });
 
-   private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> atomic64Cache = cacheProperty(new ValueComputer<Class<?>, Map<String, Boolean>>(){
+   private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> atomic64Cache = cacheProperty(new ValueComputer<Class<?>, Map<String, Boolean>>() {
       @Override
       public Map<String, Boolean> compute(Class<?> key) {
          Map<String, Boolean> properties = new HashMap<>();
@@ -2742,7 +2726,7 @@ public abstract class Kernel implements Cloneable{
 
    private static <A extends Annotation> ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> markedWith(
          final Class<A> annotationClass) {
-      return cacheProperty(new ValueComputer<Class<?>, Map<String, Boolean>>(){
+      return cacheProperty(new ValueComputer<Class<?>, Map<String, Boolean>>() {
          @Override
          public Map<String, Boolean> compute(Class<?> key) {
             Map<String, Boolean> markedMethodNames = new HashMap<>();
@@ -2785,7 +2769,7 @@ public abstract class Kernel implements Cloneable{
       return nameAndTypeEntry.getNameUTF8Entry().getUTF8() + nameAndTypeEntry.getDescriptorUTF8Entry().getUTF8();
    }
 
-   private static final ValueCache<Class<?>, Map<String, String>, RuntimeException> mappedMethodNamesCache = cacheProperty(new ValueComputer<Class<?>, Map<String, String>>(){
+   private static final ValueCache<Class<?>, Map<String, String>, RuntimeException> mappedMethodNamesCache = cacheProperty(new ValueComputer<Class<?>, Map<String, String>>() {
       @Override
       public Map<String, String> compute(Class<?> key) {
          Map<String, String> properties = new HashMap<>();
@@ -2805,7 +2789,7 @@ public abstract class Kernel implements Cloneable{
 
    private static <K, V, T extends Throwable> ValueCache<Class<?>, Map<K, V>, T> cacheProperty(
          final ThrowingValueComputer<Class<?>, Map<K, V>, T> throwingValueComputer) {
-      return ValueCache.on(new ThrowingValueComputer<Class<?>, Map<K, V>, T>(){
+      return ValueCache.on(new ThrowingValueComputer<Class<?>, Map<K, V>, T>() {
          @Override
          public Map<K, V> compute(Class<?> key) throws T {
             Map<K, V> properties = new HashMap<>();
