@@ -275,6 +275,18 @@ public abstract class KernelRunnerJNI{
     * @author gfrost
     */
    //  @UsedByJNICode @Annotations.Experimental protected static final int JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING = 1 << 4;
+   
+   /**
+    * This 'bit' indicates that we want to execute on the Acceleratr.
+    * 
+    * Be careful changing final constants starting with JNI.<br/>
+    * 
+    * @see com.amd.aparapi.internal.annotation.UsedByJNICode
+    * 
+    * @author ekasit
+    */
+   @UsedByJNICode protected static final int JNI_FLAG_USE_ACC = 1 << 5;
+
 
    /*
     * Native methods

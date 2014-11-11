@@ -461,7 +461,7 @@ JNI_JAVA(jobject, OpenCLJNI, getPlatforms)
                JNIHelper::callVoid(jenv, platformListInstance, "add", ArgsBooleanReturn(ObjectClassArg), platformInstance);
 
                cl_uint deviceIdc;
-               cl_device_type requestedDeviceType =CL_DEVICE_TYPE_CPU |CL_DEVICE_TYPE_GPU ;
+               cl_device_type requestedDeviceType =CL_DEVICE_TYPE_CPU |CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_ACCELERATOR;
                status = clGetDeviceIDs(platformIds[platformIdx], requestedDeviceType, 0, NULL, &deviceIdc);
                if (status == CL_SUCCESS && deviceIdc > 0 ){
                   cl_device_id* deviceIds = new cl_device_id[deviceIdc];
@@ -489,7 +489,8 @@ JNI_JAVA(jobject, OpenCLJNI, getPlatforms)
                         }
                         if (deviceType & CL_DEVICE_TYPE_ACCELERATOR) {
                            deviceType &= ~CL_DEVICE_TYPE_ACCELERATOR;
-                           fprintf(stderr, "Accelerator ");
+                           //fprintf(stderr, "Accelerator ");
+                           deviceTypeEnumInstance = JNIHelper::getStaticFieldObject(jenv, DeviceTypeClass, "ACC", DeviceTypeClassArg);
                         }
                         //fprintf(stderr, "(0x%llx) ", deviceType);
                         //fprintf(stderr, "\n");

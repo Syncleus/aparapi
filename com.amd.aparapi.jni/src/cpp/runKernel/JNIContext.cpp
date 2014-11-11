@@ -13,6 +13,8 @@ JNIContext::JNIContext(JNIEnv *jenv, jobject _kernelObject, jobject _openCLDevic
       deviceType(((flags&com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_USE_GPU)==com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_USE_GPU)?CL_DEVICE_TYPE_GPU:CL_DEVICE_TYPE_CPU),
       profileFile(NULL), 
       valid(JNI_FALSE){
+   if (flags&com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_USE_ACC)
+      deviceType = CL_DEVICE_TYPE_ACCELERATOR;
    cl_int status = CL_SUCCESS;
    jobject platformInstance = OpenCLDevice::getPlatformInstance(jenv, openCLDeviceObject);
    cl_platform_id platformId = OpenCLPlatform::getPlatformId(jenv, platformInstance);
