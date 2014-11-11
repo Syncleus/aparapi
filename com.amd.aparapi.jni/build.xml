@@ -73,6 +73,55 @@ First consider editing the properties in build.properties
 
       <echo message="amd.app.sdk.dir ${amd.app.sdk.dir}"/>
 
+      <available property="linux.intel.app.sdk.exists" file="/opt/intel/opencl" type="dir"/>
+      <condition property="intel.app.sdk.dir" value="/opt/intel/opencl">
+         <and>
+            <os family="unix" />
+            <not>
+               <os family="mac" />
+            </not>
+            <isset property="linux.intel.app.sdk.exists" />
+            <not>
+               <isset property="win32.amd.app.sdk.exists" />
+            </not>
+            <not>
+               <isset property="win64.amd.app.sdk.exists" />
+            </not>
+         </and>
+      </condition>
+
+      <echo message=" intel.app.sdk.dir ${intel.app.sdk.dir}"/>
+
+      <condition property="vendor.name" value="amd">
+         <isset property="amd.app.sdk.dir" /> 
+      </condition>
+
+      <condition property="vendor.name" value="intel">
+         <and>
+            <isset property="intel.app.sdk.dir" /> 
+            <not>
+                <isset property="amd.app.sdk.dir" /> 
+            </not>
+         </and>
+      </condition>
+
+      <echo message=" vendor.name ${vendor.name}"/>
+  
+      <condition property="app.sdk.dir" value="${amd.app.sdk.dir}">
+         <isset property="amd.app.sdk.dir" /> 
+      </condition>
+
+      <condition property="app.sdk.dir" value="${intel.app.sdk.dir}">
+         <and>
+            <isset property="intel.app.sdk.dir" /> 
+            <not>
+                <isset property="app.sdk.dir" /> 
+            </not>
+         </and>
+      </condition>
+
+      <echo message="app.sdk.dir ${app.sdk.dir}"/>
+
 	  <!-- Check for Visual Studio Compiler -->
 	  <!-- This needs to be in descending order to properly handle multiple installations -->
 	  <available property="msvc.32.12.0.exists" file="C:/Program Files/Microsoft Visual Studio 12.0\VC\bin" type="dir"/>
@@ -321,6 +370,12 @@ First consider editing the properties in build.properties
       <condition property="optional.x64.subdir" value="" else="x64\">
         <equals arg1="${x86_or_x86_64}" arg2="x86"/>
       </condition>
+
+
+      <condition property="optional.app.sdk.lib.subdir" value="lib\" else="lib64\">
+        <equals arg1="${x86_or_x86_64}" arg2="x86"/>
+
+     </condition>
       
       <condition property="gcc.m.value" value="32" else="64">
         <equals arg1="${x86_or_x86_64}" arg2="x86"/>
@@ -352,18 +407,18 @@ First consider editing the properties in build.properties
                   <os family="mac" />
                </not>
                <not>
-                  <isset property="amd.app.sdk.dir" />
+                  <isset property="app.sdk.dir" />
                </not>
             </and>
          </condition>
          <![CDATA[
          You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
 
-         You need to set amd.app.sdk.dir to point to the location where AMD APP SDK is installed
+         You need to set app.sdk.dir to point to the location where OpenCL SDK is installed
          ]]>
       </fail>
       
-      <available file="${amd.app.sdk.dir}" type="dir" property="amd.app.sdk.dir.exists" />
+      <available file="${app.sdk.dir}" type="dir" property="app.sdk.dir.exists" />
 
       <fail message="Error:">
          <condition>
@@ -372,14 +427,14 @@ First consider editing the properties in build.properties
                   <os family="mac" />
                </not>
                <not>
-                  <isset property="amd.app.sdk.dir.exists" />
+                  <isset property="app.sdk.dir.exists" />
                </not>
             </and>
          </condition>
          <![CDATA[
          You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
 
-         At present amd.app.sdk.dir is set (to ${amd.app.sdk.dir}) but that dir does not exist
+         At present app.sdk.dir is set (to ${app.sdk.dir}) but that dir does not exist
          ]]>
       </fail>
    </target>
@@ -458,7 +513,7 @@ First consider editing the properties in build.properties
          <arg value="-I${java.home}/../include" />
          <arg value="-I${java.home}/../include/linux" />
          <arg value="-Iinclude" />
-         <arg value="-I${amd.app.sdk.dir}/include" />
+         <arg value="-I${app.sdk.dir}/include" />
          <arg value="-Isrc/cpp" />
          <arg value="-Isrc/cpp/runKernel" />
          <arg value="-Isrc/cpp/invoke" />
@@ -480,7 +535,8 @@ First consider editing the properties in build.properties
          <arg value="src/cpp/classtools.cpp" />
          <arg value="src/cpp/JNIHelper.cpp" />
          <arg value="src/cpp/agent.cpp" />
-         <arg value="-L${amd.app.sdk.dir}/lib/${x86_or_x86_64}" />
+         <arg value="-L${app.sdk.dir}/lib/${x86_or_x86_64}" />
+         <arg value="-L${app.sdk.dir}/${optional.app.sdk.lib.subdir}" />
          <arg value="-lOpenCL" />
       </exec>
    </target>
@@ -543,7 +599,7 @@ First consider editing the properties in build.properties
          <arg value="/I${java.home}\..\include" />
          <arg value="/I${java.home}\..\include\win32" />
          <arg value="/Iinclude" />
-	     <arg value="/I${amd.app.sdk.dir}\include" />
+	     <arg value="/I${app.sdk.dir}\include" />
          <arg value="/IC:\Program Files (x86)\Windows Kits\8.0\Include\shared" />
          <arg value="/IC:\Program Files (x86)\Windows Kits\8.0\Include\um" />
          <arg value="/Isrc/cpp" />
@@ -568,7 +624,8 @@ First consider editing the properties in build.properties
          <arg value="/link" />
          <arg value="/libpath:${msvc.dir}\vc\lib\${optional.amd64.subdir}" />
          <arg value="/libpath:${msvc.sdk.dir}\lib\${optional.x64.subdir}" />
-	     <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
+	 <arg value="/libpath:${app.sdk.dir}\lib\${x86_or_x86_64}" />
+	 <arg value="/libpath:${app.sdk.dir}\${optional.app.sdk.lib.subdir}" />
          <arg value="/libpath:C:\Program Files (x86)\Windows Kits\8.0\Lib\win8\um\x64" />
          <arg value="OpenCL.lib" />
          <arg value="/out:${basedir}\dist\aparapi_${x86_or_x86_64}.dll" />
@@ -588,7 +645,7 @@ First consider editing the properties in build.properties
          <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="/I${msvc.dir}\vc\include" />
          <arg value="/I${msvc.sdk.dir}\include" />
-         <arg value="/I${amd.app.sdk.dir}\include" />
+         <arg value="/I${app.sdk.dir}\include" />
          <arg value="/Isrc/cpp" />
          <arg value="/Isrc/cpp/runKernel" />
          <arg value="/Isrc/cpp/invoke" />
@@ -596,7 +653,8 @@ First consider editing the properties in build.properties
          <arg value="/link" />
          <arg value="/libpath:${msvc.dir}\vc\lib\${optional.amd64.subdir}" />
          <arg value="/libpath:${msvc.sdk.dir}\lib\${optional.x64.subdir}" />
-         <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
+         <arg value="/libpath:${app.sdk.dir}\lib\${x86_or_x86_64}" />
+         <arg value="/libpath:${app.sdk.dir}\${optional.app.sdk.lib.subdir}" />
          <arg value="OpenCL.lib" />
          <arg value="/out:${basedir}/dist/cltest_${x86_or_x86_64}.exe" />
       </exec>
@@ -637,9 +695,10 @@ First consider editing the properties in build.properties
          <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="-I${java.home}/../include" />
          <arg value="-I${java.home}/../include/linux" />
-         <arg value="-I${amd.app.sdk.dir}/include" />
+         <arg value="-I${app.sdk.dir}/include" />
          <arg value="src/cpp/cltest.cpp" />
-         <arg value="-L${amd.app.sdk.dir}/lib/${x86_or_x86_64}" />
+         <arg value="-L${app.sdk.dir}/lib/${x86_or_x86_64}" />
+         <arg value="-L${app.sdk.dir}/${optional.app.sdk.lib.subdir}" />
          <arg value="-lOpenCL" />
          <arg value="-o" />
          <arg value="${basedir}/cltest_${x86_or_x86_64}" />

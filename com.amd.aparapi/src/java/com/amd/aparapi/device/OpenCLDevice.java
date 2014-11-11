@@ -448,6 +448,25 @@ public class OpenCLDevice extends Device{
       return (device);
    }
 
+   public static OpenCLDevice select(DeviceComparitor _deviceComparitor, Device.TYPE _type) {
+      OpenCLDevice device = null;
+      final OpenCLPlatform platform = new OpenCLPlatform(0, null, null, null);
+
+      for (final OpenCLPlatform p : platform.getOpenCLPlatforms()) {
+         for (final OpenCLDevice d : p.getOpenCLDevices()) {
+            if (d.getType() != _type) continue;
+            if (device == null) {
+               device = d;
+            } else {
+               device = _deviceComparitor.select(device, d);
+            }
+         }
+      }
+
+      return (device);
+   }
+
+
    @Override public String toString() {
       final StringBuilder s = new StringBuilder("{");
       boolean first = true;

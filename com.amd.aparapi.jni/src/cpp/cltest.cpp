@@ -126,7 +126,7 @@ int main(int argc, char **argv){
       fprintf(stderr, "   CL_PLATFORM_VERSION.\"%s\"\n", platformVersionName); 
       fprintf(stderr, "   CL_PLATFORM_NAME....\"%s\"\n", platformName); 
       cl_uint deviceIdc;
-      cl_device_type requestedDeviceType =CL_DEVICE_TYPE_CPU |CL_DEVICE_TYPE_GPU ;
+      cl_device_type requestedDeviceType =CL_DEVICE_TYPE_CPU |CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_ACCELERATOR;
       status = clGetDeviceIDs(platformIds[platformIdx], requestedDeviceType, 0, NULL, &deviceIdc);
       fprintf(stderr, "   Platform %d has %d device%s{\n", platformIdx, deviceIdc, ((deviceIdc==1)?"":"s"));
       if (status == CL_SUCCESS && deviceIdc >0 ){
