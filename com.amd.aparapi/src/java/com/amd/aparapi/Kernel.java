@@ -302,11 +302,12 @@ public abstract class Kernel implements Cloneable {
     * determine how it executed.  
     *    
     * <p>
-    * Aparapi supports 4 execution modes. 
+    * Aparapi supports 5 execution modes. Default is GPU. 
     * <ul>
     * <table>
     * <tr><th align="left">Enum value</th><th align="left">Execution</th></tr>
     * <tr><td><code><b>GPU</b></code></td><td>Execute using OpenCL on first available GPU device</td></tr>
+    * <tr><td><code><b>ACC</b></code></td><td>Execute using OpenCL on first available Accelerator device</td></tr>
     * <tr><td><code><b>CPU</b></code></td><td>Execute using OpenCL on first available CPU device</td></tr>
     * <tr><td><code><b>JTP</b></code></td><td>Execute using a Java Thread Pool (one thread spawned per available core)</td></tr>
     * <tr><td><code><b>SEQ</b></code></td><td>Execute using a single loop. This is useful for debugging but will be less 
@@ -325,7 +326,7 @@ public abstract class Kernel implements Cloneable {
     *     kernel.execute(values.length);
     * </pre></blockquote>
     * <p>
-    * Alternatively, the property <code>com.amd.aparapi.executionMode</code> can be set to one of <code>JTP,GPU,CPU,SEQ</code>
+    * Alternatively, the property <code>com.amd.aparapi.executionMode</code> can be set to one of <code>JTP,GPU,ACC,CPU,SEQ</code>
     * when an application is launched. 
     * <p><blockquote><pre>
     *    java -classpath ....;aparapi.jar -Dcom.amd.aparapi.executionMode=GPU MyApplication  
@@ -365,7 +366,11 @@ public abstract class Kernel implements Cloneable {
        * <p>
        * This is meant to be used for debugging a kernel.
        */
-      SEQ;
+      SEQ,
+      /**
+       * The value representing execution on an accelerator device (Xeon Phi) via OpenCL.
+       */
+      ACC;
 
       static EXECUTION_MODE getDefaultExecutionMode() {
          EXECUTION_MODE defaultExecutionMode = OpenCLLoader.isOpenCLAvailable() ? GPU : JTP;
@@ -442,7 +447,7 @@ public abstract class Kernel implements Cloneable {
 
       static boolean anyOpenCL(LinkedHashSet<EXECUTION_MODE> _executionModes) {
          for (final EXECUTION_MODE mode : _executionModes) {
-            if ((mode == GPU) || (mode == CPU)) {
+            if ((mode == GPU) || (mode == ACC) || (mode == CPU)) {
                return true;
             }
          }
@@ -450,7 +455,7 @@ public abstract class Kernel implements Cloneable {
       }
 
       public boolean isOpenCL() {
-         return (this == GPU) || (this == CPU);
+         return (this == GPU) || (this == ACC) || (this == CPU);
       }
    };
 

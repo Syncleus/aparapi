@@ -115,6 +115,48 @@ public class Main{
          System.out.println("}");
       }
 
+      Device bestGPU = OpenCLDevice.bestGPU();
+      if (bestGPU == null) {
+         System.out.println("OpenCLDevice.bestGPU() returned null!");
+      } else {
+         System.out.println("OpenCLDevice.bestGPU() returned { ");
+         System.out.println("   Type                  : " + bestGPU.getType());
+         System.out.println("   GlobalMemSize         : " + ((OpenCLDevice) bestGPU).getGlobalMemSize());
+         System.out.println("   LocalMemSize          : " + ((OpenCLDevice) bestGPU).getLocalMemSize());
+         System.out.println("   MaxComputeUnits       : " + ((OpenCLDevice) bestGPU).getMaxComputeUnits());
+         System.out.println("   MaxWorkGroupSizes     : " + ((OpenCLDevice) bestGPU).getMaxWorkGroupSize());
+         System.out.println("   MaxWorkItemDimensions : " + ((OpenCLDevice) bestGPU).getMaxWorkItemDimensions());
+         System.out.println("}");
+      }
+
+      Device firstACC = OpenCLDevice.firstACC();
+      if (firstACC == null) {
+         System.out.println("OpenCLDevice.firstACC() returned null!");
+      } else {
+         System.out.println("OpenCLDevice.firstACC() returned { ");
+         System.out.println("   Type                  : " + firstACC.getType());
+         System.out.println("   GlobalMemSize         : " + ((OpenCLDevice) firstACC).getGlobalMemSize());
+         System.out.println("   LocalMemSize          : " + ((OpenCLDevice) firstACC).getLocalMemSize());
+         System.out.println("   MaxComputeUnits       : " + ((OpenCLDevice) firstACC).getMaxComputeUnits());
+         System.out.println("   MaxWorkGroupSizes     : " + ((OpenCLDevice) firstACC).getMaxWorkGroupSize());
+         System.out.println("   MaxWorkItemDimensions : " + ((OpenCLDevice) firstACC).getMaxWorkItemDimensions());
+         System.out.println("}");
+      }
+
+      Device bestACC = OpenCLDevice.bestACC();
+      if (bestACC == null) {
+         System.out.println("OpenCLDevice.bestACC() returned null!");
+      } else {
+         System.out.println("OpenCLDevice.bestACC() returned { ");
+         System.out.println("   Type                  : " + bestACC.getType());
+         System.out.println("   GlobalMemSize         : " + ((OpenCLDevice) bestACC).getGlobalMemSize());
+         System.out.println("   LocalMemSize          : " + ((OpenCLDevice) bestACC).getLocalMemSize());
+         System.out.println("   MaxComputeUnits       : " + ((OpenCLDevice) bestACC).getMaxComputeUnits());
+         System.out.println("   MaxWorkGroupSizes     : " + ((OpenCLDevice) bestACC).getMaxWorkGroupSize());
+         System.out.println("   MaxWorkItemDimensions : " + ((OpenCLDevice) bestACC).getMaxWorkItemDimensions());
+         System.out.println("}");
+      }
+
    }
 
 }

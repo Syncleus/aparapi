@@ -11,20 +11,16 @@ public abstract class Device{
       GPU,
       CPU,
       JTP,
-      SEQ
+      SEQ,
+      ACC
    };
 
+   /**
+    * @return Now return the device of any types having the maximum compute units
+    */
    public static Device best() {
       return (OpenCLDevice.select(new DeviceComparitor(){
          @Override public OpenCLDevice select(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs) {
-            if (_deviceLhs.getType() != _deviceRhs.getType()) {
-               if (_deviceLhs.getType() == TYPE.GPU) {
-                  return (_deviceLhs);
-               } else {
-                  return (_deviceRhs);
-               }
-            }
-
             if (_deviceLhs.getMaxComputeUnits() > _deviceRhs.getMaxComputeUnits()) {
                return (_deviceLhs);
             } else {
@@ -32,6 +28,30 @@ public abstract class Device{
             }
          }
       }));
+   }
+
+   public static Device bestGPU() {
+      return (OpenCLDevice.select(new DeviceComparitor(){
+         @Override public OpenCLDevice select(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs) {
+            if (_deviceLhs.getMaxComputeUnits() > _deviceRhs.getMaxComputeUnits()) {
+               return (_deviceLhs);
+            } else {
+               return (_deviceRhs);
+            }
+         }
+      }, Device.TYPE.GPU));
+   }
+
+   public static Device bestACC() {
+      return (OpenCLDevice.select(new DeviceComparitor(){
+         @Override public OpenCLDevice select(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs) {
+            if (_deviceLhs.getMaxComputeUnits() > _deviceRhs.getMaxComputeUnits()) {
+               return (_deviceLhs);
+            } else {
+               return (_deviceRhs);
+            }
+         }
+      }, Device.TYPE.ACC));
    }
 
    public static Device first(final Device.TYPE _type) {
@@ -48,6 +68,11 @@ public abstract class Device{
 
    public static Device firstCPU() {
       return (first(Device.TYPE.CPU));
+
+   }
+
+   public static Device firstACC() {
+      return (first(Device.TYPE.ACC));
 
    }
 

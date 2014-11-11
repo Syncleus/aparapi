@@ -51,6 +51,12 @@ public:
       return((flags&com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_USE_GPU)==com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_USE_GPU?JNI_TRUE:JNI_FALSE);
    }
 
+   jboolean isUsingACC(){
+      //I'm pretty sure that this is equivalend to:
+      //return flags & com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_USE_ACC;
+      return((flags&com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_USE_ACC)==com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_USE_ACC?JNI_TRUE:JNI_FALSE);
+   }
+
    ~JNIContext(){
    }
 
