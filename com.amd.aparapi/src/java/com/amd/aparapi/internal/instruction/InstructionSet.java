@@ -629,6 +629,8 @@ public class InstructionSet{
 
       private StoreSpec storeSpec;
 
+      private Constructor<?> constructor;
+
       private ByteCode(Class<?> _class, LoadSpec _loadSpec, StoreSpec _storeSpec, ImmediateSpec _immediate, PopSpec _pop,
             PushSpec _push, Operator _operator) {
          clazz = _class;
@@ -639,6 +641,21 @@ public class InstructionSet{
 
          loadSpec = _loadSpec;
          storeSpec = _storeSpec;
+         if (clazz != null) {
+
+            try {
+               constructor = clazz.getDeclaredConstructor(MethodModel.class, ByteReader.class, boolean.class);
+            } catch (final SecurityException e) {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            } catch (final NoSuchMethodException e) {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            } catch (final IllegalArgumentException e) {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            }
+         }
       }
 
       private ByteCode(Class<?> _class, ImmediateSpec _immediate) {
@@ -731,16 +748,11 @@ public class InstructionSet{
 
       public Instruction newInstruction(MethodModel _methodModel, ByteReader byteReader, boolean _isWide) {
          Instruction newInstruction = null;
-         if (clazz != null) {
-
+         if (constructor != null) {
             try {
-               final Constructor<?> constructor = clazz.getDeclaredConstructor(MethodModel.class, ByteReader.class, boolean.class);
                newInstruction = (Instruction) constructor.newInstance(_methodModel, byteReader, _isWide);
                newInstruction.setLength(byteReader.getOffset() - newInstruction.getThisPC());
             } catch (final SecurityException e) {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            } catch (final NoSuchMethodException e) {
                // TODO Auto-generated catch block
                e.printStackTrace();
             } catch (final IllegalArgumentException e) {

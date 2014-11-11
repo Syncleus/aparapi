@@ -41,6 +41,7 @@ import com.amd.aparapi.*;
 import com.amd.aparapi.internal.annotation.*;
 import com.amd.aparapi.internal.exception.*;
 import com.amd.aparapi.internal.instruction.InstructionSet.*;
+import com.amd.aparapi.internal.model.ValueCache.ThrowingValueComputer;
 import com.amd.aparapi.internal.model.ClassModel.AttributePool.*;
 import com.amd.aparapi.internal.model.ClassModel.ConstantPool.*;
 import com.amd.aparapi.internal.reader.*;
@@ -122,10 +123,31 @@ public class ClassModel{
 
    private ClassModel superClazz = null;
 
-   private HashSet<String> noClMethods = null;
+   //   private Memoizer<Set<String>> noClMethods = Memoizer.of(this::computeNoCLMethods);
+   private Memoizer<Set<String>> noClMethods = Memoizer.Impl.of(new Supplier<Set<String>>(){
+      @Override
+      public Set<String> get() {
+         return computeNoCLMethods();
+      }
+   });
 
-   private HashMap<String, Kernel.PrivateMemorySpace> privateMemoryFields = null;
+   //   private Memoizer<Map<String, Kernel.PrivateMemorySpace>> privateMemoryFields = Memoizer.of(this::computePrivateMemoryFields);
+   private Memoizer<Map<String, Kernel.PrivateMemorySpace>> privateMemoryFields = Memoizer.Impl
+         .of(new Supplier<Map<String, Kernel.PrivateMemorySpace>>(){
+            @Override
+            public Map<String, Kernel.PrivateMemorySpace> get() {
+               return computePrivateMemoryFields();
+            }
+         });
 
+   //   private ValueCache<String, Integer, ClassParseException> privateMemorySizes = ValueCache.on(this::computePrivateMemorySize);
+   private ValueCache<String, Integer, ClassParseException> privateMemorySizes = ValueCache
+         .on(new ThrowingValueComputer<String, Integer, ClassParseException>(){
+            @Override
+            public Integer compute(String fieldName) throws ClassParseException {
+               return computePrivateMemorySize(fieldName);
+            }
+         });
 
    /**
     * Create a ClassModel representing a given Class.
@@ -137,7 +159,7 @@ public class ClassModel{
     * @throws ClassParseException
     */
 
-   public ClassModel(Class<?> _class) throws ClassParseException {
+   private ClassModel(Class<?> _class) throws ClassParseException {
 
       parse(_class);
 
@@ -147,7 +169,7 @@ public class ClassModel{
       // not occur in normal use
       if ((mySuper != null) && (!mySuper.getName().equals(Kernel.class.getName()))
             && (!mySuper.getName().equals("java.lang.Object"))) {
-         superClazz = new ClassModel(mySuper);
+         superClazz = createClassModel(mySuper);
       }
    }
 
@@ -204,7 +226,8 @@ public class ClassModel{
       return superClazz;
    }
 
-   @DocMe public void replaceSuperClazz(ClassModel c) {
+   @DocMe
+   public void replaceSuperClazz(ClassModel c) {
       if (superClazz != null) {
          assert c.isSuperClass(getClassWeAreModelling()) == true : "not my super";
          if (superClazz.getClassWeAreModelling().getName().equals(c.getClassWeAreModelling().getName())) {
@@ -260,30 +283,38 @@ public class ClassModel{
     * If a field does not satisfy the private memory conditions, null, otherwise the size of private memory required.
     */
    public Integer getPrivateMemorySize(String fieldName) throws ClassParseException {
-      if (privateMemoryFields == null) {
-         privateMemoryFields = new HashMap<String, Kernel.PrivateMemorySpace>();
-         HashMap<Field, Kernel.PrivateMemorySpace> privateMemoryFields = new HashMap<Field, Kernel.PrivateMemorySpace>();
-         for (Field field : getClassWeAreModelling().getDeclaredFields()) {
-            Kernel.PrivateMemorySpace privateMemorySpace = field.getAnnotation(Kernel.PrivateMemorySpace.class);
-            if (privateMemorySpace != null) {
-               privateMemoryFields.put(field, privateMemorySpace);
-            }
-         }
-         for (Field field : getClassWeAreModelling().getFields()) {
-            Kernel.PrivateMemorySpace privateMemorySpace = field.getAnnotation(Kernel.PrivateMemorySpace.class);
-            if (privateMemorySpace != null) {
-               privateMemoryFields.put(field, privateMemorySpace);
-            }
-         }
-         for (Map.Entry<Field, Kernel.PrivateMemorySpace> entry : privateMemoryFields.entrySet()) {
-            this.privateMemoryFields.put(entry.getKey().getName(), entry.getValue());
-         }
-      }
-      Kernel.PrivateMemorySpace annotation = privateMemoryFields.get(fieldName);
+      if (CacheEnabler.areCachesEnabled())
+         return privateMemorySizes.computeIfAbsent(fieldName);
+      return computePrivateMemorySize(fieldName);
+   }
+
+   private Integer computePrivateMemorySize(String fieldName) throws ClassParseException {
+      Kernel.PrivateMemorySpace annotation = privateMemoryFields.get().get(fieldName);
       if (annotation != null) {
          return annotation.value();
       }
       return getPrivateMemorySizeFromFieldName(fieldName);
+   }
+
+   private Map<String, Kernel.PrivateMemorySpace> computePrivateMemoryFields() {
+      Map<String, Kernel.PrivateMemorySpace> tempPrivateMemoryFields = new HashMap<String, Kernel.PrivateMemorySpace>();
+      Map<Field, Kernel.PrivateMemorySpace> privateMemoryFields = new HashMap<Field, Kernel.PrivateMemorySpace>();
+      for (Field field : getClassWeAreModelling().getDeclaredFields()) {
+         Kernel.PrivateMemorySpace privateMemorySpace = field.getAnnotation(Kernel.PrivateMemorySpace.class);
+         if (privateMemorySpace != null) {
+            privateMemoryFields.put(field, privateMemorySpace);
+         }
+      }
+      for (Field field : getClassWeAreModelling().getFields()) {
+         Kernel.PrivateMemorySpace privateMemorySpace = field.getAnnotation(Kernel.PrivateMemorySpace.class);
+         if (privateMemorySpace != null) {
+            privateMemoryFields.put(field, privateMemorySpace);
+         }
+      }
+      for (Map.Entry<Field, Kernel.PrivateMemorySpace> entry : privateMemoryFields.entrySet()) {
+         tempPrivateMemoryFields.put(entry.getKey().getName(), entry.getValue());
+      }
+      return tempPrivateMemoryFields;
    }
 
    public static Integer getPrivateMemorySizeFromField(Field field) {
@@ -309,25 +340,26 @@ public class ClassModel{
    }
 
    public Set<String> getNoCLMethods() {
-      if (this.noClMethods == null) {
-         noClMethods = new HashSet<String>();
-         HashSet<Method> methods = new HashSet<Method>();
-         for (Method method : getClassWeAreModelling().getDeclaredMethods()) {
-            if (method.getAnnotation(Kernel.NoCL.class) != null) {
-               methods.add(method);
-            }
-         }
-         for (Method method : getClassWeAreModelling().getMethods()) {
-            if (method.getAnnotation(Kernel.NoCL.class) != null) {
-               methods.add(method);
-            }
-         }
-         for (Method method : methods) {
-            noClMethods.add(method.getName());
-         }
+      return computeNoCLMethods();
+   }
 
+   private Set<String> computeNoCLMethods() {
+      Set<String> tempNoClMethods = new HashSet<String>();
+      HashSet<Method> methods = new HashSet<Method>();
+      for (Method method : getClassWeAreModelling().getDeclaredMethods()) {
+         if (method.getAnnotation(Kernel.NoCL.class) != null) {
+            methods.add(method);
+         }
       }
-      return noClMethods;
+      for (Method method : getClassWeAreModelling().getMethods()) {
+         if (method.getAnnotation(Kernel.NoCL.class) != null) {
+            methods.add(method);
+         }
+      }
+      for (Method method : methods) {
+         tempNoClMethods.add(method.getName());
+      }
+      return tempNoClMethods;
    }
 
    public static String convert(String _string) {
@@ -602,6 +634,21 @@ public class ClassModel{
       return (methodDescription);
    }
 
+   //   private static final ValueCache<Class<?>, ClassModel, ClassParseException> classModelCache = ValueCache.onIdentity(ClassModel::new);
+   private static final ValueCache<Class<?>, ClassModel, ClassParseException> classModelCache = ValueCache
+         .on(new ThrowingValueComputer<Class<?>, ClassModel, ClassParseException>(){
+            @Override
+            public ClassModel compute(Class<?> key) throws ClassParseException {
+               return new ClassModel(key);
+            }
+         });
+
+   public static ClassModel createClassModel(Class<?> _class) throws ClassParseException {
+      if (CacheEnabler.areCachesEnabled())
+         return classModelCache.computeIfAbsent(_class);
+      return new ClassModel(_class);
+   }
+
    private int magic;
 
    private int minorVersion;
@@ -813,7 +860,8 @@ public class ClassModel{
             super(_byteReader, _slot, ConstantPoolType.METHOD);
          }
 
-         @Override public String toString() {
+         @Override
+         public String toString() {
             final StringBuilder sb = new StringBuilder();
             sb.append(getClassEntry().getNameUTF8Entry().getUTF8());
             sb.append(".");
@@ -934,13 +982,15 @@ public class ClassModel{
 
          private Type returnType = null;
 
-         @Override public int hashCode() {
+         @Override
+         public int hashCode() {
             final NameAndTypeEntry nameAndTypeEntry = getNameAndTypeEntry();
 
             return ((((nameAndTypeEntry.getNameIndex() * 31) + nameAndTypeEntry.getDescriptorIndex()) * 31) + getClassIndex());
          }
 
-         @Override public boolean equals(Object _other) {
+         @Override
+         public boolean equals(Object _other) {
             if ((_other == null) || !(_other instanceof MethodReferenceEntry)) {
                return (false);
             } else {
@@ -1312,7 +1362,8 @@ public class ClassModel{
 
       }
 
-      @Override public Iterator<Entry> iterator() {
+      @Override
+      public Iterator<Entry> iterator() {
          return (entries.iterator());
       }
 
@@ -1399,58 +1450,51 @@ public class ClassModel{
          } else if (_entry instanceof ConstantPool.NameAndTypeEntry) {
             final ConstantPool.NameAndTypeEntry nameAndTypeEntry = (ConstantPool.NameAndTypeEntry) _entry;
             references = new int[] {
-                  nameAndTypeEntry.getNameIndex(),
-                  nameAndTypeEntry.getDescriptorIndex()
+                  nameAndTypeEntry.getNameIndex(), nameAndTypeEntry.getDescriptorIndex()
             };
          } else if (_entry instanceof ConstantPool.MethodEntry) {
             final ConstantPool.MethodEntry methodEntry = (ConstantPool.MethodEntry) _entry;
             final ConstantPool.ClassEntry classEntry = (ConstantPool.ClassEntry) get(methodEntry.getClassIndex());
-            @SuppressWarnings("unused") final ConstantPool.UTF8Entry utf8Entry = (ConstantPool.UTF8Entry) get(classEntry
-                  .getNameIndex());
+            @SuppressWarnings("unused")
+            final ConstantPool.UTF8Entry utf8Entry = (ConstantPool.UTF8Entry) get(classEntry.getNameIndex());
             final ConstantPool.NameAndTypeEntry nameAndTypeEntry = (ConstantPool.NameAndTypeEntry) get(methodEntry
                   .getNameAndTypeIndex());
-            @SuppressWarnings("unused") final ConstantPool.UTF8Entry utf8NameEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry
-                  .getNameIndex());
-            @SuppressWarnings("unused") final ConstantPool.UTF8Entry utf8DescriptorEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry
-                  .getDescriptorIndex());
+            @SuppressWarnings("unused")
+            final ConstantPool.UTF8Entry utf8NameEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getNameIndex());
+            @SuppressWarnings("unused")
+            final ConstantPool.UTF8Entry utf8DescriptorEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getDescriptorIndex());
             references = new int[] {
-                  methodEntry.getClassIndex(),
-                  classEntry.getNameIndex(),
-                  nameAndTypeEntry.getNameIndex(),
+                  methodEntry.getClassIndex(), classEntry.getNameIndex(), nameAndTypeEntry.getNameIndex(),
                   nameAndTypeEntry.getDescriptorIndex()
             };
          } else if (_entry instanceof ConstantPool.InterfaceMethodEntry) {
             final ConstantPool.InterfaceMethodEntry interfaceMethodEntry = (ConstantPool.InterfaceMethodEntry) _entry;
             final ConstantPool.ClassEntry classEntry = (ConstantPool.ClassEntry) get(interfaceMethodEntry.getClassIndex());
-            @SuppressWarnings("unused") final ConstantPool.UTF8Entry utf8Entry = (ConstantPool.UTF8Entry) get(classEntry
-                  .getNameIndex());
+            @SuppressWarnings("unused")
+            final ConstantPool.UTF8Entry utf8Entry = (ConstantPool.UTF8Entry) get(classEntry.getNameIndex());
             final ConstantPool.NameAndTypeEntry nameAndTypeEntry = (ConstantPool.NameAndTypeEntry) get(interfaceMethodEntry
                   .getNameAndTypeIndex());
-            @SuppressWarnings("unused") final ConstantPool.UTF8Entry utf8NameEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry
-                  .getNameIndex());
-            @SuppressWarnings("unused") final ConstantPool.UTF8Entry utf8DescriptorEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry
-                  .getDescriptorIndex());
+            @SuppressWarnings("unused")
+            final ConstantPool.UTF8Entry utf8NameEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getNameIndex());
+            @SuppressWarnings("unused")
+            final ConstantPool.UTF8Entry utf8DescriptorEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getDescriptorIndex());
             references = new int[] {
-                  interfaceMethodEntry.getClassIndex(),
-                  classEntry.getNameIndex(),
-                  nameAndTypeEntry.getNameIndex(),
+                  interfaceMethodEntry.getClassIndex(), classEntry.getNameIndex(), nameAndTypeEntry.getNameIndex(),
                   nameAndTypeEntry.getDescriptorIndex()
             };
          } else if (_entry instanceof ConstantPool.FieldEntry) {
             final ConstantPool.FieldEntry fieldEntry = (ConstantPool.FieldEntry) _entry;
             final ConstantPool.ClassEntry classEntry = (ConstantPool.ClassEntry) get(fieldEntry.getClassIndex());
-            @SuppressWarnings("unused") final ConstantPool.UTF8Entry utf8Entry = (ConstantPool.UTF8Entry) get(classEntry
-                  .getNameIndex());
+            @SuppressWarnings("unused")
+            final ConstantPool.UTF8Entry utf8Entry = (ConstantPool.UTF8Entry) get(classEntry.getNameIndex());
             final ConstantPool.NameAndTypeEntry nameAndTypeEntry = (ConstantPool.NameAndTypeEntry) get(fieldEntry
                   .getNameAndTypeIndex());
-            @SuppressWarnings("unused") final ConstantPool.UTF8Entry utf8NameEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry
-                  .getNameIndex());
-            @SuppressWarnings("unused") final ConstantPool.UTF8Entry utf8DescriptorEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry
-                  .getDescriptorIndex());
+            @SuppressWarnings("unused")
+            final ConstantPool.UTF8Entry utf8NameEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getNameIndex());
+            @SuppressWarnings("unused")
+            final ConstantPool.UTF8Entry utf8DescriptorEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getDescriptorIndex());
             references = new int[] {
-                  fieldEntry.getClassIndex(),
-                  classEntry.getNameIndex(),
-                  nameAndTypeEntry.getNameIndex(),
+                  fieldEntry.getClassIndex(), classEntry.getNameIndex(), nameAndTypeEntry.getNameIndex(),
                   nameAndTypeEntry.getDescriptorIndex()
             };
          }
@@ -1581,7 +1625,8 @@ public class ClassModel{
             codeEntryAttributePool = new AttributePool(_byteReader, getName());
          }
 
-         @Override public AttributePool getAttributePool() {
+         @Override
+         public AttributePool getAttributePool() {
             return (codeEntryAttributePool);
          }
 
@@ -1664,7 +1709,8 @@ public class ClassModel{
             super(_byteReader, _nameIndex, _length);
          }
 
-         @Override public Iterator<T> iterator() {
+         @Override
+         public Iterator<T> iterator() {
             return (pool.iterator());
          }
       }
@@ -1848,27 +1894,33 @@ public class ClassModel{
                return (variableNameIndex);
             }
 
-            @Override public int getStart() {
+            @Override
+            public int getStart() {
                return (start);
             }
 
-            @Override public int getVariableIndex() {
+            @Override
+            public int getVariableIndex() {
                return (variableIndex);
             }
 
-            @Override public String getVariableName() {
+            @Override
+            public String getVariableName() {
                return (constantPool.getUTF8Entry(variableNameIndex).getUTF8());
             }
 
-            @Override public String getVariableDescriptor() {
+            @Override
+            public String getVariableDescriptor() {
                return (constantPool.getUTF8Entry(descriptorIndex).getUTF8());
             }
 
-            @Override public int getEnd() {
+            @Override
+            public int getEnd() {
                return (start + usageLength);
             }
 
-            @Override public boolean isArray() {
+            @Override
+            public boolean isArray() {
                return (getVariableDescriptor().startsWith("["));
             }
          }
@@ -1969,7 +2021,8 @@ public class ClassModel{
             return (bytes);
          }
 
-         @Override public String toString() {
+         @Override
+         public String toString() {
             return (new String(bytes));
          }
 
@@ -1987,7 +2040,8 @@ public class ClassModel{
             return (bytes);
          }
 
-         @Override public String toString() {
+         @Override
+         public String toString() {
             return (new String(bytes));
          }
       }
@@ -2004,7 +2058,8 @@ public class ClassModel{
             return (bytes);
          }
 
-         @Override public String toString() {
+         @Override
+         public String toString() {
             return (new String(bytes));
          }
       }
@@ -2094,9 +2149,11 @@ public class ClassModel{
                   }
                }
 
-               @SuppressWarnings("unused") private final int elementNameIndex;
+               @SuppressWarnings("unused")
+               private final int elementNameIndex;
 
-               @SuppressWarnings("unused") private Value value;
+               @SuppressWarnings("unused")
+               private Value value;
 
                public ElementValuePair(ByteReader _byteReader) {
                   elementNameIndex = _byteReader.u2();
@@ -2626,12 +2683,23 @@ public class ClassModel{
    }
 
    public ClassModelMethod getMethod(String _name, String _descriptor) {
+      ClassModelMethod methodOrNull = getMethodOrNull(_name, _descriptor);
+      if (methodOrNull == null)
+         return superClazz != null ? superClazz.getMethod(_name, _descriptor) : (null);
+      return methodOrNull;
+   }
+
+   private ClassModelMethod getMethodOrNull(String _name, String _descriptor) {
       for (final ClassModelMethod entry : methods) {
          if (entry.getName().equals(_name) && entry.getDescriptor().equals(_descriptor)) {
+            if (logger.isLoggable(Level.FINE)) {
+               logger.fine("Found " + clazz.getName() + "." + entry.getName() + " " + entry.getDescriptor() + " for "
+                     + _name.replace('/', '.'));
+            }
             return (entry);
          }
       }
-      return superClazz != null ? superClazz.getMethod(_name, _descriptor) : (null);
+      return null;
    }
 
    public List<ClassModelField> getFieldPoolEntries() {
@@ -2647,7 +2715,9 @@ public class ClassModel{
     * @return The Method or null if we fail to locate a given method.
     */
    public ClassModelMethod getMethod(MethodEntry _methodEntry, boolean _isSpecial) {
-      final String entryClassNameInDotForm = _methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.');
+      NameAndTypeEntry nameAndTypeEntry = _methodEntry.getNameAndTypeEntry();
+      String utf8Name = nameAndTypeEntry.getNameUTF8Entry().getUTF8();
+      final String entryClassNameInDotForm = utf8Name.replace('/', '.');
 
       // Shortcut direct calls to supers to allow "foo() { super.foo() }" type stuff to work
       if (_isSpecial && (superClazz != null) && superClazz.isSuperClass(entryClassNameInDotForm)) {
@@ -2658,19 +2728,20 @@ public class ClassModel{
          return superClazz.getMethod(_methodEntry, false);
       }
 
-      for (final ClassModelMethod entry : methods) {
-         if (entry.getName().equals(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8())
-               && entry.getDescriptor().equals(_methodEntry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8())) {
-            if (logger.isLoggable(Level.FINE)) {
-               logger.fine("Found " + clazz.getName() + "." + entry.getName() + " " + entry.getDescriptor() + " for "
-                     + entryClassNameInDotForm);
-            }
-            return (entry);
-         }
-      }
-
-      return superClazz != null ? superClazz.getMethod(_methodEntry, false) : (null);
+      ClassModelMethod methodOrNull = getMethodOrNull(utf8Name, nameAndTypeEntry.getDescriptorUTF8Entry().getUTF8());
+      if (methodOrNull == null)
+         return superClazz != null ? superClazz.getMethod(_methodEntry, false) : (null);
+      return methodOrNull;
    }
+
+   //   private ValueCache<MethodKey, MethodModel, AparapiException> methodModelCache = ValueCache.on(this::computeMethodModel);
+   private ValueCache<MethodKey, MethodModel, AparapiException> methodModelCache = ValueCache
+         .on(new ThrowingValueComputer<MethodKey, MethodModel, AparapiException>(){
+            @Override
+            public MethodModel compute(MethodKey key) throws AparapiException {
+               return computeMethodModel(key);
+            }
+         });
 
    /**
     * Create a MethodModel for a given method name and signature.
@@ -2680,9 +2751,17 @@ public class ClassModel{
     * @return 
     * @throws AparapiException
     */
-
    public MethodModel getMethodModel(String _name, String _signature) throws AparapiException {
-      final ClassModelMethod method = getMethod(_name, _signature);
+      if (CacheEnabler.areCachesEnabled())
+         return methodModelCache.computeIfAbsent(MethodKey.of(_name, _signature));
+      else {
+         final ClassModelMethod method = getMethod(_name, _signature);
+         return new MethodModel(method);
+      }
+   }
+
+   private MethodModel computeMethodModel(MethodKey methodKey) throws AparapiException {
+      final ClassModelMethod method = getMethod(methodKey.getName(), methodKey.getSignature());
       return new MethodModel(method);
    }
 
@@ -2715,9 +2794,29 @@ public class ClassModel{
       totalStructSize = x;
    }
 
+   //   private final ValueCache<EntrypointKey, Entrypoint, AparapiException> entrypointCache = ValueCache.on(this::computeBasicEntrypoint);
+   private final ValueCache<EntrypointKey, Entrypoint, AparapiException> entrypointCache = ValueCache
+         .on(new ThrowingValueComputer<EntrypointKey, Entrypoint, AparapiException>(){
+            @Override
+            public Entrypoint compute(EntrypointKey key) throws AparapiException {
+               return computeBasicEntrypoint(key);
+            }
+         });
+
    Entrypoint getEntrypoint(String _entrypointName, String _descriptor, Object _k) throws AparapiException {
-      final MethodModel method = getMethodModel(_entrypointName, _descriptor);
-      return (new Entrypoint(this, method, _k));
+      if (CacheEnabler.areCachesEnabled()) {
+         EntrypointKey key = EntrypointKey.of(_entrypointName, _descriptor);
+         Entrypoint entrypointWithoutKernel = entrypointCache.computeIfAbsent(key);
+         return entrypointWithoutKernel.cloneForKernel(_k);
+      } else {
+         final MethodModel method = getMethodModel(_entrypointName, _descriptor);
+         return new Entrypoint(this, method, _k);
+      }
+   }
+
+   Entrypoint computeBasicEntrypoint(EntrypointKey entrypointKey) throws AparapiException {
+      final MethodModel method = getMethodModel(entrypointKey.getEntrypointName(), entrypointKey.getDescriptor());
+      return new Entrypoint(this, method, null);
    }
 
    public Class<?> getClassWeAreModelling() {
@@ -2730,5 +2829,9 @@ public class ClassModel{
 
    public Entrypoint getEntrypoint() throws AparapiException {
       return (getEntrypoint("run", "()V", null));
+   }
+
+   public static void invalidateCaches() {
+      classModelCache.invalidate();
    }
 }
