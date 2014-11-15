@@ -273,9 +273,9 @@ public abstract class KernelWriter extends BlockWriter{
 
    public final static String __private = "__private";
 
-   public final static String LOCAL_ANNOTATION_NAME = "L" + Local.class.getName().replace(".", "/") + ";";
+   public final static String LOCAL_ANNOTATION_NAME = "L" + Local.class.getName().replace('.', '/') + ";";
 
-   public final static String CONSTANT_ANNOTATION_NAME = "L" + Constant.class.getName().replace(".", "/") + ";";
+   public final static String CONSTANT_ANNOTATION_NAME = "L" + Constant.class.getName().replace('.', '/') + ";";
 
    @Override public void write(Entrypoint _entryPoint) throws CodeGenException {
       final List<String> thisStruct = new ArrayList<String>();
@@ -341,7 +341,7 @@ public abstract class KernelWriter extends BlockWriter{
          String className = null;
          if (signature.startsWith("L")) {
             // Turn Lcom/amd/javalabs/opencl/demo/DummyOOA; into com_amd_javalabs_opencl_demo_DummyOOA for example
-            className = (signature.substring(1, signature.length() - 1)).replace("/", "_");
+            className = (signature.substring(1, signature.length() - 1)).replace('/', '_');
             // if (logger.isLoggable(Level.FINE)) {
             // logger.fine("Examining object parameter: " + signature + " new: " + className);
             // }
@@ -475,7 +475,7 @@ public abstract class KernelWriter extends BlockWriter{
       for (final ClassModel cm : _entryPoint.getObjectArrayFieldsClasses().values()) {
          final ArrayList<FieldEntry> fieldSet = cm.getStructMembers();
          if (fieldSet.size() > 0) {
-            final String mangledClassName = cm.getClassWeAreModelling().getName().replace(".", "_");
+            final String mangledClassName = cm.getClassWeAreModelling().getName().replace('.', '_');
             newLine();
             write("typedef struct " + mangledClassName + "_s{");
             in();
@@ -572,11 +572,11 @@ public abstract class KernelWriter extends BlockWriter{
                // Call to an object member or superclass of member
                for (final ClassModel c : _entryPoint.getObjectArrayFieldsClasses().values()) {
                   if (mm.getMethod().getClassModel() == c) {
-                     write("__global " + mm.getMethod().getClassModel().getClassWeAreModelling().getName().replace(".", "_")
+                     write("__global " + mm.getMethod().getClassModel().getClassWeAreModelling().getName().replace('.', '_')
                            + " *this");
                      break;
                   } else if (mm.getMethod().getClassModel().isSuperClass(c.getClassWeAreModelling())) {
-                     write("__global " + c.getClassWeAreModelling().getName().replace(".", "_") + " *this");
+                     write("__global " + c.getClassWeAreModelling().getName().replace('.', '_') + " *this");
                      break;
                   }
                }

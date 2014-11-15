@@ -50,7 +50,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
 
-public class Entrypoint{
+public class Entrypoint implements Cloneable {
 
    private static Logger logger = Logger.getLogger(Config.getLoggerName());
 
@@ -81,7 +81,7 @@ public class Entrypoint{
 
    private final List<MethodModel> calledMethods = new ArrayList<MethodModel>();
 
-   private MethodModel methodModel;
+   private final MethodModel methodModel;
 
    /**
       True is an indication to use the fp64 pragma
@@ -226,7 +226,7 @@ public class Entrypoint{
             final Class<?> memberClass = Class.forName(className);
 
             // Immediately add this class and all its supers if necessary
-            memberClassModel = new ClassModel(memberClass);
+            memberClassModel = ClassModel.createClassModel(memberClass);
             if (logger.isLoggable(Level.FINEST)) {
                logger.finest("adding class " + className);
             }
@@ -595,7 +595,7 @@ public class Entrypoint{
                   // Add the class model for the referenced obj array
                   if (signature.startsWith("[L")) {
                      // Turn [Lcom/amd/javalabs/opencl/demo/DummyOOA; into com.amd.javalabs.opencl.demo.DummyOOA for example
-                     final String className = (signature.substring(2, signature.length() - 1)).replace("/", ".");
+                     final String className = (signature.substring(2, signature.length() - 1)).replace('/', '.');
                      final ClassModel arrayFieldModel = getOrUpdateAllClassAccesses(className);
                      if (arrayFieldModel != null) {
                         final Class<?> memberClass = arrayFieldModel.getClassWeAreModelling();
@@ -625,7 +625,7 @@ public class Entrypoint{
                         }
                      }
                   } else {
-                     final String className = (field.getClassEntry().getNameUTF8Entry().getUTF8()).replace("/", ".");
+                     final String className = (field.getClassEntry().getNameUTF8Entry().getUTF8()).replace('/', '.');
                      // Look for object data member access
                      if (!className.equals(getClassModel().getClassWeAreModelling().getName())
                            && (getFieldFromClassHierarchy(getClassModel().getClassWeAreModelling(), accessedFieldName) == null)) {
@@ -640,7 +640,7 @@ public class Entrypoint{
                   fieldAssignments.add(assignedFieldName);
                   referencedFieldNames.add(assignedFieldName);
 
-                  final String className = (field.getClassEntry().getNameUTF8Entry().getUTF8()).replace("/", ".");
+                  final String className = (field.getClassEntry().getNameUTF8Entry().getUTF8()).replace('/', '.');
                   // Look for object data member access
                   if (!className.equals(getClassModel().getClassWeAreModelling().getName())
                         && (getFieldFromClassHierarchy(getClassModel().getClassWeAreModelling(), assignedFieldName) == null)) {
@@ -908,5 +908,15 @@ public class Entrypoint{
       assert target == null : "Should not have missed a method in calledMethods";
 
       return null;
+   }
+
+   Entrypoint cloneForKernel(Object _k) throws AparapiException {
+      try {
+         Entrypoint clonedEntrypoint = (Entrypoint) clone();
+         clonedEntrypoint.kernelInstance = _k;
+         return clonedEntrypoint;
+      } catch (CloneNotSupportedException e) {
+         throw new AparapiException(e);
+      }
    }
 }
