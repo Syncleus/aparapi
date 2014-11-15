@@ -97,7 +97,7 @@ import com.amd.aparapi.internal.instruction.InstructionSet.ConditionalBranch;
  * @author gfrost 
  */
 
-public class BranchSet{
+public class BranchSet {
    /**
     * Base abstract class used to hold information used to construct node tree for logical expressions. 
     * 
@@ -107,7 +107,7 @@ public class BranchSet{
     * @author gfrost
     *
     */
-   public static abstract class LogicalExpressionNode{
+   public static abstract class LogicalExpressionNode {
       private LogicalExpressionNode next = null;
 
       private LogicalExpressionNode parent = null;
@@ -121,6 +121,8 @@ public class BranchSet{
       public abstract int getFallThrough();
 
       public abstract void invert();
+
+      public abstract LogicalExpressionNode cloneInverted();
 
       public LogicalExpressionNode getRoot() {
          if (parent != null) {
@@ -154,24 +156,37 @@ public class BranchSet{
     * @author gfrost
     *
     */
-   public static class SimpleLogicalExpressionNode extends LogicalExpressionNode{
+   public static class SimpleLogicalExpressionNode extends LogicalExpressionNode {
       private final ConditionalBranch branch;
 
-      protected boolean invert = false;
+      private boolean invert;
 
       public SimpleLogicalExpressionNode(ConditionalBranch _branch) {
-         branch = _branch;
+         this(_branch, false);
       }
 
-      @Override public int getTarget() {
+      private SimpleLogicalExpressionNode(ConditionalBranch _branch, boolean _invert) {
+         branch = _branch;
+         invert = _invert;
+      }
+
+      @Override
+      public int getTarget() {
          return (getBranch().getTarget().getThisPC());
       }
 
-      @Override public void invert() {
+      @Override
+      public void invert() {
          invert = !invert;
       }
 
-      @Override public int getFallThrough() {
+      @Override
+      public LogicalExpressionNode cloneInverted() {
+         return new SimpleLogicalExpressionNode(branch, !invert);
+      }
+
+      @Override
+      public int getFallThrough() {
          return (getBranch().getNextPC().getThisPC());
       }
 
@@ -181,6 +196,11 @@ public class BranchSet{
 
       public ConditionalBranch getBranch() {
          return branch;
+      }
+
+      @Override
+      public String toString() {
+         return invert ? ("!(" + getBranch() + ")") : getBranch().toString();
       }
    }
 
@@ -195,41 +215,56 @@ public class BranchSet{
     * @author gfrost
     *
     */
-   public static class CompoundLogicalExpressionNode extends LogicalExpressionNode{
+   public static class CompoundLogicalExpressionNode extends LogicalExpressionNode {
       private final LogicalExpressionNode lhs;
 
       private final LogicalExpressionNode rhs;
 
       private boolean and;
 
-      public CompoundLogicalExpressionNode(boolean _and, LogicalExpressionNode _lhs, LogicalExpressionNode _rhs) {
+      private CompoundLogicalExpressionNode(boolean _and, LogicalExpressionNode _lhs, LogicalExpressionNode _rhs,
+            boolean applyInverts) {
          lhs = _lhs;
          and = _and;
          rhs = _rhs;
          setNext(_rhs.getNext());
-         if (and) {
-            lhs.invert();
-            // rhs.invert();
+         if (applyInverts) {
+            if (and) {
+               lhs.invert();
+               // rhs.invert();
+            }
          }
          rhs.setParent(this);
          lhs.setParent(this);
       }
 
-      @Override public int getTarget() {
+      public CompoundLogicalExpressionNode(boolean _and, LogicalExpressionNode _lhs, LogicalExpressionNode _rhs) {
+         this(_and, _lhs, _rhs, true);
+      }
+
+      @Override
+      public int getTarget() {
          return (rhs.getTarget());
       }
 
-      @Override public void invert() {
+      @Override
+      public void invert() {
          and = !and;
          lhs.invert();
          rhs.invert();
+      }
+
+      @Override
+      public LogicalExpressionNode cloneInverted() {
+         return new CompoundLogicalExpressionNode(!and, lhs.cloneInverted(), rhs.cloneInverted(), false);
       }
 
       public boolean isAnd() {
          return (and);
       }
 
-      @Override public int getFallThrough() {
+      @Override
+      public int getFallThrough() {
          return (rhs.getFallThrough());
       }
 
@@ -242,6 +277,12 @@ public class BranchSet{
 
          return rhs;
       }
+
+      @Override
+      public String toString() {
+         return getLhs().toString() + " " + (isAnd() ? "&&" : "||") + " " + getRhs().toString();
+      }
+
    }
 
    private final List<ConditionalBranch> set = new ArrayList<ConditionalBranch>();
