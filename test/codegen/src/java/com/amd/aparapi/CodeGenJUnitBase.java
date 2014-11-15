@@ -37,14 +37,17 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.amd.aparapi;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
 
 import com.amd.aparapi.internal.exception.AparapiException;
 import com.amd.aparapi.internal.model.ClassModel;
 import com.amd.aparapi.internal.model.Entrypoint;
 import com.amd.aparapi.internal.writer.KernelWriter;
 
-public class CodeGenJUnitBase{
+public class CodeGenJUnitBase {
 
    protected void test(Class<?> _class, Class<? extends AparapiException> _expectedExceptionType, String[] expectedOpenCL) {
       try {
@@ -53,7 +56,7 @@ public class CodeGenJUnitBase{
 
          //  String expected = source.getOpenCLString();
 
-         ClassModel classModel = new ClassModel(_class);
+         ClassModel classModel = ClassModel.createClassModel(_class);
 
          // construct an artficial instance of our class here
          // we assume the specified class will have a null constructor
@@ -94,11 +97,15 @@ public class CodeGenJUnitBase{
                      .println("}\n------------------------------------------------------------------------------------------------------");
 
             }
-            assertTrue(_class.getSimpleName(), same);
+            if (!same) {
+               assertEquals(_class.getSimpleName(), Arrays.toString(expectedOpenCL), actual);
+            }
          } else {
             assertTrue("Expected exception " + _expectedExceptionType + " Instead we got {\n" + actual + "\n}", false);
          }
 
+      } catch (AssertionError e) {
+         throw e;
       } catch (Throwable t) {
          if (_expectedExceptionType == null || !t.getClass().isAssignableFrom(_expectedExceptionType)) {
             t.printStackTrace();
