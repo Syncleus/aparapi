@@ -959,12 +959,12 @@ public class KernelRunner extends KernelRunnerJNI{
       assert args != null : "args should not be null";
       final boolean needSync = updateKernelArrayRefs();
       if (needSync && logger.isLoggable(Level.FINE)) {
-         logger.fine("Need to resync arrays on " + kernel.getClass().getName());
+         logger.fine("Need to resync arrays on " + describeKernelClass());
       }
 
       // native side will reallocate array buffers if necessary
       if (runKernelJNI(jniContextHandle, _range, needSync, _passes) != 0) {
-         logger.warning("### CL exec seems to have failed. Trying to revert to Java ###");
+         logger.warning("### " + describeKernelClass() + " - CL exec seems to have failed. Trying to revert to Java ###");
          kernel.setFallbackExecutionMode();
          return execute(_entrypointName, _range, _passes);
       }
@@ -999,14 +999,18 @@ public class KernelRunner extends KernelRunnerJNI{
    synchronized private Kernel warnFallBackAndExecute(String _entrypointName, final Range _range, final int _passes,
          Exception _exception) {
       if (logger.isLoggable(Level.WARNING)) {
-         logger.warning("Reverting to the next execution mode for " + kernel.getClass() + ": " + _exception.getMessage());
+         logger.warning("Reverting to the next execution mode for " + describeKernelClass() + ": " + _exception.getMessage());
          _exception.printStackTrace();
       }
       return fallBackAndExecute(_entrypointName, _range, _passes);
    }
 
+   private String describeKernelClass() {
+      return kernel.getClass().getName();
+   }
+
    synchronized private Kernel warnFallBackAndExecute(String _entrypointName, final Range _range, final int _passes, String _excuse) {
-      logger.warning("Reverting to the next execution mode for " + kernel.getClass() + ": " + _excuse);
+      logger.warning("Reverting to the next execution mode for " + describeKernelClass() + ": " + _excuse);
       return fallBackAndExecute(_entrypointName, _range, _passes);
    }
 
@@ -1295,7 +1299,7 @@ public class KernelRunner extends KernelRunnerJNI{
       }
 
       if (Config.enableExecutionModeReporting) {
-         System.out.println(kernel.getClass().getCanonicalName() + ":" + kernel.getExecutionMode());
+         System.out.println(describeKernelClass() + ":" + kernel.getExecutionMode());
       }
 
       executionTime = System.currentTimeMillis() - executeStartTime;
