@@ -98,7 +98,6 @@ public class MethodModel{
       return noCL;
    }
 
-
    public boolean isPrivateMemoryGetter() {
       return methodIsPrivateMemoryGetter;
    }
@@ -1726,5 +1725,9 @@ public class MethodModel{
 
    public Instruction getExprHead() {
       return (expressionList.getHead());
+   }
+
+   @Override public String toString() {
+      return "MethodModel of " + method;
    }
 }

@@ -45,7 +45,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreateJUnitTests{
+public class CreateJUnitTests {
    public static void main(String[] args) throws ClassNotFoundException, FileNotFoundException, IOException {
       File rootDir = new File(System.getProperty("root", "."));
 
@@ -57,9 +57,10 @@ public class CreateJUnitTests{
       System.out.println(testDir.getCanonicalPath());
 
       List<String> classNames = new ArrayList<String>();
-      for (File sourceFile : testDir.listFiles(new FilenameFilter(){
+      for (File sourceFile : testDir.listFiles(new FilenameFilter() {
 
-         @Override public boolean accept(File dir, String name) {
+         @Override
+         public boolean accept(File dir, String name) {
             return (name.endsWith(".java"));
          }
       })) {
@@ -86,33 +87,10 @@ public class CreateJUnitTests{
             sb.append("\n */\n");
          }
          sb.append("public class " + className + " extends com.amd.aparapi.CodeGenJUnitBase{\n");
-         sb.append("   @Test public void " + className + "(){\n");
-         if (source.getOpenCLSectionCount() > 0) {
-
-            sb.append("   String[] expectedOpenCL = new String[]{\n");
-            for (List<String> opencl : source.getOpenCL()) {
-               sb.append("   \"\"\n");
-               for (String line : opencl) {
-                  sb.append("   +\"" + line + "\\n\"\n");
-               }
-               sb.append("   ,\n");
-            }
-            sb.append("   };\n");
-         } else {
-            sb.append("   String[] expectedOpenCL = null;\n");
-         }
-
-         String exceptions = source.getExceptionsString();
-         if (exceptions.length() > 0) {
-            sb.append("   Class<? extends com.amd.aparapi.internal.exception.AparapiException> expectedException = ");
-
-            sb.append("com.amd.aparapi.internal.exception." + exceptions + ".class");
-            sb.append(";\n");
-         } else {
-            sb.append("   Class<? extends com.amd.aparapi.internal.exception.AparapiException> expectedException = null;\n");
-         }
-         sb.append("       test(" + testPackageName + "." + className + ".class, expectedException, expectedOpenCL);\n");
-         sb.append("   }\n");
+         appendExpectedOpenCL(source, sb);
+         appendExpectedExceptions(source, sb);
+         appendTest(testPackageName, className, "", sb);
+         appendTest(testPackageName, className, "WorksWithCaching", sb);
          sb.append("}\n");
          //  System.out.println(sb.toString());
 
@@ -123,5 +101,40 @@ public class CreateJUnitTests{
 
       }
 
+   }
+
+   private static void appendTest(String testPackageName, String className, String suffix, StringBuilder sb) {
+      sb.append("   @Test public void " + className + suffix + "(){\n");
+      sb.append("       test(" + testPackageName + "." + className + ".class, expectedException, expectedOpenCL);\n");
+      sb.append("   }\n");
+   }
+
+   private static void appendExpectedExceptions(Source source, StringBuilder sb) {
+      String exceptions = source.getExceptionsString();
+      if (exceptions.length() > 0) {
+         sb.append("   private static final Class<? extends com.amd.aparapi.internal.exception.AparapiException> expectedException = ");
+
+         sb.append("com.amd.aparapi.internal.exception." + exceptions + ".class");
+         sb.append(";\n");
+      } else {
+         sb.append("   private static final Class<? extends com.amd.aparapi.internal.exception.AparapiException> expectedException = null;\n");
+      }
+   }
+
+   private static void appendExpectedOpenCL(Source source, StringBuilder sb) {
+      if (source.getOpenCLSectionCount() > 0) {
+
+         sb.append("  private static final  String[] expectedOpenCL = new String[]{\n");
+         for (List<String> opencl : source.getOpenCL()) {
+            sb.append("   \"\"\n");
+            for (String line : opencl) {
+               sb.append("   +\"" + line + "\\n\"\n");
+            }
+            sb.append("   ,\n");
+         }
+         sb.append("   };\n");
+      } else {
+         sb.append("   private static final String[] expectedOpenCL = null;\n");
+      }
    }
 }

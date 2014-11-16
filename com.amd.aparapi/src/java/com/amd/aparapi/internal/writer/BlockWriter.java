@@ -40,11 +40,14 @@ package com.amd.aparapi.internal.writer;
 import com.amd.aparapi.*;
 import com.amd.aparapi.internal.exception.*;
 import com.amd.aparapi.internal.instruction.*;
+import com.amd.aparapi.internal.instruction.BranchSet.LogicalExpressionNode;
+import com.amd.aparapi.internal.instruction.InstructionSet.AccessInstanceField;
 import com.amd.aparapi.internal.instruction.BranchSet.*;
 import com.amd.aparapi.internal.instruction.InstructionSet.*;
 import com.amd.aparapi.internal.model.ClassModel.ConstantPool.*;
 import com.amd.aparapi.internal.model.ClassModel.*;
 import com.amd.aparapi.internal.model.*;
+import com.amd.aparapi.internal.model.ClassModel.ConstantPool.NameAndTypeEntry;
 
 import java.util.*;
 
@@ -59,6 +62,7 @@ import java.util.*;
 public abstract class BlockWriter{
 
    public final static String arrayLengthMangleSuffix = "__javaArrayLength";
+
    public final static String arrayDimMangleSuffix = "__javaArrayDimension";
 
    public abstract void write(String _string);
@@ -315,10 +319,7 @@ public abstract class BlockWriter{
    public Instruction writeConditional(BranchSet _branchSet, boolean _invert) throws CodeGenException {
 
       final LogicalExpressionNode logicalExpression = _branchSet.getLogicalExpression();
-      if (!_invert) {
-         logicalExpression.invert();
-      }
-      write(logicalExpression);
+      write(_invert ? logicalExpression : logicalExpression.cloneInverted());
       return (_branchSet.getLast().getNextExpr());
    }
 
@@ -416,7 +417,8 @@ public abstract class BlockWriter{
          final AccessArrayElement arrayLoadInstruction = (AccessArrayElement) _instruction;
 
          //object array, get address
-         if(arrayLoadInstruction instanceof I_AALOAD) {
+         boolean isMultiDimensional = arrayLoadInstruction instanceof I_AALOAD && isMultiDimensionalArray(arrayLoadInstruction);
+         if (isMultiDimensional) {
             write("(&");
          }
          writeInstruction(arrayLoadInstruction.getArrayRef());
@@ -425,22 +427,25 @@ public abstract class BlockWriter{
 
          //object array, find the size of each object in the array
          //for 2D arrays, this size is the size of a row.
-         if(arrayLoadInstruction instanceof I_AALOAD) {
+         if (isMultiDimensional) {
             int dim = 0;
             Instruction load = arrayLoadInstruction.getArrayRef();
-            while(load instanceof I_AALOAD) {
+            while (load instanceof I_AALOAD) {
                load = load.getFirstChild();
                dim++;
             }
 
-            String arrayName = ((AccessInstanceField)load).getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-            write(" * this->" + arrayName + arrayDimMangleSuffix+dim);
+            NameAndTypeEntry nameAndTypeEntry = ((AccessInstanceField) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
+            if (isMultiDimensionalArray(nameAndTypeEntry)) {
+               String arrayName = nameAndTypeEntry.getNameUTF8Entry().getUTF8();
+               write(" * this->" + arrayName + arrayDimMangleSuffix + dim);
+            }
          }
 
          write("]");
 
          //object array, close parentheses
-         if(arrayLoadInstruction instanceof I_AALOAD) {
+         if (isMultiDimensional) {
             write(")");
          }
       } else if (_instruction instanceof AccessField) {
@@ -467,13 +472,14 @@ public abstract class BlockWriter{
          //we're looking at
          int dim = 0;
          Instruction load = _instruction.getFirstChild();
-         while(load instanceof I_AALOAD) {
-             load = load.getFirstChild();
-             dim++;
+         while (load instanceof I_AALOAD) {
+            load = load.getFirstChild();
+            dim++;
          }
-         final AccessInstanceField child = (AccessInstanceField) load;
-         final String arrayName = child.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-         write("this->" + arrayName + arrayLengthMangleSuffix + dim);
+         NameAndTypeEntry nameAndTypeEntry = ((AccessInstanceField) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
+         final String arrayName = nameAndTypeEntry.getNameUTF8Entry().getUTF8();
+         String dimSuffix = isMultiDimensionalArray(nameAndTypeEntry) ? Integer.toString(dim) : "";
+         write("this->" + arrayName + arrayLengthMangleSuffix + dimSuffix);
       } else if (_instruction instanceof AssignToField) {
          final AssignToField assignedField = (AssignToField) _instruction;
 
@@ -723,10 +729,38 @@ public abstract class BlockWriter{
 
    }
 
+   private boolean isMultiDimensionalArray(NameAndTypeEntry nameAndTypeEntry) {
+      return nameAndTypeEntry.getDescriptorUTF8Entry().getUTF8().startsWith("[[");
+   }
+
+   private boolean isObjectArray(NameAndTypeEntry nameAndTypeEntry) {
+      return nameAndTypeEntry.getDescriptorUTF8Entry().getUTF8().startsWith("[L");
+   }
+
+   private boolean isMultiDimensionalArray(final AccessArrayElement arrayLoadInstruction) {
+      AccessInstanceField accessInstanceField = getUltimateInstanceFieldAccess(arrayLoadInstruction);
+      return isMultiDimensionalArray(accessInstanceField.getConstantPoolFieldEntry().getNameAndTypeEntry());
+   }
+
+   private boolean isObjectArray(final AccessArrayElement arrayLoadInstruction) {
+      AccessInstanceField accessInstanceField = getUltimateInstanceFieldAccess(arrayLoadInstruction);
+      return isObjectArray(accessInstanceField.getConstantPoolFieldEntry().getNameAndTypeEntry());
+   }
+
+   private AccessInstanceField getUltimateInstanceFieldAccess(final AccessArrayElement arrayLoadInstruction) {
+      Instruction load = arrayLoadInstruction.getArrayRef();
+      while (load instanceof I_AALOAD) {
+         load = load.getFirstChild();
+      }
+
+      return (AccessInstanceField) load;
+   }
+
    public void writeMethod(MethodCall _methodCall, MethodEntry _methodEntry) throws CodeGenException {
-      boolean noCL = _methodEntry.getOwnerClassModel().getNoCLMethods().contains(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
+      boolean noCL = _methodEntry.getOwnerClassModel().getNoCLMethods()
+            .contains(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
       if (noCL) {
-          return;
+         return;
       }
 
       if (_methodCall instanceof VirtualMethodCall) {
@@ -760,8 +794,7 @@ public abstract class BlockWriter{
       if (_methodModel.isGetter() && !_methodModel.isNoCL()) {
          FieldEntry accessorVariableFieldEntry = _methodModel.getAccessorVariableFieldEntry();
          writeGetterBlock(accessorVariableFieldEntry);
-      }
-      else {
+      } else {
          writeBlock(_methodModel.getExprHead(), null);
       }
    }

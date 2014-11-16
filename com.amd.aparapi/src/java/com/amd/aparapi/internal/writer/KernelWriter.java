@@ -38,7 +38,6 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 package com.amd.aparapi.internal.writer;
 
 import com.amd.aparapi.*;
-import com.amd.aparapi.Kernel;
 import com.amd.aparapi.internal.exception.*;
 import com.amd.aparapi.internal.instruction.*;
 import com.amd.aparapi.internal.instruction.InstructionSet.*;
@@ -47,8 +46,6 @@ import com.amd.aparapi.internal.model.ClassModel.AttributePool.*;
 import com.amd.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEntry.*;
 import com.amd.aparapi.internal.model.ClassModel.*;
 import com.amd.aparapi.internal.model.ClassModel.ConstantPool.*;
-import com.amd.aparapi.opencl.OpenCL.Constant;
-import com.amd.aparapi.opencl.OpenCL.*;
 
 import java.util.*;
 
@@ -198,15 +195,16 @@ public abstract class KernelWriter extends BlockWriter{
          if (m != null && m.isGetter()) {
             getterField = m.getAccessorVariableFieldEntry();
          }
-         if (getterField != null) {
-             String fieldName = getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-             write("this->");
-             write(fieldName);
-             return;
+         if (getterField != null && isThis(_methodCall.getArg(0))) {
+            String fieldName = getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+            write("this->");
+            write(fieldName);
+            return;
          }
-         boolean noCL = _methodEntry.getOwnerClassModel().getNoCLMethods().contains(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
+         boolean noCL = _methodEntry.getOwnerClassModel().getNoCLMethods()
+               .contains(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
          if (noCL) {
-             return;
+            return;
          }
          final String intrinsicMapping = Kernel.getMappedMethodName(_methodEntry);
          // System.out.println("getMappedMethodName for " + methodName + " returned " + mapping);
@@ -260,6 +258,10 @@ public abstract class KernelWriter extends BlockWriter{
       }
    }
 
+   private boolean isThis(Instruction instruction) {
+      return instruction instanceof I_ALOAD_0;
+   }
+
    public void writePragma(String _name, boolean _enable) {
       write("#pragma OPENCL EXTENSION " + _name + " : " + (_enable ? "en" : "dis") + "able");
       newLine();
@@ -273,9 +275,10 @@ public abstract class KernelWriter extends BlockWriter{
 
    public final static String __private = "__private";
 
-   public final static String LOCAL_ANNOTATION_NAME = "L" + Local.class.getName().replace('.', '/') + ";";
+   public final static String LOCAL_ANNOTATION_NAME = "L" + com.amd.aparapi.Kernel.Local.class.getName().replace('.', '/') + ";";
 
-   public final static String CONSTANT_ANNOTATION_NAME = "L" + Constant.class.getName().replace('.', '/') + ";";
+   public final static String CONSTANT_ANNOTATION_NAME = "L" + com.amd.aparapi.Kernel.Constant.class.getName().replace('.', '/')
+         + ";";
 
    @Override public void write(Entrypoint _entryPoint) throws CodeGenException {
       final List<String> thisStruct = new ArrayList<String>();
@@ -308,7 +311,7 @@ public abstract class KernelWriter extends BlockWriter{
          }
 
          if (privateMemorySize != null) {
-             type = __private;
+            type = __private;
          }
          final RuntimeAnnotationsEntry visibleAnnotations = field.getAttributePool().getRuntimeVisibleAnnotationsEntry();
 
@@ -328,7 +331,7 @@ public abstract class KernelWriter extends BlockWriter{
          //if we have a an array we want to mark the object as a pointer
          //if we have a multiple dimensional array we want to remember the number of dimensions
          while (signature.startsWith("[")) {
-            if(isPointer == false) {
+            if (isPointer == false) {
                argLine.append(argType + " ");
                thisStructLine.append(type + " ");
             }
@@ -382,19 +385,15 @@ public abstract class KernelWriter extends BlockWriter{
 
          // Add int field into "this" struct for supporting java arraylength op
          // named like foo__javaArrayLength
-         if (isPointer && _entryPoint.getArrayFieldArrayLengthUsed().contains(field.getName()) ||
-             isPointer && numDimensions > 1) {
-            
-            for(int i = 0; i < numDimensions; i++) {
+         if (isPointer && _entryPoint.getArrayFieldArrayLengthUsed().contains(field.getName()) || isPointer && numDimensions > 1) {
+
+            for (int i = 0; i < numDimensions; i++) {
                final StringBuilder lenStructLine = new StringBuilder();
                final StringBuilder lenArgLine = new StringBuilder();
                final StringBuilder lenAssignLine = new StringBuilder();
-               final StringBuilder dimStructLine = new StringBuilder();
-               final StringBuilder dimArgLine = new StringBuilder();
-               final StringBuilder dimAssignLine = new StringBuilder();
 
-               String lenName = field.getName() + BlockWriter.arrayLengthMangleSuffix +
-                    Integer.toString(i);
+               String suffix = numDimensions == 1 ? "" : Integer.toString(i);
+               String lenName = field.getName() + BlockWriter.arrayLengthMangleSuffix + suffix;
 
                lenStructLine.append("int " + lenName);
 
@@ -409,21 +408,25 @@ public abstract class KernelWriter extends BlockWriter{
                argLines.add(lenArgLine.toString());
                thisStruct.add(lenStructLine.toString());
 
-               String dimName = field.getName() + BlockWriter.arrayDimMangleSuffix +
-                    Integer.toString(i);
+               if (numDimensions > 1) {
+                  final StringBuilder dimStructLine = new StringBuilder();
+                  final StringBuilder dimArgLine = new StringBuilder();
+                  final StringBuilder dimAssignLine = new StringBuilder();
+                  String dimName = field.getName() + BlockWriter.arrayDimMangleSuffix + suffix;
 
-               dimStructLine.append("int " + dimName);
+                  dimStructLine.append("int " + dimName);
 
-               dimAssignLine.append("this->");
-               dimAssignLine.append(dimName);
-               dimAssignLine.append(" = ");
-               dimAssignLine.append(dimName);
+                  dimAssignLine.append("this->");
+                  dimAssignLine.append(dimName);
+                  dimAssignLine.append(" = ");
+                  dimAssignLine.append(dimName);
 
-               dimArgLine.append("int " + dimName);
+                  dimArgLine.append("int " + dimName);
 
-               assigns.add(dimAssignLine.toString());
-               argLines.add(dimArgLine.toString());
-               thisStruct.add(dimStructLine.toString());
+                  assigns.add(dimAssignLine.toString());
+                  argLines.add(dimArgLine.toString());
+                  thisStruct.add(dimStructLine.toString());
+               }
             }
          }
       }
@@ -704,7 +707,7 @@ public abstract class KernelWriter extends BlockWriter{
          throw codeGenException;
       }/* catch (final Throwable t) {
          throw new CodeGenException(t);
-      }*/
+       }*/
 
       return (openCLStringBuilder.toString());
    }

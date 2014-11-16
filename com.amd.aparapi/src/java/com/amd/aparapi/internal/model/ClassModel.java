@@ -2715,9 +2715,7 @@ public class ClassModel{
     * @return The Method or null if we fail to locate a given method.
     */
    public ClassModelMethod getMethod(MethodEntry _methodEntry, boolean _isSpecial) {
-      NameAndTypeEntry nameAndTypeEntry = _methodEntry.getNameAndTypeEntry();
-      String utf8Name = nameAndTypeEntry.getNameUTF8Entry().getUTF8();
-      final String entryClassNameInDotForm = utf8Name.replace('/', '.');
+      final String entryClassNameInDotForm = _methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.');
 
       // Shortcut direct calls to supers to allow "foo() { super.foo() }" type stuff to work
       if (_isSpecial && (superClazz != null) && superClazz.isSuperClass(entryClassNameInDotForm)) {
@@ -2728,7 +2726,9 @@ public class ClassModel{
          return superClazz.getMethod(_methodEntry, false);
       }
 
-      ClassModelMethod methodOrNull = getMethodOrNull(utf8Name, nameAndTypeEntry.getDescriptorUTF8Entry().getUTF8());
+      NameAndTypeEntry nameAndTypeEntry = _methodEntry.getNameAndTypeEntry();
+      ClassModelMethod methodOrNull = getMethodOrNull(nameAndTypeEntry.getNameUTF8Entry().getUTF8(), nameAndTypeEntry
+            .getDescriptorUTF8Entry().getUTF8());
       if (methodOrNull == null)
          return superClazz != null ? superClazz.getMethod(_methodEntry, false) : (null);
       return methodOrNull;
@@ -2737,8 +2737,7 @@ public class ClassModel{
    //   private ValueCache<MethodKey, MethodModel, AparapiException> methodModelCache = ValueCache.on(this::computeMethodModel);
    private ValueCache<MethodKey, MethodModel, AparapiException> methodModelCache = ValueCache
          .on(new ThrowingValueComputer<MethodKey, MethodModel, AparapiException>(){
-            @Override
-            public MethodModel compute(MethodKey key) throws AparapiException {
+            @Override public MethodModel compute(MethodKey key) throws AparapiException {
                return computeMethodModel(key);
             }
          });
@@ -2797,8 +2796,7 @@ public class ClassModel{
    //   private final ValueCache<EntrypointKey, Entrypoint, AparapiException> entrypointCache = ValueCache.on(this::computeBasicEntrypoint);
    private final ValueCache<EntrypointKey, Entrypoint, AparapiException> entrypointCache = ValueCache
          .on(new ThrowingValueComputer<EntrypointKey, Entrypoint, AparapiException>(){
-            @Override
-            public Entrypoint compute(EntrypointKey key) throws AparapiException {
+            @Override public Entrypoint compute(EntrypointKey key) throws AparapiException {
                return computeBasicEntrypoint(key);
             }
          });
@@ -2833,5 +2831,9 @@ public class ClassModel{
 
    public static void invalidateCaches() {
       classModelCache.invalidate();
+   }
+
+   @Override public String toString() {
+      return "ClassModel of " + getClassWeAreModelling();
    }
 }
