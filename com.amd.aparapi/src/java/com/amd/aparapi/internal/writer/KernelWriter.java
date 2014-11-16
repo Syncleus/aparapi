@@ -38,7 +38,6 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 package com.amd.aparapi.internal.writer;
 
 import com.amd.aparapi.*;
-import com.amd.aparapi.Kernel;
 import com.amd.aparapi.internal.exception.*;
 import com.amd.aparapi.internal.instruction.*;
 import com.amd.aparapi.internal.instruction.InstructionSet.*;
@@ -47,6 +46,7 @@ import com.amd.aparapi.internal.model.ClassModel.AttributePool.*;
 import com.amd.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEntry.*;
 import com.amd.aparapi.internal.model.ClassModel.*;
 import com.amd.aparapi.internal.model.ClassModel.ConstantPool.*;
+
 import java.util.*;
 
 public abstract class KernelWriter extends BlockWriter{
@@ -195,7 +195,7 @@ public abstract class KernelWriter extends BlockWriter{
          if (m != null && m.isGetter()) {
             getterField = m.getAccessorVariableFieldEntry();
          }
-         if (getterField != null) {
+         if (getterField != null && isThis(_methodCall.getArg(0))) {
             String fieldName = getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
             write("this->");
             write(fieldName);
@@ -258,6 +258,10 @@ public abstract class KernelWriter extends BlockWriter{
       }
    }
 
+   private boolean isThis(Instruction instruction) {
+      return instruction instanceof I_ALOAD_0;
+   }
+
    public void writePragma(String _name, boolean _enable) {
       write("#pragma OPENCL EXTENSION " + _name + " : " + (_enable ? "en" : "dis") + "able");
       newLine();
@@ -306,7 +310,7 @@ public abstract class KernelWriter extends BlockWriter{
             throw new CodeGenException(e);
          }
 
-         if (privateMemorySize != null) { 
+         if (privateMemorySize != null) {
             type = __private;
          }
          final RuntimeAnnotationsEntry visibleAnnotations = field.getAttributePool().getRuntimeVisibleAnnotationsEntry();
@@ -387,11 +391,9 @@ public abstract class KernelWriter extends BlockWriter{
                final StringBuilder lenStructLine = new StringBuilder();
                final StringBuilder lenArgLine = new StringBuilder();
                final StringBuilder lenAssignLine = new StringBuilder();
-               final StringBuilder dimStructLine = new StringBuilder();
-               final StringBuilder dimArgLine = new StringBuilder();
-               final StringBuilder dimAssignLine = new StringBuilder();
 
-               String lenName = field.getName() + BlockWriter.arrayLengthMangleSuffix + Integer.toString(i);
+               String suffix = numDimensions == 1 ? "" : Integer.toString(i);
+               String lenName = field.getName() + BlockWriter.arrayLengthMangleSuffix + suffix;
 
                lenStructLine.append("int " + lenName);
 
@@ -406,20 +408,25 @@ public abstract class KernelWriter extends BlockWriter{
                argLines.add(lenArgLine.toString());
                thisStruct.add(lenStructLine.toString());
 
-               String dimName = field.getName() + BlockWriter.arrayDimMangleSuffix + Integer.toString(i);
+               if (numDimensions > 1) {
+                  final StringBuilder dimStructLine = new StringBuilder();
+                  final StringBuilder dimArgLine = new StringBuilder();
+                  final StringBuilder dimAssignLine = new StringBuilder();
+                  String dimName = field.getName() + BlockWriter.arrayDimMangleSuffix + suffix;
 
-               dimStructLine.append("int " + dimName);
+                  dimStructLine.append("int " + dimName);
 
-               dimAssignLine.append("this->");
-               dimAssignLine.append(dimName);
-               dimAssignLine.append(" = ");
-               dimAssignLine.append(dimName);
+                  dimAssignLine.append("this->");
+                  dimAssignLine.append(dimName);
+                  dimAssignLine.append(" = ");
+                  dimAssignLine.append(dimName);
 
-               dimArgLine.append("int " + dimName);
+                  dimArgLine.append("int " + dimName);
 
-               assigns.add(dimAssignLine.toString());
-               argLines.add(dimArgLine.toString());
-               thisStruct.add(dimStructLine.toString());
+                  assigns.add(dimAssignLine.toString());
+                  argLines.add(dimArgLine.toString());
+                  thisStruct.add(dimStructLine.toString());
+               }
             }
          }
       }
