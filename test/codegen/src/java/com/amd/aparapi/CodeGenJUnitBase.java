@@ -109,7 +109,7 @@ public class CodeGenJUnitBase {
       } catch (Throwable t) {
          if (_expectedExceptionType == null || !t.getClass().isAssignableFrom(_expectedExceptionType)) {
             t.printStackTrace();
-            assertTrue("Unexpected exception " + t, false);
+            throw new AssertionError("Unexpected exception " + t, t);
          }
       }
    }
