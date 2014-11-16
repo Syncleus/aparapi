@@ -1,7 +1,7 @@
 package com.amd.aparapi.test.runtime;
 
 import com.amd.aparapi.*;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 
@@ -19,10 +19,11 @@ public class Issue103 extends Kernel {
    }
 
    void validate() {
-      for (int i = 0; i < size; i++) {
-         System.out.println(target[i] + " ... " + source[i]);
-         assertTrue("target == source", target[i] == source[i]);
-      }
+      assertArrayEquals("target == source", target, source);
+//      for (int i = 0; i < size; i++) {
+//         System.out.println(target[i] + " ... " + source[i]);
+//         assertTrue("target == source", target[i] == source[i]);
+//      }
    }
    
    @Test public void test() {

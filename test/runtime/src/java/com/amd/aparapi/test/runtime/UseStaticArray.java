@@ -1,6 +1,6 @@
 package com.amd.aparapi.test.runtime;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import com.amd.aparapi.Kernel;
 
@@ -28,9 +28,10 @@ public class UseStaticArray extends Kernel{
 
       assertTrue("ran on GPU", getExecutionMode() == Kernel.EXECUTION_MODE.GPU);
 
-      for (int i = 0; i < size; i++) {
-         assertTrue("results == fooBar", results[i] == values[i]);
-      }
+      assertArrayEquals("results == fooBar", results, values);
+//      for (int i = 0; i < size; i++) {
+//         assertTrue("results == fooBar", results[i] == values[i]);
+//      }
    }
 
    public static void main(String args[]) {
