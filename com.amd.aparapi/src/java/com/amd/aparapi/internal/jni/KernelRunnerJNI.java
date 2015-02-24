@@ -8,6 +8,7 @@ import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.annotation.DocMe;
 import com.amd.aparapi.internal.annotation.UsedByJNICode;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
@@ -310,7 +311,7 @@ public abstract class KernelRunnerJNI{
 
    protected native int setArgsJNI(long _jniContextHandle, KernelArgJNI[] _args, int argc);
 
-   protected native int runKernelJNI(long _jniContextHandle, Range _range, boolean _needSync, int _passes);
+   protected native int runKernelJNI(long _jniContextHandle, Range _range, boolean _needSync, int _passes, ByteBuffer _inBuffer, ByteBuffer _outBuffer);
 
    protected native int disposeJNI(long _jniContextHandle);
 

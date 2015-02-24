@@ -16,7 +16,8 @@ public class MedianDemo {
 
    static {
       try {
-         testImage = ImageIO.read(new File("C:\\dev\\aparapi_live\\aparapi\\samples\\convolution\\testcard.jpg"));
+         File imageFile = new File("./../../../samples/convolution/testcard.jpg").getCanonicalFile();
+         testImage = ImageIO.read(imageFile);
       } catch (IOException e) {
          throw new RuntimeException(e);
       }
@@ -25,6 +26,7 @@ public class MedianDemo {
    private static final boolean TEST_JTP = false;
 
    public static void main(String[] ignored) {
+      final int size = 5;
       System.setProperty("com.amd.aparapi.enableShowGeneratedOpenCL", "true");
       int[] argbs = testImage.getRGB(0, 0, testImage.getWidth(), testImage.getHeight(), null, 0, testImage.getWidth());
       MedianKernel7x7 kernel = new MedianKernel7x7();
@@ -36,7 +38,7 @@ public class MedianDemo {
       if (TEST_JTP) {
          kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
       }
-      kernel.processImages(new MedianSettings(7));
+      kernel.processImages(new MedianSettings(size));
       BufferedImage out = new BufferedImage(testImage.getWidth(), testImage.getHeight(), BufferedImage.TYPE_INT_RGB);
       out.setRGB(0, 0, testImage.getWidth(), testImage.getHeight(), kernel._destPixels, 0, testImage.getWidth());
       ImageIcon icon1 = new ImageIcon(testImage);
@@ -55,7 +57,7 @@ public class MedianDemo {
       int reps = 20;
       for (int rep = 0; rep < reps; ++rep) {
          long start = System.nanoTime();
-         kernel.processImages(new MedianSettings(7));
+         kernel.processImages(new MedianSettings(size));
          long elapsed = System.nanoTime() - start;
          System.out.println("elapsed = " + elapsed / 1000000f + "ms");
       }

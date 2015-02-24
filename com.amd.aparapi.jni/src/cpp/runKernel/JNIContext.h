@@ -32,6 +32,9 @@ public:
    jint* writeEventArgs;
    jboolean firstRun;
    jint passes;
+   jbyte* runKernelInBytes;
+   jbyte* runKernelOutBytes;
+
    ProfileInfo *exec;
    FILE* profileFile;
 
