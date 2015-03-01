@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+
+<project name="aparapi" default="build" basedir=".">
+   <property environment="env" />
+
+   <condition property="x86_or_x86_64" value="x86" else="x86_64"> <or><os arch="x86" /><os arch="i386"/></or> </condition>
+   <condition property="dist" value="dist_windows_${x86_or_x86_64}"><os family="windows" /></condition>
+   <condition property="dist" value="dist_linux_${x86_or_x86_64}"><and><not><os family="mac"/></not><os family="unix" /></and></condition>	
+   <condition property="dist" value="dist_mac_${x86_or_x86_64}"><os family="mac" /></condition>
+		
+   <target name="help">
+      <echo message="Available targets are:-"/> 
+      <echo message="   clean"/> 
+      <echo message="      Clean the com.amd.aparapi and com.amd.aparapi.jni subdirs."/> 
+      <echo message="   build"/> 
+      <echo message="      Build the com.amd.aparapi and com.amd.aparapi.jni artifacts and samples."/> 
+      <echo message="   examples"/> 
+      <echo message="      Build the com.amd.aparapi and com.amd.aparapi.jni artifacts, samples and examples."/> 
+      <echo message="   test"/> 
+      <echo message="      Build and execute the test code."/> 
+      <echo message="   dist"/> 
+      <echo message="      Create ${dist} dir and populates with aparapi.jar and available .so/dlls and javadoc."/> 
+      <echo message="      Copies the samples (with adjusted paths) into ${dist}."/> 
+      <echo message="      Builds the samples in ${dist}."/> 
+      <echo message="      Create ${dist}.zip from ${dist} "/> 
+   </target>
+
+
+   <target name="clean">
+      <delete dir="${dist}"/>
+      <delete file="${dist}.zip"/>
+      <subant target="clean">
+         <fileset dir="samples" includes="*/build.xml"/>
+         <fileset dir="examples" includes="*/build.xml"/>
+         <fileset dir="test" includes="*/build.xml"/>
+      </subant>
+      <delete dir="examples\nbody\jogamp"/> <!-- we handle the jogamp delete here, save downloading each build -->
+      <delete file="test\codegen\.libs\junit-4.10.jar"/> <!-- we handle the junit delete here, save downloading each build -->
+      <ant dir="com.amd.aparapi.jni" target="clean"/> 
+      <ant dir="com.amd.aparapi" target="clean"/> 
+   </target>
+
+   <target name="build" depends="clean">
+      <!-- Build the two aparapi dirs -->
+      <ant dir="com.amd.aparapi" target="build"/> 
+      <ant dir="com.amd.aparapi.jni" target="build"/> 
+      <subant target="build">
+         <fileset dir="samples" includes="*/build.xml"/>
+      </subant>
+   </target>
+
+   <target name="examples" depends="build">
+      <subant target="build">
+         <fileset dir="examples" includes="*/build.xml"/>
+      </subant>
+   </target>
+
+   <target name="test" depends="build">
+      <subant target="junit">
+         <fileset dir="test" includes="*/build.xml"/>
+      </subant>
+   </target>
+
+   <target name="dist" depends="build">
+      <!-- Create the dist dir for the current arch and bitness -->
+      <mkdir dir="${dist}"/>
+
+      <!-- Copy the license dist -->
+      <copy todir="${dist}" file="LICENSE.TXT"/>
+
+      <!-- Copy aparapi.jar to dist -->
+      <copy todir="${dist}" file="com.amd.aparapi/dist/aparapi.jar"/>
+
+      <!-- Create javadoc in dist -->
+      <javadoc packagenames="com.amd.aparapi.*" access="public" destdir="${dist}/api" >
+         <fileset dir="com.amd.aparapi/src/java" defaultexcludes="yes"/>
+      </javadoc>
+
+      <!-- Copy aparapi shared lib to dist -->
+      <copy todir="${dist}">
+         <fileset dir="com.amd.aparapi.jni/dist" includes="**.dll,**.so,**.dylib" />
+      </copy>
+
+      <mkdir dir="${dist}/samples"/>
+      <copy todir="${dist}/samples">
+         <fileset dir="samples"/>
+      </copy>
+
+      <replace dir="${dist}/samples" includes="**/build.xml,**/*.bat,**/*.sh" token="../../com.amd.aparapi/dist/aparapi.jar" value="../../aparapi.jar"/>
+      <replace dir="${dist}/samples" includes="**/*.bat,**/*.sh" token="../../com.amd.aparapi.jni/dist" value="../.."/>
+
+      <zip destfile="${dist}.zip" basedir="${dist}" />
+
+   </target>
+
+
+</project>
