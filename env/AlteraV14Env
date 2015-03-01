@@ -1,0 +1,8 @@
+export QUARTUS_ROOTDIR=/home/sdev/altera/14.0/quartus
+export PATH=$PATH:$QUARTUS_ROOTDIR/bin
+export ALTERAOCLSDKROOT=/home/sdev/altera/14.0/hld
+export LD_LIBRARY_PATH=$ALTERAOCLSDKROOT/host/linux64/lib:$ALTERAOCLSDKROOT/board/nalla_pcie/linux64/lib
+export PATH=$PATH:$ALTERAOCLSDKROOT/bin
+export AOCL_BOARD_PACKAGE_ROOT=/home/sdev/altera/14.0/hld/board/nalla_pcie
+export LM_LICENSE_FILE=8123@HPUMASSFPGA
+

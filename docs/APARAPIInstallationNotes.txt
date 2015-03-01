@@ -1,0 +1,41 @@
+---------------------------------------------------------
+APARAPI Installation Notes for CentOS release 6.x (Tested on 6.3/4/5/6)
+---------------------------------------------------------
+
+* Note default CentOs repository versions of Java(1.6) and Ant(1.7) are not compatible with latest APARAPI svn src
+  need to download newr versions (see below)
+
+- install Java JDK
+  sudo yum install java-1.7.0-openjdk-devel
+
+- install ANT
+  Download latest ANT -> currently apache-ant-1.9.1-bin.tar.gz
+  sudo tar xvzf apache-ant-1.9.1-bin.tar.gz -C /opt
+  sudo ln -s /opt/apache-ant-1.9.1 /opt/ant
+  
+- install AMD APP SDK
+
+  - needed for build even if hardware not available
+
+- install git
+
+- install g++
+
+  sudo yum install gcc-c++
+
+- get src from git repository
+
+  git clone ... [project folder]
+
+- set environment vars
+
+  source [project folder]/env/aparapiBuildEnv
+
+- build
+
+  cd [project folder]/src/aparapi
+
+  ant clean build dist
+
+
+
