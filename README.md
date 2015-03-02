@@ -26,7 +26,7 @@ Changes from original work
 
 Project History 
 ---------------
-As far as I know the original idea of trying to target FPGAs from Java using Aparapi was the brain child of two guys at HP Servers(Sai Rahul Chalamalasetti, Mitch Wright). 
+To the best of my knowledge the original idea of trying to target FPGAs from Java using Aparapi was the brain child of Sai Rahul Chalamalasetti and Mitch Wright from HP Servers. 
 
 I started writing the first implementation of the project (called APARAPI-FPGA's) while working as an intern at HP Servers in 2013.  It started as a proof of concept but showed great promise.
 
@@ -36,7 +36,7 @@ The project culminated with two publications in Sept 2014 (FPL 2014 and FSP 2014
 
 Since then we received a lot of interest and requests to release the source and we have been planning to release our implementation for some time now.
 
-Due the crazy schedule of a PhD student I had to postpone work on this for a long time, but a couple of months back I decided to dedicate the time to rewrite the framework to what I envisioned it to be, a general high level framework for heterogeneous devices. 
+This project was left on the back burner for a long time, but a couple of months back I started to dedicate some time to rewrite the framework to what I originally envisioned it to be i.e. a general, programmer friendly, high level framework for heterogeneous devices. 
 
 Two things were important to me working towards this public release:
 1. I wanted to make sure it will be something that can be usable by regular Java programmers and not just release another difficult to understand research project that would require significant effort to make it work. 
@@ -62,6 +62,9 @@ http://arxiv.org/abs/1408.4964
 The original Aparapi project can be found at: 
 https://code.google.com/p/aparapi/
 
+This work is part of the Heterogeneous computing research that is conducted by the Mora research group at UML: 
+http://mora.uml.edu/
+
 Documentation
 ---------------
 For information on how to setup the environment and run some tests please check the [project root]/docs folder:
@@ -77,6 +80,6 @@ Acknowledgments
 ---------------
 1. AMD for doing such a great job with Aparapi without which this project would be an order of magnitude more complex.
 
-2. HP Servers which believed back in 2012 that OpenCL on FPGAs is something worth looking at.
+2. HP Servers which believed back in 2012 that Java-OpenCL on FPGAs is something worth looking at.
 
 3. Altera, Nallatech and Terassic for contributing FPGA hardware for us to develop and test on.
