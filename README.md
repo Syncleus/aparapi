@@ -71,8 +71,7 @@ Wiki:
 https://gitlab.com/mora/aparapi-ucores/wikis/home
 
 Screenshots:
-https://gitlab.com/mora/aparapi-ucores/wikis/home/Screenshots
-
+https://gitlab.com/mora/aparapi-ucores/wikis/Screenshots
 
 Acknowledgments
 ---------------
