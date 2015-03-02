@@ -64,7 +64,8 @@ https://code.google.com/p/aparapi/
 
 Documentation
 ---------------
-For information on how to setup the environment and run some tests please check the [project root]/docs folder
+For information on how to setup the environment and run some tests please check the [project root]/docs folder:
+https://gitlab.com/mora/aparapi-ucores/tree/master/docs
 
 Acknowledgments
 ---------------
