@@ -1382,8 +1382,9 @@ public class KernelRunner extends KernelRunnerJNI{
 
    /**
     * Returns the index of the current pass, or one of two special constants with negative values to indicate special progress states. Those constants are
-    * {@link #PASS_ID_PREPARING_EXECUTION} to indicate that the Kernel has not yet started executing, or {@link #PASS_ID_COMPLETED_EXECUTION} to indicate that
-    * execution is complete (possibly due to early termination via {@link #cancelMultiPass()}).
+    * {@link #PASS_ID_PREPARING_EXECUTION} to indicate that the Kernel has started executing but not reached the initial pass, or
+    * {@link #PASS_ID_COMPLETED_EXECUTION} to indicate that execution is complete (possibly due to early termination via {@link #cancelMultiPass()}), i.e. the Kernel
+    * is idle. {@link #PASS_ID_COMPLETED_EXECUTION} is also returned before the first execution has been invoked.
     *
     * <p>This can be used, for instance, to update a visual progress bar.
     *
@@ -1402,6 +1403,13 @@ public class KernelRunner extends KernelRunnerJNI{
          default:
             return getCurrentPassRemote();
       }
+   }
+
+   /**
+    * True while any of the {@code execute()} methods are in progress.
+    */
+   public boolean isExecuting() {
+      return executing;
    }
 
    protected int getCurrentPassRemote() {

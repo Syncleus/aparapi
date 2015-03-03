@@ -970,6 +970,9 @@ public abstract class Kernel implements Cloneable {
     * @see #execute(String, Range, int)
     */
    public void cancelMultiPass() {
+      if (kernelRunner == null) {
+         return;
+      }
       kernelRunner.cancelMultiPass();
    }
 
@@ -982,9 +985,19 @@ public abstract class Kernel implements Cloneable {
     */
    public int getCurrentPass() {
       if (kernelRunner == null) {
-         return KernelRunner.PASS_ID_PREPARING_EXECUTION;
+         return KernelRunner.PASS_ID_COMPLETED_EXECUTION;
       }
       return kernelRunner.getCurrentPass();
+   }
+
+   /**
+    * @see KernelRunner#isExecuting()
+    */
+   public boolean isExecuting() {
+      if (kernelRunner == null) {
+         return false;
+      }
+      return kernelRunner.isExecuting();
    }
 
    /**
