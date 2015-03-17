@@ -37,22 +37,35 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.amd.aparapi;
 
-import com.amd.aparapi.annotation.*;
-import com.amd.aparapi.exception.*;
-import com.amd.aparapi.internal.kernel.*;
+import com.amd.aparapi.annotation.Experimental;
+import com.amd.aparapi.exception.DeprecatedException;
+import com.amd.aparapi.internal.kernel.KernelRunner;
 import com.amd.aparapi.internal.model.CacheEnabler;
+import com.amd.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry;
+import com.amd.aparapi.internal.model.ClassModel.ConstantPool.NameAndTypeEntry;
 import com.amd.aparapi.internal.model.ValueCache;
 import com.amd.aparapi.internal.model.ValueCache.ThrowingValueComputer;
 import com.amd.aparapi.internal.model.ValueCache.ValueComputer;
-import com.amd.aparapi.internal.model.ClassModel.ConstantPool.*;
-import com.amd.aparapi.internal.opencl.*;
-import com.amd.aparapi.internal.util.*;
+import com.amd.aparapi.internal.opencl.OpenCLLoader;
+import com.amd.aparapi.internal.util.UnsafeWrapper;
 
-import java.lang.annotation.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.*;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.logging.Logger;
 
 /**
  * A <i>kernel</i> encapsulates a data parallel algorithm that will execute either on a GPU
@@ -942,6 +955,50 @@ public abstract class Kernel implements Cloneable {
     * Every kernel must override this method.
     */
    public abstract void run();
+
+   /**
+    * Invoking this method flags that once the current pass is complete execution should be abandoned. Due to the complexity of intercommunication
+    * between java (or C) and executing OpenCL, this is the best we can do for general cancellation of execution at present. OpenCL 2.0 should introduce
+    * pipe mechanisms which will support mid-pass cancellation easily.
+    *
+    * <p>
+    * Note that in the case of thread-pool/pure java execution we could do better already, using Thread.interrupt() (and/or other means) to abandon
+    * execution mid-pass. However at present this is not attempted.
+    *
+    * @see #execute(int, int)
+    * @see #execute(Range, int)
+    * @see #execute(String, Range, int)
+    */
+   public void cancelMultiPass() {
+      if (kernelRunner == null) {
+         return;
+      }
+      kernelRunner.cancelMultiPass();
+   }
+
+   public int getCancelState() {
+      return kernelRunner == null ? KernelRunner.CANCEL_STATUS_FALSE : kernelRunner.getCancelState();
+   }
+
+   /**
+    * @see KernelRunner#getCurrentPass()
+    */
+   public int getCurrentPass() {
+      if (kernelRunner == null) {
+         return KernelRunner.PASS_ID_COMPLETED_EXECUTION;
+      }
+      return kernelRunner.getCurrentPass();
+   }
+
+   /**
+    * @see KernelRunner#isExecuting()
+    */
+   public boolean isExecuting() {
+      if (kernelRunner == null) {
+         return false;
+      }
+      return kernelRunner.isExecuting();
+   }
 
    /**
     * When using a Java Thread Pool Aparapi uses clone to copy the initial instance to each thread. 

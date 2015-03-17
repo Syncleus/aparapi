@@ -50,6 +50,10 @@
 #include "List.h"
 #include <algorithm>
 
+static const int PASS_ID_PREPARING_EXECUTION = -2;
+static const int PASS_ID_COMPLETED_EXECUTION = -1;
+static const int CANCEL_STATUS_FALSE = 0;
+static const int CANCEL_STATUS_TRUE = 1;
 
 //compiler dependant code
 /**
@@ -777,8 +781,23 @@ void enqueueKernel(JNIContext* jniContext, Range& range, int passes, int argPos,
    jniContext->passes = passes;
    jniContext->exec = new ProfileInfo[passes];
 
+   jbyte* kernelOutBytes = jniContext->runKernelOutBytes;
+   int* kernelOutBytesAsInts = reinterpret_cast<int*>(kernelOutBytes);
+
+   jbyte* kernelInBytes = jniContext->runKernelInBytes;
+   int* kernelInBytesAsInts = reinterpret_cast<int*>(kernelInBytes);
+
    cl_int status = CL_SUCCESS;
    for (int passid=0; passid < passes; passid++) {
+	   
+	   int cancelCode = kernelInBytesAsInts[0];
+	   kernelOutBytesAsInts[0] = passid;
+
+	   if (cancelCode == CANCEL_STATUS_TRUE) {
+		   fprintf(stderr, "received cancellation, aborting at pass %d\n", passid);
+		   kernelOutBytes[0] = -1;
+		   break;
+	   }
 
       //size_t offset = 1; // (size_t)((range.globalDims[0]/jniContext->deviceIdc)*dev);
       status = clSetKernelArg(jniContext->kernel, argPos, sizeof(passid), &(passid));
@@ -874,6 +893,7 @@ void enqueueKernel(JNIContext* jniContext, Range& range, int passes, int argPos,
       }
     
    }
+   kernelOutBytesAsInts[0] = PASS_ID_COMPLETED_EXECUTION;
 }
 
 
@@ -1050,7 +1070,7 @@ void checkEvents(JNIEnv* jenv, JNIContext* jniContext, int writeEventCount) {
 }
 
 JNI_JAVA(jint, KernelRunnerJNI, runKernelJNI)
-   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jobject _range, jboolean needSync, jint passes) {
+   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jobject _range, jboolean needSync, jint passes, jobject inBuffer, jobject outBuffer) {
       if (config == NULL){
          config = new Config(jenv);
       }
@@ -1059,7 +1079,16 @@ JNI_JAVA(jint, KernelRunnerJNI, runKernelJNI)
 
       cl_int status = CL_SUCCESS;
       JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
+	  jniContext->runKernelInBytes = (jbyte*)jenv->GetDirectBufferAddress(inBuffer);
+	  jniContext->runKernelOutBytes = (jbyte*)jenv->GetDirectBufferAddress(outBuffer);
 
+	  jbyte* kernelInBytes = jniContext->runKernelInBytes;
+	  int* kernelInBytesAsInts = reinterpret_cast<int*>(kernelInBytes);
+	  kernelInBytesAsInts[0] = CANCEL_STATUS_FALSE;
+
+	  jbyte* kernelOutBytes = jniContext->runKernelOutBytes;
+	  int* kernelOutBytesAsInts = reinterpret_cast<int*>(kernelOutBytes);
+	  kernelOutBytesAsInts[0] = PASS_ID_PREPARING_EXECUTION;
 
       if (jniContext->firstRun && config->isProfilingEnabled()){
          try {
