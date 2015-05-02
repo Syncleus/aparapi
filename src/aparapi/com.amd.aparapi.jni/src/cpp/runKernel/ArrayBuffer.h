@@ -102,6 +102,7 @@ class ArrayBuffer{
       ProfileInfo write;
 
       ArrayBuffer();
+      ~ArrayBuffer();
       void unpinAbort(JNIEnv *jenv);
       void unpinCommit(JNIEnv *jenv);
       void pin(JNIEnv *jenv);

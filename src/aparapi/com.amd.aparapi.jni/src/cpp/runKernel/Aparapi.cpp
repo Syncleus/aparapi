@@ -1169,6 +1169,30 @@ inline char* getClassName(JNIEnv* jenv, JNIContext* jniContext, const char *optE
    return classNameStr;
 }
 
+const char *OSPathSeparator =
+#ifdef _WIN32
+                            "\\";
+#else
+                            "/";
+#endif
+
+char *buildFilePath(const char *basePart,const char *filePart)
+{
+    int fullPathLength = strlen(filePart);
+    if(basePart!=NULL)
+    	fullPathLength += strlen(basePart);
+    char *fullPath = new char[fullPathLength + 1];
+    if(basePart!=NULL)
+    {
+      strcpy(fullPath,basePart);
+      // !!! Handle os dependent separator !!!
+      if(fullPath[strlen(fullPath)-1]!=OSPathSeparator[0])
+        strcat(fullPath,OSPathSeparator);
+    }
+    strcat(fullPath,filePart);
+    return fullPath;
+}
+
 void writeProfile(JNIEnv* jenv, JNIContext* jniContext) {
    // compute profile filename
    // indicate cpu or gpu
@@ -1276,6 +1300,10 @@ JNI_JAVA(jlong, KernelRunnerJNI, buildProgramJNI)
 #define BINARY_FILE_EXT ".aocx"
 #endif
 
+// allows defining an alternative folder where bin files should be loaded from
+// Usefull when running in aparapi embeded mode
+#define BINARY_FOLDER_ENV_VAR "APARAPI_CL_BIN_FOLDER"
+
         const char *sourceChars = jenv->GetStringUTFChars(source, NULL);
 
 //#ifdef OUTPUT_OCL_FILE
@@ -1283,9 +1311,14 @@ JNI_JAVA(jlong, KernelRunnerJNI, buildProgramJNI)
 //#endif
 
 #ifdef USE_BINARY_FILE
+        char *binFileFolder = getenv(BINARY_FOLDER_ENV_VAR);
+        fprintf(stderr, "Bin Folder is %s\n",binFileFolder);
         char *binFileName = getClassName(jenv,jniContext,BINARY_FILE_EXT);
-     	jniContext->program = CLHelper::createProgramWithBinary(jenv, jniContext->context,  1, &jniContext->deviceId, binFileName, NULL, &status);
+        char *fullBinFilePath = buildFilePath(binFileFolder,binFileName);
+        fprintf(stderr, "FullBinFilePath is %s\n",fullBinFilePath);
+     	jniContext->program = CLHelper::createProgramWithBinary(jenv, jniContext->context,  1, &jniContext->deviceId, fullBinFilePath, NULL, &status);
      	delete []binFileName;
+     	delete []fullBinFilePath;
 #else
         jniContext->program = CLHelper::createProgramWithSource(jenv, jniContext->context,  1, &jniContext->deviceId, sourceChars, NULL, &status);
 #endif

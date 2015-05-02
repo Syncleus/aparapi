@@ -49,6 +49,17 @@ ArrayBuffer::ArrayBuffer():
    isPinned(false){
    }
 
+ArrayBuffer::~ArrayBuffer()
+{
+   // !!! oren fix mem leak
+   if(addr!=NULL)
+   {
+     acl_aligned_free(addr);//aclPtr
+ 	 fprintf(stderr, "Deallocated %d bytes at address %x\n",lengthInBytes,(long)addr);
+     //addr = NULL;
+   }
+}
+
 void ArrayBuffer::unpinAbort(JNIEnv *jenv){
    // !!! oren mem test
    //jenv->ReleasePrimitiveArrayCritical((jarray)javaArray, addr,JNI_ABORT);
