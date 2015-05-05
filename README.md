@@ -1,4 +1,4 @@
-Aparapi-Ucores - Aparapi for Unconvenional Cores
+Aparapi-Ucores - Aparapi for Unconventional Cores
 ================================================
 This project is a fork of AMD's Aparapi framework meant to allow using simple Java code to target any type of heterogeneous device that supports OpenCL.
 
