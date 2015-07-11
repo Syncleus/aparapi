@@ -6,6 +6,8 @@ First consider editing the properties in build.properties
 -->
 <project name="com.amd.aparapi.jni" default="build" basedir=".">
 
+   <property file="build.properties"/>
+	
    <!-- 
    DO NOT EDIT BELOW THIS LINE 
    -->
@@ -66,7 +68,20 @@ First consider editing the properties in build.properties
       </condition>
 
       <echo message=" amd.app.sdk.dir ${amd.app.sdk.dir}"/>
+   	
+   	  <!-- !!! wagnerse add -> automatically get the gcc compile arguments for the Altera OpenCL -->
+   	  <exec executable="aocl" outputproperty="altera.opencl.sdk.compileconfig" failonerror="true">
+   	  	<arg line="compile-config"/>
+   	  </exec>
+   	
+   	  <echo message=" AOCL Compile configuration: ${altera.opencl.sdk.compileconfig}"/>
 
+ 	  <!-- !!! wagnerse add -> automatically get the gcc link arguments for the Altera OpenCL -->
+ 	  <exec executable="aocl" outputproperty="altera.opencl.sdk.linkconfig" failonerror="true">
+ 	  	<arg line="link-config"/>
+ 	  </exec>
+   	
+ 	  <echo message=" AOCL Link configuration: ${altera.opencl.sdk.linkconfig}"/>
 
       <!-- !!! 11.11.14 oren change -> detect Altera OpenCL SDK Board Package root -->
       <available property="linux.amd.app.bsp.exists" file="${env.AOCL_BOARD_PACKAGE_ROOT}" type="dir"/>
@@ -656,17 +671,11 @@ First consider editing the properties in build.properties
          <arg value="src/cpp/classtools.cpp" />
          <arg value="src/cpp/JNIHelper.cpp" />
          <arg value="src/cpp/agent.cpp" />
-         <!--  11.1.14 Nallatch old -> <arg value="-L${amd.app.sdk.dir}/linux64/lib" /> -->
-         <arg value="-L${amd.app.bsp.dir}/linux64/lib" />
-         <arg value="-L${amd.app.sdk.dir}/host/linux64/lib" />
-         <arg value="-lalterahalmmd" />
-         <!--  11.1.14 Nallatch old -> <arg value="-lalterammdpcie" /> -->
-         <arg value="-laltera_apb_14_0_mmd" />
-         <!--  11.1.14 Nallatch old -><arg value="-lpkg_editor" /> -->
-         <arg value="-lalteracl" />
-         <arg value="-lelf" />
-         <arg value="-lrt" />
-         <arg value="-lstdc++" />
+      	 <!-- !!! wagnerse -> Use compile and link configuration from aocl -->
+      	 <arg line="${altera.opencl.sdk.compileconfig}"/>
+         <arg value="-lOpenCL"/>
+      	 <arg line="${altera.opencl.sdk.linkconfig}"/> 
+      	 <arg line="-Wl,--export-dynamic"/>
       </exec>
    </target>
 
