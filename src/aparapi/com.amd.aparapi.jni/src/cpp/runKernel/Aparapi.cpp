@@ -1182,6 +1182,8 @@ char *buildFilePath(const char *basePart,const char *filePart)
     if(basePart!=NULL)
     	fullPathLength += strlen(basePart);
     char *fullPath = new char[fullPathLength + 1];
+    //!!! poz bug fix - init to null !!!
+    fullPath[0]='\0';
     if(basePart!=NULL)
     {
       strcpy(fullPath,basePart);
