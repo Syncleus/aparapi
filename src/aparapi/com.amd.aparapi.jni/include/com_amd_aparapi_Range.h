@@ -10,7 +10,7 @@ extern "C" {
 #undef com_amd_aparapi_Range_THREADS_PER_CORE
 #define com_amd_aparapi_Range_THREADS_PER_CORE 16L
 #undef com_amd_aparapi_Range_MAX_OPENCL_GROUP_SIZE
-#define com_amd_aparapi_Range_MAX_OPENCL_GROUP_SIZE 256L
+#define com_amd_aparapi_Range_MAX_OPENCL_GROUP_SIZE 1024L
 #ifdef __cplusplus
 }
 #endif

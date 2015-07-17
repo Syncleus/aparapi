@@ -1047,8 +1047,11 @@ public class KernelRunner extends KernelRunnerJNI{
 					e1.printStackTrace();
 				  }
                   */
+                  // !!! oren change -> support flow types
+                  // set flow type
+                  int buildFlags = kernel.getFlowType().getValue();
                   // Send the string to OpenCL to compile it
-                  if (buildProgramJNI(jniContextHandle, openCL) == 0) {
+                  if (buildProgramJNI(jniContextHandle, openCL,buildFlags) == 0) {
                      return warnFallBackAndExecute(_entrypointName, _range, _passes, "OpenCL compile failed");
                   }
 

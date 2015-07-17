@@ -1,8 +1,11 @@
 package com.amd.aparapi.device;
 
+import java.util.List;
+
 import com.amd.aparapi.Range;
 import com.amd.aparapi.device.OpenCLDevice.DeviceComparitor;
 import com.amd.aparapi.device.OpenCLDevice.DeviceSelector;
+import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 
 public abstract class Device{
 
@@ -14,6 +17,98 @@ public abstract class Device{
       JTP,
       SEQ
    };
+   
+   // !!! oren change -> get device using the tuple (platform, deviceType, id)
+   
+   public static Device getDevice(String platformName, Device.TYPE deviceType, int deviceId)
+   {
+	   return getDevice(platformName,deviceType.name(),deviceId);
+   }
+
+   // get first available device
+
+   public static Device getDevice(String platformName, Device.TYPE deviceType)
+   {
+	   return getDevice(platformName,deviceType.name(),0);
+   }
+
+   public static Device getDevice(String platformName, String deviceTypeName)
+   {
+	   return getDevice(platformName,deviceTypeName,0);
+   }
+
+   public static Device getDevice(String platformName, String deviceTypeName, int deviceId)
+   {
+      List<OpenCLPlatform> platforms = (new OpenCLPlatform()).getOpenCLPlatforms();
+
+      int platformc = 0;
+      for (OpenCLPlatform platform : platforms) 
+      {
+         if(platform.getName().contains(platformName))
+         {
+
+           System.out.println("Platform " + platformc + "{");
+
+           System.out.println("   Name    : \"" + platform.getName() + "\"");
+
+           System.out.println("   Vendor  : \"" + platform.getVendor() + "\"");
+
+           System.out.println("   Version : \"" + platform.getVersion() + "\"");
+
+           List<OpenCLDevice> devices = platform.getOpenCLDevices();
+
+           System.out.println("   Platform contains " + devices.size() + " OpenCL devices");
+
+           int devicec = 0;
+
+           for (OpenCLDevice device : devices) 
+           {
+             if( device.getType().name().equalsIgnoreCase(deviceTypeName))
+             {
+
+               System.out.println("   Device " + devicec + "{");
+
+               System.out.println("       Type                  : " + device.getType());
+
+               System.out.println("       GlobalMemSize         : " + device.getGlobalMemSize());
+
+               System.out.println("       LocalMemSize          : " + device.getLocalMemSize());
+
+               System.out.println("       MaxComputeUnits       : " + device.getMaxComputeUnits());
+
+               System.out.println("       MaxWorkGroupSizes     : " + device.getMaxWorkGroupSize());
+
+               System.out.println("       MaxWorkItemDimensions : " + device.getMaxWorkItemDimensions());
+
+               System.out.println("   }");
+               
+               if(deviceId>0 && (devicec!=deviceId))
+               {
+            	   System.out.println("!!! devicec!=deviceId(" + deviceId + ") => continue search !!!");
+            	   continue;
+               }
+            	   
+               // close platform bracket
+               System.out.println("}");
+
+               return device; 
+             }
+
+             devicec++;
+           }
+           System.out.println("Device type/id combination not found");
+
+           System.out.println("}");
+
+           platformc++;
+
+       }
+
+     }
+     // return not found !!!
+     return null;
+   }
+
 
    public static Device best() {
       return (OpenCLDevice.select(new DeviceComparitor(){

@@ -276,6 +276,19 @@ public abstract class KernelRunnerJNI{
     */
    //  @UsedByJNICode @Annotations.Experimental protected static final int JNI_FLAG_ENABLE_VERBOSE_JNI_OPENCL_RESOURCE_TRACKING = 1 << 4;
 
+   /** !!! oren change ->
+    * These flags indicate that we want to build source/binary i.e. use source/binary flow.
+    * 
+    * Be careful changing final constants starting with JNI.<br/>
+    * 
+    * @see com.amd.aparapi.internal.annotation.UsedByJNICode
+    * 
+    * @author oren
+    */
+   @UsedByJNICode public static final int JNI_FLAG_SOURCE_FLOW  = 1 << 0;
+   @UsedByJNICode public static final int JNI_FLAG_BINARY_FLOW  = 1 << 1;
+   @UsedByJNICode public static final int JNI_FLAG_DEFAULT_FLOW = 1 << 2;
+   
    /*
     * Native methods
     */
@@ -295,7 +308,9 @@ public abstract class KernelRunnerJNI{
 
    protected native int getJNI(long _jniContextHandle, Object _array);
 
-   protected native long buildProgramJNI(long _jniContextHandle, String _source);
+   //protected native long buildProgramJNI(long _jniContextHandle, String _source);
+   // !!! oren change -> add binary option to build
+   protected native long buildProgramJNI(long _jniContextHandle, String _source, int _buildFlags);
 
    protected native int setArgsJNI(long _jniContextHandle, KernelArgJNI[] _args, int argc);
 
