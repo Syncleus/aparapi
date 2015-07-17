@@ -336,7 +336,8 @@ JNI_JAVA(void, OpenCLJNI, invoke)
    }
 
 JNI_JAVA(jobject, OpenCLJNI, getPlatforms)
-   (JNIEnv *jenv, jobject jobj) {
+   (JNIEnv *jenv, jobject jobj)
+   {
       jobject platformListInstance = JNIHelper::createInstance(jenv, ArrayListClass, VoidReturn);
       cl_int status = CL_SUCCESS;
       cl_uint platformc;
@@ -352,43 +353,23 @@ JNI_JAVA(jobject, OpenCLJNI, getPlatforms)
             status = clGetPlatformInfo(platformIds[platformIdx], CL_PLATFORM_VERSION, sizeof(platformVersionName), platformVersionName, NULL);
             fprintf(stderr, "platform version %d %s\n", platformIdx, platformVersionName); 
 
-            // fix this so OpenCL 1.3 or higher will not break!
-            if (
-#ifdef ALTERA_OPENCL
-           		1 // !!! oren fix for bad platform version check
-                ||
-#endif
-                   !strncmp(platformVersionName, "OpenCL 1.2", 10)
-                || !strncmp(platformVersionName, "OpenCL 1.1", 10)
-#ifdef __APPLE__
-                || !strncmp(platformVersionName, "OpenCL 1.0", 10)
-#endif
-               ) 
-               { 
-               char platformVendorName[512];  
-               char platformName[512];  
-               status = clGetPlatformInfo(platformIds[platformIdx], CL_PLATFORM_VENDOR, sizeof(platformVendorName), platformVendorName, NULL);
-               status = clGetPlatformInfo(platformIds[platformIdx], CL_PLATFORM_NAME, sizeof(platformName), platformName, NULL);
-               fprintf(stderr, "platform vendor    %d %s\n", platformIdx, platformVendorName); 
-               fprintf(stderr, "platform version %d %s\n", platformIdx, platformVersionName); 
-               jobject platformInstance = JNIHelper::createInstance(jenv, OpenCLPlatformClass , ArgsVoidReturn(LongArg StringClassArg StringClassArg StringClassArg ), 
+            char platformVendorName[512];
+            char platformName[512];
+            status = clGetPlatformInfo(platformIds[platformIdx], CL_PLATFORM_VENDOR, sizeof(platformVendorName), platformVendorName, NULL);
+            status = clGetPlatformInfo(platformIds[platformIdx], CL_PLATFORM_NAME, sizeof(platformName), platformName, NULL);
+            fprintf(stderr, "platform vendor    %d %s\n", platformIdx, platformVendorName);
+            fprintf(stderr, "platform version %d %s\n", platformIdx, platformVersionName);
+            jobject platformInstance = JNIHelper::createInstance(jenv, OpenCLPlatformClass , ArgsVoidReturn(LongArg StringClassArg StringClassArg StringClassArg ),
                      (jlong)platformIds[platformIdx],
                      jenv->NewStringUTF(platformVersionName), 
                      jenv->NewStringUTF(platformVendorName),
                      jenv->NewStringUTF(platformName)
                      );
-               JNIHelper::callVoid(jenv, platformListInstance, "add", ArgsBooleanReturn(ObjectClassArg), platformInstance);
+            JNIHelper::callVoid(jenv, platformListInstance, "add", ArgsBooleanReturn(ObjectClassArg), platformInstance);
 
-               cl_uint deviceIdc;
-               // !!! oren fix - detect accelerators as well, they forgot to add the CL_DEVICE_TYPE_ACCELERATOR
-#ifndef ALTERA_OPENCL
-               cl_device_type requestedDeviceType =CL_DEVICE_TYPE_CPU |CL_DEVICE_TYPE_GPU ;
-#else
-               //cl_device_type requestedDeviceType =CL_DEVICE_TYPE_CPU |CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_ACCELERATOR;
-               // Altera OpenCL fails if this is different then = CL_DEVICE_TYPE_ACCELERATOR
-               cl_device_type requestedDeviceType = CL_DEVICE_TYPE_ACCELERATOR;
-#endif
-               status = clGetDeviceIDs(platformIds[platformIdx], requestedDeviceType, 0, NULL, &deviceIdc);
+            cl_uint deviceIdc;
+            cl_device_type requestedDeviceType = CL_DEVICE_TYPE_ALL;
+            status = clGetDeviceIDs(platformIds[platformIdx], requestedDeviceType, 0, NULL, &deviceIdc);
                if (status == CL_SUCCESS && deviceIdc > 0 ){
                   fprintf(stderr, "found %d devices\n", deviceIdc);
                   cl_device_id* deviceIds = new cl_device_id[deviceIdc];
@@ -476,7 +457,7 @@ JNI_JAVA(jobject, OpenCLJNI, getPlatforms)
                }
             }
          }
-      }
+      //}
 
       return (platformListInstance);
    }

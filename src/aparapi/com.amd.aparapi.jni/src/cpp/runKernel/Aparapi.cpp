@@ -52,6 +52,8 @@
 #include <algorithm>
 //#include <string>
 
+// !!! oren change ->
+#include "ConfigSettings.h"
 
 //compiler dependant code
 /**
@@ -1152,9 +1154,9 @@ inline char* getClassName(JNIEnv* jenv, JNIContext* jniContext, const char *optE
 
    // !!! Java adds '$' chars to inner class names so replace them with '.'
    char *charPtr = classNameStr;
-   while(charPtr=strchr(charPtr,'$'))
+   while(charPtr = strchr(charPtr,'$'))
    {
-	   *charPtr='.';
+	   *charPtr = BINARY_FILE_SEP;
 	   charPtr++;
    }
 
@@ -1285,45 +1287,56 @@ inline void outputOCLFile(JNIEnv* jenv, JNIContext* jniContext, const char *sour
 
 }
 
+inline void verifyFlow(jint &buildFlags)
+{
+    // verify flow support is available
+    if(!(PLATFORM_FLOW_SUPPORT & buildFlags))
+    {
+        fprintf(stderr, "!!! Error requested flow(%0xd) not available !!!\n",buildFlags);
+        throw CLException(CL_INVALID_VALUE,"buildProgramJNI() -> bad request flow");
+    }
+
+    // check/set if default flow is requested
+    if(buildFlags==DEFAULT_FLOW)
+    	buildFlags = PLATFORM_DEFAULT_FLOW;
+}
 
 JNI_JAVA(jlong, KernelRunnerJNI, buildProgramJNI)
-   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jstring source) {
+   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jstring source, jint buildFlags) {
       JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
       if (jniContext == NULL){
          return 0;
       }
 
       try {
-         cl_int status = CL_SUCCESS;
-
-#ifdef ALTERA_OPENCL
-#define OUTPUT_OCL_FILE
-#define USE_BINARY_FILE
-#define BINARY_FILE_EXT ".aocx"
-#endif
-
-// allows defining an alternative folder where bin files should be loaded from
-// Usefull when running in aparapi embeded mode
-#define BINARY_FOLDER_ENV_VAR "APARAPI_CL_BIN_FOLDER"
+        cl_int status = CL_SUCCESS;
 
         const char *sourceChars = jenv->GetStringUTFChars(source, NULL);
 
-//#ifdef OUTPUT_OCL_FILE
-         outputOCLFile(jenv,jniContext,sourceChars);
-//#endif
-
-#ifdef USE_BINARY_FILE
-        char *binFileFolder = getenv(BINARY_FOLDER_ENV_VAR);
-        fprintf(stderr, "Bin Folder is %s\n",binFileFolder);
-        char *binFileName = getClassName(jenv,jniContext,BINARY_FILE_EXT);
-        char *fullBinFilePath = buildFilePath(binFileFolder,binFileName);
-        fprintf(stderr, "FullBinFilePath is %s\n",fullBinFilePath);
-     	jniContext->program = CLHelper::createProgramWithBinary(jenv, jniContext->context,  1, &jniContext->deviceId, fullBinFilePath, NULL, &status);
-     	delete []binFileName;
-     	delete []fullBinFilePath;
-#else
-        jniContext->program = CLHelper::createProgramWithSource(jenv, jniContext->context,  1, &jniContext->deviceId, sourceChars, NULL, &status);
+#ifdef OUTPUT_OCL_FILE
+        outputOCLFile(jenv,jniContext,sourceChars);
 #endif
+
+        // !!! oren change ->
+        // verify the flow and modify if need be
+        verifyFlow(buildFlags);
+
+//#ifdef USE_BINARY_FILE
+        if(buildFlags & com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_BINARY_FLOW)
+        {
+          char *binFileFolder = getenv(BINARY_FOLDER_ENV_VAR);
+          fprintf(stderr, "Bin Folder is %s\n",binFileFolder);
+          char *binFileName = getClassName(jenv,jniContext,BINARY_FILE_EXT);
+          char *fullBinFilePath = buildFilePath(binFileFolder,binFileName);
+          fprintf(stderr, "FullBinFilePath is %s\n",fullBinFilePath);
+     	  jniContext->program = CLHelper::createProgramWithBinary(jenv, jniContext->context,  1, &jniContext->deviceId, fullBinFilePath, NULL, &status);
+     	  delete []binFileName;
+     	  delete []fullBinFilePath;
+        }
+//#else
+        else
+          jniContext->program = CLHelper::createProgramWithSource(jenv, jniContext->context,  1, &jniContext->deviceId, sourceChars, NULL, &status);
+//#endif
 
         jenv->ReleaseStringUTFChars(source, sourceChars);
 

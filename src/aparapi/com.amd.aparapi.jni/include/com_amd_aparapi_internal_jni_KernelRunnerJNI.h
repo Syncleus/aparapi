@@ -51,6 +51,12 @@ extern "C" {
 #define com_amd_aparapi_internal_jni_KernelRunnerJNI_ARG_STATIC 4194304L
 #undef com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_USE_GPU
 #define com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_USE_GPU 4L
+#undef com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_SOURCE_FLOW
+#define com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_SOURCE_FLOW 1L
+#undef com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_BINARY_FLOW
+#define com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_BINARY_FLOW 2L
+#undef com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_DEFAULT_FLOW
+#define com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_DEFAULT_FLOW 4L
 /*
  * Class:     com_amd_aparapi_internal_jni_KernelRunnerJNI
  * Method:    initJNI
@@ -70,10 +76,10 @@ JNIEXPORT jint JNICALL Java_com_amd_aparapi_internal_jni_KernelRunnerJNI_getJNI
 /*
  * Class:     com_amd_aparapi_internal_jni_KernelRunnerJNI
  * Method:    buildProgramJNI
- * Signature: (JLjava/lang/String;)J
+ * Signature: (JLjava/lang/String;I)J
  */
 JNIEXPORT jlong JNICALL Java_com_amd_aparapi_internal_jni_KernelRunnerJNI_buildProgramJNI
-  (JNIEnv *, jobject, jlong, jstring);
+  (JNIEnv *, jobject, jlong, jstring, jint);
 
 /*
  * Class:     com_amd_aparapi_internal_jni_KernelRunnerJNI

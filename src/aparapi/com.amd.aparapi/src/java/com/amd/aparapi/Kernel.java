@@ -405,6 +405,80 @@ public abstract class Kernel implements Cloneable {
       }
    };
 
+   ////////////////////
+   // !!! oren change -> add source/binary flow support to kernel 
+   ////////////////////
+   public static enum FlowType
+   {
+	   // flow type list
+	   SOURCE(com.amd.aparapi.internal.jni.KernelRunnerJNI.JNI_FLAG_SOURCE_FLOW),
+	   BINARY(com.amd.aparapi.internal.jni.KernelRunnerJNI.JNI_FLAG_BINARY_FLOW),
+	   DEFAULT(com.amd.aparapi.internal.jni.KernelRunnerJNI.JNI_FLAG_DEFAULT_FLOW);
+
+	   // data store
+	   int flowType;
+
+	   FlowType(int flowType)
+	   {
+		   setValue(flowType);
+	   }
+
+	   FlowType(String flowTypeStr)
+	   {
+		   this.flowType = strToFlowType(flowTypeStr).getValue();
+	   }
+
+	   public int getValue()
+	   {
+		   return this.flowType;
+	   }
+
+	   private void setValue(int flowType)
+	   {
+		   this.flowType = flowType;
+	   }
+
+	   public static FlowType getDefaultFlowType() 
+	   {
+		   // if set by user try get value else set to default 
+		   FlowType flowType = (Config.flowType==null) ? DEFAULT : strToFlowType(Config.flowType);
+		   return flowType;
+	   }
+
+	   public static FlowType strToFlowType(final String flowTypeStr)
+	   {
+		   try 
+		   {
+			   FlowType flowType = valueOf(flowTypeStr.toUpperCase());
+			   return flowType;
+		   }
+		   catch (Exception e)
+		   {
+			   logger.info("!!! bad flow type => (" + flowTypeStr + ") => reverting to default platform flow!");
+			   throw e;
+		   }
+	   }
+
+   }
+   
+   public FlowType getFlowType() {
+		return kernelFlowType;
+	}
+
+
+	public void setFlowType(FlowType kernelFlowType) {
+		this.kernelFlowType = kernelFlowType;
+	}
+
+	public void setFlowType(String flowTypeStr) {
+		this.kernelFlowType = FlowType.strToFlowType(flowTypeStr);
+	}
+   
+   private FlowType kernelFlowType = FlowType.getDefaultFlowType();
+   
+     
+   ////////////////////
+   
    private KernelRunner kernelRunner = null;
 
    private KernelState kernelState = new KernelState();
@@ -616,7 +690,8 @@ public abstract class Kernel implements Cloneable {
       return getGlobalId(0);
    }
 
-   @OpenCLDelegate
+
+@OpenCLDelegate
    protected final int getGlobalId(int _dim) {
       return kernelState.getGlobalIds()[_dim];
    }
@@ -2816,4 +2891,5 @@ public abstract class Kernel implements Cloneable {
          executionMode = currentMode.next();
       }
    }
+
 }

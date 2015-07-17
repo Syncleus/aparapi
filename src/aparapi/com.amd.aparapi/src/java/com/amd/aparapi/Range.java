@@ -51,7 +51,11 @@ public class Range extends RangeJNI{
 
    public static final int THREADS_PER_CORE = 16;
 
-   public static final int MAX_OPENCL_GROUP_SIZE = 256;
+   // !!! oren change -> this value looks out dated and the mechanism probably needs revisiting !!! 
+   // we already see evidence of improved performance for size==1024 on certain devices (ref: FPGA doc classification paper) 
+   // for now we set it to 4X original value, but we should think about it more...
+   //public static final int MAX_OPENCL_GROUP_SIZE = 256;
+   public static final int MAX_OPENCL_GROUP_SIZE = 1024;
 
    public static final int MAX_GROUP_SIZE = Math.max(Runtime.getRuntime().availableProcessors() * THREADS_PER_CORE,
          MAX_OPENCL_GROUP_SIZE);
@@ -113,11 +117,18 @@ public class Range extends RangeJNI{
     */
 
    private static int[] getFactors(int _value, int _max) {
-      final int factors[] = new int[MAX_GROUP_SIZE];
+      //final int factors[] = new int[MAX_GROUP_SIZE];
       int factorIdx = 0;
 
-      for (int possibleFactor = 1; possibleFactor <= _max; possibleFactor++) {
-         if ((_value % possibleFactor) == 0) {
+      // !!! oren bug fix -> based on poz findings
+      // max can not be bigger then value and if factorIdx >= MAX_GROUP_SIZE we will have an access violation
+      final int GroupSizeLimit = Math.min(Math.min(_max,_value),MAX_GROUP_SIZE);
+      final int factors[] = new int[GroupSizeLimit];
+      //for (int possibleFactor = 1; possibleFactor <= _max; possibleFactor++) 
+      for (int possibleFactor = 1; possibleFactor <= GroupSizeLimit; possibleFactor++) 
+      {
+         if ((_value % possibleFactor) == 0) 
+         {
             factors[factorIdx++] = possibleFactor;
          }
       }
