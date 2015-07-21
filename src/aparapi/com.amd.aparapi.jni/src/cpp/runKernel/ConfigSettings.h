@@ -33,7 +33,7 @@
 // Altera platform specific
 ///////////////////////////
 #ifdef ALTERA_OPENCL
-  #define PLATFORM_FLOW_SUPPORT BINARY_FLOW
+  #define PLATFORM_FLOW_SUPPORT (SOURCE_FLOW | BINARY_FLOW | DEFAULT_FLOW)
   #define PLATFORM_DEFAULT_FLOW BINARY_FLOW
   #define BINARY_FILE_EXT ".aocx"
   #define BINARY_FILE_SEP '.'
@@ -47,7 +47,7 @@
 ///////////////////////////
 // All other platforms - set the default for other platforms
 ///////////////////////////
-  #define PLATFORM_FLOW_SUPPORT (BINARY_FLOW | SOURCE_FLOW)
+  #define PLATFORM_FLOW_SUPPORT (SOURCE_FLOW | BINARY_FLOW | DEFAULT_FLOW)
   #define PLATFORM_DEFAULT_FLOW SOURCE_FLOW
   #define BINARY_FILE_EXT ".bcl"
   #define BINARY_FILE_SEP '.'
