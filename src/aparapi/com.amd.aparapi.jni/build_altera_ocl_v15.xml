@@ -641,6 +641,8 @@ First consider editing the properties in build.properties
          <arg value="-O3" />
          <arg value="-O0" />
         -->
+      	<!-- !!! oren change -> add support for ISO C++ 2011 (C++0x) requires GCC 4.3 and later -->      	
+      	<arg value="-std=c++0x" />
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
