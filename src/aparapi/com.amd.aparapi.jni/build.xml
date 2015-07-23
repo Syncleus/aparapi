@@ -627,6 +627,8 @@ First consider editing the properties in build.properties
          <arg value="src/cpp/runKernel/KernelArg.cpp" />
          <arg value="src/cpp/runKernel/ProfileInfo.cpp" />
          <arg value="src/cpp/runKernel/Range.cpp" />
+      	<!-- !!! oren change -> platform config settings -->
+         <arg value="src/cpp/runKernel/ConfigSettings.cpp" />
          <arg value="src/cpp/invoke/OpenCLJNI.cpp" />
          <arg value="src/cpp/invoke/OpenCLArgDescriptor.cpp" />
          <arg value="src/cpp/invoke/OpenCLMem.cpp" />

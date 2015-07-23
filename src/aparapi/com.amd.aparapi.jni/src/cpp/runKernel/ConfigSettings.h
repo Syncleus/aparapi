@@ -3,16 +3,16 @@
 
 // !!! oren changes ->
 // configuration settings for building platform specific code
-// TODO: consider moving parts of this to a configuration file later on and load settings dynamically
+// TODO: consider moving parts of this to a configuration file lateron and load settings dynamically
 
 #include <string>
+#include <cstring>
 #include <map>
 #include <tuple>
 #include <memory>
 
 // use values from JNI config
 #include "com_amd_aparapi_internal_jni_KernelRunnerJNI.h"
-
 
 // auto output kernel.cl file
 #define OUTPUT_OCL_FILE
@@ -28,17 +28,52 @@
 #define DEFAULT_FLOW  com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_DEFAULT_FLOW
 ///////////////////////////
 
-#define FILE_EXT_LENGTH 8
+//#define FILE_EXT_LENGTH 8
 
 class PlatformConfig
 {
 public:
-	PlatformConfig(int flowSupport, const char *fileExt, char fileSep)
+
+    typedef std::shared_ptr<PlatformConfig> Ptr;
+
+	PlatformConfig(const char *name, int flowSupport, int defaultFlowSupport, const char *binFileExt, char fileSep)
     {
+		setName(name);
+		setSearchStr(name); // default search string is name!
 		setFlowSupport(flowSupport);
-        setFileExtension(fileExt);
+		setDefaultFlowSupport(defaultFlowSupport);
+        setBinFileExtension(binFileExt);
 		setFileSeperator(fileSep);
     }
+
+	PlatformConfig(const char *name, const char *searchStr, int flowSupport, int defaultFlowSupport, const char *binFileExt, char fileSep)
+    {
+		setName(name);
+		setSearchStr(searchStr);
+		setFlowSupport(flowSupport);
+		setDefaultFlowSupport(defaultFlowSupport);
+        setBinFileExtension(binFileExt);
+		setFileSeperator(fileSep);
+    }
+
+	void setName(const char *name)
+	{
+		m_name = name;
+	}
+	const char *getName()
+	{
+		return m_name.c_str();
+	}
+
+	void setSearchStr(const char *searchStr)
+	{
+		m_searchStr = searchStr;
+	}
+
+	const char *getsearchStr()
+	{
+		return m_searchStr.c_str();
+	}
 
 	void setFlowSupport(int flowSupport)
 	{
@@ -50,14 +85,24 @@ public:
 		return m_flowSupport;
 	}
 
-	void setFileExtension(const char *fileExt)
+	void setDefaultFlowSupport(int defaultFlowSupport)
 	{
-		m_fileExt = fileExt;
+		m_defaultFlowSupport = defaultFlowSupport;
 	}
 
-	const char *getFileExtension()
+	int getDefaultFlowSupport()
 	{
-		return m_fileExt.c_str();
+		return m_defaultFlowSupport;
+	}
+
+	void setBinFileExtension(const char *binFileExt)
+	{
+		m_binFileExt = binFileExt;
+	}
+
+	const char *getBinFileExtension()
+	{
+		return m_binFileExt.c_str();
 	}
 
 	void setFileSeperator(char fileSep)
@@ -73,17 +118,21 @@ public:
 protected:
 	// data
 	int m_flowSupport;
+	int m_defaultFlowSupport;
 	//char m_fileExt[FILE_EXT_LENGTH];
-	std::string m_fileExt;
+	std::string m_binFileExt;
 	char m_fileSep;
+	std::string m_name;
+	std::string m_searchStr; // platform name search string
 };
 
 class PlatformConfigFactory
 {
 public:
-	  typedef std::shared_ptr<PlatformConfig> PlatformConfigPtr;
-	  typedef std::pair<std::string,PlatformConfigPtr> PlatformConfigTuple;
-	  typedef std::map<std::string,PlatformConfigTuple> PlatformConfigMap;
+	  //typedef std::shared_ptr<PlatformConfig> PlatformConfigPtr;
+	  //typedef std::pair<std::string,PlatformConfigPtr> PlatformConfigTuple;
+	  //typedef std::map<std::string,PlatformConfigTuple> PlatformConfigMap;
+	  typedef std::map<std::string,PlatformConfig::Ptr> PlatformConfigMap;
 
 	  static PlatformConfigFactory &getPlatformConfigFactory()//openclManager *oclMgr)
 	  {
@@ -93,24 +142,49 @@ public:
 		  return *pcf;
 	  }
 
-	  bool registerPlatformConfig(const char *name, PlatformConfigPtr platformConfigPtr)
+	  bool registerPlatformConfig(const char *name, PlatformConfig::Ptr platformConfigPtr)
 	  {
-		  m_platformConfigMap[name]=PlatformConfigTuple(name,platformConfigPtr);
+		  //m_platformConfigMap[name]=PlatformConfigTuple(name,platformConfigPtr);
+		  m_platformConfigMap[name]=platformConfigPtr;
 		  return true;
 	  }
 
-#define REGISTER_PLLATFORM_CONFIG(name,platformConfigPtr) bool name##PlatformConfig=PlatformConfigFactory::getPlatformConfigFactory().register(#name,platformConfigPtr);
+#define REGISTER_PLATFORM_CONFIG_BASE(name,platformConfigPtr) bool name##PlatformConfig=PlatformConfigFactory::getPlatformConfigFactory().registerPlatformConfig(#name,PlatformConfig::Ptr(platformConfigPtr));
+#define REGISTER_PLATFORM_CONFIG(name,flowSupport,defaultFlowSupport,binFileExt,fileSep) REGISTER_PLATFORM_CONFIG_BASE(name, new PlatformConfig(#name,flowSupport,defaultFlowSupport,binFileExt,fileSep))
+#define REGISTER_PLATFORM_CONFIG_WITH_SEARCH_STR(name,searchStr,flowSupport,defaultFlowSupport,binFileExt,fileSep) REGISTER_PLATFORM_CONFIG_BASE(name, new PlatformConfig(#name,searchStr,flowSupport,defaultFlowSupport,binFileExt,fileSep))
 
+#define DEFAULT_PLATFORM_CONFIG_NAME DEFAULT_PCN
+#define NAME_TO_STR(s) #s
 
-	  PlatformConfigPtr findPlatformConfigByName(const char *name)
+	  PlatformConfig::Ptr findPlatformConfigByName(const char *name)
 	  {
 		  PlatformConfigMap::iterator itr = m_platformConfigMap.find(name);
 		          if (itr != m_platformConfigMap.end())
 		          {
-		              return itr->second.second;
+		              //return itr->second.second;
+		              return itr->second;
 		          }
 		          else
-		        	  return PlatformConfigPtr();
+		        	  return PlatformConfig::Ptr();
+	  }
+
+	  PlatformConfig::Ptr findPlatformConfigFromFullName(const char *fullPlatformName)
+	  {
+		  // Requires C++11 -> leave minimum compiler support at C++0x for now ...
+		  //for ( const auto &itr : m_platformConfigMap )
+		  for (PlatformConfigMap::iterator itr = m_platformConfigMap.begin(); itr != m_platformConfigMap.end(); itr++ )
+		  {
+		     if(std::strstr(fullPlatformName,itr->second->getsearchStr()))
+		    	 return itr->second;
+		  }
+
+		  // if not found search for default cplatform config
+    	  return  findPlatformConfigByName(NAME_TO_STR(DEFAULT_PLATFORM_CONFIG_NAME));
+	  }
+
+	  PlatformConfigMap &getConfigMap()
+	  {
+         return m_platformConfigMap;
 	  }
 
 	  // data
@@ -128,6 +202,7 @@ public:
 ///////////////////////////
 // Altera platform specific
 ///////////////////////////
+/*
 #ifdef ALTERA_OPENCL
   #define PLATFORM_FLOW_SUPPORT (SOURCE_FLOW | BINARY_FLOW | DEFAULT_FLOW)
   #define PLATFORM_DEFAULT_FLOW BINARY_FLOW
@@ -148,7 +223,7 @@ public:
   #define BINARY_FILE_EXT ".bcl"
   #define BINARY_FILE_SEP '.'
 #endif // ALTERA_OPENCL
-
+*/
 #endif // CONFIG_SETTINGS_H
 
 
