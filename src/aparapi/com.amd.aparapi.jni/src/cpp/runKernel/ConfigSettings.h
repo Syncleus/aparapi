@@ -155,9 +155,11 @@ public:
 
 #define DEFAULT_PLATFORM_CONFIG_NAME DEFAULT_PCN
 #define NAME_TO_STR(s) #s
+#define DEFINE_NAME_TO_STR(s) NAME_TO_STR(s)
 
 	  PlatformConfig::Ptr findPlatformConfigByName(const char *name)
 	  {
+		  printf("findPlatformConfigByName: %s\n",name);
 		  PlatformConfigMap::iterator itr = m_platformConfigMap.find(name);
 		          if (itr != m_platformConfigMap.end())
 		          {
@@ -170,6 +172,7 @@ public:
 
 	  PlatformConfig::Ptr findPlatformConfigFromFullName(const char *fullPlatformName)
 	  {
+		  printf("findPlatformConfigFromFullName: %s\n",fullPlatformName);
 		  // Requires C++11 -> leave minimum compiler support at C++0x for now ...
 		  //for ( const auto &itr : m_platformConfigMap )
 		  for (PlatformConfigMap::iterator itr = m_platformConfigMap.begin(); itr != m_platformConfigMap.end(); itr++ )
@@ -179,7 +182,7 @@ public:
 		  }
 
 		  // if not found search for default cplatform config
-    	  return  findPlatformConfigByName(NAME_TO_STR(DEFAULT_PLATFORM_CONFIG_NAME));
+    	  return  findPlatformConfigByName(DEFINE_NAME_TO_STR(DEFAULT_PLATFORM_CONFIG_NAME));
 	  }
 
 	  PlatformConfigMap &getConfigMap()
