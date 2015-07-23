@@ -1156,7 +1156,7 @@ inline char* getClassName(JNIEnv* jenv, JNIContext* jniContext, const char *optE
    char *charPtr = classNameStr;
    while(charPtr = strchr(charPtr,'$'))
    {
-	   *charPtr = BINARY_FILE_SEP;
+	   *charPtr = jniContext->platformConfigPtr->getFileSeperator();//BINARY_FILE_SEP;
 	   charPtr++;
    }
 
@@ -1287,10 +1287,11 @@ inline void outputOCLFile(JNIEnv* jenv, JNIContext* jniContext, const char *sour
 
 }
 
-inline void verifyFlow(jint &buildFlags)
+inline void verifyFlow(JNIContext* jniContext, jint &buildFlags)
 {
+	PlatformConfig::Ptr platformConfigPtr = jniContext->platformConfigPtr;
     // verify flow support is available
-    if(!(PLATFORM_FLOW_SUPPORT & buildFlags))
+    if(!(platformConfigPtr->getFlowSupport() & buildFlags))
     {
         fprintf(stderr, "!!! Error requested flow(%0xd) not available !!!\n",buildFlags);
         throw CLException(CL_INVALID_VALUE,"buildProgramJNI() -> bad request flow");
@@ -1298,7 +1299,7 @@ inline void verifyFlow(jint &buildFlags)
 
     // check/set if default flow is requested
     if(buildFlags==DEFAULT_FLOW)
-    	buildFlags = PLATFORM_DEFAULT_FLOW;
+    	buildFlags = platformConfigPtr->getDefaultFlowSupport();
 }
 
 JNI_JAVA(jlong, KernelRunnerJNI, buildProgramJNI)
@@ -1319,14 +1320,14 @@ JNI_JAVA(jlong, KernelRunnerJNI, buildProgramJNI)
 
         // !!! oren change ->
         // verify the flow and modify if need be
-        verifyFlow(buildFlags);
+        verifyFlow(jniContext,buildFlags);
 
 //#ifdef USE_BINARY_FILE
         if(buildFlags & com_amd_aparapi_internal_jni_KernelRunnerJNI_JNI_FLAG_BINARY_FLOW)
         {
           char *binFileFolder = getenv(BINARY_FOLDER_ENV_VAR);
           fprintf(stderr, "Bin Folder is %s\n",binFileFolder);
-          char *binFileName = getClassName(jenv,jniContext,BINARY_FILE_EXT);
+          char *binFileName = getClassName(jenv,jniContext,jniContext->platformConfigPtr->getBinFileExtension());//BINARY_FILE_EXT
           char *fullBinFilePath = buildFilePath(binFileFolder,binFileName);
           fprintf(stderr, "FullBinFilePath is %s\n",fullBinFilePath);
      	  jniContext->program = CLHelper::createProgramWithBinary(jenv, jniContext->context,  1, &jniContext->deviceId, fullBinFilePath, NULL, &status);

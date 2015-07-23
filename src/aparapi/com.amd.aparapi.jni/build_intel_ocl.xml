@@ -603,6 +603,8 @@ First consider editing the properties in build.properties
         <!-- !!! oren change -> add debug info, no optimizations 
          <arg value="-O3" />
         -->
+      	 <!-- !!! oren change -> add support for ISO C++ 2011 (C++0x) requires GCC 4.3 and later -->      	
+      	 <arg value="-std=c++0x" />
          <arg value="-O0" />
          <arg value="-g" />
          <arg value="-fPIC" />
@@ -625,6 +627,8 @@ First consider editing the properties in build.properties
          <arg value="src/cpp/runKernel/KernelArg.cpp" />
          <arg value="src/cpp/runKernel/ProfileInfo.cpp" />
          <arg value="src/cpp/runKernel/Range.cpp" />
+      	<!-- !!! oren change -> platform config settings -->
+         <arg value="src/cpp/runKernel/ConfigSettings.cpp" />
          <arg value="src/cpp/invoke/OpenCLJNI.cpp" />
          <arg value="src/cpp/invoke/OpenCLArgDescriptor.cpp" />
          <arg value="src/cpp/invoke/OpenCLMem.cpp" />

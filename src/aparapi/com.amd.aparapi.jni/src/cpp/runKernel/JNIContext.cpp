@@ -29,6 +29,12 @@ JNIContext::JNIContext(JNIEnv *jenv, jobject _kernelObject, jobject _openCLDevic
    if (status == CL_SUCCESS){
       valid = JNI_TRUE;
    }
+
+   // !!! oren change -> setup platform configuration
+   char platformName[512]={""};
+   status = clGetPlatformInfo(platformId, CL_PLATFORM_NAME, sizeof(platformName), platformName, NULL);
+   platformConfigPtr = PlatformConfigFactory::getPlatformConfigFactory().findPlatformConfigFromFullName(platformName);
+
 }
 
 void JNIContext::dispose(JNIEnv *jenv, Config* config) {
