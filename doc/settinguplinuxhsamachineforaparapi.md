@@ -53,14 +53,18 @@ Until all of the HSA drivers and features are available in stock linux and have 
 A Ubuntu compatible kernel can be pulled from github
 
 >$ cd ~ # I put all of this in my home dir
+
 >$ sudo apt-get install git
+
 >$ git clone https://github.com/HSAFoundation/Linux-HSA-Drivers-And-Images-AMD.git
 
 Or you can pull the zip and unzip using curl if you don't have git
 
 >$ cd ~ # I put all of this in my home dir
-$ curl -L https://github.com/HSAFoundation/Linux-HSA-Drivers-And-Images-AMD/archive/master.zip > drivers.zip
-$ unzip drivers.zip
+
+>$ curl -L https://github.com/HSAFoundation/Linux-HSA-Drivers-And-Images-AMD/archive/master.zip > drivers.zip
+
+>$ unzip drivers.zip
 
 This will create the following subdir on your machine
 
