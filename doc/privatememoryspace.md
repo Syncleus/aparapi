@@ -9,10 +9,10 @@ The private memory space is generally only suitable for smallish arrays, but is 
 ##Details
 In Aparapi there are two mechanisms available to mark a Kernel class member as belonging to the private memory space when mapped to OpenCL code (matching the equivalent functionality for marking items as belonging to the local memory space). Either the field can be named with a suffix plus buffer size, for example
 
->   protected short[] myBuffer_$private$32 = new short[32];
+    protected short[] myBuffer_$private$32 = new short[32];
 or using the Annotation Kernel.PrivateMemorySpace, for example
 
->   protected @PrivateMemorySpace(32) short[] myBuffer = new short[32];
+    protected @PrivateMemorySpace(32) short[] myBuffer = new short[32];
 The latter should be used in preference to the former.
 
 Note that OpenCL requires that the size of a private array be fixed at compile time for any kernel. Thus it is not possible for a single Kernel subclass to support private buffers of varying size. Unfortunately this may entail creating multiple subclasses with varying buffer sizes in order to most efficiently support varying private buffer sizes.
