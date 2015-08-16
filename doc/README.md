@@ -23,24 +23,24 @@ APARAPI Documentation
 | DevelopersGuideLinux | Developer guide for Linux. |
 | DevelopersGuideWindows | Developers guide for Windows. |
 | EmulatingMultipleEntrypointsUsingCurrentAPI	| How to emulate multiple entrypoints using existing Aparapi APIs	|
-* MultipleEntryPointSupportProposal	How to extend Aparapi to allow multiple entrypoints for kernels	Jul 2012	frost.g...@gmail.com
-* ExplicitBufferHandling	How to minimize buffer transfers	Jul 2012	frost.g...@gmail.com
-* AparapiPatterns	Examples and code fragments to demonstrate Aparapi fetaures.	Jul 2012	frost.g...@gmail.com
-* ProfilingKernelsFromEclipse	Profiling Kernels with AMD profiler in Eclipse (Indigo)	May 2012	frost.g...@gmail.com
-* DeviceProposal	How we might use the extension mechanism devices for general Kernel execution.	May 2012	frost.g...@gmail.com
-* NewOpenCLBinding	How to use new OpenCL binding mechanism.	Mar 2012	frost.g...@gmail.com
-* AparapiExtensionProposal	A proposed aparapi extension mechanism.	Feb 2012	frost.g...@gmail.com
-* UsingConstantMemory	How to make use of constant memory in a Kernel	Feb 2012	frost.g...@gmail.com
-* UsingLocalMemory	How to make use of local memory in a Kernel	Feb 2012	frost.g...@gmail.com
-* UsingMultiDimExecutionRanges	How to use the new Range class (for multi-dim range access)	Feb 2012	frost.g...@gmail.com
-* AccessingMultiDimNDRangeProposal	A proposal for accessing multi-dim ND range execution	Dec 2011	frost.g...@gmail.com
-* LocalMemoryAndBarrierProposal	A proposal for handling local memory and barriers	Dec 2011	frost.g...@gmail.com
-* AddressSpacesUsingBuffers	Proposal For OpenCL address space support using java Buffers instead of arrays.	Dec 2011	frost.g...@gmail.com
-* BuildingNBody	How to build the NBody example.	Nov 2011	frost.g...@gmail.com
-* UnitTestGuide	Unit test Guide Find out how to run Junit tests and how to add new tests.	Sep 2011	frost.g...@gmail.com
-* NewFeatures	New Features added to this open source release of Aparapi.	Sep 2011	frost.g...@gmail.com
-* UsersGuide	Aparapi User's Guide.	Sep 2011	frost.g...@gmail.com
-* DevelopersGuide	Aparapi developers guide.	Sep 2011	frost.g...@gmail.com
-* ContributionGuide	How to contribute (bug fix or features).	Sep 2011	frost.g...@gmail.com
-* JavaKernelGuidelines	What code can and can't be converted to OpenCL by Aparapi.	Sep 2011	frost.g...@gmail.com
-* Attribution	Attribution
+| MultipleEntryPointSupportProposal | How to extend Aparapi to allow multiple entrypoints for kernels	|
+| ExplicitBufferHandling | How to minimize buffer transfers |
+| AparapiPatterns | Examples and code fragments to demonstrate Aparapi fetaures. |
+| ProfilingKernelsFromEclipse | Profiling Kernels with AMD profiler in Eclipse (Indigo) |
+| DeviceProposal | How we might use the extension mechanism devices for general Kernel execution.|
+| NewOpenCLBinding | How to use new OpenCL binding mechanism. |
+| AparapiExtensionProposal | A proposed aparapi extension mechanism. |
+| UsingConstantMemory | How to make use of constant memory in a Kernel |
+| UsingLocalMemory | How to make use of local memory in a Kernel |
+| UsingMultiDimExecutionRanges | How to use the new Range class (for multi-dim range access) |
+| AccessingMultiDimNDRangeProposal | A proposal for accessing multi-dim ND range execution |
+| LocalMemoryAndBarrierProposal | A proposal for handling local memory and barriers |
+| AddressSpacesUsingBuffers | Proposal For OpenCL address space support using java Buffers instead of arrays.	|
+| BuildingNBody | How to build the NBody example.|
+| UnitTestGuide | Unit test Guide Find out how to run Junit tests and how to add new tests. |
+| NewFeatures | New Features added to this open source release of Aparapi. |
+| UsersGuide | Aparapi User's Guide. |
+| DevelopersGuide | Aparapi developers guide. |
+| ContributionGuide | How to contribute (bug fix or features). |
+| JavaKernelGuidelines | What code can and can't be converted to OpenCL by Aparapi. |
+| Attribution | Attribution |
