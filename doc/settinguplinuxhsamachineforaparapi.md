@@ -188,21 +188,22 @@ You will need to edit env.sh and make sure that APARAPI_HOME, OKRA_HOME, OCL_HOM
 
 Here are how I set my vars.
 
-|environment |variable	|value|
-|------------|----------|-----|
-|JAVA_HOME|/home/${LOGNAME}/jdk1.8.0|
-|OCL_HOME|/home/${LOGNAME}/AMD-APP-SDK-v2.9-RC-lnx64|
-|APARAPI_HOME|/home/${LOGNAME}/aparapi-lambda|
-|OKRA_HOME | /home/${LOGNAME}/Okra-Interface-to-HSA-Device/okra/|
+|environment variable	|value                                               |
+|-----------------------|----------------------------------------------------|
+|JAVA_HOME              |/home/${LOGNAME}/jdk1.8.0                           |
+|OCL_HOME               |/home/${LOGNAME}/AMD-APP-SDK-v2.9-RC-lnx64          |
+|APARAPI_HOME           |/home/${LOGNAME}/aparapi-lambda                     |
+|OKRA_HOME              |/home/${LOGNAME}/Okra-Interface-to-HSA-Device/okra/ |
 
 It is recommended (thanks notzed ;) ) that you test your env.sh using sh env.sh until it stops reporting errors. Once you have finished I recommend sourcing it into your current shell before building with ant.
 
-$ cd ~aparapi-lambda
+>$ cd ~aparapi-lambda
 $ . env.sh
 $ ant
+
 If you get any problems check the env.sh vars first.
 
 If all is well you should be able to run some samples.
 
-$ cd ~/aparapi-lambda/samples/mandel
+>$ cd ~/aparapi-lambda/samples/mandel
 $ sh hsailmandel.sh
