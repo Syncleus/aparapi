@@ -1,6 +1,8 @@
 PrivateMemorySpace
 ==================
 
+*Using `__private` memory space in Aparapi kernels. Phase-Implementation Updated Sep 14, 2014 by barneydp...@gmail.com*
+
 ## Introduction
 The private memory space identifier (just "private" is also recognised) can be applied to struct fields in order to indicate that the data is not shared with/accessible to other kernel instances. Whilst this is the default for non-array data, it must be explicitly applied to array fields in order to make them private. Aparapi now supports arrays in the private memory space.
 

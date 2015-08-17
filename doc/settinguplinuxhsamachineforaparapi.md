@@ -1,5 +1,5 @@
 # Setting up Linus HSA machine for APARAPI
-
+*How to setup a Linux HSA machine for testing HSA enabled Aparapi Updated May 22, 2014 by frost.g...@gmail.com*
 ## Introduction
 Now that HSA hardware is generally available I figured it was time to describe how to setup a HSA enabled Linux platform so that it can run Aparapi.
 
