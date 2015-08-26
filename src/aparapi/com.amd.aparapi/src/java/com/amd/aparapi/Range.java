@@ -109,6 +109,28 @@ public class Range extends RangeJNI{
       return (range);
    }
 
+   /** 
+    * Create a range from an existing range and a device <br/>
+    * 
+    * @param device to be associated with range
+    * @param orgRange original range to copy from
+    * @return A new Range with the requested dimensions
+    */
+   public static Range create(Device _device, Range orgRange) {
+	   
+	   switch(orgRange.getDims())
+	   {
+	   case 1:
+		   return create(_device,orgRange.globalSize_0,orgRange.localSize_0);
+	   case 2:
+		   return create2D(_device,orgRange.globalSize_0,orgRange.globalSize_1,orgRange.localSize_0,orgRange.localSize_1);
+	   case 3:
+		   return create3D(_device,orgRange.globalSize_0,orgRange.globalSize_1,orgRange.globalSize_2,orgRange.localSize_0,orgRange.localSize_1,orgRange.localSize_2);
+	   default:
+		   return null;
+	   }
+   }
+
    /**
     * Determine the set of factors for a given value.
     * @param _value The value we wish to factorize. 
