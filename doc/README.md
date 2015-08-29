@@ -6,7 +6,7 @@ APARAPI Documentation
 | [PrivateMemorySpace](privatememoryspace.md)| Using `__private` memory space in Aparapi kernels. |
 | [SettingUpLinuxHSAMachineForAparapi](settinguplinuxhsamachineforaparapi.md) | How to setup a Linux HSA machine for testing HSA enabled Aparapi |
 | [PossibleAparapiLambdaSyntaxOptions](PossibleAparapiLambdaSyntaxOptions.md) | Syntax suggestions for HSA enabled Aparapi |
-| HSAEnablementOfLambdaBranchSidebar| Sidebar for HSAEnablementOfLambdaBranchAparapi|
+| [HSAEnablementOfLambdaBranchSidebar](HSAEnablementOfLambdaBranchSidebar.md)| Sidebar for HSAEnablementOfLambdaBranchAparapi|
 | HSAEnablementOfLambdaBranch	| Adding HSA Support to Aparapi lambda branch	|
 | UsingAparapiLambdaBranchWithHSASimulator | One-sentence summary of this page. |
 | SettingUpLinuxHSAMachineForAparapiSidebar | Sidebar for SettingUpLinuxHSAMachineForAparapi |
