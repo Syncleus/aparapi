@@ -29,17 +29,19 @@ So you can run the familiar 'squares' kernel using
     int in[] = ..//
     int out[] = .../
     Device.bestGPU().forEach(in.length, (i)->{
-       out[i] = in[i]*in[i];
+       out[i] = in[i] * in[i];
      });
+
 Instead of
 
     int in[] = ..//
     int out[] = .../
     Device.bestGPU().forEach(in.length, new IntConsumer(){
        public void accept(int i){
-           out[i] = in[i]*in[i];
+           out[i] = in[i] * in[i];
        }
      });
+
 To accomodate lambda's we created Device.forEach(int range, IntConsumer ic) which converts the bytecode of the ic parameter to OpenCL at runtime. The captured args (in, out and i - in this case) are passed to the GPU and the kernel executed.
 
 During our early experiments we encountered an interesting issue. The new 'lambdafied' javac uses Java 7 method handles and invoke dynamic instructions to dispatch the lambda code. It does this by injecting a call to a MethodHandle factory into the call site. At runtime, this factory creates a synthetic class (to capture call-site args) and passes this to our Device.forEach().
@@ -53,6 +55,7 @@ This will mean that in future we will change how Aparapi is launched.
 Instead of
 
     $ java -Djava.library.path=path/to/aparapi -classpath path/to/aparapi/aparapi.jar:your.jar YourClass
+    
 We will use
 
     $ java -agentlib=path/to/aparapi/aparapi.dll -classpath path/to/aparapi/aparapi.jar:your.jar YourClass
