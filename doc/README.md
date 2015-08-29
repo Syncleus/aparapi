@@ -43,4 +43,4 @@ APARAPI Documentation
 | DevelopersGuide | Aparapi developers guide. |
 | ContributionGuide | How to contribute (bug fix or features). |
 | JavaKernelGuidelines | What code can and can't be converted to OpenCL by Aparapi. |
-| Attribution | Attribution |
+| [Attribution](Attribution.md) | Attribution |
