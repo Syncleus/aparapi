@@ -95,7 +95,7 @@ The code-generating ant build.xml file performs the following steps to generate 
 * initiates the JUnit test phase (result data in junit/data)
 * creates the JUnit report (in junit/html/junit from junit/data)
 
-To create a new test case, just add your test case to the codegen/src/java/com/amd/aparapi/test package (including the expected OpenCL).
+To create a new test case, just add your test case to the `codegen/src/java/com/amd/aparapi/test` package (including the expected OpenCL).
 
 Sometimes different javac implementations (such as Oracle and Eclipse) will generate different bytecode for the same source. When Aparapi converts this bytecode it may yield different (but equally acceptable) OpenCL forms. One example of this is the BooleanToggle test:
 

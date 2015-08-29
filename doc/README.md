@@ -19,7 +19,7 @@ APARAPI Documentation
 | HomePageSuggestions ||
 | [ChoosingSpecificDevicesForExecution](ChoosingSpecificDevicesForExecution.md) | Using the new Device API's to choose Kernel execution on a specific device.	|
 | Gadgets | Gadgetorium|
-| ConvertingBytecodeToOpenCL | How Aparapi converts bytecode to OpenCL |
+| [ConvertingBytecodeToOpenCL](ConvertingBytecodeToOpenCL.md) | How Aparapi converts bytecode to OpenCL |
 | DevelopersGuideLinux | Developer guide for Linux. |
 | DevelopersGuideWindows | Developers guide for Windows. |
 | EmulatingMultipleEntrypointsUsingCurrentAPI	| How to emulate multiple entrypoints using existing Aparapi APIs	|
