@@ -20,9 +20,9 @@ APARAPI Documentation
 | [ChoosingSpecificDevicesForExecution](ChoosingSpecificDevicesForExecution.md) | Using the new Device API's to choose Kernel execution on a specific device.	|
 | Gadgets | Gadgetorium|
 | [ConvertingBytecodeToOpenCL](ConvertingBytecodeToOpenCL.md) | How Aparapi converts bytecode to OpenCL |
-| DevelopersGuideLinux | Developer guide for Linux. |
-| DevelopersGuideWindows | Developers guide for Windows. |
-| EmulatingMultipleEntrypointsUsingCurrentAPI	| How to emulate multiple entrypoints using existing Aparapi APIs	|
+| [DevelopersGuideLinux](DevelopersGuideLinux.md) | Developer guide for Linux. |
+| [DevelopersGuideWindows](DevelopersGuideWindows.md) | Developers guide for Windows. |
+| [EmulatingMultipleEntrypointsUsingCurrentAPI](EmulatingMultipleEntrypointsUsingCurrentAPI.md)	| How to emulate multiple entrypoints using existing Aparapi APIs	|
 | MultipleEntryPointSupportProposal | How to extend Aparapi to allow multiple entrypoints for kernels	|
 | [ExplicitBufferHandling](ExplicitBufferHandling.md) | How to minimize buffer transfers |
 | AparapiPatterns | Examples and code fragments to demonstrate Aparapi fetaures. |
