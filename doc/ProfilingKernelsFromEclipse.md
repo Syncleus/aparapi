@@ -73,12 +73,14 @@ Assume your Eclipse project follows a typical Maven layout:
     2. Name: AMD cltrace - Project
     3. Location: C:\Program Files (x86)\AMD APP\tools\AMD APP Profiler 2.4\x64\sprofile.exe
     4. Arguments:
-
-
         `-o "${project_loc}\profiles\cltrace.txt" -k all -r -O -t -T`
+
         `-w "${project_loc}"`
+
         `"C:\Program Files\Java\jdk1.6.0_30\bin\java.exe"`
+
         `-Djava.library.path="lib\aparapi-2012-02-15"`
+
         `-jar "${project_loc}\runner.jar"`
 
 
