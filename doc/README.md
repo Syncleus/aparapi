@@ -4,12 +4,12 @@ APARAPI Documentation
 | | |
 |----------------|------|
 | [PrivateMemorySpace](privatememoryspace.md)| Using `__private` memory space in Aparapi kernels. |
-| [SettingUpLinuxHSAMachineForAparapi](settinguplinuxhsamachineforaparapi.md) | How to setup a Linux HSA machine for testing HSA enabled Aparapi |
+| [SettingUpLinuxHSAMachineForAparapi](SettingUpLinuxHSAMachineForAparapi.md) | How to setup a Linux HSA machine for testing HSA enabled Aparapi |
 | [PossibleAparapiLambdaSyntaxOptions](PossibleAparapiLambdaSyntaxOptions.md) | Syntax suggestions for HSA enabled Aparapi |
 | [HSAEnablementOfLambdaBranchSidebar](HSAEnablementOfLambdaBranchSidebar.md)| Sidebar for HSAEnablementOfLambdaBranchAparapi|
-| HSAEnablementOfLambdaBranch	| Adding HSA Support to Aparapi lambda branch	|
-| UsingAparapiLambdaBranchWithHSASimulator | One-sentence summary of this page. |
-| SettingUpLinuxHSAMachineForAparapiSidebar | Sidebar for SettingUpLinuxHSAMachineForAparapi |
+| [HSAEnablementOfLambdaBranch](HSAEnablementOfLambdaBranch.md)	| Adding HSA Support to Aparapi lambda branch	|
+| [UsingAparapiLambdaBranchWithHSASimulator](UsingAparapiLambdaBranchWithHSASimulator.md) | One-sentence summary of this page. |
+| [SettingUpLinuxHSAMachineForAparapiSidebar](SettingUpLinuxHSAMachineForAparapiSidebar.md) | Sidebar for SettingUpLinuxHSAMachineForAparapi |
 | HSASidebar | |
 | AddingLambdasToAparapi | Adding Java 8 Lambda Support to Aparapi |
 | ProfilingKernelExecution | Using Aparapi's built in profiling APIs |
