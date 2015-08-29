@@ -23,7 +23,7 @@ APARAPI Documentation
 | [DevelopersGuideLinux](DevelopersGuideLinux.md) | Developer guide for Linux. |
 | [DevelopersGuideWindows](DevelopersGuideWindows.md) | Developers guide for Windows. |
 | [EmulatingMultipleEntrypointsUsingCurrentAPI](EmulatingMultipleEntrypointsUsingCurrentAPI.md)	| How to emulate multiple entrypoints using existing Aparapi APIs	|
-| MultipleEntryPointSupportProposal | How to extend Aparapi to allow multiple entrypoints for kernels	|
+| [MultipleEntryPointSupportProposal](MultipleEntryPointSupportProposal.md) | How to extend Aparapi to allow multiple entrypoints for kernels	|
 | [ExplicitBufferHandling](ExplicitBufferHandling.md) | How to minimize buffer transfers |
 | AparapiPatterns | Examples and code fragments to demonstrate Aparapi fetaures. |
 | ProfilingKernelsFromEclipse | Profiling Kernels with AMD profiler in Eclipse (Indigo) |
