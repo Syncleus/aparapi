@@ -14,10 +14,10 @@ APARAPI Documentation
 | [AddingLambdasToAparapi](AddingLambdasToAparapi.md) | Adding Java 8 Lambda Support to Aparapi |
 | [ProfilingKernelExecution](ProfilingKernelExecution.md) | Using Aparapi's built in profiling APIs |
 | [HowToAddUML](HowToAddUML.md) | How to add plantuml docs to wiki pages |
-| LIbraryAgentDuality | Aparapi libraries can now be loaded as JVMTI agents. |
-| FrequentlyAskedQuestions | Frequently Asked Questions|
+| [LIbraryAgentDuality](LIbraryAgentDuality.md) | Aparapi libraries can now be loaded as JVMTI agents. |
+| [FrequentlyAskedQuestions](FrequentlyAskedQuestions.md) | Frequently Asked Questions|
 | HomePageSuggestions ||
-| ChoosingSpecificDevicesForExecution | Using the new Device API's to choose Kernel execution on a specific device.	|
+| [ChoosingSpecificDevicesForExecution](ChoosingSpecificDevicesForExecution.md) | Using the new Device API's to choose Kernel execution on a specific device.	|
 | Gadgets | Gadgetorium|
 | ConvertingBytecodeToOpenCL | How Aparapi converts bytecode to OpenCL |
 | DevelopersGuideLinux | Developer guide for Linux. |
@@ -37,7 +37,7 @@ APARAPI Documentation
 | LocalMemoryAndBarrierProposal | A proposal for handling local memory and barriers |
 | AddressSpacesUsingBuffers | Proposal For OpenCL address space support using java Buffers instead of arrays.	|
 | BuildingNBody | How to build the NBody example.|
-| UnitTestGuide | Unit test Guide Find out how to run Junit tests and how to add new tests. |
+| [UnitTestGuide](UnitTestGuide.md) | Unit test Guide Find out how to run Junit tests and how to add new tests. |
 | NewFeatures | New Features added to this open source release of Aparapi. |
 | UsersGuide | Aparapi User's Guide. |
 | DevelopersGuide | Aparapi developers guide. |
