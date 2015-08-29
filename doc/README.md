@@ -25,7 +25,7 @@ APARAPI Documentation
 | [EmulatingMultipleEntrypointsUsingCurrentAPI](EmulatingMultipleEntrypointsUsingCurrentAPI.md)	| How to emulate multiple entrypoints using existing Aparapi APIs	|
 | [MultipleEntryPointSupportProposal](MultipleEntryPointSupportProposal.md) | How to extend Aparapi to allow multiple entrypoints for kernels	|
 | [ExplicitBufferHandling](ExplicitBufferHandling.md) | How to minimize buffer transfers |
-| AparapiPatterns | Examples and code fragments to demonstrate Aparapi fetaures. |
+| [AparapiPatterns](AparapiPatterns.md) | Examples and code fragments to demonstrate Aparapi fetaures. |
 | ProfilingKernelsFromEclipse | Profiling Kernels with AMD profiler in Eclipse (Indigo) |
 | DeviceProposal | How we might use the extension mechanism devices for general Kernel execution.|
 | NewOpenCLBinding | How to use new OpenCL binding mechanism. |
