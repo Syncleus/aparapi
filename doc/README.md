@@ -12,8 +12,8 @@ APARAPI Documentation
 | [SettingUpLinuxHSAMachineForAparapiSidebar](SettingUpLinuxHSAMachineForAparapiSidebar.md) | Sidebar for SettingUpLinuxHSAMachineForAparapi |
 | HSASidebar | |
 | [AddingLambdasToAparapi](AddingLambdasToAparapi.md) | Adding Java 8 Lambda Support to Aparapi |
-| ProfilingKernelExecution | Using Aparapi's built in profiling APIs |
-| HowToAddUML | How to add plantuml docs to wiki pages |
+| [ProfilingKernelExecution](ProfilingKernelExecution.md) | Using Aparapi's built in profiling APIs |
+| [HowToAddUML](HowToAddUML.md) | How to add plantuml docs to wiki pages |
 | LIbraryAgentDuality | Aparapi libraries can now be loaded as JVMTI agents. |
 | FrequentlyAskedQuestions | Frequently Asked Questions|
 | HomePageSuggestions ||
