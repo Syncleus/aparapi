@@ -3,7 +3,7 @@ APARAPI Documentation
 
 | | |
 |----------------|------|
-| [PrivateMemorySpace](privatememoryspace.md)| Using `__private` memory space in Aparapi kernels. |
+| [PrivateMemorySpace](PrivateMemorySpace.md)| Using `__private` memory space in Aparapi kernels. |
 | [SettingUpLinuxHSAMachineForAparapi](SettingUpLinuxHSAMachineForAparapi.md) | How to setup a Linux HSA machine for testing HSA enabled Aparapi |
 | [PossibleAparapiLambdaSyntaxOptions](PossibleAparapiLambdaSyntaxOptions.md) | Syntax suggestions for HSA enabled Aparapi |
 | [HSAEnablementOfLambdaBranchSidebar](HSAEnablementOfLambdaBranchSidebar.md)| Sidebar for HSAEnablementOfLambdaBranchAparapi|
@@ -11,7 +11,7 @@ APARAPI Documentation
 | [UsingAparapiLambdaBranchWithHSASimulator](UsingAparapiLambdaBranchWithHSASimulator.md) | One-sentence summary of this page. |
 | [SettingUpLinuxHSAMachineForAparapiSidebar](SettingUpLinuxHSAMachineForAparapiSidebar.md) | Sidebar for SettingUpLinuxHSAMachineForAparapi |
 | HSASidebar | |
-| AddingLambdasToAparapi | Adding Java 8 Lambda Support to Aparapi |
+| [AddingLambdasToAparapi](AddingLambdasToAparapi.md) | Adding Java 8 Lambda Support to Aparapi |
 | ProfilingKernelExecution | Using Aparapi's built in profiling APIs |
 | HowToAddUML | How to add plantuml docs to wiki pages |
 | LIbraryAgentDuality | Aparapi libraries can now be loaded as JVMTI agents. |
