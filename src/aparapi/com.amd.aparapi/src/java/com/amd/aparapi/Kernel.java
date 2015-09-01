@@ -994,7 +994,23 @@ public abstract class Kernel implements Cloneable {
       }
    }
 
+   
    /**
+    * Init a kernel from an existing one. used in caching mechanisems to improve startup time (ex. SparkCL). 
+    *  
+    */
+   public void init(Kernel kernel) {
+
+	 // create and init a copy of the kernel runner
+	 kernelRunner = new KernelRunner(this);
+         if(kernel.kernelRunner!=null)
+	   kernelRunner.init(kernel.kernelRunner);
+         // We need to be careful to also clone the KernelState
+         kernelState = new KernelState(kernel.kernelState); // Qualified copy constructor
+   }
+
+
+/**
     * Delegates to either {@link java.lang.Math#acos(double)} (Java) or <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/acos.html">acos(float)</a></code> (OpenCL).
      * 
      * User should note the differences in precision between Java and OpenCL's implementation of arithmetic functions to determine whether the difference in precision is acceptable.

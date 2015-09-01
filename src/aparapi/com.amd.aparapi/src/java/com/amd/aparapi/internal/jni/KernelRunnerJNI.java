@@ -310,6 +310,8 @@ public abstract class KernelRunnerJNI{
 
    //protected native long buildProgramJNI(long _jniContextHandle, String _source);
    // !!! oren change -> add binary option to build
+   // !!! oren change -> add synchronized
+   // protected native synchronized long buildProgramJNI(long _jniContextHandle, String _source, int _buildFlags);
    protected native long buildProgramJNI(long _jniContextHandle, String _source, int _buildFlags);
 
    protected native int setArgsJNI(long _jniContextHandle, KernelArgJNI[] _args, int argc);

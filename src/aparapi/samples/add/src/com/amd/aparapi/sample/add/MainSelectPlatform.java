@@ -227,6 +227,9 @@ public class MainSelectPlatform {
       Device device = Device.getDevice(platformHint,deviceType,deviceId);
       kernel.execute(Range.create(device,512,16)); 
       System.out.printf("****************\n");
+      
+      // test new range functionality
+      Range.create(device,Range.create(512,16));
 
 
 
