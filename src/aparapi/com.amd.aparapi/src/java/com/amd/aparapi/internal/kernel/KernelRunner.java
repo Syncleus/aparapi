@@ -110,7 +110,21 @@ public class KernelRunner extends KernelRunnerJNI{
       kernel = _kernel;
    }
 
-   /**
+   public void init(KernelRunner kernelRunner) 
+   {
+	//this = super.clone();
+	jniContextHandle = kernelRunner.jniContextHandle;
+	entryPoint = kernelRunner.entryPoint;
+	argc = kernelRunner.argc;
+        args = kernelRunner.args;
+        //puts = kernelRunner.puts;
+	capabilitiesSet = kernelRunner.capabilitiesSet;
+        accumulatedExecutionTime = kernelRunner.accumulatedExecutionTime;
+	conversionTime = kernelRunner.conversionTime;
+	executionTime = kernelRunner.executionTime;
+   }
+
+/**
     * <code>Kernel.dispose()</code> delegates to <code>KernelRunner.dispose()</code> which delegates to <code>disposeJNI()</code> to actually close JNI data structures.<br/>
     * 
     * @see KernelRunner#disposeJNI()
@@ -1022,7 +1036,11 @@ public class KernelRunner extends KernelRunnerJNI{
 
                   String openCL = null;
                   try {
+                     // !!! oren change -> kernel writer is not thread safe!
+                     // TODO: check if it makes sense to change this
+                     synchronized (Kernel.class) {
                      openCL = KernelWriter.writeToString(entryPoint);
+                     }
                   } catch (final CodeGenException codeGenException) {
                      return warnFallBackAndExecute(_entrypointName, _range, _passes, codeGenException);
                   }
@@ -1051,9 +1069,14 @@ public class KernelRunner extends KernelRunnerJNI{
                   // set flow type
                   int buildFlags = kernel.getFlowType().getValue();
                   // Send the string to OpenCL to compile it
-                  if (buildProgramJNI(jniContextHandle, openCL,buildFlags) == 0) {
+                  // !!! oren change -> in a parallel device for singel kernel environment buildProgramJNI can fail
+                  // TODO: improve sync to be more fine grained later - reuse kernel elements better etc.
+                  //synchronized (Kernel.class)
+                  //{
+                    if (buildProgramJNI(jniContextHandle, openCL,buildFlags) == 0) {
                      return warnFallBackAndExecute(_entrypointName, _range, _passes, "OpenCL compile failed");
-                  }
+                    }
+                  //}
 
                   args = new KernelArg[entryPoint.getReferencedFields().size()];
                   int i = 0;
