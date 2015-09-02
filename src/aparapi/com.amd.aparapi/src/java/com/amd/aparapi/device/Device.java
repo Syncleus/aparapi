@@ -39,13 +39,13 @@ public abstract class Device{
 
    public static Device getDevice(String platformName, String deviceTypeName, int deviceId)
    {
-      List<OpenCLPlatform> platforms = (new OpenCLPlatform()).getOpenCLPlatforms();
+      List<OpenCLPlatform> platforms = (new OpenCLPlatform()).getOpenCLPlatformsFilteredBy(platformName); //getOpenCLPlatforms();
 
       int platformc = 0;
       for (OpenCLPlatform platform : platforms) 
       {
-         if(platform.getName().contains(platformName))
-         {
+         //if(platform.getName().contains(platformName))
+         //{
 
            System.out.println("Platform " + platformc + "{");
 
@@ -104,7 +104,7 @@ public abstract class Device{
 
        }
 
-     }
+     //}
      // return not found !!!
      return null;
    }
