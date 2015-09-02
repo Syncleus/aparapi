@@ -81,13 +81,17 @@ public class OpenCLPlatform extends OpenCLJNI{
     		  System.out.println("Filtering Platforms using: " + filter );
     		  for (Iterator<OpenCLPlatform> iterator = platformList.iterator(); iterator.hasNext(); ) 
     		  {
-    			  String platformIName = iterator.next().getName();
-    			  System.out.println("Checking Platform: " + platformIName );
-    			  if (!platformIName.contains(filter)) 
+    			  String platformName = iterator.next().getName();
+    			  if (filter.equals("*") || platformName.contains(filter)) 
     			  {
-    				  System.out.println("Filtering Out Platform: " + platformIName);
-    				  iterator.remove();
+                                  System.out.println("Adding Platform: " + platformName );
     			  }
+                          else
+                          {
+    				  System.out.println("Discarding Platform: " + platformName);
+    				  iterator.remove();
+                          }
+
     		  }
     	  }
     	  return (platformList);
