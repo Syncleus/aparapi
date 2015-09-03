@@ -14,26 +14,21 @@ First consider editing the properties in build.properties
    <echo>OS Arch:    ${os.arch}</echo>
    <echo>Java Ver:   ${java.version}</echo>
 
-   <!-- Ideally this would be the latest version of Java but not everyone is going to have it installed -->
-   <!-- Additionally we want to avoid "Class not found: javac1.8" errors from old Ant versions (i.e. Eclipse) -->
-   <property name="build.compiler" value="javac1.7"/>
-   <property name="ant.build.javac.source" value="1.7"/>
-   <property name="ant.build.javac.target" value="1.7"/>
+   <!--<property name="build.compiler" value="javac1.6"/>-->
+   <!--  <property name="ant.build.javac.source" value="1.6"/>-->
+   <!-- <property name="ant.build.javac.target" value="1.6"/> -->
 
-   <property name="amd.app.sdk.version" value="2.9-1"/>
-   
    <property environment="env" />
-   
-   <!-- Check for AMD APP SDK -->
-   <echo>
-      Note: Since AMD APP SDK 2.9 you can have multiple versions installed/co-exist on same machine, 
-      so AMD introduced a completely new naming convention for their installation directories
-      For example C:/Program Files/AMD APP SDK/2.9-1
-   </echo>
+   <property name="msvc.dir" value="C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin" />
+   <!-- we need env.PATH for msvc only -->
+
+   <!-- uncomment this if you want to use mingw! -->
+   <!--<property name="mingw.dir" value="c:\\MinGW"/>-->
 
    <target name="init">
-      <available property="win32.amd.app.sdk.exists" file="C:/Program Files/AMD APP SDK/${amd.app.sdk.version}" type="dir"/>
-      <condition property="amd.app.sdk.dir" value="C:/Program Files/AMD APP SDK/${amd.app.sdk.version}">
+      <available property="win32.amd.app.sdk.exists" file="C:\Program Files (x86)\AMD APP SDK\2.9-1" type="dir"/>
+
+      <condition property="amd.app.sdk.dir" value="C:\Program Files (x86)\AMD APP SDK\2.9-1">
          <and>
             <os family="windows" />
             <isset property="win32.amd.app.sdk.exists" />
@@ -43,8 +38,8 @@ First consider editing the properties in build.properties
          </and>
       </condition>
 
-      <available property="win64.amd.app.sdk.exists" file="C:/Program Files (x86)/AMD APP SDK/${amd.app.sdk.version}" type="dir"/>
-      <condition property="amd.app.sdk.dir" value="C:/Program Files (x86)/AMD APP SDK/${amd.app.sdk.version}">
+      <available property="win64.amd.app.sdk.exists" file="C:\Program Files (x86)\AMD APP SDK\2.9-1" type="dir"/>
+      <condition property="amd.app.sdk.dir" value="C:\Program Files (x86)\AMD APP SDK\2.9-1">
          <and>
             <os family="windows" />
             <isset property="win64.amd.app.sdk.exists" />
@@ -54,8 +49,8 @@ First consider editing the properties in build.properties
          </and>
       </condition>
 
-      <available property="linux.amd.app.sdk.exists" file="/opt/AMDAPPSDK-${amd.app.sdk.version}" type="dir"/>
-      <condition property="amd.app.sdk.dir" value="/opt/AMDAPPSDK-${amd.app.sdk.version}">
+      <available property="linux.amd.app.sdk.exists" file="/opt/AMDAPP" type="dir"/>
+      <condition property="amd.app.sdk.dir" value="/opt/AMDAPP">
          <and>
             <os family="unix" />
             <not>
@@ -71,190 +66,226 @@ First consider editing the properties in build.properties
          </and>
       </condition>
 
-      <echo message="amd.app.sdk.dir ${amd.app.sdk.dir}"/>
+      <echo message=" amd.app.sdk.dir ${amd.app.sdk.dir}"/>
 
-      <available property="linux.intel.app.sdk.exists" file="/opt/intel/opencl" type="dir"/>
-      <condition property="intel.app.sdk.dir" value="/opt/intel/opencl">
-         <and>
-            <os family="unix" />
-            <not>
-               <os family="mac" />
-            </not>
-            <isset property="linux.intel.app.sdk.exists" />
-            <not>
-               <isset property="win32.amd.app.sdk.exists" />
-            </not>
-            <not>
-               <isset property="win64.amd.app.sdk.exists" />
-            </not>
-         </and>
-      </condition>
-
-      <echo message=" intel.app.sdk.dir ${intel.app.sdk.dir}"/>
-
-      <condition property="vendor.name" value="amd">
-         <isset property="amd.app.sdk.dir" /> 
-      </condition>
-
-      <condition property="vendor.name" value="intel">
-         <and>
-            <isset property="intel.app.sdk.dir" /> 
-            <not>
-                <isset property="amd.app.sdk.dir" /> 
-            </not>
-         </and>
-      </condition>
-
-      <echo message=" vendor.name ${vendor.name}"/>
-  
-      <condition property="app.sdk.dir" value="${amd.app.sdk.dir}">
-         <isset property="amd.app.sdk.dir" /> 
-      </condition>
-
-      <condition property="app.sdk.dir" value="${intel.app.sdk.dir}">
-         <and>
-            <isset property="intel.app.sdk.dir" /> 
-            <not>
-                <isset property="app.sdk.dir" /> 
-            </not>
-         </and>
-      </condition>
-
-      <echo message="app.sdk.dir ${app.sdk.dir}"/>
-
-	  <!-- Check for Visual Studio Compiler -->
+	  <!-- Check for Visual Studio -->
 	  <!-- This needs to be in descending order to properly handle multiple installations -->
-	  <available property="msvc.32.12.0.exists" file="C:/Program Files/Microsoft Visual Studio 12.0\VC\bin" type="dir"/>
-      <condition property="msvc.dir" value="c:/Program Files/Microsoft Visual Studio 12.0">
+	  
+      <available property="msvc.32.11.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 11.0\VC\bin" type="dir"/>
+      <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 11.0">
          <and>
-            <os family="windows" />
-            <isset property="msvc.32.12.0.exists" />
             <not>
-               <isset property="msvc.dir" />
+               <or>
+                  <os arch="x86" />
+                  <os arch="i386" />
+               </or>
             </not>
-         </and>
-      </condition>
-      
-      <available property="msvc.64.12.0.exists" file="C:/Program Files (x86)/Microsoft Visual Studio 12.0\VC\bin" type="dir"/>
-      <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 12.0">
-         <and>
-            <os family="windows" />
-            <isset property="msvc.64.12.0.exists" />
-            <not>
-               <isset property="msvc.dir" />
-            </not>
-         </and>
-      </condition>
-      
-	  <available property="msvc.32.11.0.exists" file="C:/Program Files/Microsoft Visual Studio 11.0\VC\bin" type="dir"/>
-      <condition property="msvc.dir" value="c:/Program Files/Microsoft Visual Studio 11.0">
-         <and>
             <os family="windows" />
             <isset property="msvc.32.11.0.exists" />
             <not>
                <isset property="msvc.dir" />
             </not>
-         </and>
-      </condition>
-      
-      <available property="msvc.64.11.0.exists" file="C:/Program Files (x86)/Microsoft Visual Studio 11.0\VC\bin" type="dir"/>
-      <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 11.0">
-         <and>
-            <os family="windows" />
-            <isset property="msvc.64.11.0.exists" />
             <not>
-               <isset property="msvc.dir" />
+               <isset property="mingw.dir" />
             </not>
          </and>
       </condition>
       
-      <available property="msvc.32.10.0.exists" file="c:/Program Files/Microsoft Visual Studio 10.0\vc\bin" type="dir"/>
+      <available property="msvc.64.10.0.exists" file="c:/Program Files/Microsoft Visual Studio 10.0\vc\bin" type="dir"/>
       <condition property="msvc.dir" value="c:/Program Files/Microsoft Visual Studio 10.0">
          <and>
+            <or>
+               <os arch="x86" />
+               <os arch="i386" />
+            </or>
+            <os family="windows" />
+            <isset property="msvc.64.10.0.exists" />
+            <not>
+               <isset property="msvc.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
+         </and>
+      </condition>
+      
+      <available property="msvc.32.10.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 10.0\vc\bin" type="dir"/>
+      <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 10.0">
+         <and>
+            <not>
+               <or>
+                  <os arch="x86" />
+                  <os arch="i386" />
+               </or>
+            </not>
             <os family="windows" />
             <isset property="msvc.32.10.0.exists" />
             <not>
                <isset property="msvc.dir" />
             </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
          </and>
       </condition>
       
-      <available property="msvc.64.10.0.exists" file="c:/Program Files (x86)/Microsoft Visual Studio 10.0\vc\bin" type="dir"/>
-      <condition property="msvc.dir" value="c:/Program Files (x86)/Microsoft Visual Studio 10.0">
+      <available property="msvc.32.9.0.exists" file="c:/Program Files/Microsoft Visual Studio 9.0\vc\bin" type="dir"/>
+      <condition property="msvc.dir" value="c:/Program Files/Microsoft Visual Studio 9.0">
          <and>
+            <or>
+               <os arch="x86" />
+               <os arch="i386" />
+            </or>
             <os family="windows" />
-            <isset property="msvc.64.10.0.exists" />
+            <isset property="msvc.32.9.0.exists" />
             <not>
                <isset property="msvc.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
             </not>
          </and>
       </condition>
 
 	  <!-- Check for SDKs -->
 	  <!-- This needs to be in descending order to properly handle multiple installations -->
-	
-      <available property="msvc.sdk.7.1A.32.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.1A" type="dir"/>
+	  
+      <!-- <available property="msvc.sdk.8.0A.32.exists" file="C:/Program Files (x86)/Microsoft SDKs/Windows/v8.0A" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files (x86)/Microsoft SDKs/Windows/v8.0A">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.8.0A.32.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
+         </and>
+      </condition>
+      
+      <available property="msvc.sdk.8.0.32.exists" file="C:/Program Files (x86)/Microsoft SDKs/Windows/v8.0" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files (x86)/Microsoft SDKs/Windows/v8.0">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.8.0.32.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
+         </and>
+      </condition> -->
+      
+      <available property="msvc.sdk.7.1A.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.1A" type="dir"/>
       <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v7.1A">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.7.1A.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
+         </and>
+      </condition>
+      
+      <available property="msvc.sdk.7.1A.32.exists" file="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A">
          <and>
             <os family="windows" />
             <isset property="msvc.sdk.7.1A.32.exists" />
             <not>
                <isset property="msvc.sdk.dir" />
             </not>
-         </and>
-      </condition>
-      
-      <available property="msvc.sdk.7.1A.64.exists" file="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A" type="dir"/>
-      <condition property="msvc.sdk.dir" value="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A">
-         <and>
-            <os family="windows" />
-            <isset property="msvc.sdk.7.1A.64.exists" />
             <not>
-               <isset property="msvc.sdk.dir" />
+               <isset property="mingw.dir" />
             </not>
          </and>
       </condition>
       
-      <available property="msvc.sdk.7.1.32.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.1" type="dir"/>
+      <available property="msvc.sdk.7.1.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.1" type="dir"/>
       <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v7.1">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.7.1.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
+         </and>
+      </condition>
+
+	  <available property="msvc.sdk.7.1.32.exists" file="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1">
          <and>
             <os family="windows" />
             <isset property="msvc.sdk.7.1.32.exists" />
             <not>
                <isset property="msvc.sdk.dir" />
             </not>
-         </and>
-      </condition>
-
-	  <available property="msvc.sdk.7.1.64.exists" file="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1" type="dir"/>
-      <condition property="msvc.sdk.dir" value="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1">
-         <and>
-            <os family="windows" />
-            <isset property="msvc.sdk.7.1.64.exists" />
             <not>
-               <isset property="msvc.sdk.dir" />
+               <isset property="mingw.dir" />
             </not>
          </and>
       </condition>
 
-      <available property="msvc.sdk.7.0A.32.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.0A" type="dir"/>
+      <available property="msvc.sdk.7.0A.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.0A" type="dir"/>
       <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v7.0A">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.7.0A.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
+         </and>
+      </condition>
+
+      <available property="msvc.sdk.7.0A.32.exists" file="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A">
          <and>
             <os family="windows" />
             <isset property="msvc.sdk.7.0A.32.exists" />
             <not>
                <isset property="msvc.sdk.dir" />
             </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
+         </and>
+      </condition>
+      
+      <available property="msvc.sdk.7.0.exists" file="C:/Program Files/Microsoft SDKs/Windows/v7.0" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v7.0">
+         <and>
+            <os family="windows" />
+            <isset property="msvc.sdk.7.0.exists" />
+            <not>
+               <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
+            </not>
          </and>
       </condition>
 
-      <available property="msvc.sdk.7.0A.64.exists" file="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A" type="dir"/>
-      <condition property="msvc.sdk.dir" value="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A">
+      <available property="msvc.sdk.6.0A.exists" file="C:/Program Files/Microsoft SDKs/Windows/v6.0A" type="dir"/>
+      <condition property="msvc.sdk.dir" value="C:/Program Files/Microsoft SDKs/Windows/v6.0A">
          <and>
             <os family="windows" />
-            <isset property="msvc.sdk.7.0A.64.exists" />
+            <isset property="msvc.sdk.6.0A.exists" />
             <not>
                <isset property="msvc.sdk.dir" />
+            </not>
+            <not>
+               <isset property="mingw.dir" />
             </not>
          </and>
       </condition>
@@ -264,6 +295,7 @@ First consider editing the properties in build.properties
    </target>
 
    <target name="check" depends="init">
+
       <fail message="Error:">
          <condition>
             <and>
@@ -275,9 +307,9 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
 
-         At present msvc.dir seems to be configured but not msvc.sdk.dir
+         At present msvc.dir seems to be Configured but not msvc.sdk.dir
          ]]>
       </fail>
 
@@ -292,12 +324,11 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
 
-         At present msvc.sdk.dir seems to be configured but not msvc.dir
+         At present msvc.sdk.dir seems to be Configured but not msvc.dir
          ]]>
       </fail>
-      
       <available file="${msvc.dir}" type="dir" property="msvc.dir.exists" />
       <available file="${msvc.sdk.dir}" type="dir" property="msvc.sdk.dir.exists" />
 
@@ -312,12 +343,11 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
 
          At present msvc.dir is set (to ${msvc.dir}) but that dir does not exist
          ]]>
       </fail>
-      
       <fail message="Error:">
          <condition>
             <and>
@@ -329,12 +359,34 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
 
          At present msvc.sdk.dir is set (to ${msvc.sdk.dir}) but that dir does not exist
          ]]>
       </fail>
-      
+
+
+      <available file="${mingw.dir}" type="dir" property="mingw.dir.exists" />
+      <fail message="Error:">
+         <condition>
+            <and>
+               <os family="windows" />
+               <isset property="mingw.dir" />
+               <not>
+                  <isset property="mingw.dir.exists" />
+               </not>
+            </and>
+         </condition>
+         <![CDATA[
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+
+         At present mingw.dir is set (to ${mingw.dir}) but that dir does not exist
+         ]]>
+      </fail>
+      <echo message="java.home ${java.home}"/>
+      <!--<echo message="msvc.dir.exists ${msvc.dir.exists}"/>-->
+      <!--<echo message="msvc.sdk.dir.exists ${msvc.sdk.dir.exists}"/>-->
+      <!--<echo message="mingw.dir.exists ${mingw.dir.exists}"/>-->
       <condition property="use.msvc">
          <and>
             <os family="windows" />
@@ -342,6 +394,54 @@ First consider editing the properties in build.properties
             <isset property="msvc.sdk.dir.exists" />
          </and>
       </condition>
+      <!--<echo message="use.msvc ${use.msvc}"/>-->
+
+      <condition property="use.mingw">
+         <and>
+            <os family="windows" />
+            <isset property="mingw.dir.exists" />
+         </and>
+      </condition>
+      <!--<echo message="use.mingw ${use.mingw}"/>-->
+
+      <fail message="Error:">
+         <condition>
+            <and>
+               <isset property="use.mingw" />
+               <isset property="use.msvc" />
+            </and>
+         </condition>
+         <![CDATA[
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+
+         At present ant is Configured for both MinGW AND Microsoft Visual Studio. You need to pick one or the other :) !
+
+         Just comment out the properties for the compiler that you *do not* wish to use.
+         ]]>
+      </fail>
+
+      <fail message="Error:">
+         <condition>
+            <and>
+               <os family="windows" />
+               <not>
+                  <or>
+                     <isset property="use.mingw" />
+                     <isset property="use.msvc" />
+                  </or>
+               </not>
+            </and>
+         </condition>
+         <![CDATA[
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
+
+         This looks like a windows machine so you probably need to Configure either:-
+
+         * msvc.dir and msvc.sdk.dir if you wish to use Microsoft Visual Studio compiler
+
+         * mingw.dir if you prefer if you prefer to use MinGW 
+         ]]>
+      </fail>
 
       <condition property="use.gcc">
          <and>
@@ -364,25 +464,24 @@ First consider editing the properties in build.properties
       </condition>
 
       <condition property="optional.amd64.subdir" value="" else="amd64\">
-         <equals arg1="${x86_or_x86_64}" arg2="x86"/>
+         <or>
+            <os arch="x86" />
+            <os arch="i386" />
+         </or>
       </condition>
 
       <condition property="optional.x64.subdir" value="" else="x64\">
-        <equals arg1="${x86_or_x86_64}" arg2="x86"/>
+         <or>
+            <os arch="x86" />
+            <os arch="i386" />
+         </or>
       </condition>
 
 
-      <condition property="optional.app.sdk.lib.subdir" value="lib\" else="lib64\">
-        <equals arg1="${x86_or_x86_64}" arg2="x86"/>
+      <available file="${msvc.dir}\${optional.amd64.subdir}cl.exe" type="file" property="cl.exists" />
 
-     </condition>
-      
-      <condition property="gcc.m.value" value="32" else="64">
-        <equals arg1="${x86_or_x86_64}" arg2="x86"/>
-      </condition>
-
-      <available file="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe" type="file" property="cl.exists" />
-
+	  <echo message="${msvc.dir}\${optional.amd64.subdir}cl.exe"/>
+	  
       <fail message="Error:">
          <condition>
             <and>
@@ -393,10 +492,12 @@ First consider editing the properties in build.properties
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
 
-         Could not find vc\bin\${optional.amd64.subdir}cl under configured msvc.dir. Check if msvc.dir is pointing
-         to a valid Visual Studio installation
+		 
+		 
+         Could not find vc\bin\${optional.amd64.subdir}cl under Configured msvc.dir. Check if msvc.dir is pointing
+         to a valid visual studio installation
          ]]>
       </fail>
 
@@ -407,18 +508,17 @@ First consider editing the properties in build.properties
                   <os family="mac" />
                </not>
                <not>
-                  <isset property="app.sdk.dir" />
+                  <isset property="amd.app.sdk.dir" />
                </not>
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
 
-         You need to set app.sdk.dir to point to the location where OpenCL SDK is installed
+         You need to set amd.app.sdk.dir to point to the location where AMD APP SDK is installed
          ]]>
       </fail>
-      
-      <available file="${app.sdk.dir}" type="dir" property="app.sdk.dir.exists" />
+      <available file="${amd.app.sdk.dir}" type="dir" property="amd.app.sdk.dir.exists" />
 
       <fail message="Error:">
          <condition>
@@ -427,14 +527,14 @@ First consider editing the properties in build.properties
                   <os family="mac" />
                </not>
                <not>
-                  <isset property="app.sdk.dir.exists" />
+                  <isset property="amd.app.sdk.dir.exists" />
                </not>
             </and>
          </condition>
          <![CDATA[
-         You will need to edit com.amd.aparapi.jni/build.xml to compile aparapi JNI code
+         You will need to edit com.amd.aparapi.jni/build.properties to compile aparapi JNI code
 
-         At present app.sdk.dir is set (to ${app.sdk.dir}) but that dir does not exist
+         At present amd.app.sdk.dir is set (to ${amd.app.sdk.dir}) but that dir does not exist
          ]]>
       </fail>
    </target>
@@ -501,11 +601,11 @@ First consider editing the properties in build.properties
       </javah>
    </target>
 
+
    <target name="gcc" if="use.gcc">
       <mkdir dir="${basedir}/dist"/>
       <echo message="linuxcc ${os.arch}" />
-      <exec executable="g++" failonerror="true">
-         <arg value="-m${gcc.m.value}" />
+      <exec executable="g++">
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
@@ -513,7 +613,7 @@ First consider editing the properties in build.properties
          <arg value="-I${java.home}/../include" />
          <arg value="-I${java.home}/../include/linux" />
          <arg value="-Iinclude" />
-         <arg value="-I${app.sdk.dir}/include" />
+         <arg value="-I${amd.app.sdk.dir}/include" />
          <arg value="-Isrc/cpp" />
          <arg value="-Isrc/cpp/runKernel" />
          <arg value="-Isrc/cpp/invoke" />
@@ -535,8 +635,7 @@ First consider editing the properties in build.properties
          <arg value="src/cpp/classtools.cpp" />
          <arg value="src/cpp/JNIHelper.cpp" />
          <arg value="src/cpp/agent.cpp" />
-         <arg value="-L${app.sdk.dir}/lib/${x86_or_x86_64}" />
-         <arg value="-L${app.sdk.dir}/${optional.app.sdk.lib.subdir}" />
+         <arg value="-L${amd.app.sdk.dir}/lib/${x86_or_x86_64}" />
          <arg value="-lOpenCL" />
       </exec>
    </target>
@@ -544,7 +643,7 @@ First consider editing the properties in build.properties
    <target name="gcc_mac" if="use.gcc_mac">
       <mkdir dir="${basedir}/dist"/>
       <echo message="gcc ${os.arch}" />
-      <exec executable="g++" failonerror="true">
+      <exec executable="g++">
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
@@ -552,9 +651,9 @@ First consider editing the properties in build.properties
          <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <!-- JDK 6 -->
          <arg value="-I/System/Library/Frameworks/JavaVM.framework/Headers" />
-         <!-- LATEST JDK 7 without JDK 6 -->
-         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/include/" />
-         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/include/darwin/" />
+         <!-- JDK 7u51 without JDK 6 -->
+         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_12.jdk/Contents/Home/include/" />
+         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_12.jdk/Contents/Home/include/darwin/" />
          <arg value="-Iinclude" />
          <arg value="-Isrc/cpp" />
          <arg value="-Isrc/cpp/runKernel" />
@@ -586,7 +685,7 @@ First consider editing the properties in build.properties
    <target name="msvc" if="use.msvc">
       <mkdir dir="${basedir}\dist"/>
       <echo message="msvc ${os.arch}" />
-      <exec executable="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe" failonerror="true">
+      <exec executable="${msvc.dir}\${optional.amd64.subdir}cl.exe">
          <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE" />
          <arg value="/nologo" />
          <arg value="/TP" />
@@ -599,9 +698,10 @@ First consider editing the properties in build.properties
          <arg value="/I${java.home}\..\include" />
          <arg value="/I${java.home}\..\include\win32" />
          <arg value="/Iinclude" />
-	     <arg value="/I${app.sdk.dir}\include" />
+	 <arg value="/I${amd.app.sdk.dir}\include" />
          <arg value="/IC:\Program Files (x86)\Windows Kits\8.0\Include\shared" />
          <arg value="/IC:\Program Files (x86)\Windows Kits\8.0\Include\um" />
+	 
          <arg value="/Isrc/cpp" />
          <arg value="/Isrc/cpp/runKernel" />
          <arg value="/Isrc/cpp/invoke" />
@@ -624,20 +724,58 @@ First consider editing the properties in build.properties
          <arg value="/link" />
          <arg value="/libpath:${msvc.dir}\vc\lib\${optional.amd64.subdir}" />
          <arg value="/libpath:${msvc.sdk.dir}\lib\${optional.x64.subdir}" />
-	 <arg value="/libpath:${app.sdk.dir}\lib\${x86_or_x86_64}" />
-	 <arg value="/libpath:${app.sdk.dir}\${optional.app.sdk.lib.subdir}" />
+	 <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
          <arg value="/libpath:C:\Program Files (x86)\Windows Kits\8.0\Lib\win8\um\x64" />
-         <arg value="OpenCL.lib" />
+         <arg value="C:\Program Files (x86)\AMD APP SDK\2.9-1\lib\x86\OpenCL.lib" />
          <arg value="/out:${basedir}\dist\aparapi_${x86_or_x86_64}.dll" />
       </exec>
    </target>
 
-   <target name="build" depends="clean, javah, msvc, gcc, gcc_mac" />
+   <target name="mingw" if="use.mingw">
+      <mkdir dir="${basedir}\dist"/>
+      <echo message="mingw ${os.arch}" /> 
+      <exec executable="${mingw.dir}/bin/g++">
+         <env key="PATH" path="${env.PATH};${mingw.dir}/bin" />
+         <arg value="-Wall" />
+         <arg value="-O3" />
+         <arg value="-Wl,--kill-at" />
+         <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
+         <arg value="-I${java.home}\..\include" />
+         <arg value="-I${java.home}\..\include\win32" />
+         <arg value="-Iinclude" />
+         <arg value="-I${amd.app.sdk.dir}\include" />
+         <arg value="-Isrc/cpp" />
+         <arg value="-Isrc/cpp/runKernel" />
+         <arg value="-Isrc/cpp/invoke" />
+         <arg value="-shared" />
+         <arg value="-o" />
+         <arg value="${basedir}\dist\aparapi_${x86_or_x86_64}.dll" />
+         <arg value="src/cpp/runKernel/Aparapi.cpp" />
+         <arg value="src/cpp/runKernel/ArrayBuffer.cpp" />
+         <arg value="src/cpp/runKernel/AparapiBuffer.cpp" />
+         <arg value="src/cpp/runKernel/Config.cpp" />
+         <arg value="src/cpp/runKernel/JNIContext.cpp" />
+         <arg value="src/cpp/runKernel/KernelArg.cpp" />
+         <arg value="src/cpp/runKernel/ProfileInfo.cpp" />
+         <arg value="src/cpp/runKernel/Range.cpp" />
+         <arg value="src/cpp/invoke/OpenCLJNI.cpp" />
+         <arg value="src/cpp/invoke/OpenCLArgDescriptor.cpp" />
+         <arg value="src/cpp/invoke/OpenCLMem.cpp" />
+         <arg value="src/cpp/CLHelper.cpp" />
+         <arg value="src/cpp/classtools.cpp" />
+         <arg value="src/cpp/JNIHelper.cpp" />
+         <arg value="src/cpp/agent.cpp" />
+         <arg value="-L${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
+         <arg value="-lOpenCL" />
+      </exec>
+   </target>
+
+   <target name="build" depends="clean, javah, msvc, mingw, gcc, gcc_mac" />
 
    <target name="msvc_cltest" if="use.msvc">
       <mkdir dir="${basedir}\dist"/>
       <echo message="msvc_cltest ${os.arch}" />
-      <exec executable="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe" failonerror="true">
+      <exec executable="${msvc.dir}\vc\bin\${optional.amd64.subdir}cl.exe">
          <env key="PATH" path="${env.PATH};${msvc.dir}\\Common7\\IDE" />
          <arg value="/nologo" />
          <arg value="/TP" />
@@ -645,7 +783,7 @@ First consider editing the properties in build.properties
          <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="/I${msvc.dir}\vc\include" />
          <arg value="/I${msvc.sdk.dir}\include" />
-         <arg value="/I${app.sdk.dir}\include" />
+         <arg value="/I${amd.app.sdk.dir}\include" />
          <arg value="/Isrc/cpp" />
          <arg value="/Isrc/cpp/runKernel" />
          <arg value="/Isrc/cpp/invoke" />
@@ -653,8 +791,7 @@ First consider editing the properties in build.properties
          <arg value="/link" />
          <arg value="/libpath:${msvc.dir}\vc\lib\${optional.amd64.subdir}" />
          <arg value="/libpath:${msvc.sdk.dir}\lib\${optional.x64.subdir}" />
-         <arg value="/libpath:${app.sdk.dir}\lib\${x86_or_x86_64}" />
-         <arg value="/libpath:${app.sdk.dir}\${optional.app.sdk.lib.subdir}" />
+         <arg value="/libpath:${amd.app.sdk.dir}\lib\${x86_or_x86_64}" />
          <arg value="OpenCL.lib" />
          <arg value="/out:${basedir}/dist/cltest_${x86_or_x86_64}.exe" />
       </exec>
@@ -663,16 +800,16 @@ First consider editing the properties in build.properties
    <target name="mac_cltest" if="use.gcc_mac">
       <mkdir dir="${basedir}/dist"/>
       <echo message="gcc cltest ${os.arch}" />
-      <exec executable="g++" failonerror="true">
+      <exec executable="g++">
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
          <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <!-- JDK 6 -->
          <arg value="-I/System/Library/Frameworks/JavaVM.framework/Headers" />
-         <!-- Latest JDK 7 without JDK 6 -->
-         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/include/" />
-         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/include/darwin/" />
+         <!-- JDK 7u51 without JDK 6 -->
+         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_51.jdk/Contents/Home/include/" />
+         <arg value="-I/Library/Java/JavaVirtualMachines/jdk1.7.0_51.jdk/Contents/Home/include/darwin/" />
          <arg value="-Iinclude" />
          <arg value="-Isrc/cpp" />
          <arg value="-Isrc/cpp/runKernel" />
@@ -688,17 +825,16 @@ First consider editing the properties in build.properties
    <target name="gcc_cltest" if="use.gcc">
       <mkdir dir="${basedir}/dist"/>
       <echo message="gcc cltest ${os.arch}" />
-      <exec executable="g++" failonerror="true">
+      <exec executable="g++">
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
          <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
          <arg value="-I${java.home}/../include" />
          <arg value="-I${java.home}/../include/linux" />
-         <arg value="-I${app.sdk.dir}/include" />
+         <arg value="-I${amd.app.sdk.dir}/include" />
          <arg value="src/cpp/cltest.cpp" />
-         <arg value="-L${app.sdk.dir}/lib/${x86_or_x86_64}" />
-         <arg value="-L${app.sdk.dir}/${optional.app.sdk.lib.subdir}" />
+         <arg value="-L${amd.app.sdk.dir}/lib/${x86_or_x86_64}" />
          <arg value="-lOpenCL" />
          <arg value="-o" />
          <arg value="${basedir}/cltest_${x86_or_x86_64}" />
@@ -708,7 +844,7 @@ First consider editing the properties in build.properties
    <target name="gcc_clt" if="use.gcc">
       <mkdir dir="${basedir}/dist"/>
       <echo message="gcc cltest ${os.arch}" />
-      <exec executable="g++" failonerror="true">
+      <exec executable="g++">
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
@@ -719,10 +855,11 @@ First consider editing the properties in build.properties
       </exec>
   </target>
 
+
    <target name="mac_clt" if="use.gcc_mac">
       <mkdir dir="${basedir}/dist"/>
       <echo message="gcc clt ${os.arch}" />
-      <exec executable="g++" failonerror="true">
+      <exec executable="g++">
          <arg value="-O3" />
          <arg value="-g" />
          <arg value="-fPIC" />
