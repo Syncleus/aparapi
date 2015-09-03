@@ -141,10 +141,10 @@ jint writeProfileInfo(JNIContext* jniContext){
          fprintf(jniContext->profileFile, "%d write %s,", pos++, arg->name);
 
          fprintf(jniContext->profileFile, "%lu,%lu,%lu,%lu,",  
-           (unsigned long)(arg->arrayBuffer->write.queued - currSampleBaseTime)/1000,
-           (unsigned long)(arg->arrayBuffer->write.submit - currSampleBaseTime)/1000,
-           (unsigned long)(arg->arrayBuffer->write.start - currSampleBaseTime)/1000,
-           (unsigned long)(arg->arrayBuffer->write.end - currSampleBaseTime)/1000);
+        	(unsigned long)(arg->arrayBuffer->write.queued - currSampleBaseTime)/1000,
+        	(unsigned long)(arg->arrayBuffer->write.submit - currSampleBaseTime)/1000,
+        	(unsigned long)(arg->arrayBuffer->write.start - currSampleBaseTime)/1000,
+        	(unsigned long)(arg->arrayBuffer->write.end - currSampleBaseTime)/1000);
       }
    }
 
@@ -181,10 +181,10 @@ jint writeProfileInfo(JNIContext* jniContext){
             fprintf(jniContext->profileFile, "%d read %s,", pos++, arg->name);
 
             fprintf(jniContext->profileFile, "%lu,%lu,%lu,%lu,",  
-               (unsigned long)(arg->arrayBuffer->read.queued - currSampleBaseTime)/1000,
-               (unsigned long)(arg->arrayBuffer->read.submit - currSampleBaseTime)/1000,
-               (unsigned long)(arg->arrayBuffer->read.start - currSampleBaseTime)/1000,
-               (unsigned long)(arg->arrayBuffer->read.end - currSampleBaseTime)/1000);
+            	(unsigned long)(arg->arrayBuffer->read.queued - currSampleBaseTime)/1000,
+            	(unsigned long)(arg->arrayBuffer->read.submit - currSampleBaseTime)/1000,
+            	(unsigned long)(arg->arrayBuffer->read.start - currSampleBaseTime)/1000,
+            	(unsigned long)(arg->arrayBuffer->read.end - currSampleBaseTime)/1000);
          }
       }
    }
@@ -789,15 +789,15 @@ void enqueueKernel(JNIContext* jniContext, Range& range, int passes, int argPos,
 
    cl_int status = CL_SUCCESS;
    for (int passid=0; passid < passes; passid++) {
-      
-      int cancelCode = kernelInBytesAsInts[0];
-      kernelOutBytesAsInts[0] = passid;
+	   
+	   int cancelCode = kernelInBytesAsInts[0];
+	   kernelOutBytesAsInts[0] = passid;
 
-      if (cancelCode == CANCEL_STATUS_TRUE) {
-         fprintf(stderr, "received cancellation, aborting at pass %d\n", passid);
-         kernelOutBytes[0] = -1;
-         break;
-      }
+	   if (cancelCode == CANCEL_STATUS_TRUE) {
+		   fprintf(stderr, "received cancellation, aborting at pass %d\n", passid);
+		   kernelOutBytes[0] = -1;
+		   break;
+	   }
 
       //size_t offset = 1; // (size_t)((range.globalDims[0]/jniContext->deviceIdc)*dev);
       status = clSetKernelArg(jniContext->kernel, argPos, sizeof(passid), &(passid));
@@ -1079,16 +1079,16 @@ JNI_JAVA(jint, KernelRunnerJNI, runKernelJNI)
 
       cl_int status = CL_SUCCESS;
       JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
-      jniContext->runKernelInBytes = (jbyte*)jenv->GetDirectBufferAddress(inBuffer);
-      jniContext->runKernelOutBytes = (jbyte*)jenv->GetDirectBufferAddress(outBuffer);
+	  jniContext->runKernelInBytes = (jbyte*)jenv->GetDirectBufferAddress(inBuffer);
+	  jniContext->runKernelOutBytes = (jbyte*)jenv->GetDirectBufferAddress(outBuffer);
 
-      jbyte* kernelInBytes = jniContext->runKernelInBytes;
-      int* kernelInBytesAsInts = reinterpret_cast<int*>(kernelInBytes);
-      kernelInBytesAsInts[0] = CANCEL_STATUS_FALSE;
+	  jbyte* kernelInBytes = jniContext->runKernelInBytes;
+	  int* kernelInBytesAsInts = reinterpret_cast<int*>(kernelInBytes);
+	  kernelInBytesAsInts[0] = CANCEL_STATUS_FALSE;
 
-      jbyte* kernelOutBytes = jniContext->runKernelOutBytes;
-      int* kernelOutBytesAsInts = reinterpret_cast<int*>(kernelOutBytes);
-      kernelOutBytesAsInts[0] = PASS_ID_PREPARING_EXECUTION;
+	  jbyte* kernelOutBytes = jniContext->runKernelOutBytes;
+	  int* kernelOutBytesAsInts = reinterpret_cast<int*>(kernelOutBytes);
+	  kernelOutBytesAsInts[0] = PASS_ID_PREPARING_EXECUTION;
 
       if (jniContext->firstRun && config->isProfilingEnabled()){
          try {
