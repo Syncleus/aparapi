@@ -1,10 +1,9 @@
 package com.amd.aparapi.test.runtime;
 
-import static org.junit.Assert.assertTrue;
+import com.amd.aparapi.*;
+import org.junit.*;
 
-import org.junit.Test;
-
-import com.amd.aparapi.Kernel;
+import static org.junit.Assert.*;
 
 public class ExplicitBoolean{
 
@@ -61,7 +60,7 @@ public class ExplicitBoolean{
          printArray(k2.output);
 
       assertTrue("k1.input == k2.input", Util.same(k1.output, k1.output));
-      System.out.println(k1.getExecutionMode());
+      System.out.println(k1.getTargetDevice().getShortDescription());
    }
 
    private static void printArray(boolean[] a) {

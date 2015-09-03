@@ -45,6 +45,7 @@ import com.amd.aparapi.internal.model.ValueCache.ThrowingValueComputer;
 import com.amd.aparapi.internal.model.ClassModel.AttributePool.*;
 import com.amd.aparapi.internal.model.ClassModel.ConstantPool.*;
 import com.amd.aparapi.internal.reader.*;
+import com.amd.aparapi.internal.util.*;
 
 import java.io.*;
 import java.lang.reflect.*;
@@ -2629,7 +2630,7 @@ public class ClassModel{
          methods.add(method);
       }
 
-      attributePool = new AttributePool(byteReader, getClassWeAreModelling().getSimpleName());
+      attributePool = new AttributePool(byteReader, Reflection.getSimpleName(getClassWeAreModelling()));
    }
 
    public int getMagic() {

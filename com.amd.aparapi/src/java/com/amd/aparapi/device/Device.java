@@ -1,79 +1,76 @@
 package com.amd.aparapi.device;
 
-import com.amd.aparapi.Range;
-import com.amd.aparapi.device.OpenCLDevice.DeviceComparitor;
-import com.amd.aparapi.device.OpenCLDevice.DeviceSelector;
+import com.amd.aparapi.*;
+import com.amd.aparapi.internal.kernel.*;
 
 public abstract class Device{
 
    public static enum TYPE {
-      UNKNOWN,
-      GPU,
-      CPU,
-      JTP,
-      SEQ,
-      ACC
+      UNKNOWN(Integer.MAX_VALUE),
+      GPU(2),
+      CPU(3),
+      JTP(5),
+      SEQ(6),
+      ACC(1),
+      ALT(4);
+
+      /** Heuristic ranking of device types, lower is better. */
+      public final int rank;
+
+      TYPE(int rank) {
+         this.rank = rank;
+      }
    };
 
-   /**
-    * @return Now return the device of any types having the maximum compute units
+   /** @deprecated  use {@link KernelManager#bestDevice()}
+    *  @see com.amd.aparapi.device
     */
+   @Deprecated
    public static Device best() {
-      return (OpenCLDevice.select(new DeviceComparitor(){
-         @Override public OpenCLDevice select(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs) {
-            if (_deviceLhs.getMaxComputeUnits() > _deviceRhs.getMaxComputeUnits()) {
-               return (_deviceLhs);
-            } else {
-               return (_deviceRhs);
-            }
-         }
-      }));
+      return KernelManager.instance().bestDevice();
    }
 
+   /**
+    *  @see com.amd.aparapi.device
+    */
+   @SuppressWarnings("deprecation")
+   @Deprecated
    public static Device bestGPU() {
-      return (OpenCLDevice.select(new DeviceComparitor(){
-         @Override public OpenCLDevice select(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs) {
-            if (_deviceLhs.getMaxComputeUnits() > _deviceRhs.getMaxComputeUnits()) {
-               return (_deviceLhs);
-            } else {
-               return (_deviceRhs);
-            }
-         }
-      }, Device.TYPE.GPU));
+      return firstGPU();
    }
 
-   public static Device bestACC() {
-      return (OpenCLDevice.select(new DeviceComparitor(){
-         @Override public OpenCLDevice select(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs) {
-            if (_deviceLhs.getMaxComputeUnits() > _deviceRhs.getMaxComputeUnits()) {
-               return (_deviceLhs);
-            } else {
-               return (_deviceRhs);
-            }
-         }
-      }, Device.TYPE.ACC));
-   }
-
+   /**
+    *  @see com.amd.aparapi.device
+    */
+   @Deprecated
    public static Device first(final Device.TYPE _type) {
-      return (OpenCLDevice.select(new DeviceSelector(){
-         @Override public OpenCLDevice select(OpenCLDevice _device) {
-            return (_device.getType() == _type ? _device : null);
-         }
-      }));
+      return KernelManager.DeprecatedMethods.firstDevice(_type);
    }
 
+   /**
+    *  @see com.amd.aparapi.device
+    */
+   @SuppressWarnings("deprecation")
+   @Deprecated
    public static Device firstGPU() {
-      return (first(Device.TYPE.GPU));
+      return KernelManager.DeprecatedMethods.firstDevice(TYPE.GPU);
    }
 
+   /**
+    *  @see com.amd.aparapi.device
+    */
+   @SuppressWarnings("deprecation")
+   @Deprecated
    public static Device firstCPU() {
-      return (first(Device.TYPE.CPU));
-
+      return KernelManager.DeprecatedMethods.firstDevice(TYPE.CPU);
    }
 
-   public static Device firstACC() {
-      return (first(Device.TYPE.ACC));
-
+   /**
+    *  @see com.amd.aparapi.device
+    */
+   @Deprecated
+   public static Device bestACC() {
+      throw new UnsupportedOperationException();
    }
 
    protected TYPE type = TYPE.UNKNOWN;
@@ -87,6 +84,8 @@ public abstract class Device{
          0,
          0
    };
+
+   public abstract String getShortDescription();
 
    public TYPE getType() {
       return type;
@@ -143,5 +142,26 @@ public abstract class Device{
    public Range createRange3D(int _globalWidth, int _globalHeight, int _globalDepth, int _localWidth, int _localHeight,
          int _localDepth) {
       return (Range.create3D(this, _globalWidth, _globalHeight, _globalDepth, _localWidth, _localHeight, _localDepth));
+   }
+
+   public abstract long getDeviceId();
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) {
+         return true;
+      }
+      if (!(o instanceof Device)) {
+         return false;
+      }
+
+      Device device = (Device) o;
+
+      return getDeviceId() == device.getDeviceId();
+   }
+
+   @Override
+   public int hashCode() {
+      return Long.hashCode(getDeviceId());
    }
 }

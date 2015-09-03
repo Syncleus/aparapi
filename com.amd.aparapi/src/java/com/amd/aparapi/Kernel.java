@@ -38,8 +38,9 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 package com.amd.aparapi;
 
 import com.amd.aparapi.annotation.Experimental;
+import com.amd.aparapi.device.*;
 import com.amd.aparapi.exception.DeprecatedException;
-import com.amd.aparapi.internal.kernel.KernelRunner;
+import com.amd.aparapi.internal.kernel.*;
 import com.amd.aparapi.internal.model.CacheEnabler;
 import com.amd.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry;
 import com.amd.aparapi.internal.model.ClassModel.ConstantPool.NameAndTypeEntry;
@@ -47,7 +48,7 @@ import com.amd.aparapi.internal.model.ValueCache;
 import com.amd.aparapi.internal.model.ValueCache.ThrowingValueComputer;
 import com.amd.aparapi.internal.model.ValueCache.ValueComputer;
 import com.amd.aparapi.internal.opencl.OpenCLLoader;
-import com.amd.aparapi.internal.util.UnsafeWrapper;
+import com.amd.aparapi.internal.util.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -55,14 +56,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.logging.Logger;
@@ -314,7 +308,13 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
-    * The <i>execution mode</i> ENUM enumerates the possible modes of executing a kernel. 
+    * @deprecated It is no longer recommended that {@code EXECUTION_MODE}s are used, as a more sophisticated {@link com.amd.aparapi.device.Device}
+    * preference mechanism is in place, see {@link com.amd.aparapi.internal.kernel.KernelManager}. Though {@link #setExecutionMode(EXECUTION_MODE)}
+    * is still honored, the default EXECUTION_MODE is now {@link EXECUTION_MODE#AUTO}, which indicates that the KernelManager
+    * will determine execution behaviours.
+    *
+    * <p>
+    * The <i>execution mode</i> ENUM enumerates the possible modes of executing a kernel.
     * One can request a mode of execution using the values below, and query a kernel after it first executes to 
     * determine how it executed.  
     *    
@@ -354,8 +354,12 @@ public abstract class Kernel implements Cloneable {
     * @author  gfrost AMD Javalabs
     * @version Alpha, 21/09/2010
     */
-
+   @Deprecated
    public static enum EXECUTION_MODE {
+      /**
+       *
+       */
+      AUTO,
       /**
        * A dummy value to indicate an unknown state.
        */
@@ -389,27 +393,9 @@ public abstract class Kernel implements Cloneable {
        */
       ACC;
 
-      static EXECUTION_MODE getDefaultExecutionMode() {
-         EXECUTION_MODE defaultExecutionMode = OpenCLLoader.isOpenCLAvailable() ? GPU : JTP;
-         final String executionMode = Config.executionMode;
-         if (executionMode != null) {
-            try {
-               EXECUTION_MODE requestedExecutionMode;
-               requestedExecutionMode = getExecutionModeFromString(executionMode).iterator().next();
-               logger.fine("requested execution mode =");
-               if ((OpenCLLoader.isOpenCLAvailable() && requestedExecutionMode.isOpenCL()) || !requestedExecutionMode.isOpenCL()) {
-                  defaultExecutionMode = requestedExecutionMode;
-               }
-            } catch (final Throwable t) {
-               // we will take the default
-            }
-         }
-
-         logger.fine("default execution modes = " + defaultExecutionMode);
-
-         return (defaultExecutionMode);
-      }
-
+      /**
+       * @deprecated See {@link EXECUTION_MODE}.
+       */
       static LinkedHashSet<EXECUTION_MODE> getDefaultExecutionModes() {
          LinkedHashSet<EXECUTION_MODE> defaultExecutionModes = new LinkedHashSet<EXECUTION_MODE>();
 
@@ -955,6 +941,26 @@ public abstract class Kernel implements Cloneable {
     * Every kernel must override this method.
     */
    public abstract void run();
+
+   /** False by default. In the event that all preferred devices fail to execute a kernel, it is possible to supply an alternate (possibly non-parallel)
+    * execution algorithm by overriding this method to return true, and overriding {@link #executeFallbackAlgorithm(Range, int)} with the alternate
+    * algorithm.
+    */
+   public boolean hasFallbackAlgorithm() {
+      return false;
+   }
+
+   /** If {@link #hasFallbackAlgorithm()} has been overriden to return true, this method should be overriden so as to
+    * apply a single pass of the kernel's logic to the entire _range.
+    *
+    * <p>
+    * This is not normally required, as fallback to {@link JavaDevice#THREAD_POOL} will implement the algorithm in parallel. However
+    * in the event that thread pool execution may be prohibitively slow, this method might implement a "quick and dirty" approximation
+    * to the desired result (for example, a simple box-blur as opposed to a gaussian blur in an image processing application).
+    */
+   public void executeFallbackAlgorithm(Range _range, int _passId) {
+      // nothing
+   }
 
    /**
     * Invoking this method flags that once the current pass is complete execution should be abandoned. Due to the complexity of intercommunication
@@ -1930,26 +1936,29 @@ public abstract class Kernel implements Cloneable {
       return kernelState;
    }
 
-   /**
-    * Determine the execution time of the previous Kernel.execute(range) call.
-    * 
-    * Note that for the first call this will include the conversion time. 
-    * 
-    * @return The time spent executing the kernel (ms) 
-    * 
-    * @see #getConversionTime();
-    * @see #getAccumulatedExecutionTime();
-    * 
-    */
-   public synchronized long getExecutionTime() {
-      return prepareKernelRunner().getExecutionTime();
-   }
-
    private KernelRunner prepareKernelRunner() {
       if (kernelRunner == null) {
          kernelRunner = new KernelRunner(this);
       }
       return kernelRunner;
+   }
+
+   /**
+    * Determine the execution time of the previous Kernel.execute(range) call.
+    *
+    * Note that for the first call this will include the conversion time.
+    *
+    * @return The time spent executing the kernel (ms)
+    *
+    * @see #getConversionTime();
+    * @see #getAccumulatedExecutionTime();
+    *
+    */
+   public double getExecutionTime() {
+      KernelProfile profile = KernelManager.instance().getProfile(getClass());
+      synchronized (profile) {
+         return profile.getLastExecutionTime();
+      }
    }
 
    /**
@@ -1963,8 +1972,11 @@ public abstract class Kernel implements Cloneable {
     * @see #getConversionTime();
     * 
     */
-   public synchronized long getAccumulatedExecutionTime() {
-      return prepareKernelRunner().getAccumulatedExecutionTime();
+   public double getAccumulatedExecutionTime() {
+      KernelProfile profile = KernelManager.instance().getProfile(getClass());
+      synchronized (profile) {
+         return profile.getAccumulatedTotalTime();
+      }
    }
 
    /**
@@ -1974,8 +1986,11 @@ public abstract class Kernel implements Cloneable {
     * @see #getExecutionTime();
     * @see #getAccumulatedExecutionTime();
     */
-   public synchronized long getConversionTime() {
-      return prepareKernelRunner().getConversionTime();
+   public double getConversionTime() {
+      KernelProfile profile = KernelManager.instance().getProfile(getClass());
+      synchronized (profile) {
+         return profile.getLastConversionTime();
+      }
    }
 
    /**
@@ -1992,10 +2007,30 @@ public abstract class Kernel implements Cloneable {
       return (execute(_range, 1));
    }
 
+   @Override
+   @SuppressWarnings("deprecation")
+   public String toString() {
+      if (executionMode == EXECUTION_MODE.AUTO) {
+         List<Device> preferredDevices = KernelManager.instance().getPreferences(this).getPreferredDevices(this);
+         StringBuilder preferredDevicesSummary = new StringBuilder("{");
+         for (int i = 0; i < preferredDevices.size(); ++i) {
+            Device device = preferredDevices.get(i);
+            preferredDevicesSummary.append(device.getShortDescription());
+            if (i < preferredDevices.size() - 1) {
+               preferredDevicesSummary.append("|");
+            }
+         }
+         preferredDevicesSummary.append("}");
+         return Reflection.getSimpleName(getClass()) + ", devices=" + preferredDevicesSummary.toString();
+      } else {
+         return Reflection.getSimpleName(getClass()) + ", modes=" + executionModes + ", current = " + executionMode;
+      }
+   }
+
    /**
     * Start execution of <code>_range</code> kernels.
     * <p>
-    * When <code>kernel.execute(_range)</code> is invoked, Aparapi will schedule the execution of <code>_range</code> kernels. If the execution mode is GPU then 
+    * When <code>kernel.execute(_range)</code> is 1invoked, Aparapi will schedule the execution of <code>_range</code> kernels. If the execution mode is GPU then
     * the kernels will execute as OpenCL code on the GPU device. Otherwise, if the mode is JTP, the kernels will execute as a pool of Java threads on the CPU. 
     * <p>
     * Since adding the new <code>Range class</code> this method offers backward compatibility and merely defers to <code> return (execute(Range.create(_range), 1));</code>.
@@ -2004,7 +2039,18 @@ public abstract class Kernel implements Cloneable {
     * 
     */
    public synchronized Kernel execute(int _range) {
-      return (execute(Range.create(_range), 1));
+      return (execute(createRange(_range), 1));
+   }
+
+   @SuppressWarnings("deprecation")
+   protected Range createRange(int _range) {
+      if (executionMode.equals(EXECUTION_MODE.AUTO)) {
+         Device device = getTargetDevice();
+         Range range = Range.create(device, _range);
+         return range;
+      } else {
+         return Range.create(null, _range);
+      }
    }
 
    /**
@@ -2033,21 +2079,7 @@ public abstract class Kernel implements Cloneable {
     * 
     */
    public synchronized Kernel execute(int _range, int _passes) {
-      return (execute(Range.create(_range), _passes));
-   }
-
-   /**
-    * Start execution of <code>globalSize</code> kernels for the given entrypoint.
-    * <p>
-    * When <code>kernel.execute("entrypoint", globalSize)</code> is invoked, Aparapi will schedule the execution of <code>globalSize</code> kernels. If the execution mode is GPU then 
-    * the kernels will execute as OpenCL code on the GPU device. Otherwise, if the mode is JTP, the kernels will execute as a pool of Java threads on the CPU. 
-    * <p>
-    * @param _entry is the name of the method we wish to use as the entrypoint to the kernel
-    * @return The Kernel instance (this) so we can chain calls to put(arr).execute(range).get(arr)
-    * 
-    */
-   public synchronized Kernel execute(Entry _entry, Range _range) {
-      return prepareKernelRunner().execute(_entry, _range, 1);
+      return (execute(createRange(_range), _passes));
    }
 
    /**
@@ -2093,7 +2125,22 @@ public abstract class Kernel implements Cloneable {
       }
    }
 
+   public boolean isRunningCL() {
+      return getTargetDevice() instanceof OpenCLDevice;
+   }
+
+   public final Device getTargetDevice() {
+      return KernelManager.instance().getPreferences(this).getPreferredDevice(this);
+   }
+
+   /** @return true by default, may be overriden to allow vetoing of a device or devices by a given Kernel instance. */
+   public boolean isAllowDevice(Device _device) {
+      return true;
+   }
+
    /**
+    * @deprecated See {@link EXECUTION_MODE}
+    * <p>
     * Return the current execution mode.  
     * 
     * Before a Kernel executes, this return value will be the execution mode as determined by the setting of 
@@ -2108,11 +2155,14 @@ public abstract class Kernel implements Cloneable {
     * 
     * @see #setExecutionMode(EXECUTION_MODE)
     */
+   @Deprecated
    public EXECUTION_MODE getExecutionMode() {
       return (executionMode);
    }
 
    /**
+    * @deprecated See {@link EXECUTION_MODE}
+    * <p>
     * Set the execution mode. 
     * <p>
     * This should be regarded as a request. The real mode will be determined at runtime based on the availability of OpenCL and the characteristics of the workload.
@@ -2121,10 +2171,15 @@ public abstract class Kernel implements Cloneable {
     * 
     * @see #getExecutionMode()
     */
+   @Deprecated
    public void setExecutionMode(EXECUTION_MODE _executionMode) {
       executionMode = _executionMode;
    }
 
+   /**
+    * @deprecated See {@link EXECUTION_MODE}
+    */
+   @Deprecated
    public void setFallbackExecutionMode() {
       executionMode = EXECUTION_MODE.getFallbackExecutionMode();
    }
@@ -2718,13 +2773,24 @@ public abstract class Kernel implements Cloneable {
       return prepareKernelRunner().getProfileInfo();
    }
 
-   private final LinkedHashSet<EXECUTION_MODE> executionModes = EXECUTION_MODE.getDefaultExecutionModes();
+   /**
+    * @deprecated See {@link EXECUTION_MODE}.
+    */
+   private final LinkedHashSet<EXECUTION_MODE> executionModes = (Config.executionMode != null) ? EXECUTION_MODE.getDefaultExecutionModes() :  new LinkedHashSet<>(Collections.singleton(EXECUTION_MODE.AUTO));
 
+   /**
+    * @deprecated See {@link EXECUTION_MODE}.
+    */
    private Iterator<EXECUTION_MODE> currentMode = executionModes.iterator();
 
+   /**
+    * @deprecated See {@link EXECUTION_MODE}.
+    */
    private EXECUTION_MODE executionMode = currentMode.next();
 
    /**
+    * @deprecated See {@link EXECUTION_MODE}.
+    * <p>
     * set possible fallback path for execution modes.
     * for example setExecutionFallbackPath(GPU,CPU,JTP) will try to use the GPU
     * if it fails it will fall back to OpenCL CPU and finally it will try JTP.
@@ -2736,6 +2802,7 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
+    * @deprecated See {@link EXECUTION_MODE}.
     * @return is there another execution path we can try
     */
    public boolean hasNextExecutionMode() {
@@ -2743,6 +2810,7 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
+    * @deprecated See {@link EXECUTION_MODE}.
     * try the next execution path in the list if there aren't any more than give up
     */
    public void tryNextExecutionMode() {

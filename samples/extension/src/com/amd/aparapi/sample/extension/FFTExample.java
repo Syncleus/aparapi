@@ -1,12 +1,12 @@
 package com.amd.aparapi.sample.extension;
 
-import java.util.Arrays;
+import com.amd.aparapi.*;
+import com.amd.aparapi.device.*;
+import com.amd.aparapi.internal.kernel.*;
+import com.amd.aparapi.opencl.*;
+import com.amd.aparapi.opencl.OpenCL.*;
 
-import com.amd.aparapi.Range;
-import com.amd.aparapi.device.Device;
-import com.amd.aparapi.device.OpenCLDevice;
-import com.amd.aparapi.opencl.OpenCL;
-import com.amd.aparapi.opencl.OpenCL.Resource;
+import java.util.*;
 
 public class FFTExample{
 
@@ -98,7 +98,7 @@ public class FFTExample{
       final float imaginary[] = new float[LEN];
       final float referenceReal[] = Arrays.copyOf(real, real.length);
       final float referenceImaginary[] = Arrays.copyOf(imaginary, imaginary.length);
-      final OpenCLDevice device = (OpenCLDevice) Device.best();
+      final OpenCLDevice device = (OpenCLDevice) KernelManager.instance().getDefaultPreferences().getPreferredDevice(null);
       final FFT fft = device.bind(FFT.class);
       for (int i = 0; i < LEN; i++) {
          initial[i] = real[i] = referenceReal[i] = (float) (Math.random() * 256);

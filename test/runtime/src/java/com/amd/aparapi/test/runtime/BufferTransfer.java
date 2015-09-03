@@ -1,17 +1,13 @@
 package com.amd.aparapi.test.runtime;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import com.amd.aparapi.*;
+import com.amd.aparapi.device.*;
+import com.amd.aparapi.internal.kernel.*;
+import org.junit.*;
 
-import java.util.Arrays;
+import java.util.*;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.amd.aparapi.Kernel;
-import com.amd.aparapi.Range;
-import com.amd.aparapi.device.Device;
-import com.amd.aparapi.device.OpenCLDevice;
+import static org.junit.Assert.*;
 
 public class BufferTransfer{
 
@@ -19,7 +15,7 @@ public class BufferTransfer{
 
    @BeforeClass public static void setUpBeforeClass() throws Exception {
 
-      Device device = Device.best();
+      Device device = KernelManager.instance().bestDevice();
       if (device == null || !(device instanceof OpenCLDevice)) {
          fail("no opencl device!");
       }
@@ -209,7 +205,7 @@ public class BufferTransfer{
             for (int n = 0; n < neuronOutputs.length; n++)
                log[n][simStep[0]] = neuronOutputs[n];
          }
-         System.out.println(getExecutionMode() + (isExplicit() ? ", explicit" : ", auto"));
+         System.out.println(getTargetDevice().getShortDescription() + (isExplicit() ? ", explicit" : ", auto"));
 
          for (int n = 0; n < neuronOutputs.length; n++)
             System.out.println(Arrays.toString(log[n]));

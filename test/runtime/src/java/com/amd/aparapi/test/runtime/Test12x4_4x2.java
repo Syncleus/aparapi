@@ -1,12 +1,14 @@
 package com.amd.aparapi.test.runtime;
 
+import com.amd.aparapi.device.*;
 import org.junit.Test;
 
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.Range;
 
 public class Test12x4_4x2{
-   @Test public void test() {
+      @SuppressWarnings("deprecation")
+      @Test public void test() {
       // globalThreadId, threadId, globalX, globalY, localX, localY
       final int[][] test = new int[][] {
             {
@@ -446,7 +448,12 @@ public class Test12x4_4x2{
       };
       Kernel kernel = new Kernel(){
 
-         @Override public void run() {
+            @Override
+            public boolean isAllowDevice(Device _device) {
+                  return _device.getType() == Device.TYPE.JTP;
+            }
+
+            @Override public void run() {
             int x = getGlobalId(0);
             int y = getGlobalId(1);
             int lx = getLocalId(0);
@@ -492,7 +499,6 @@ public class Test12x4_4x2{
          }
 
       };
-      kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
       kernel.execute(Range.create2D(12, 4, 4, 2));
 
    }

@@ -1,9 +1,9 @@
 package com.amd.aparapi;
 
-import java.util.Arrays;
+import com.amd.aparapi.device.*;
+import com.amd.aparapi.internal.jni.*;
 
-import com.amd.aparapi.device.Device;
-import com.amd.aparapi.internal.jni.RangeJNI;
+import java.util.*;
 
 /**
  * 
@@ -56,7 +56,7 @@ public class Range extends RangeJNI{
    public static final int MAX_GROUP_SIZE = Math.max(Runtime.getRuntime().availableProcessors() * THREADS_PER_CORE,
          MAX_OPENCL_GROUP_SIZE);
 
-   private Device device = null;
+   private OpenCLDevice device = null;
 
    private int maxWorkGroupSize;
 
@@ -73,7 +73,7 @@ public class Range extends RangeJNI{
     * @param _dims
     */
    public Range(Device _device, int _dims) {
-      device = _device;
+      device = !(_device instanceof OpenCLDevice) ? null : (OpenCLDevice) _device;
       dims = _dims;
 
       if (device != null) {
@@ -317,7 +317,7 @@ public class Range extends RangeJNI{
     * For example for <code>MAX_GROUP_SIZE</code> of 64 we favor 4x4x4 over 1x16x16.
     * 
     * @param _globalWidth the width of the 3D grid we wish to process
-    * @param _globalHieght the height of the 3D grid we wish to process
+    * @param _globalHeight the height of the 3D grid we wish to process
     * @param _globalDepth the depth of the 3D grid we wish to process
     * @return
     */

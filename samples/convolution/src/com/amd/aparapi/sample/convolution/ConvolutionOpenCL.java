@@ -38,13 +38,13 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 
 package com.amd.aparapi.sample.convolution;
 
-import java.io.File;
+import com.amd.aparapi.*;
+import com.amd.aparapi.device.*;
+import com.amd.aparapi.internal.kernel.*;
+import com.amd.aparapi.opencl.*;
+import com.amd.aparapi.opencl.OpenCL.*;
 
-import com.amd.aparapi.Range;
-import com.amd.aparapi.device.Device;
-import com.amd.aparapi.device.OpenCLDevice;
-import com.amd.aparapi.opencl.OpenCL;
-import com.amd.aparapi.opencl.OpenCL.Resource;
+import java.io.*;
 
 public class ConvolutionOpenCL{
 
@@ -61,7 +61,7 @@ public class ConvolutionOpenCL{
    public static void main(final String[] _args) {
       final File file = new File(_args.length == 1 ? _args[0] : "testcard.jpg");
 
-      final OpenCLDevice openclDevice = (OpenCLDevice) Device.best();
+      final OpenCLDevice openclDevice = (OpenCLDevice) KernelManager.instance().bestDevice();
 
       final Convolution convolution = openclDevice.bind(Convolution.class);
       final float convMatrix3x3[] = new float[] {

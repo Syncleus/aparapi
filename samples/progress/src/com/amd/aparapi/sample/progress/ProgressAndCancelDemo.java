@@ -1,13 +1,11 @@
 package com.amd.aparapi.sample.progress;
 
-import com.amd.aparapi.Kernel;
-import com.amd.aparapi.internal.kernel.KernelRunner;
+import com.amd.aparapi.internal.kernel.*;
 
 import javax.swing.*;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
+import javax.swing.plaf.nimbus.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 
 /**
  * Demonstrates progress tracking and cancellation for multi-pass kernels.
@@ -36,7 +34,7 @@ public class ProgressAndCancelDemo {
 
       kernel = new LongRunningKernel();
       if (TEST_JTP) {
-         kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
+         KernelManager.setKernelManager(KernelManagers.JTP_ONLY);
       }
       Thread asynchReader = new Thread() {
          @Override
