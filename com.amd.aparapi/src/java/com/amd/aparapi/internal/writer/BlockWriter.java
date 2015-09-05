@@ -364,14 +364,19 @@ public abstract class BlockWriter{
 
    public void writeInstruction(Instruction _instruction) throws CodeGenException {
       if (_instruction instanceof CompositeIfElseInstruction) {
-         write("(");
+         boolean needParenthesis = isNeedParenthesis(_instruction);
+         if(needParenthesis){
+             write("(");
+         }
          write("(");
          final Instruction lhs = writeConditional(((CompositeInstruction) _instruction).getBranchSet());
          write(")?");
          writeInstruction(lhs);
          write(":");
          writeInstruction(lhs.getNextExpr().getNextExpr());
-         write(")");
+         if(needParenthesis){
+             write(")");
+         }
       } else if (_instruction instanceof CompositeInstruction) {
          writeComposite((CompositeInstruction) _instruction);
 
@@ -558,24 +563,7 @@ public abstract class BlockWriter{
       } else if (_instruction instanceof BinaryOperator) {
          final BinaryOperator binaryInstruction = (BinaryOperator) _instruction;
          final Instruction parent = binaryInstruction.getParentExpr();
-         boolean needsParenthesis = true;
-
-         if (parent instanceof AssignToLocalVariable) {
-            needsParenthesis = false;
-         } else if (parent instanceof AssignToField) {
-            needsParenthesis = false;
-         } else if (parent instanceof AssignToArrayElement) {
-            needsParenthesis = false;
-         } else {
-            /**
-                        if (parent instanceof BinaryOperator) {
-                           BinaryOperator parentBinaryOperator = (BinaryOperator) parent;
-                           if (parentBinaryOperator.getOperator().ordinal() > binaryInstruction.getOperator().ordinal()) {
-                              needsParenthesis = false;
-                           }
-                        }
-            **/
-         }
+         boolean needsParenthesis = isNeedParenthesis(binaryInstruction);
 
          if (needsParenthesis) {
             write("(");
@@ -729,6 +717,29 @@ public abstract class BlockWriter{
          throw new CodeGenException(String.format("%s", _instruction.getByteCode().toString().toLowerCase()));
       }
 
+   }
+
+   private boolean isNeedParenthesis(Instruction instruction){
+        final Instruction parent = instruction.getParentExpr();
+        boolean needsParenthesis = true;
+
+        if (parent instanceof AssignToLocalVariable) {
+           needsParenthesis = false;
+        } else if (parent instanceof AssignToField) {
+           needsParenthesis = false;
+        } else if (parent instanceof AssignToArrayElement) {
+           needsParenthesis = false;
+        } else {
+           /**
+                       if (parent instanceof BinaryOperator) {
+                          BinaryOperator parentBinaryOperator = (BinaryOperator) parent;
+                          if (parentBinaryOperator.getOperator().ordinal() > binaryInstruction.getOperator().ordinal()) {
+                             needsParenthesis = false;
+                          }
+                       }
+           **/
+        }
+        return needsParenthesis;
    }
 
    private boolean isMultiDimensionalArray(NameAndTypeEntry nameAndTypeEntry) {
