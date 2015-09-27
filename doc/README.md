@@ -33,7 +33,7 @@ APARAPI Documentation
 | [UsingConstantMemory](UsingConstantMemory.md) | How to make use of constant memory in a Kernel |
 | [UsingLocalMemory](UsingLocalMemory.md) | How to make use of local memory in a Kernel |
 | [UsingMultiDimExecutionRanges](UsingMultiDimExecutionRanges.md) | How to use the new Range class (for multi-dim range access) |
-| AccessingMultiDimNDRangeProposal | A proposal for accessing multi-dim ND range execution |
+| [AccessingMultiDimNDRangeProposal](AccessingMultiDimNDRangeProposal.md) | A proposal for accessing multi-dim ND range execution |
 | LocalMemoryAndBarrierProposal | A proposal for handling local memory and barriers |
 | [AddressSpacesUsingBuffers](AddressSpacesUsingBuffers.md) | Proposal For OpenCL address space support using java Buffers instead of arrays.	|
 | [BuildingNBody](BuildingNBody.md) | How to build the NBody example.|
