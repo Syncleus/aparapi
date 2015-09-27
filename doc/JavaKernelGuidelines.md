@@ -46,7 +46,6 @@ Some restrictions/guidelines may be removed or augmented in a future Aparapi rel
     int foo(int a) {
        // . . .
     }
-
     public void run() {
       int z;
       foo(z = 3);
