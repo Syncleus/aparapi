@@ -29,7 +29,7 @@ APARAPI Documentation
 | [ProfilingKernelsFromEclipse](ProfilingKernelsFromEclipse.md) | Profiling Kernels with AMD profiler in Eclipse (Indigo) |
 | [DeviceProposal](DeviceProposal.md) | How we might use the extension mechanism devices for general Kernel execution.|
 | [NewOpenCLBinding](NewOpenCLBinding.md) | How to use new OpenCL binding mechanism. |
-| AparapiExtensionProposal | A proposed aparapi extension mechanism. |
+| [AparapiExtensionProposal](AparapiExtensionProposal.md) | A proposed aparapi extension mechanism. |
 | UsingConstantMemory | How to make use of constant memory in a Kernel |
 | UsingLocalMemory | How to make use of local memory in a Kernel |
 | UsingMultiDimExecutionRanges | How to use the new Range class (for multi-dim range access) |
