@@ -35,8 +35,8 @@ APARAPI Documentation
 | [UsingMultiDimExecutionRanges](UsingMultiDimExecutionRanges.md) | How to use the new Range class (for multi-dim range access) |
 | AccessingMultiDimNDRangeProposal | A proposal for accessing multi-dim ND range execution |
 | LocalMemoryAndBarrierProposal | A proposal for handling local memory and barriers |
-| AddressSpacesUsingBuffers | Proposal For OpenCL address space support using java Buffers instead of arrays.	|
-| BuildingNBody | How to build the NBody example.|
+| [AddressSpacesUsingBuffers](AddressSpacesUsingBuffers.md) | Proposal For OpenCL address space support using java Buffers instead of arrays.	|
+| [BuildingNBody](BuildingNBody.md) | How to build the NBody example.|
 | [UnitTestGuide](UnitTestGuide.md) | Unit test Guide Find out how to run Junit tests and how to add new tests. |
 | NewFeatures | New Features added to this open source release of Aparapi. |
 | UsersGuide | Aparapi User's Guide. |
