@@ -27,8 +27,8 @@ APARAPI Documentation
 | [ExplicitBufferHandling](ExplicitBufferHandling.md) | How to minimize buffer transfers |
 | [AparapiPatterns](AparapiPatterns.md) | Examples and code fragments to demonstrate Aparapi fetaures. |
 | [ProfilingKernelsFromEclipse](ProfilingKernelsFromEclipse.md) | Profiling Kernels with AMD profiler in Eclipse (Indigo) |
-| DeviceProposal | How we might use the extension mechanism devices for general Kernel execution.|
-| NewOpenCLBinding | How to use new OpenCL binding mechanism. |
+| [DeviceProposal](DeviceProposal.md) | How we might use the extension mechanism devices for general Kernel execution.|
+| [NewOpenCLBinding](NewOpenCLBinding.md) | How to use new OpenCL binding mechanism. |
 | AparapiExtensionProposal | A proposed aparapi extension mechanism. |
 | UsingConstantMemory | How to make use of constant memory in a Kernel |
 | UsingLocalMemory | How to make use of local memory in a Kernel |
