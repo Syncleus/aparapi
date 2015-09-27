@@ -43,13 +43,14 @@ Some restrictions/guidelines may be removed or augmented in a future Aparapi rel
 * A variable cannot have its first assignment be the side effect of an expression evaluation or a method call.  For example, the following will not be translated to run on the GPU.
 
 
-    int foo(int a) {
-       // . . .
-    }
-    public void run() {
-      int z;
-      foo(z = 3);
-    }
+        int foo(int a) {
+           // . . .
+        }
+        public void run() {
+          int z;
+          foo(z = 3);
+        }
+
 
 * This should be regarded as an error which needs to be addressed, as a workaround, explicitly initialize variables (even to 0) when declared.
 
