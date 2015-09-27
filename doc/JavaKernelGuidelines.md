@@ -42,6 +42,7 @@ Some restrictions/guidelines may be removed or augmented in a future Aparapi rel
 * Only simple loops and conditionals are supported; switch, break, and continue are not supported.
 * A variable cannot have its first assignment be the side effect of an expression evaluation or a method call.  For example, the following will not be translated to run on the GPU.
 
+
     int foo(int a) {
        // . . .
     }
