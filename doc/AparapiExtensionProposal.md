@@ -244,15 +244,15 @@ Ideally we would also like to invoke FFT directly (instead of via a Kernel). Thi
 
 The only way I can see how to do this is to force the creation of an interface so we can use Java's existing Proxy mechanism to create a wrapper.
 
-  @OpenCL(wraps=FFT.class);
-  interface FFTInterface{
+   @OpenCL(wraps=FFT.class);
+   interface FFTInterface{
     public void forward(  Range _range, float[] _data,  float[] _imaginary);
         public void reverse( Range _range, float[] _data, float[] _imaginary);
-  }
-  Then provide a mechanism for extracting a proxy and invoking it.
-
-  float[] real = //??
-  float[] imag = //??
-  Aparapi.wrap<FFT>(FFTInterface.class).forward(range, real, imag);
+   }
+   Then provide a mechanism for extracting a proxy and invoking it.
+   
+   float[] real = //??
+   float[] imag = //??
+   Aparapi.wrap<FFT>(FFTInterface.class).forward(range, real, imag);
 
 I can't see a cleaner solution.
