@@ -41,6 +41,6 @@ APARAPI Documentation
 | [NewFeatures](NewFeatures.md) | New Features added to this open source release of Aparapi. |
 | [UsersGuide](UsersGuide.md) | Aparapi User's Guide. |
 | [DevelopersGuide](DevelopersGuide.md) | Aparapi developers guide. |
-| ContributionGuide | How to contribute (bug fix or features). |
-| JavaKernelGuidelines | What code can and can't be converted to OpenCL by Aparapi. |
+| [ContributionGuide](ContributionGuide.md) | How to contribute (bug fix or features). |
+| [JavaKernelGuidelines](JavaKernelGuidelines.md) | What code can and can't be converted to OpenCL by Aparapi. |
 | [Attribution](Attribution.md) | Attribution |
