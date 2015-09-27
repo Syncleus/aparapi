@@ -38,7 +38,7 @@ APARAPI Documentation
 | [AddressSpacesUsingBuffers](AddressSpacesUsingBuffers.md) | Proposal For OpenCL address space support using java Buffers instead of arrays.	|
 | [BuildingNBody](BuildingNBody.md) | How to build the NBody example.|
 | [UnitTestGuide](UnitTestGuide.md) | Unit test Guide Find out how to run Junit tests and how to add new tests. |
-| NewFeatures | New Features added to this open source release of Aparapi. |
+| [NewFeatures](NewFeatures.md) | New Features added to this open source release of Aparapi. |
 | UsersGuide | Aparapi User's Guide. |
 | DevelopersGuide | Aparapi developers guide. |
 | ContributionGuide | How to contribute (bug fix or features). |
