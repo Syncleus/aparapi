@@ -31,8 +31,8 @@ APARAPI Documentation
 | [NewOpenCLBinding](NewOpenCLBinding.md) | How to use new OpenCL binding mechanism. |
 | [AparapiExtensionProposal](AparapiExtensionProposal.md) | A proposed aparapi extension mechanism. |
 | [UsingConstantMemory](UsingConstantMemory.md) | How to make use of constant memory in a Kernel |
-| [UsingLocalMemory[(UsingLocalMemory.md) | How to make use of local memory in a Kernel |
-| UsingMultiDimExecutionRanges | How to use the new Range class (for multi-dim range access) |
+| [UsingLocalMemory](UsingLocalMemory.md) | How to make use of local memory in a Kernel |
+| [UsingMultiDimExecutionRanges](UsingMultiDimExecutionRanges.md) | How to use the new Range class (for multi-dim range access) |
 | AccessingMultiDimNDRangeProposal | A proposal for accessing multi-dim ND range execution |
 | LocalMemoryAndBarrierProposal | A proposal for handling local memory and barriers |
 | AddressSpacesUsingBuffers | Proposal For OpenCL address space support using java Buffers instead of arrays.	|
