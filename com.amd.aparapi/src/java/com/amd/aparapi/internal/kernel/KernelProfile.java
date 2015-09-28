@@ -12,6 +12,7 @@ import java.util.logging.*;
  */
 public class KernelProfile {
 
+   private static final double MILLION = 1000000d;
    private static Logger logger = Logger.getLogger(Config.getLoggerName());
    private final Class<? extends Kernel> kernelClass;
    private LinkedHashMap<Device, KernelDeviceProfile> deviceProfiles = new LinkedHashMap<>();
@@ -25,12 +26,13 @@ public class KernelProfile {
 
    public double getLastExecutionTime() {
       KernelDeviceProfile lastDeviceProfile = getLastDeviceProfile();
-      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getLastElapsedTime(ProfilingEvent.START, ProfilingEvent.EXECUTED);
+      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getLastElapsedTime(ProfilingEvent.START, ProfilingEvent.EXECUTED) / MILLION;
    }
 
    public double getLastConversionTime() {
       KernelDeviceProfile lastDeviceProfile = getLastDeviceProfile();
-      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getLastElapsedTime(ProfilingEvent.START, ProfilingEvent.EXECUTED);   }
+      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getLastElapsedTime(ProfilingEvent.START, ProfilingEvent.EXECUTED) / MILLION;
+   }
 
    public double getAccumulatedTotalTime() {
       KernelDeviceProfile lastDeviceProfile = getLastDeviceProfile();
@@ -38,12 +40,12 @@ public class KernelProfile {
          return Double.NaN;
       }
       else {
-         return lastDeviceProfile.getCumulativeElapsedTimeAll();
+         return lastDeviceProfile.getCumulativeElapsedTimeAll() / MILLION;
       }
    }
 
-   private KernelDeviceProfile getLastDeviceProfile() {
-      return null;
+   public KernelDeviceProfile getLastDeviceProfile() {
+      return deviceProfiles.get(currentDevice);
    }
 
    void onStart(Device device) {
@@ -61,10 +63,11 @@ public class KernelProfile {
    void onEvent(ProfilingEvent event) {
       switch (event) {
          case CLASS_MODEL_BUILT: // fallthrough
-         case OPENCL_GENERATED: // fallthrough
-         case OPENCL_COMPILED: // fallthrough
-         case PREPARE_EXECUTE: // fallthrough
-         case EXECUTED: // fallthrough
+         case OPENCL_GENERATED:  // fallthrough
+         case INIT_JNI:          // fallthrough
+         case OPENCL_COMPILED:   // fallthrough
+         case PREPARE_EXECUTE:   // fallthrough
+         case EXECUTED:          // fallthrough
          {
             if (currentDeviceProfile == null) {
                logger.log(Level.SEVERE, "Error in KernelProfile, no currentDevice (synchronization error?");

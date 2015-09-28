@@ -106,6 +106,14 @@ public class Config extends ConfigJNI{
     */
    public static final boolean dumpProfilesOnExit = Boolean.getBoolean(propPkgName + ".dumpProfilesOnExit");
 
+   /**
+    * Dumps profiling info (for a single execution) after every Kernel execution.
+    *
+    *  Usage -Dcom.amd.aparapi.dumpProfileOnExecution={true|false}
+    *
+    */
+   public static final boolean dumpProfileOnExecution = Boolean.getBoolean(propPkgName + ".dumpProfileOnExecution");
+
    // Pragma/OpenCL codegen related flags
    public static final boolean enableAtomic32 = Boolean.getBoolean(propPkgName + ".enableAtomic32");
 

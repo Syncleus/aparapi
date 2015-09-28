@@ -1,8 +1,8 @@
 package com.amd.aparapi.internal.jni;
 
-import java.lang.reflect.Field;
+import com.amd.aparapi.internal.annotation.*;
 
-import com.amd.aparapi.internal.annotation.UsedByJNICode;
+import java.lang.reflect.*;
 
 /**
  * This class is intended to be used as a 'proxy' or 'facade' object for Java code to interact with JNI
@@ -12,28 +12,25 @@ public abstract class KernelArgJNI{
    /**
     * The type of this KernelArg. Created by or-ing appropriate flags
     * 
-    * @see ARG_BOOLEAN
-    * @see ARG_BYTE
-    * @see ARG_CHAR
-    * @see ARG_FLOAT
-    * @see ARG_INT
-    * @see ARG_DOUBLE
-    * @see ARG_LONG
-    * @see ARG_SHORT
-    * @see ARG_ARRAY
-    * @see ARG_PRIMITIVE
-    * @see ARG_READ
-    * @see ARG_WRITE
-    * @see ARG_LOCAL
-    * @see ARG_GLOBAL
-    * @see ARG_CONSTANT
-    * @see ARG_ARRAYLENGTH
-    * @see ARG_APARAPI_BUF
-    * @see ARG_EXPLICIT
-    * @see ARG_EXPLICIT_WRITE
-    * @see ARG_OBJ_ARRAY_STRUCT
-    * @see ARG_APARAPI_BUF_HAS_ARRAY
-    * @see ARG_APARAPI_BUF_IS_DIRECT
+    * @see KernelRunnerJNI#ARG_BOOLEAN
+    * @see KernelRunnerJNI#ARG_BYTE
+    * @see KernelRunnerJNI#ARG_CHAR
+    * @see KernelRunnerJNI#ARG_FLOAT
+    * @see KernelRunnerJNI#ARG_INT
+    * @see KernelRunnerJNI#ARG_DOUBLE
+    * @see KernelRunnerJNI#ARG_LONG
+    * @see KernelRunnerJNI#ARG_SHORT
+    * @see KernelRunnerJNI#ARG_ARRAY
+    * @see KernelRunnerJNI#ARG_PRIMITIVE
+    * @see KernelRunnerJNI#ARG_READ
+    * @see KernelRunnerJNI#ARG_WRITE
+    * @see KernelRunnerJNI#ARG_LOCAL
+    * @see KernelRunnerJNI#ARG_GLOBAL
+    * @see KernelRunnerJNI#ARG_CONSTANT
+    * @see KernelRunnerJNI#ARG_ARRAYLENGTH
+    * @see KernelRunnerJNI#ARG_EXPLICIT
+    * @see KernelRunnerJNI#ARG_EXPLICIT_WRITE
+    * @see KernelRunnerJNI#ARG_OBJ_ARRAY_STRUCT
     */
    @UsedByJNICode protected int type;
 

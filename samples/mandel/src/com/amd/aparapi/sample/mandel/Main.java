@@ -60,6 +60,16 @@ import java.util.List;
 
 public class Main{
 
+   static {
+      System.setProperty("com.amd.aparapi.dumpProfilesOnExit", "true");
+//      KernelManager.setKernelManager(new KernelManager() {
+//         @Override
+//         protected List<Device.TYPE> getPreferredDeviceTypes() {
+//            return Collections.singletonList(Device.TYPE.CPU);
+//         }
+//      });
+   }
+
    /**
     * An Aparapi Kernel implementation for creating a scaled view of the mandelbrot set.
     *  
@@ -70,13 +80,13 @@ public class Main{
    public static class MandelKernel extends Kernel{
 
       /** RGB buffer used to store the Mandelbrot image. This buffer holds (width * height) RGB values. */
-      final private int rgb[];
+      private int[] rgb;
 
       /** Mandelbrot image width. */
-      final private int width;
+      private int width;
 
       /** Mandelbrot image height. */
-      final private int height;
+      private int height;
 
       /** Maximum iterations for Mandelbrot. */
       final private int maxIterations = 64;
@@ -110,6 +120,12 @@ public class Main{
          height = _height;
          rgb = _rgb;
 
+      }
+
+      public void resetImage(int _width, int _height, int[] _rgb) {
+         width = _width;
+         height = _height;
+         rgb = _rgb;
       }
 
       public int getCount(float x, float y) {
@@ -152,6 +168,9 @@ public class Main{
          scale = _scale;
       }
 
+      public int[] getRgbs() {
+         return rgb;
+      }
    }
 
    /** User selected zoom-in point on the Mandelbrot view. */

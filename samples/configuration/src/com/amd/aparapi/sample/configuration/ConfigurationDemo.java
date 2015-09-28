@@ -10,16 +10,14 @@ import java.util.*;
  */
 public class ConfigurationDemo {
    public static void main(String[] ignored) {
-      System.setProperty("com.amd.aparapi.dumpProfilesOnExit", "true");
-
       StringBuilder report;
 
       List<Integer> tests = Arrays.asList(0, 1, 2, 3);
-      int reps = 300;
+      int reps = 1;
       for (int rep = 0; rep < reps; ++rep) {
          runTests(rep == 0, tests);
 
-         if (rep % 100 == 99 || rep == 0) {
+         if (rep % 100 == 99 || rep == 0 || rep == reps - 1) {
             report = new StringBuilder("rep = " + rep + "\n");
             KernelManager.instance().reportDeviceUsage(report, true);
             System.out.println(report);

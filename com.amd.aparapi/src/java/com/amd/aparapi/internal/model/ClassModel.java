@@ -65,9 +65,9 @@ import java.util.logging.*;
  * @author gfrost
  *
  */
-public class ClassModel{
+public class ClassModel {
 
-   public interface LocalVariableInfo{
+   public interface LocalVariableInfo {
 
       int getStart();
 
@@ -142,6 +142,7 @@ public class ClassModel{
          });
 
    //   private ValueCache<String, Integer, ClassParseException> privateMemorySizes = ValueCache.on(this::computePrivateMemorySize);
+
    private ValueCache<String, Integer, ClassParseException> privateMemorySizes = ValueCache
          .on(new ThrowingValueComputer<String, Integer, ClassParseException>(){
             @Override
@@ -635,19 +636,25 @@ public class ClassModel{
       return (methodDescription);
    }
 
-   //   private static final ValueCache<Class<?>, ClassModel, ClassParseException> classModelCache = ValueCache.onIdentity(ClassModel::new);
    private static final ValueCache<Class<?>, ClassModel, ClassParseException> classModelCache = ValueCache
          .on(new ThrowingValueComputer<Class<?>, ClassModel, ClassParseException>(){
             @Override
             public ClassModel compute(Class<?> key) throws ClassParseException {
-               return new ClassModel(key);
+               return createClassModelInternal(key);
             }
          });
 
+   private static ClassModel createClassModelInternal(Class<?> key) throws ClassParseException {
+      ClassModel classModel = new ClassModel(key);
+      return classModel;
+   }
+
    public static ClassModel createClassModel(Class<?> _class) throws ClassParseException {
-      if (CacheEnabler.areCachesEnabled())
+      if (CacheEnabler.areCachesEnabled()) {
          return classModelCache.computeIfAbsent(_class);
-      return new ClassModel(_class);
+      }
+
+      return createClassModelInternal(_class);
    }
 
    private int magic;
@@ -746,7 +753,7 @@ public class ClassModel{
 
       private final List<Entry> entries = new ArrayList<Entry>();
 
-      public abstract class Entry{
+      public abstract class Entry {
          private final ConstantPoolType constantPoolType;
 
          private final int slot;
@@ -1559,7 +1566,7 @@ public class ClassModel{
       }
    }
 
-   public class AttributePool{
+   public class AttributePool {
       private final List<AttributePoolEntry> attributePoolEntries = new ArrayList<AttributePoolEntry>();
 
       public class CodeEntry extends AttributePoolEntry{
@@ -1672,7 +1679,7 @@ public class ClassModel{
          }
       }
 
-      public abstract class AttributePoolEntry{
+      public abstract class AttributePoolEntry {
          protected int length;
 
          protected int nameIndex;
@@ -1727,7 +1734,7 @@ public class ClassModel{
       }
 
       public class InnerClassesEntry extends PoolEntry<InnerClassesEntry.InnerClassInfo>{
-         public class InnerClassInfo{
+         public class InnerClassInfo {
             private final int innerAccess;
 
             private final int innerIndex;
@@ -1771,7 +1778,7 @@ public class ClassModel{
 
       public class LineNumberTableEntry extends PoolEntry<LineNumberTableEntry.StartLineNumberPair>{
 
-         public class StartLineNumberPair{
+         public class StartLineNumberPair {
             private final int lineNumber;
 
             private final int start;
@@ -2090,13 +2097,13 @@ public class ClassModel{
 
       public class RuntimeAnnotationsEntry extends PoolEntry<RuntimeAnnotationsEntry.AnnotationInfo>{
 
-         public class AnnotationInfo{
+         public class AnnotationInfo {
             private final int typeIndex;
 
             private final int elementValuePairCount;
 
             public class ElementValuePair{
-               class Value{
+               class Value {
                   Value(int _tag) {
                      tag = _tag;
                   }
@@ -2383,7 +2390,7 @@ public class ClassModel{
 
    private static ClassLoader classModelLoader = ClassModel.class.getClassLoader();
 
-   public class ClassModelField{
+   public class ClassModelField {
       private final int fieldAccessFlags;
 
       AttributePool fieldAttributePool;
@@ -2450,7 +2457,7 @@ public class ClassModel{
       }
    }
 
-   public class ClassModelMethod{
+   public class ClassModelMethod {
 
       private final int methodAccessFlags;
 
@@ -2554,7 +2561,7 @@ public class ClassModel{
       }
    }
 
-   public class ClassModelInterface{
+   public class ClassModelInterface {
       private final int interfaceIndex;
 
       ClassModelInterface(ByteReader _byteReader) {
@@ -2805,7 +2812,10 @@ public class ClassModel{
    Entrypoint getEntrypoint(String _entrypointName, String _descriptor, Object _k) throws AparapiException {
       if (CacheEnabler.areCachesEnabled()) {
          EntrypointKey key = EntrypointKey.of(_entrypointName, _descriptor);
+         long s = System.nanoTime();
          Entrypoint entrypointWithoutKernel = entrypointCache.computeIfAbsent(key);
+         long e = System.nanoTime() - s;
+         System.out.println("newMethodModel: " + e / 1000000f);
          return entrypointWithoutKernel.cloneForKernel(_k);
       } else {
          final MethodModel method = getMethodModel(_entrypointName, _descriptor);

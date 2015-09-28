@@ -143,6 +143,7 @@ public class Main2D{
 
    @SuppressWarnings("serial") public static void main(String[] _args) {
 
+
       final JFrame frame = new JFrame("MandelBrot");
 
       /** Mandelbrot image height. */

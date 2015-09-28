@@ -40,6 +40,8 @@
 #include "CLHelper.h"
 #include "List.h"
 #include <map>
+#include <vector>
+#include <stdio.h>
 
 void setMap(std::map<cl_int, const char*>& errorMap) {
    errorMap[CL_SUCCESS]                         = "success";
@@ -129,14 +131,62 @@ void CLHelper::getBuildErr(JNIEnv *jenv, cl_device_id deviceId,  cl_program prog
    delete []buildLog;
 }
 
-cl_program CLHelper::compile(JNIEnv *jenv, cl_context context, size_t deviceCount, cl_device_id* deviceIds, jstring source, jstring* log, cl_int* status){
-   const char *sourceChars = jenv->GetStringUTFChars(source, NULL);
-   size_t sourceSize[] = { strlen(sourceChars) };
-   cl_program program = clCreateProgramWithSource(context, 1, &sourceChars, sourceSize, status); 
-   jenv->ReleaseStringUTFChars(source, sourceChars);
-   *status = clBuildProgram(program, deviceCount, deviceIds, NULL, NULL, NULL);
+cl_program CLHelper::compile(JNIEnv *jenv, cl_context context, cl_device_id* deviceId, jstring* source, jstring* binaryKey, jstring* log, cl_int* status){
+   using std::map;
+   using std::vector;
+   using std::string;
+
+   static map<string, vector<unsigned char *> > src2bin;
+   static map<string, vector<size_t> > src2len;
+
+   const char* sourceChars = jenv->GetStringUTFChars(*source, NULL);
+   const char* keyChars = jenv->GetStringUTFChars(*binaryKey, NULL);
+   string sourceStr(sourceChars);
+   string keyStr(keyChars);
+
+   size_t sourceLength[] = {sourceStr.length()};
+
+   bool cacheDisabled = jenv->GetStringLength(*binaryKey) == 0;
+
+   cl_program program;
+   bool is_built_from_source = false;
+   bool keyNotFound = src2bin.find(keyStr) == src2bin.end();
+
+   if (cacheDisabled || keyNotFound) {
+      is_built_from_source = true;
+      program = clCreateProgramWithSource(context, 1, &sourceChars, sourceLength, status);
+   }
+   else{
+      cl_int *binary_status = new cl_int[1];
+      program = clCreateProgramWithBinary(context, 1, deviceId, &src2len[keyStr][0], (const unsigned char**)&src2bin[keyStr][0], binary_status, NULL);
+      cl_int theStatus = binary_status[0];
+      if (theStatus != CL_SUCCESS) {
+         getBuildErr(jenv, *deviceId, program, log);
+      }
+      delete[] binary_status;
+   }
+
+   jenv->ReleaseStringUTFChars(*source, sourceChars);
+   jenv->ReleaseStringUTFChars(*binaryKey, keyChars);
+
+   *status = clBuildProgram(program, 1, deviceId, NULL, NULL, NULL);
    if(*status == CL_BUILD_PROGRAM_FAILURE) {
-      getBuildErr(jenv, *deviceIds, program, log);
+      getBuildErr(jenv, *deviceId, program, log);
+   }
+
+   if(is_built_from_source && !cacheDisabled) {
+      vector<unsigned char *> &bins = src2bin[keyStr];
+      vector<size_t> &lens = src2len[keyStr];
+
+      bins.resize(1);
+      lens.resize(1);
+
+      clGetProgramInfo(program, CL_PROGRAM_BINARY_SIZES, sizeof(size_t), &lens[0], NULL);
+      for(size_t i = 0; i < 1; ++i){
+         bins[i] = new unsigned char[lens[i]];
+      }
+
+      clGetProgramInfo(program, CL_PROGRAM_BINARIES, sizeof(unsigned char*), &bins[0], NULL);
    }
    return(program);
 }

@@ -17,6 +17,7 @@ public class KernelDeviceProfile {
    private static final int TABLE_COLUMN_HEADER_WIDTH = 21;
    private static final int TABLE_COLUMN_COUNT_WIDTH = 8;
    private static final int TABLE_COLUMN_WIDTH;
+   private static String tableHeader = null;
    private final Class<? extends Kernel> kernel;
    private final Device device;
    private long[] currentTimes = new long[ProfilingEvent.values().length];
@@ -106,17 +107,20 @@ public class KernelDeviceProfile {
       return sum;
    }
 
-   public static String getTableHeader() {
-      int length = ProfilingEvent.values().length;
-      StringBuilder builder = new StringBuilder(150);
-      appendRowHeaders(builder, "Device", "Count");
-      for (int i = 1; i < length; ++i) {
-         ProfilingEvent stage = ProfilingEvent.values()[i];
-         String heading = stage.name();
-         appendCell(builder, heading);
+   public static synchronized String getTableHeader() {
+      if (tableHeader == null) {
+         int length = ProfilingEvent.values().length;
+         StringBuilder builder = new StringBuilder(150);
+         appendRowHeaders(builder, "Device", "Count");
+         for (int i = 1; i < length; ++i) {
+            ProfilingEvent stage = ProfilingEvent.values()[i];
+            String heading = stage.name();
+            appendCell(builder, heading);
+         }
+         builder.append("  ").append("Total");
+         tableHeader = builder.toString();
       }
-      builder.append("  ").append("Total");
-      return builder.toString();
+      return tableHeader;
    }
 
    public String getLastAsTableRow() {

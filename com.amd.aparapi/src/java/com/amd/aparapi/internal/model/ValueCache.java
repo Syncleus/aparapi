@@ -1,9 +1,7 @@
 package com.amd.aparapi.internal.model;
 
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.lang.ref.*;
+import java.util.concurrent.*;
 
 //import java.util.function.Supplier;
 
@@ -14,7 +12,7 @@ public final class ValueCache<K, V, T extends Throwable> {
    }
 
    //    @FunctionalInterface
-   public interface ValueComputer<K, V> extends ThrowingValueComputer<K, V, RuntimeException>{
+   public interface ValueComputer<K, V> extends ThrowingValueComputer<K, V, RuntimeException> {
       // Marker interface
    }
 

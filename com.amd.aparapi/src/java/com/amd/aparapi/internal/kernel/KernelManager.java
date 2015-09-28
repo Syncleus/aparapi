@@ -47,11 +47,16 @@ public class KernelManager {
    /** This method returns a shared instance of a given Kernel subclass. The kernelClass needs a no-args constructor, which
     *  need not be public.
     *
-    *  <p>Given that compilation of OpenCL is relatively expensive and that (currently!) there is no caching of compiled OpenCL
-    *  it is desirable to only ever create one instance of any given Kernel subclass, which this method facilitates.</p>
+    *  <p>Each new Kernel instance requires a new JNIContext, the creation of which is expensive. There is apparently no simple solution by which a cached JNIContext can be reused
+    *  for all instances of a given Kernel class, since it is intimately connected with resource aquisition and release. In the absence of a context caching solution, it is often
+    *  highly desirable to only ever create one instance of any given Kernel subclass, which this method facilitates.</p>
     *
-    *  <p>In order to maintain thread saftey, it is necessary to synchronize on the returned kernel for the duration of the process of setting up,
-    *  executing and extracting the results from that kernel, when using a shared instance.</p>
+    *  <p>In order to maintain thread saftey when using a shared instance, it is necessary to synchronize on the returned kernel for the duration of the process of setting up,
+    *  executing and extracting the results from that kernel.</p>
+    *
+    *  <p>This method instantiates a Kernel (per Kernel class) via Reflection, and thus can only be used where the Kernel class has a no-args constructor, which need not be public.
+    *  In fact, if a Kernel subclass is designed to be used in conjunction with this method, it is recommended that its <b>only</b> constructor is a <b>private</b> no-args constructor.
+    *  </p>
     *
     *  @throws RuntimeException if the class cannot be instantiated
     */

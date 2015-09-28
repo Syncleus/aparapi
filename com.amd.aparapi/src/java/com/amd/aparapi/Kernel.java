@@ -464,6 +464,8 @@ public abstract class Kernel implements Cloneable {
 
    private KernelRunner kernelRunner = null;
 
+   private boolean autoCleanUpArrays = false;
+
    private KernelState kernelState = new KernelState();
 
    /**
@@ -2110,6 +2112,33 @@ public abstract class Kernel implements Cloneable {
       return prepareKernelRunner().execute(_entrypoint, _range, _passes);
    }
 
+   public boolean isAutoCleanUpArrays() {
+      return autoCleanUpArrays;
+   }
+
+   /**
+    * Property which if true enables automatic calling of {@link #cleanUpArrays()} following each execution.
+    */
+   public void setAutoCleanUpArrays(boolean autoCleanUpArrays) {
+      this.autoCleanUpArrays = autoCleanUpArrays;
+   }
+
+   /**
+    * Frees the bulk of the resources used by this kernel, by setting array sizes in non-primitive {@link KernelArg}s to 1 (0 size is prohibited) and invoking kernel
+    * execution on a zero size range. Unlike {@link #dispose()}, this does not prohibit further invocations of this kernel, as sundry resources such as OpenCL queues are
+    * <b>not</b> freed by this method.
+    *
+    * <p>This allows a "dormant" Kernel to remain in existence without undue strain on GPU resources, which may be strongly preferable to disposing a Kernel and
+    * recreating another one later, as creation/use of a new Kernel (specifically creation of its associated OpenCL context) is expensive.</p>
+    *
+    * <p>Note that where the underlying array field is declared final, for obvious reasons it is not resized to zero.</p>
+    */
+   public synchronized void cleanUpArrays() {
+      if (kernelRunner != null) {
+         kernelRunner.cleanUpArrays();
+      }
+   }
+
    /**
     * Release any resources associated with this Kernel.
     * <p>
@@ -2123,6 +2152,12 @@ public abstract class Kernel implements Cloneable {
          kernelRunner.dispose();
          kernelRunner = null;
       }
+   }
+
+   /** Automatically releases any resources associated with this Kernel when the Kernel is garbage collected. */
+   @Override
+   protected void finalize() {
+      dispose();
    }
 
    public boolean isRunningCL() {

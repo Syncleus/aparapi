@@ -76,7 +76,6 @@ public class Main{
       /**
       * @brief   Abromowitz Stegun approxmimation for PHI (Cumulative Normal Distribution Function)
       * @param   X input value
-      * @param   phi pointer to store calculated CND of X
       */
       float phi(float X) {
          final float c1 = 0.319381530f;
@@ -183,18 +182,15 @@ public class Main{
 
       int size = Integer.getInteger("size", 512);
       Range range = Range.create(size);
-      int iterations = Integer.getInteger("iterations", 5);
+      int iterations = Integer.getInteger("iterations", 20);
       System.out.println("size =" + size);
       System.out.println("iterations =" + iterations);
       BlackScholesKernel kernel = new BlackScholesKernel(size);
 
-      long totalExecTime = 0;
-      long iterExecTime = 0;
-      /*
       for (int i = 0; i < iterations; i++) {
-         iterExecTime = kernel.execute(size).getExecutionTime();
-         totalExecTime += iterExecTime;
-      }*/
+         kernel.execute(size).getExecutionTime();
+      }
+
       kernel.execute(range, iterations);
       System.out.println("Average execution time " + kernel.getAccumulatedExecutionTime() / iterations);
       kernel.showResults(10);

@@ -75,6 +75,10 @@ import java.util.logging.*;
  */
 public class KernelRunner extends KernelRunnerJNI{
 
+   public static boolean BINARY_CACHING_DISABLED = false;
+
+   private static final int MINIMUM_ARRAY_SIZE = 1;
+
    /** @see #getCurrentPass() */
    @UsedByJNICode public static final int PASS_ID_PREPARING_EXECUTION = -2;
    /** @see #getCurrentPass() */
@@ -129,6 +133,7 @@ public class KernelRunner extends KernelRunnerJNI{
    private static final ForkJoinPool threadPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors(),
          lowPriorityThreadFactory, null, false);
    private static HashMap<Class<? extends Kernel>, String> openCLCache = new HashMap<>();
+   private static LinkedHashSet<String> seenBinaryKeys = new LinkedHashSet<>();
 
    /**
     * Create a KernelRunner for a specific Kernel instance.
@@ -147,7 +152,34 @@ public class KernelRunner extends KernelRunnerJNI{
       inBufferRemoteInt = inBufferRemote.asIntBuffer();
       outBufferRemoteInt = outBufferRemote.asIntBuffer();
 
-      KernelManager.instance(); // ensures static initialization of KernalManager
+      KernelManager.instance(); // ensures static initialization of KernelManager
+   }
+
+   /**
+    * @see Kernel#cleanUpArrays().
+    */
+   public void cleanUpArrays() {
+      if (args != null && kernel.isRunningCL()) {
+         for (KernelArg arg : args) {
+            if ((arg.getType() & KernelRunnerJNI.ARG_ARRAY) != 0) {
+               Field field = arg.getField();
+               if (field != null && field.getType().isArray() && !Modifier.isFinal(field.getModifiers())) {
+                  field.setAccessible(true);
+                  Class<?> componentType = field.getType().getComponentType();
+                  Object newValue = Array.newInstance(componentType, MINIMUM_ARRAY_SIZE);
+                  try {
+                     field.set(kernel, newValue);
+                  }
+                  catch (IllegalAccessException e) {
+                     throw new RuntimeException(e);
+                  }
+               }
+            }
+         }
+         kernel.execute(0);
+      } else if (kernel.isRunningCL()) {
+         logger.log(Level.SEVERE, "KernelRunner#cleanUpArrays() could not execute as no args available (Kernel has not been executed?)");
+      }
    }
 
    /**
@@ -156,7 +188,7 @@ public class KernelRunner extends KernelRunnerJNI{
     * @see KernelRunnerJNI#disposeJNI(long)
     */
    public void dispose() {
-      if (kernel.isRunningCL()) {
+      if (args != null || kernel.isRunningCL()) {
          disposeJNI(jniContextHandle);
       }
       // We are using a shared pool, so there's no need no shutdown it when kernel is disposed
@@ -1005,7 +1037,7 @@ public class KernelRunner extends KernelRunnerJNI{
          kernel.setFallbackExecutionMode();
       }
       recreateRange(_settings);
-      return executeInternal(_settings);
+      return executeInternalInner(_settings);
    }
 
    private void recreateRange(ExecutionSettings _settings) {
@@ -1075,33 +1107,23 @@ public class KernelRunner extends KernelRunnerJNI{
       }
 
       recreateRange(_settings);
-      return executeInternal(_settings);
-   }
-
-   private String describeDevice() {
-      Device device = KernelManager.instance().getPreferences(kernel).getPreferredDevice(kernel);
-      return (device == null) ? "<default fallback>" : device.getShortDescription();
-   }
-
-   @Override
-   public String toString() {
-      return "KernelRunner{" + kernel + "}";
+      return executeInternalInner(_settings);
    }
 
    @SuppressWarnings("deprecation")
    public synchronized Kernel execute(String _entrypoint, final Range _range, final int _passes) {
       executing = true;
-      clearCancelMultiPass();
-      KernelProfile profile = KernelManager.instance().getProfile(kernel.getClass());
-      KernelPreferences preferences = KernelManager.instance().getPreferences(kernel);
-      boolean legacyExecutionMode = kernel.getExecutionMode() != Kernel.EXECUTION_MODE.AUTO;
-
-      ExecutionSettings settings = new ExecutionSettings(preferences, profile, _entrypoint, _range, _passes, legacyExecutionMode);
       try {
+         clearCancelMultiPass();
+         KernelProfile profile = KernelManager.instance().getProfile(kernel.getClass());
+         KernelPreferences preferences = KernelManager.instance().getPreferences(kernel);
+         boolean legacyExecutionMode = kernel.getExecutionMode() != Kernel.EXECUTION_MODE.AUTO;
+
+         ExecutionSettings settings = new ExecutionSettings(preferences, profile, _entrypoint, _range, _passes, legacyExecutionMode);
          // Two Kernels of the same class share the same KernelPreferences object, and since failure (fallback) generally mutates
          // the preferences object, we must lock it. Note this prevents two Kernels of the same class executing simultaneously.
          synchronized (preferences) {
-            return executeInternal(settings);
+            return executeInternalOuter(settings);
          }
       } finally {
          executing = false;
@@ -1109,8 +1131,18 @@ public class KernelRunner extends KernelRunnerJNI{
       }
    }
 
+   private synchronized Kernel executeInternalOuter(ExecutionSettings _settings) {
+      try {
+         return executeInternalInner(_settings);
+      } finally {
+         if (kernel.isAutoCleanUpArrays() &&_settings.range.getGlobalSize_0() != 0) {
+            cleanUpArrays();
+         }
+      }
+   }
+
    @SuppressWarnings("deprecation")
-   private synchronized Kernel executeInternal(ExecutionSettings _settings) {
+   private synchronized Kernel executeInternalInner(ExecutionSettings _settings) {
 
       if (_settings.range == null) {
          throw new IllegalStateException("range can't be null");
@@ -1119,7 +1151,7 @@ public class KernelRunner extends KernelRunnerJNI{
       EXECUTION_MODE requestedExecutionMode = kernel.getExecutionMode();
 
       if (requestedExecutionMode.isOpenCL() && _settings.range.getDevice() != null && !(_settings.range.getDevice() instanceof OpenCLDevice)) {
-         fallBackToNextDevice(_settings, "OpenCL was requested but Device supplied was not an OpenCLDevice");
+         fallBackToNextDevice(_settings, "OpenCL EXECUTION_MODE was requested but Device supplied was not an OpenCLDevice");
       }
 
       Device device = _settings.range.getDevice();
@@ -1151,9 +1183,6 @@ public class KernelRunner extends KernelRunnerJNI{
          OpenCLDevice openCLDevice = device instanceof OpenCLDevice ? (OpenCLDevice) device : null;
 
          int jniFlags = 0;
-         if (_settings.legacyExecutionMode && device != null && !(device instanceof OpenCLDevice)) {
-            hashCode();
-         }
          // for legacy reasons use old logic where Kernel.EXECUTION_MODE is not AUTO
          if (_settings.legacyExecutionMode && !userSpecifiedDevice && requestedExecutionMode.isOpenCL()) {
             if (requestedExecutionMode.equals(EXECUTION_MODE.GPU)) {
@@ -1214,9 +1243,8 @@ public class KernelRunner extends KernelRunnerJNI{
                      // jniFlags |= (kernel.getExecutionMode().equals(Kernel.EXECUTION_MODE.GPU) ? JNI_FLAG_USE_GPU : 0);
                      // Init the device to check capabilities before emitting the
                      // code that requires the capabilities.
-
-                     // synchronized(Kernel.class){
                      jniContextHandle = initJNI(kernel, openCLDevice, jniFlags); // openCLDevice will not be null here
+                     _settings.profile.onEvent(ProfilingEvent.INIT_JNI);
                   } // end of synchronized! issue 68
 
                   if (jniContextHandle == 0) {
@@ -1282,8 +1310,26 @@ public class KernelRunner extends KernelRunnerJNI{
                      }
                   }
 
-                  // Send the string to OpenCL to compile it
-                  long handle = buildProgramJNI(jniContextHandle, openCL);
+                  // Send the string to OpenCL to compile it, or if the compiled binary is already cached on JNI side just empty string to use cached binary
+                  long handle;
+                  if (BINARY_CACHING_DISABLED) {
+                     handle = buildProgramJNI(jniContextHandle, openCL, "");
+                  } else {
+                     synchronized (seenBinaryKeys) {
+                        String binaryKey = kernel.getClass().getName() + ":" + device.getDeviceId();
+                        if (seenBinaryKeys.contains(binaryKey)) {
+                           // use cached binary
+                           logger.log(Level.INFO, "reusing cached binary for " + binaryKey);
+                           handle = buildProgramJNI(jniContextHandle, "", binaryKey);
+                        }
+                        else {
+                           // create and cache binary
+                           logger.log(Level.INFO, "compiling new binary for " + binaryKey);
+                           handle = buildProgramJNI(jniContextHandle, openCL, binaryKey);
+                           seenBinaryKeys.add(binaryKey);
+                        }
+                     }
+                  }
                   _settings.profile.onEvent(ProfilingEvent.OPENCL_COMPILED);
                   if (handle == 0) {
                      return fallBackToNextDevice(_settings, "OpenCL compile failed");
@@ -1446,6 +1492,26 @@ public class KernelRunner extends KernelRunnerJNI{
       }
       finally {
          _settings.profile.onEvent(ProfilingEvent.EXECUTED);
+         maybeReportProfile(_settings);
+      }
+   }
+
+   @Override
+   public String toString() {
+      return "KernelRunner{" + kernel + "}";
+   }
+
+   private String describeDevice() {
+      Device device = KernelManager.instance().getPreferences(kernel).getPreferredDevice(kernel);
+      return (device == null) ? "<default fallback>" : device.getShortDescription();
+   }
+
+   private void maybeReportProfile(ExecutionSettings _settings) {
+      if (Config.dumpProfileOnExecution) {
+         StringBuilder report = new StringBuilder();
+         report.append(KernelDeviceProfile.getTableHeader()).append('\n');
+         report.append(_settings.profile.getLastDeviceProfile().getLastAsTableRow());
+         System.out.println(report);
       }
    }
 

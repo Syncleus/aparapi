@@ -38,15 +38,15 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 
 package com.amd.aparapi.sample.convolution;
 
-import java.io.File;
+import com.amd.aparapi.*;
 
-import com.amd.aparapi.Kernel;
+import java.io.*;
 
 public class Convolution {
 
-    public static void main(final String[] _args) {
+    public static void main(final String[] _args) throws IOException {
 
-        final File file = new File(_args.length == 1 ? _args[0] : "testcard.jpg");
+        final File file = new File(_args.length == 1 ? _args[0] : "./samples/convolution/testcard.jpg").getCanonicalFile();
 
         final ImageConvolution convolution = new ImageConvolution();
 
