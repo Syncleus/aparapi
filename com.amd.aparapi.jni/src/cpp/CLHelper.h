@@ -45,7 +45,7 @@ class CLHelper{
    public:
    static const char *errString(cl_int status);
    static void getBuildErr(JNIEnv *jenv, cl_device_id deviceId, cl_program program, jstring *log);
-   static cl_program compile(JNIEnv *jenv, cl_context context, size_t deviceCount, cl_device_id* deviceId, jstring source, jstring* log, cl_int *status);
+   static cl_program compile(JNIEnv *jenv, cl_context context, cl_device_id* deviceId, jstring* source, jstring* binaryKey, jstring* log, cl_int *status);
    static jstring getExtensions(JNIEnv *jenv, cl_device_id deviceId, cl_int *status);
 };
 

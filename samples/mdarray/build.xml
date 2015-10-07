@@ -19,7 +19,7 @@
 
 	<target name="build" depends="clean">
 		<mkdir dir="classes" />
-		<javac srcdir="src" destdir="classes" debug="on" includeantruntime="false" fork="true" memorymaximumsize="3G">
+		<javac srcdir="src" destdir="classes" debug="on" includeantruntime="false" fork="true" memorymaximumsize="1024m">
 			<classpath>
 				<pathelement path="../../com.amd.aparapi/dist/aparapi.jar" />
 			</classpath>

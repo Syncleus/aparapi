@@ -1,11 +1,11 @@
 package com.amd.aparapi.internal.kernel;
 
-import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
+import com.amd.aparapi.internal.jni.*;
+import com.amd.aparapi.internal.model.*;
+import com.amd.aparapi.internal.util.*;
 
-import com.amd.aparapi.Kernel;
-import com.amd.aparapi.internal.jni.KernelArgJNI;
-import com.amd.aparapi.internal.model.ClassModel;
+import java.lang.reflect.*;
+import java.nio.*;
 
 /**
  * Each field (or captured field in the case of an anonymous inner class) referenced by any bytecode reachable from the users Kernel.run(), will
@@ -48,7 +48,7 @@ public class KernelArg extends KernelArgJNI{
     * Default constructor
     */
    protected KernelArg() {
-
+      // empty
    }
 
    /**
@@ -259,5 +259,10 @@ public class KernelArg extends KernelArgJNI{
     */
    protected void setDims(int[] dims) {
       this.dims = dims;
+   }
+
+   @Override
+   public String toString() {
+      return Reflection.getSimpleName(field.getType()) + " " + field.getName();
    }
 }

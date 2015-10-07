@@ -1198,7 +1198,7 @@ void writeProfile(JNIEnv* jenv, JNIContext* jniContext) {
 }
 
 JNI_JAVA(jlong, KernelRunnerJNI, buildProgramJNI)
-   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jstring source) {
+   (JNIEnv *jenv, jobject jobj, jlong jniContextHandle, jstring source, jstring binaryKey) {
       JNIContext* jniContext = JNIContext::getJNIContext(jniContextHandle);
       if (jniContext == NULL){
          return 0;
@@ -1207,7 +1207,7 @@ JNI_JAVA(jlong, KernelRunnerJNI, buildProgramJNI)
       try {
          cl_int status = CL_SUCCESS;
 
-         jniContext->program = CLHelper::compile(jenv, jniContext->context,  1, &jniContext->deviceId, source, NULL, &status);
+         jniContext->program = CLHelper::compile(jenv, jniContext->context, &jniContext->deviceId, &source, &binaryKey, NULL, &status);
 
          if(status == CL_BUILD_PROGRAM_FAILURE) throw CLException(status, "");
 

@@ -38,24 +38,14 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 
 package com.amd.aparapi.sample.mandel;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
-import java.util.List;
-
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-
 import com.amd.aparapi.Kernel;
-import com.amd.aparapi.ProfileInfo;
-import com.amd.aparapi.Range;
+import com.amd.aparapi.*;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.*;
+import java.util.List;
 
 /**
  * An example Aparapi application which displays a view of the Mandelbrot set and lets the user zoom in to a particular point. 
@@ -70,6 +60,16 @@ import com.amd.aparapi.Range;
 
 public class Main{
 
+   static {
+      System.setProperty("com.amd.aparapi.dumpProfilesOnExit", "true");
+//      KernelManager.setKernelManager(new KernelManager() {
+//         @Override
+//         protected List<Device.TYPE> getPreferredDeviceTypes() {
+//            return Collections.singletonList(Device.TYPE.CPU);
+//         }
+//      });
+   }
+
    /**
     * An Aparapi Kernel implementation for creating a scaled view of the mandelbrot set.
     *  
@@ -80,13 +80,13 @@ public class Main{
    public static class MandelKernel extends Kernel{
 
       /** RGB buffer used to store the Mandelbrot image. This buffer holds (width * height) RGB values. */
-      final private int rgb[];
+      private int[] rgb;
 
       /** Mandelbrot image width. */
-      final private int width;
+      private int width;
 
       /** Mandelbrot image height. */
-      final private int height;
+      private int height;
 
       /** Maximum iterations for Mandelbrot. */
       final private int maxIterations = 64;
@@ -107,7 +107,6 @@ public class Main{
        * @param _width Mandelbrot image width
        * @param _height Mandelbrot image height
        * @param _rgb Mandelbrot image RGB buffer
-       * @param _pallette Mandelbrot image palette
        */
       public MandelKernel(int _width, int _height, int[] _rgb) {
          //Initialize palette values
@@ -121,6 +120,12 @@ public class Main{
          height = _height;
          rgb = _rgb;
 
+      }
+
+      public void resetImage(int _width, int _height, int[] _rgb) {
+         width = _width;
+         height = _height;
+         rgb = _rgb;
       }
 
       public int getCount(float x, float y) {
@@ -163,6 +168,9 @@ public class Main{
          scale = _scale;
       }
 
+      public int[] getRgbs() {
+         return rgb;
+      }
    }
 
    /** User selected zoom-in point on the Mandelbrot view. */
@@ -229,8 +237,7 @@ public class Main{
       System.arraycopy(rgb, 0, imageRgb, 0, rgb.length);
       viewer.repaint();
 
-      // Report target execution mode: GPU or JTP (Java Thread Pool).
-      System.out.println("Execution mode=" + kernel.getExecutionMode());
+      System.out.println("device=" + kernel.getTargetDevice());
 
       // Window listener to dispose Kernel resources on user exit.
       frame.addWindowListener(new WindowAdapter(){

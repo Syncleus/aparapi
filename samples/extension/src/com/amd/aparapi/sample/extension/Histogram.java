@@ -41,7 +41,6 @@ public class Histogram{
       System.out.println("binResult size=" + binResult.length);
       final int[] histo = new int[BIN_SIZE];
       final int[] refHisto = new int[BIN_SIZE];
-      final Device device = Device.firstGPU();
       final Kernel k = new Kernel(){
 
          @Override public void run() {
@@ -52,6 +51,7 @@ public class Histogram{
          }
 
       };
+      final Device device = k.getTargetDevice();
       final Range range2 = device.createRange(BIN_SIZE);
       k.execute(range2);
 

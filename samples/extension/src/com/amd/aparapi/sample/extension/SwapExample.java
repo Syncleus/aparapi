@@ -3,6 +3,7 @@ package com.amd.aparapi.sample.extension;
 import com.amd.aparapi.Range;
 import com.amd.aparapi.device.Device;
 import com.amd.aparapi.device.OpenCLDevice;
+import com.amd.aparapi.internal.kernel.*;
 import com.amd.aparapi.opencl.OpenCL;
 
 public class SwapExample{
@@ -29,7 +30,7 @@ public class SwapExample{
       final float[] rhs = new float[size];
       final Range range = Range.create(size);
 
-      final Device device = Device.best();
+      final Device device = KernelManager.instance().bestDevice();
 
       if (device instanceof OpenCLDevice) {
          final OpenCLDevice openclDevice = (OpenCLDevice) device;

@@ -3,6 +3,7 @@ package com.amd.aparapi.sample.extension;
 import com.amd.aparapi.Range;
 import com.amd.aparapi.device.Device;
 import com.amd.aparapi.device.OpenCLDevice;
+import com.amd.aparapi.internal.kernel.*;
 import com.amd.aparapi.opencl.OpenCL;
 
 public class HistogramIdeal{
@@ -40,7 +41,7 @@ public class HistogramIdeal{
       System.out.println("binResult size=" + binResult.length);
       final int[] histo = new int[BIN_SIZE];
       final int[] refHisto = new int[BIN_SIZE];
-      final Device device = Device.best();
+      final Device device = KernelManager.instance().bestDevice();
 
       if (device != null) {
          System.out.println(((OpenCLDevice) device).getOpenCLPlatform().getName());

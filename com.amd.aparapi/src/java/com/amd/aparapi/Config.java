@@ -37,13 +37,11 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
  */
 package com.amd.aparapi;
 
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.amd.aparapi.internal.instruction.*;
+import com.amd.aparapi.internal.jni.*;
+import com.amd.aparapi.internal.tool.*;
 
-import com.amd.aparapi.internal.instruction.Instruction;
-import com.amd.aparapi.internal.jni.ConfigJNI;
-import com.amd.aparapi.internal.tool.InstructionViewer;
+import java.util.logging.*;
 
 /**
  * A central location for holding all runtime configurable properties as well as logging configuration.
@@ -99,6 +97,22 @@ public class Config extends ConfigJNI{
     *  
     */
    public static final boolean enableShowGeneratedOpenCL = Boolean.getBoolean(propPkgName + ".enableShowGeneratedOpenCL");
+   
+   /**
+    * Upon exiting the JVM, dumps kernel profiling info to standard out.
+    *
+    *  Usage -Dcom.amd.aparapi.dumpProfilesOnExit={true|false}
+    *  
+    */
+   public static final boolean dumpProfilesOnExit = Boolean.getBoolean(propPkgName + ".dumpProfilesOnExit");
+
+   /**
+    * Dumps profiling info (for a single execution) after every Kernel execution.
+    *
+    *  Usage -Dcom.amd.aparapi.dumpProfileOnExecution={true|false}
+    *
+    */
+   public static final boolean dumpProfileOnExecution = Boolean.getBoolean(propPkgName + ".dumpProfileOnExecution");
 
    // Pragma/OpenCL codegen related flags
    public static final boolean enableAtomic32 = Boolean.getBoolean(propPkgName + ".enableAtomic32");

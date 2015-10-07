@@ -38,29 +38,16 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 
 package com.amd.aparapi.sample.extension;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
+import com.amd.aparapi.*;
+import com.amd.aparapi.device.*;
+import com.amd.aparapi.internal.kernel.*;
+import com.amd.aparapi.opencl.*;
+import com.amd.aparapi.opencl.OpenCL.*;
 
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
-import com.amd.aparapi.Range;
-import com.amd.aparapi.device.Device;
-import com.amd.aparapi.device.OpenCLDevice;
-import com.amd.aparapi.opencl.OpenCL;
-import com.amd.aparapi.opencl.OpenCL.Resource;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.*;
 
 /**
  * An example Aparapi application which displays a view of the Mandelbrot set and lets the user zoom in to a particular point. 
@@ -155,7 +142,7 @@ public class MandelSimple{
       float offsetx = .0f;
 
       float offsety = .0f;
-      final Device device = Device.best();
+      final Device device = KernelManager.instance().bestDevice();
       if (device instanceof OpenCLDevice) {
          final OpenCLDevice openclDevice = (OpenCLDevice) device;
 
