@@ -140,6 +140,15 @@ public class Range extends RangeJNI{
    public static Range create(Device _device, int _globalWidth) {
       final Range withoutLocal = create(_device, _globalWidth, 1);
 
+      if (_device == JavaDevice.THREAD_POOL) {
+         withoutLocal.setLocalSize_0(Runtime.getRuntime().availableProcessors());
+         withoutLocal.setLocalIsDerived(true);
+         return withoutLocal;
+      } else if (_device instanceof JavaDevice) {
+         withoutLocal.setLocalIsDerived(true);
+         return withoutLocal;
+      }
+
       if (_globalWidth == 0) {
          withoutLocal.setLocalIsDerived(true);
          return withoutLocal;
