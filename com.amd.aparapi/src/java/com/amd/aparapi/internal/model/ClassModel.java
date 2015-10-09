@@ -2815,7 +2815,6 @@ public class ClassModel {
          long s = System.nanoTime();
          Entrypoint entrypointWithoutKernel = entrypointCache.computeIfAbsent(key);
          long e = System.nanoTime() - s;
-         System.out.println("newMethodModel: " + e / 1000000f);
          return entrypointWithoutKernel.cloneForKernel(_k);
       } else {
          final MethodModel method = getMethodModel(_entrypointName, _descriptor);

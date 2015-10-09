@@ -187,8 +187,8 @@ public class KernelRunner extends KernelRunnerJNI{
     * 
     * @see KernelRunnerJNI#disposeJNI(long)
     */
-   public void dispose() {
-      if (args != null || kernel.isRunningCL()) {
+   public synchronized void dispose() {
+      if (kernel.isRunningCL()) {
          disposeJNI(jniContextHandle);
       }
       // We are using a shared pool, so there's no need no shutdown it when kernel is disposed

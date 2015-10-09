@@ -2154,12 +2154,6 @@ public abstract class Kernel implements Cloneable {
       }
    }
 
-   /** Automatically releases any resources associated with this Kernel when the Kernel is garbage collected. */
-   @Override
-   protected void finalize() {
-      dispose();
-   }
-
    public boolean isRunningCL() {
       return getTargetDevice() instanceof OpenCLDevice;
    }
