@@ -42,6 +42,7 @@
 #include <map>
 #include <vector>
 #include <stdio.h>
+#include <string>
 
 void setMap(std::map<cl_int, const char*>& errorMap) {
    errorMap[CL_SUCCESS]                         = "success";
