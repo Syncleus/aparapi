@@ -1371,11 +1371,12 @@ public class KernelRunner extends KernelRunnerJNI{
                            // args[i].type |= ARG_GLOBAL;
 
                            if (type.getName().startsWith("[L")) {
+                              args[i].setArray(null); // will get updated in updateKernelArrayRefs
                               args[i].setType(args[i].getType()
-                                    | (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ | ARG_APARAPI_BUFFER));
+                                    | (ARG_ARRAY | ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ));
 
                               if (logger.isLoggable(Level.FINE)) {
-                                 logger.fine("tagging " + args[i].getName() + " as (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ)");
+                                 logger.fine("tagging " + args[i].getName() + " as (ARG_ARRAY | ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ)");
                               }
                            } else if (type.getName().startsWith("[[")) {
 
