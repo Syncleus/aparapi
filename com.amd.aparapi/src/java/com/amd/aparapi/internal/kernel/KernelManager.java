@@ -190,7 +190,7 @@ public class KernelManager {
                devices.addAll(gpus);
                break;
             case CPU:
-               devices.add(cpus.get(0));
+               devices.addAll(cpus);
                break;
             case JTP:
                devices.add(JavaDevice.THREAD_POOL);
