@@ -6,33 +6,33 @@ Redistribution and use in source and binary forms, with or without modification,
 following conditions are met:
 
 Redistributions of source code must retain the above copyright notice, this list of conditions and the following
-disclaimer. 
+disclaimer.
 
 Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
-disclaimer in the documentation and/or other materials provided with the distribution. 
+disclaimer in the documentation and/or other materials provided with the distribution.
 
 Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products
-derived from this software without specific prior written permission. 
+derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
 INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
 SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 If you use the software (in whole or in part), you shall adhere to all applicable U.S., European, and other export
 laws, including but not limited to the U.S. Export Administration Regulations ("EAR"), (15 C.F.R. Sections 730 through
 774), and E.U. Council Regulation (EC) No 1334/2000 of 22 June 2000.  Further, pursuant to Section 740.6 of the EAR,
-you hereby certify that, except pursuant to a license granted by the United States Department of Commerce Bureau of 
-Industry and Security or as otherwise permitted pursuant to a License Exception under the U.S. Export Administration 
+you hereby certify that, except pursuant to a license granted by the United States Department of Commerce Bureau of
+Industry and Security or as otherwise permitted pursuant to a License Exception under the U.S. Export Administration
 Regulations ("EAR"), you will not (1) export, re-export or release to a national of a country in Country Groups D:1,
 E:1 or E:2 any restricted technology, software, or source code you receive hereunder, or (2) export to Country Groups
 D:1, E:1 or E:2 the direct product of such technology or software, if such foreign produced direct product is subject
 to national security controls as identified on the Commerce Control List (currently found in Supplement 1 to Part 774
 of EAR).  For the most current Country Group listings, or for additional information about the EAR or your obligations
-under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
+under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/.
 
 */
 package com.amd.aparapi.internal.writer;
@@ -53,8 +53,8 @@ import java.util.*;
 
 /**
  * Base abstract class for converting <code>Aparapi</code> IR to text.<br/>
- * 
- *   
+ *
+ *
  * @author gfrost
  *
  */
@@ -364,12 +364,19 @@ public abstract class BlockWriter{
 
    public void writeInstruction(Instruction _instruction) throws CodeGenException {
       if (_instruction instanceof CompositeIfElseInstruction) {
+         boolean needParenthesis = isNeedParenthesis(_instruction);
+         if(needParenthesis){
+             write("(");
+         }
          write("(");
          final Instruction lhs = writeConditional(((CompositeInstruction) _instruction).getBranchSet());
          write(")?");
          writeInstruction(lhs);
          write(":");
          writeInstruction(lhs.getNextExpr().getNextExpr());
+         if(needParenthesis){
+             write(")");
+         }
       } else if (_instruction instanceof CompositeInstruction) {
          writeComposite((CompositeInstruction) _instruction);
 
@@ -556,24 +563,7 @@ public abstract class BlockWriter{
       } else if (_instruction instanceof BinaryOperator) {
          final BinaryOperator binaryInstruction = (BinaryOperator) _instruction;
          final Instruction parent = binaryInstruction.getParentExpr();
-         boolean needsParenthesis = true;
-
-         if (parent instanceof AssignToLocalVariable) {
-            needsParenthesis = false;
-         } else if (parent instanceof AssignToField) {
-            needsParenthesis = false;
-         } else if (parent instanceof AssignToArrayElement) {
-            needsParenthesis = false;
-         } else {
-            /**
-                        if (parent instanceof BinaryOperator) {
-                           BinaryOperator parentBinaryOperator = (BinaryOperator) parent;
-                           if (parentBinaryOperator.getOperator().ordinal() > binaryInstruction.getOperator().ordinal()) {
-                              needsParenthesis = false;
-                           }
-                        }
-            **/
-         }
+         boolean needsParenthesis = isNeedParenthesis(binaryInstruction);
 
          if (needsParenthesis) {
             write("(");
@@ -727,6 +717,29 @@ public abstract class BlockWriter{
          throw new CodeGenException(String.format("%s", _instruction.getByteCode().toString().toLowerCase()));
       }
 
+   }
+
+   private boolean isNeedParenthesis(Instruction instruction){
+        final Instruction parent = instruction.getParentExpr();
+        boolean needsParenthesis = true;
+
+        if (parent instanceof AssignToLocalVariable) {
+           needsParenthesis = false;
+        } else if (parent instanceof AssignToField) {
+           needsParenthesis = false;
+        } else if (parent instanceof AssignToArrayElement) {
+           needsParenthesis = false;
+        } else {
+           /**
+                       if (parent instanceof BinaryOperator) {
+                          BinaryOperator parentBinaryOperator = (BinaryOperator) parent;
+                          if (parentBinaryOperator.getOperator().ordinal() > binaryInstruction.getOperator().ordinal()) {
+                             needsParenthesis = false;
+                          }
+                       }
+           **/
+        }
+        return needsParenthesis;
    }
 
    private boolean isMultiDimensionalArray(NameAndTypeEntry nameAndTypeEntry) {

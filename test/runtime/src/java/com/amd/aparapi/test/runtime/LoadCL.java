@@ -1,14 +1,13 @@
 package com.amd.aparapi.test.runtime;
 
-import com.amd.aparapi.Range;
-import com.amd.aparapi.device.Device;
-import com.amd.aparapi.device.OpenCLDevice;
-import com.amd.aparapi.opencl.OpenCL;
-import com.amd.aparapi.opencl.OpenCL.Resource;
-import com.amd.aparapi.opencl.OpenCL.Source;
+import com.amd.aparapi.*;
+import com.amd.aparapi.device.*;
+import com.amd.aparapi.internal.kernel.*;
+import com.amd.aparapi.opencl.*;
+import com.amd.aparapi.opencl.OpenCL.*;
+import org.junit.*;
 
-import static org.junit.Assert.assertTrue;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class LoadCL{
 
@@ -31,7 +30,7 @@ public class LoadCL{
       final float[] quads = new float[size];
       final Range range = Range.create(size);
 
-      final Device device = Device.best();
+      final Device device = KernelManager.instance().bestDevice();
 
       if (device instanceof OpenCLDevice) {
          final OpenCLDevice openclDevice = (OpenCLDevice) device;

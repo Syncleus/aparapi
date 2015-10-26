@@ -307,7 +307,15 @@ public abstract class KernelRunnerJNI{
 
    protected native int getJNI(long _jniContextHandle, Object _array);
 
-   protected native long buildProgramJNI(long _jniContextHandle, String _source);
+   /**
+    * @param _source The OpenCL source code to compile, which may be sent empty if the binary for that source code is known to be cached on the JNI side
+    *                under the key {@code _binaryKey}.
+    * @param _binaryKey A key which embodies a Kernel class and a Device, under which the JNI side will cache the compiled binary corresponding to that Kernel/Device
+    *                   pair. Once a certain _binaryKey has been passed to this method once, further calls to this method with that key will ignore the _source (which
+    *                   can be passed empty) andused the cached binary.
+    *                   <p>By passing an empty String as the _binaryKey, the entire JNI-side binary caching apparatus can be disabled.
+    */
+   protected native long buildProgramJNI(long _jniContextHandle, String _source, String _binaryKey);
 
    protected native int setArgsJNI(long _jniContextHandle, KernelArgJNI[] _args, int argc);
 

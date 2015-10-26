@@ -88,7 +88,7 @@ void OpenCLRange::fill(JNIEnv *jenv, jobject rangeInstance, jint dims, size_t* o
 }
 
 JNI_JAVA(jobject, OpenCLJNI, createProgram)
-   (JNIEnv *jenv, jobject jobj, jobject deviceInstance, jstring source) {
+   (JNIEnv *jenv, jobject jobj, jobject deviceInstance, jstring source, jstring binaryKey) {
 
       jobject platformInstance = OpenCLDevice::getPlatformInstance(jenv, deviceInstance);
       cl_platform_id platformId = OpenCLPlatform::getPlatformId(jenv, platformInstance);
@@ -105,7 +105,7 @@ JNI_JAVA(jobject, OpenCLJNI, createProgram)
 
 
       jstring log=NULL;
-      cl_program program = CLHelper::compile(jenv, context, 1, &deviceId, source, &log, &status);
+      cl_program program = CLHelper::compile(jenv, context, &deviceId, &source, &binaryKey, &log, &status);
       cl_command_queue queue = NULL;
       if(status == CL_SUCCESS) {
          cl_command_queue_properties queue_props = CL_QUEUE_PROFILING_ENABLE;

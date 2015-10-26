@@ -1,34 +1,15 @@
 package com.amd.aparapi.device;
 
-import com.amd.aparapi.ProfileInfo;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.amd.aparapi.Range;
-import com.amd.aparapi.internal.opencl.OpenCLArgDescriptor;
-import com.amd.aparapi.internal.opencl.OpenCLKernel;
-import com.amd.aparapi.internal.opencl.OpenCLPlatform;
-import com.amd.aparapi.internal.opencl.OpenCLProgram;
-import com.amd.aparapi.opencl.OpenCL;
-import com.amd.aparapi.opencl.OpenCL.Arg;
-import com.amd.aparapi.opencl.OpenCL.Constant;
-import com.amd.aparapi.opencl.OpenCL.GlobalReadOnly;
-import com.amd.aparapi.opencl.OpenCL.GlobalReadWrite;
-import com.amd.aparapi.opencl.OpenCL.GlobalWriteOnly;
+import com.amd.aparapi.*;
+import com.amd.aparapi.internal.opencl.*;
+import com.amd.aparapi.opencl.*;
+import com.amd.aparapi.opencl.OpenCL.*;
 import com.amd.aparapi.opencl.OpenCL.Kernel;
-import com.amd.aparapi.opencl.OpenCL.Local;
-import com.amd.aparapi.opencl.OpenCL.Resource;
-import com.amd.aparapi.opencl.OpenCL.Source;
+
+import java.io.*;
+import java.lang.annotation.*;
+import java.lang.reflect.*;
+import java.util.*;
 
 public class OpenCLDevice extends Device{
 
@@ -43,6 +24,8 @@ public class OpenCLDevice extends Device{
    private long globalMemSize;
 
    private long maxMemAllocSize;
+
+   private String shortDescription = null;
 
    /**
     * Minimal constructor
@@ -99,6 +82,18 @@ public class OpenCLDevice extends Device{
 
    public long getDeviceId() {
       return (deviceId);
+   }
+
+   @Override
+   public String getShortDescription() {
+      if (shortDescription == null) {
+         String vendor = platform.getName();
+         // Hopefully(!) this equates to the recognisable name of the vendor, e.g. "Intel", "NVIDIA", "AMD"
+         // Note, it is not necessarily the hardware vendor, e.g. if the AMD CPU driver (i.e. platform) is used for an Intel CPU, this will be "AMD"
+         String[] split = vendor.split("[\\s\\(\\)]"); // split on whitespace or on '(' or ')' since Intel use "Intel(R)" here
+         shortDescription = split[0] + "<" + getType() + ">";
+      }
+      return shortDescription;
    }
 
    public static class OpenCLInvocationHandler<T extends OpenCL<T>> implements InvocationHandler{
@@ -380,8 +375,6 @@ public class OpenCLDevice extends Device{
          }
       }
 
-      // System.out.println("opencl{\n" + _source + "\n}opencl");
-
       final OpenCLProgram program = new OpenCLProgram(this, _source).createProgram(this);
 
       final Map<String, OpenCLKernel> map = new HashMap<String, OpenCLKernel>();
@@ -412,6 +405,22 @@ public class OpenCLDevice extends Device{
       OpenCLDevice select(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs);
    }
 
+   /** List OpenCLDevices of a given TYPE, or all OpenCLDevices if type == null. */
+   public static List<OpenCLDevice> listDevices(TYPE type) {
+      final OpenCLPlatform platform = new OpenCLPlatform(0, null, null, null);
+      final ArrayList<OpenCLDevice> results = new ArrayList<>();
+
+      for (final OpenCLPlatform p : platform.getOpenCLPlatforms()) {
+         for (final OpenCLDevice device : p.getOpenCLDevices()) {
+            if (type == null || device.getType() == type) {
+               results.add(device);
+            }
+         }
+      }
+
+      return results;
+   }
+
    public static OpenCLDevice select(DeviceSelector _deviceSelector) {
       OpenCLDevice device = null;
       final OpenCLPlatform platform = new OpenCLPlatform(0, null, null, null);
@@ -435,8 +444,10 @@ public class OpenCLDevice extends Device{
       OpenCLDevice device = null;
       final OpenCLPlatform platform = new OpenCLPlatform(0, null, null, null);
 
-      for (final OpenCLPlatform p : platform.getOpenCLPlatforms()) {
-         for (final OpenCLDevice d : p.getOpenCLDevices()) {
+      List<OpenCLPlatform> openCLPlatforms = platform.getOpenCLPlatforms();
+      for (final OpenCLPlatform p : openCLPlatforms) {
+         List<OpenCLDevice> openCLDevices = p.getOpenCLDevices();
+         for (final OpenCLDevice d : openCLDevices) {
             if (device == null) {
                device = d;
             } else {
@@ -466,7 +477,6 @@ public class OpenCLDevice extends Device{
       return (device);
    }
 
-
    @Override public String toString() {
       final StringBuilder s = new StringBuilder("{");
       boolean first = true;
@@ -482,7 +492,8 @@ public class OpenCLDevice extends Device{
 
       s.append("}");
 
-      return ("Device " + deviceId + "\n  type:" + type + "\n  maxComputeUnits=" + maxComputeUnits + "\n  maxWorkItemDimensions="
+      return ("Device " + deviceId + "\n  vendor = " + getOpenCLPlatform().getVendor()
+            + "\n  type:" + type + "\n  maxComputeUnits=" + maxComputeUnits + "\n  maxWorkItemDimensions="
             + maxWorkItemDimensions + "\n  maxWorkItemSizes=" + s + "\n  maxWorkWorkGroupSize=" + maxWorkGroupSize
             + "\n  globalMemSize=" + globalMemSize + "\n  localMemSize=" + localMemSize);
    }

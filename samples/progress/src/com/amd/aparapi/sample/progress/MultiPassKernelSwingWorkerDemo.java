@@ -1,7 +1,7 @@
 package com.amd.aparapi.sample.progress;
 
-import com.amd.aparapi.Kernel;
-import com.amd.aparapi.internal.kernel.KernelRunner;
+import com.amd.aparapi.*;
+import com.amd.aparapi.internal.kernel.*;
 import com.amd.aparapi.util.swing.MultiPassKernelSwingWorker;
 
 import javax.swing.*;
@@ -23,13 +23,13 @@ public class MultiPassKernelSwingWorkerDemo {
    private static LongRunningKernel kernel;
    private static MultiPassKernelSwingWorker worker;
 
-   private static final boolean TEST_JTP = true;
+   private static final boolean TEST_JTP = false;
 
    public static void main(String[] ignored) throws Exception {
-      kernel = new LongRunningKernel();
       if (TEST_JTP) {
-         kernel.setExecutionMode(Kernel.EXECUTION_MODE.JTP);
+         KernelManager.setKernelManager(KernelManagers.JTP_ONLY);
       }
+      kernel = new LongRunningKernel();
 
       UIManager.setLookAndFeel(NimbusLookAndFeel.class.getName());
       JPanel rootPanel = new JPanel();

@@ -73,6 +73,11 @@ public abstract class KernelWriter extends BlockWriter{
 
    private final String cvtShortArrayToShortStar = "short* ";
 
+   /** When declaring a __private struct pointer field, we always omit the "__private" qualifier. This is because the NVidia OpenCL compiler, at time of writing
+    * erroneously complains about explicitly qualifying pointers with __private ("error: field may not be qualified with an address space").
+    */
+   private static final boolean IMPLICIT_PRIVATE_FIELDS = true;
+
    // private static Logger logger = Logger.getLogger(Config.getLoggerName());
 
    private Entrypoint entryPoint = null;
@@ -333,7 +338,9 @@ public abstract class KernelWriter extends BlockWriter{
          while (signature.startsWith("[")) {
             if (isPointer == false) {
                argLine.append(argType + " ");
-               thisStructLine.append(type + " ");
+               if (!(type.equals(__private) && IMPLICIT_PRIVATE_FIELDS)) {
+                  thisStructLine.append(type + " ");
+               }
             }
             isPointer = true;
             numDimensions++;

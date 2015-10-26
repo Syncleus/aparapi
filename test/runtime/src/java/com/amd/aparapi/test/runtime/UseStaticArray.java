@@ -1,8 +1,10 @@
 package com.amd.aparapi.test.runtime;
 
+import com.amd.aparapi.*;
+import com.amd.aparapi.device.*;
+import org.junit.*;
+
 import static org.junit.Assert.*;
-import org.junit.Test;
-import com.amd.aparapi.Kernel;
 
 public class UseStaticArray extends Kernel{
 
@@ -26,7 +28,7 @@ public class UseStaticArray extends Kernel{
 
       execute(size);
 
-      assertTrue("ran on GPU", getExecutionMode() == Kernel.EXECUTION_MODE.GPU);
+      assertTrue("ran on GPU", getTargetDevice().getType() == Device.TYPE.GPU);
 
       assertArrayEquals("results == fooBar", results, values);
 //      for (int i = 0; i < size; i++) {

@@ -82,7 +82,7 @@ public class Main{
       kernel.execute(Range.create(512));
 
       // Report target execution mode: GPU or JTP (Java Thread Pool).
-      System.out.println("Execution mode=" + kernel.getExecutionMode());
+      System.out.println("Device = " + kernel.getTargetDevice().getShortDescription());
 
       // Display computed square values.
       for (int i = 0; i < size; i++) {

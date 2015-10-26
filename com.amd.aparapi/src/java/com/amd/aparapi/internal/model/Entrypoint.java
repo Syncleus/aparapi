@@ -62,8 +62,6 @@ public class Entrypoint implements Cloneable {
 
    private Object kernelInstance = null;
 
-   private final boolean fallback = false;
-
    private final Set<String> referencedFieldNames = new LinkedHashSet<String>();
 
    private final Set<String> arrayFieldAssignments = new LinkedHashSet<String>();
@@ -474,7 +472,7 @@ public class Entrypoint implements Cloneable {
 
       // methodMap now contains a list of method called by run itself().
       // Walk the whole graph of called methods and add them to the methodMap
-      while (!fallback && discovered) {
+      while (discovered) {
          discovered = false;
          for (final MethodModel mm : new ArrayList<MethodModel>(methodMap.values())) {
             for (final MethodCall methodCall : mm.getMethodCalls()) {
@@ -506,295 +504,288 @@ public class Entrypoint implements Cloneable {
 
       methodModel.checkForRecursion(new HashSet<MethodModel>());
 
-      if (logger.isLoggable(Level.FINE)) {
-         logger.fine("fallback=" + fallback);
-      }
+      calledMethods.addAll(methodMap.values());
+      Collections.reverse(calledMethods);
+      final List<MethodModel> methods = new ArrayList<MethodModel>(calledMethods);
 
-      if (!fallback) {
-         calledMethods.addAll(methodMap.values());
-         Collections.reverse(calledMethods);
-         final List<MethodModel> methods = new ArrayList<MethodModel>(calledMethods);
+      // add method to the calledMethods so we can include in this list
+      methods.add(methodModel);
+      final Set<String> fieldAssignments = new HashSet<String>();
 
-         // add method to the calledMethods so we can include in this list
-         methods.add(methodModel);
-         final Set<String> fieldAssignments = new HashSet<String>();
+      final Set<String> fieldAccesses = new HashSet<String>();
 
-         final Set<String> fieldAccesses = new HashSet<String>();
+      for (final MethodModel methodModel : methods) {
 
-         for (final MethodModel methodModel : methods) {
-
-            // Record which pragmas we need to enable
-            if (methodModel.requiresDoublePragma()) {
-               usesDoubles = true;
-               if (logger.isLoggable(Level.FINE)) {
-                  logger.fine("Enabling doubles on " + methodModel.getName());
-               }
-
-            }
-            if (methodModel.requiresByteAddressableStorePragma()) {
-               usesByteWrites = true;
-               if (logger.isLoggable(Level.FINE)) {
-                  logger.fine("Enabling byte addressable on " + methodModel.getName());
-               }
+         // Record which pragmas we need to enable
+         if (methodModel.requiresDoublePragma()) {
+            usesDoubles = true;
+            if (logger.isLoggable(Level.FINE)) {
+               logger.fine("Enabling doubles on " + methodModel.getName());
             }
 
-            for (Instruction instruction = methodModel.getPCHead(); instruction != null; instruction = instruction.getNextPC()) {
+         }
+         if (methodModel.requiresByteAddressableStorePragma()) {
+            usesByteWrites = true;
+            if (logger.isLoggable(Level.FINE)) {
+               logger.fine("Enabling byte addressable on " + methodModel.getName());
+            }
+         }
 
-               if (instruction instanceof AssignToArrayElement) {
-                  final AssignToArrayElement assignment = (AssignToArrayElement) instruction;
+         for (Instruction instruction = methodModel.getPCHead(); instruction != null; instruction = instruction.getNextPC()) {
 
-                  final Instruction arrayRef = assignment.getArrayRef();
-                  // AccessField here allows instance and static array refs
-                  if (arrayRef instanceof I_GETFIELD) {
-                     final I_GETFIELD getField = (I_GETFIELD) arrayRef;
-                     final FieldEntry field = getField.getConstantPoolFieldEntry();
-                     final String assignedArrayFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-                     arrayFieldAssignments.add(assignedArrayFieldName);
-                     referencedFieldNames.add(assignedArrayFieldName);
+            if (instruction instanceof AssignToArrayElement) {
+               final AssignToArrayElement assignment = (AssignToArrayElement) instruction;
 
-                  }
-               } else if (instruction instanceof AccessArrayElement) {
-                  final AccessArrayElement access = (AccessArrayElement) instruction;
+               final Instruction arrayRef = assignment.getArrayRef();
+               // AccessField here allows instance and static array refs
+               if (arrayRef instanceof I_GETFIELD) {
+                  final I_GETFIELD getField = (I_GETFIELD) arrayRef;
+                  final FieldEntry field = getField.getConstantPoolFieldEntry();
+                  final String assignedArrayFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+                  arrayFieldAssignments.add(assignedArrayFieldName);
+                  referencedFieldNames.add(assignedArrayFieldName);
 
-                  final Instruction arrayRef = access.getArrayRef();
-                  // AccessField here allows instance and static array refs
-                  if (arrayRef instanceof I_GETFIELD) {
-                     final I_GETFIELD getField = (I_GETFIELD) arrayRef;
-                     final FieldEntry field = getField.getConstantPoolFieldEntry();
-                     final String accessedArrayFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-                     arrayFieldAccesses.add(accessedArrayFieldName);
-                     referencedFieldNames.add(accessedArrayFieldName);
+               }
+            } else if (instruction instanceof AccessArrayElement) {
+               final AccessArrayElement access = (AccessArrayElement) instruction;
 
-                  }
-               } else if (instruction instanceof I_ARRAYLENGTH) {
-                  Instruction child = instruction.getFirstChild();
-                  while(child instanceof I_AALOAD) {
-                     child = child.getFirstChild();
-                  }
-                  if (!(child instanceof AccessField)) {
-                     throw new ClassParseException(ClassParseException.TYPE.LOCALARRAYLENGTHACCESS);
-                  }
-                  final AccessField childField = (AccessField) child;
-                  final String arrayName = childField.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-                  arrayFieldArrayLengthUsed.add(arrayName);
-                  if (logger.isLoggable(Level.FINE)) {
-                     logger.fine("Noted arraylength in " + methodModel.getName() + " on " + arrayName);
-                  }
-               } else if (instruction instanceof AccessField) {
-                  final AccessField access = (AccessField) instruction;
-                  final FieldEntry field = access.getConstantPoolFieldEntry();
-                  final String accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-                  fieldAccesses.add(accessedFieldName);
-                  referencedFieldNames.add(accessedFieldName);
+               final Instruction arrayRef = access.getArrayRef();
+               // AccessField here allows instance and static array refs
+               if (arrayRef instanceof I_GETFIELD) {
+                  final I_GETFIELD getField = (I_GETFIELD) arrayRef;
+                  final FieldEntry field = getField.getConstantPoolFieldEntry();
+                  final String accessedArrayFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+                  arrayFieldAccesses.add(accessedArrayFieldName);
+                  referencedFieldNames.add(accessedArrayFieldName);
 
-                  final String signature = field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-                  if (logger.isLoggable(Level.FINE)) {
-                     logger.fine("AccessField field type= " + signature + " in " + methodModel.getName());
-                  }
+               }
+            } else if (instruction instanceof I_ARRAYLENGTH) {
+               Instruction child = instruction.getFirstChild();
+               while(child instanceof I_AALOAD) {
+                  child = child.getFirstChild();
+               }
+               if (!(child instanceof AccessField)) {
+                  throw new ClassParseException(ClassParseException.TYPE.LOCALARRAYLENGTHACCESS);
+               }
+               final AccessField childField = (AccessField) child;
+               final String arrayName = childField.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+               arrayFieldArrayLengthUsed.add(arrayName);
+               if (logger.isLoggable(Level.FINE)) {
+                  logger.fine("Noted arraylength in " + methodModel.getName() + " on " + arrayName);
+               }
+            } else if (instruction instanceof AccessField) {
+               final AccessField access = (AccessField) instruction;
+               final FieldEntry field = access.getConstantPoolFieldEntry();
+               final String accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+               fieldAccesses.add(accessedFieldName);
+               referencedFieldNames.add(accessedFieldName);
 
-                  // Add the class model for the referenced obj array
-                  if (signature.startsWith("[L")) {
-                     // Turn [Lcom/amd/javalabs/opencl/demo/DummyOOA; into com.amd.javalabs.opencl.demo.DummyOOA for example
-                     final String className = (signature.substring(2, signature.length() - 1)).replace('/', '.');
-                     final ClassModel arrayFieldModel = getOrUpdateAllClassAccesses(className);
-                     if (arrayFieldModel != null) {
-                        final Class<?> memberClass = arrayFieldModel.getClassWeAreModelling();
-                        final int modifiers = memberClass.getModifiers();
-                        if (!Modifier.isFinal(modifiers)) {
-                           throw new ClassParseException(ClassParseException.TYPE.ACCESSEDOBJECTNONFINAL);
-                        }
+               final String signature = field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
+               if (logger.isLoggable(Level.FINE)) {
+                  logger.fine("AccessField field type= " + signature + " in " + methodModel.getName());
+               }
 
-                        final ClassModel refModel = objectArrayFieldsClasses.get(className);
-                        if (refModel == null) {
+               // Add the class model for the referenced obj array
+               if (signature.startsWith("[L")) {
+                  // Turn [Lcom/amd/javalabs/opencl/demo/DummyOOA; into com.amd.javalabs.opencl.demo.DummyOOA for example
+                  final String className = (signature.substring(2, signature.length() - 1)).replace('/', '.');
+                  final ClassModel arrayFieldModel = getOrUpdateAllClassAccesses(className);
+                  if (arrayFieldModel != null) {
+                     final Class<?> memberClass = arrayFieldModel.getClassWeAreModelling();
+                     final int modifiers = memberClass.getModifiers();
+                     if (!Modifier.isFinal(modifiers)) {
+                        throw new ClassParseException(ClassParseException.TYPE.ACCESSEDOBJECTNONFINAL);
+                     }
 
-                           // Verify no other member with common parent
-                           for (final ClassModel memberObjClass : objectArrayFieldsClasses.values()) {
-                              ClassModel superModel = memberObjClass;
-                              while (superModel != null) {
-                                 if (superModel.isSuperClass(memberClass)) {
-                                    throw new ClassParseException(ClassParseException.TYPE.ACCESSEDOBJECTFIELDNAMECONFLICT);
-                                 }
-                                 superModel = superModel.getSuperClazz();
+                     final ClassModel refModel = objectArrayFieldsClasses.get(className);
+                     if (refModel == null) {
+
+                        // Verify no other member with common parent
+                        for (final ClassModel memberObjClass : objectArrayFieldsClasses.values()) {
+                           ClassModel superModel = memberObjClass;
+                           while (superModel != null) {
+                              if (superModel.isSuperClass(memberClass)) {
+                                 throw new ClassParseException(ClassParseException.TYPE.ACCESSEDOBJECTFIELDNAMECONFLICT);
                               }
-                           }
-
-                           objectArrayFieldsClasses.put(className, arrayFieldModel);
-                           if (logger.isLoggable(Level.FINE)) {
-                              logger.fine("adding class to objectArrayFields: " + className);
+                              superModel = superModel.getSuperClazz();
                            }
                         }
-                     }
-                  } else {
-                     final String className = (field.getClassEntry().getNameUTF8Entry().getUTF8()).replace('/', '.');
-                     // Look for object data member access
-                     if (!className.equals(getClassModel().getClassWeAreModelling().getName())
-                           && (getFieldFromClassHierarchy(getClassModel().getClassWeAreModelling(), accessedFieldName) == null)) {
-                        updateObjectMemberFieldAccesses(className, field);
+
+                        objectArrayFieldsClasses.put(className, arrayFieldModel);
+                        if (logger.isLoggable(Level.FINE)) {
+                           logger.fine("adding class to objectArrayFields: " + className);
+                        }
                      }
                   }
-
-               } else if (instruction instanceof AssignToField) {
-                  final AssignToField assignment = (AssignToField) instruction;
-                  final FieldEntry field = assignment.getConstantPoolFieldEntry();
-                  final String assignedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-                  fieldAssignments.add(assignedFieldName);
-                  referencedFieldNames.add(assignedFieldName);
-
+               } else {
                   final String className = (field.getClassEntry().getNameUTF8Entry().getUTF8()).replace('/', '.');
                   // Look for object data member access
                   if (!className.equals(getClassModel().getClassWeAreModelling().getName())
-                        && (getFieldFromClassHierarchy(getClassModel().getClassWeAreModelling(), assignedFieldName) == null)) {
+                        && (getFieldFromClassHierarchy(getClassModel().getClassWeAreModelling(), accessedFieldName) == null)) {
                      updateObjectMemberFieldAccesses(className, field);
-                  } else {
+                  }
+               }
 
-                     if ((!Config.enablePUTFIELD) && methodModel.methodUsesPutfield() && !methodModel.isSetter()) {
-                        throw new ClassParseException(ClassParseException.TYPE.ACCESSEDOBJECTONLYSUPPORTSSIMPLEPUTFIELD);
-                     }
+            } else if (instruction instanceof AssignToField) {
+               final AssignToField assignment = (AssignToField) instruction;
+               final FieldEntry field = assignment.getConstantPoolFieldEntry();
+               final String assignedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+               fieldAssignments.add(assignedFieldName);
+               referencedFieldNames.add(assignedFieldName);
 
+               final String className = (field.getClassEntry().getNameUTF8Entry().getUTF8()).replace('/', '.');
+               // Look for object data member access
+               if (!className.equals(getClassModel().getClassWeAreModelling().getName())
+                     && (getFieldFromClassHierarchy(getClassModel().getClassWeAreModelling(), assignedFieldName) == null)) {
+                  updateObjectMemberFieldAccesses(className, field);
+               } else {
+
+                  if ((!Config.enablePUTFIELD) && methodModel.methodUsesPutfield() && !methodModel.isSetter()) {
+                     throw new ClassParseException(ClassParseException.TYPE.ACCESSEDOBJECTONLYSUPPORTSSIMPLEPUTFIELD);
                   }
 
                }
-               else if (instruction instanceof I_INVOKEVIRTUAL) {
-                  final I_INVOKEVIRTUAL invokeInstruction = (I_INVOKEVIRTUAL) instruction;
-                  MethodModel invokedMethod = invokeInstruction.getMethod();
-                  FieldEntry getterField = getSimpleGetterField(invokedMethod);
-                  if (getterField != null) {
-                     referencedFieldNames.add(getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
-                  }
-                  else {
-                     final MethodEntry methodEntry = invokeInstruction.getConstantPoolMethodEntry();
-                     if (Kernel.isMappedMethod(methodEntry)) { //only do this for intrinsics
 
-                        if (Kernel.usesAtomic32(methodEntry)) {
-                           setRequiresAtomics32Pragma(true);
+            }
+            else if (instruction instanceof I_INVOKEVIRTUAL) {
+               final I_INVOKEVIRTUAL invokeInstruction = (I_INVOKEVIRTUAL) instruction;
+               MethodModel invokedMethod = invokeInstruction.getMethod();
+               FieldEntry getterField = getSimpleGetterField(invokedMethod);
+               if (getterField != null) {
+                  referencedFieldNames.add(getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
+               }
+               else {
+                  final MethodEntry methodEntry = invokeInstruction.getConstantPoolMethodEntry();
+                  if (Kernel.isMappedMethod(methodEntry)) { //only do this for intrinsics
+
+                     if (Kernel.usesAtomic32(methodEntry)) {
+                        setRequiresAtomics32Pragma(true);
+                     }
+
+                     final Arg methodArgs[] = methodEntry.getArgs();
+                     if ((methodArgs.length > 0) && methodArgs[0].isArray()) { //currently array arg can only take slot 0
+                        final Instruction arrInstruction = invokeInstruction.getArg(0);
+                        if (arrInstruction instanceof AccessField) {
+                           final AccessField access = (AccessField) arrInstruction;
+                           final FieldEntry field = access.getConstantPoolFieldEntry();
+                           final String accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+                           arrayFieldAssignments.add(accessedFieldName);
+                           referencedFieldNames.add(accessedFieldName);
                         }
-
-                        final Arg methodArgs[] = methodEntry.getArgs();
-                        if ((methodArgs.length > 0) && methodArgs[0].isArray()) { //currently array arg can only take slot 0
-                           final Instruction arrInstruction = invokeInstruction.getArg(0);
-                           if (arrInstruction instanceof AccessField) {
-                              final AccessField access = (AccessField) arrInstruction;
-                              final FieldEntry field = access.getConstantPoolFieldEntry();
-                              final String accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-                              arrayFieldAssignments.add(accessedFieldName);
-                              referencedFieldNames.add(accessedFieldName);
-                           }
-                           else {
-                              throw new ClassParseException(ClassParseException.TYPE.ACCESSEDOBJECTSETTERARRAY);
-                           }
+                        else {
+                           throw new ClassParseException(ClassParseException.TYPE.ACCESSEDOBJECTSETTERARRAY);
                         }
                      }
-
                   }
+
                }
             }
          }
+      }
 
-         for (final String referencedFieldName : referencedFieldNames) {
+      for (final String referencedFieldName : referencedFieldNames) {
 
-            try {
-               final Class<?> clazz = classModel.getClassWeAreModelling();
-               final Field field = getFieldFromClassHierarchy(clazz, referencedFieldName);
-               if (field != null) {
-                  referencedFields.add(field);
-                  final ClassModelField ff = classModel.getField(referencedFieldName);
-                  assert ff != null : "ff should not be null for " + clazz.getName() + "." + referencedFieldName;
-                  referencedClassModelFields.add(ff);
+         try {
+            final Class<?> clazz = classModel.getClassWeAreModelling();
+            final Field field = getFieldFromClassHierarchy(clazz, referencedFieldName);
+            if (field != null) {
+               referencedFields.add(field);
+               final ClassModelField ff = classModel.getField(referencedFieldName);
+               assert ff != null : "ff should not be null for " + clazz.getName() + "." + referencedFieldName;
+               referencedClassModelFields.add(ff);
+            }
+         } catch (final SecurityException e) {
+            e.printStackTrace();
+         }
+      }
+
+      // Build data needed for oop form transforms if necessary
+      if (!objectArrayFieldsClasses.keySet().isEmpty()) {
+
+         for (final ClassModel memberObjClass : objectArrayFieldsClasses.values()) {
+
+            // At this point we have already done the field override safety check, so
+            // add all the superclass fields into the kernel member class to be
+            // sorted by size and emitted into the struct
+            ClassModel superModel = memberObjClass.getSuperClazz();
+            while (superModel != null) {
+               if (logger.isLoggable(Level.FINEST)) {
+                  logger.finest("adding = " + superModel.getClassWeAreModelling().getName() + " fields into "
+                        + memberObjClass.getClassWeAreModelling().getName());
                }
-            } catch (final SecurityException e) {
-               e.printStackTrace();
+               memberObjClass.getStructMembers().addAll(superModel.getStructMembers());
+               superModel = superModel.getSuperClazz();
             }
          }
 
-         // Build data needed for oop form transforms if necessary
-         if (!objectArrayFieldsClasses.keySet().isEmpty()) {
+         // Sort fields of each class biggest->smallest
+         final Comparator<FieldEntry> fieldSizeComparator = new Comparator<FieldEntry>(){
+            @Override public int compare(FieldEntry aa, FieldEntry bb) {
+               final String aType = aa.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
+               final String bType = bb.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
 
-            for (final ClassModel memberObjClass : objectArrayFieldsClasses.values()) {
+               // Booleans get converted down to bytes
+               final int aSize = InstructionSet.TypeSpec.valueOf(aType.equals("Z") ? "B" : aType).getSize();
+               final int bSize = InstructionSet.TypeSpec.valueOf(bType.equals("Z") ? "B" : bType).getSize();
 
-               // At this point we have already done the field override safety check, so 
-               // add all the superclass fields into the kernel member class to be
-               // sorted by size and emitted into the struct
-               ClassModel superModel = memberObjClass.getSuperClazz();
-               while (superModel != null) {
+               if (logger.isLoggable(Level.FINEST)) {
+                  logger.finest("aType= " + aType + " aSize= " + aSize + " . . bType= " + bType + " bSize= " + bSize);
+               }
+
+               // Note this is sorting in reverse order so the biggest is first
+               if (aSize > bSize) {
+                  return -1;
+               } else if (aSize == bSize) {
+                  return 0;
+               } else {
+                  return 1;
+               }
+            }
+         };
+
+         for (final ClassModel c : objectArrayFieldsClasses.values()) {
+            final ArrayList<FieldEntry> fields = c.getStructMembers();
+            if (fields.size() > 0) {
+               Collections.sort(fields, fieldSizeComparator);
+
+               // Now compute the total size for the struct
+               int totalSize = 0;
+               int alignTo = 0;
+
+               for (final FieldEntry f : fields) {
+                  // Record field offset for use while copying
+                  // Get field we will copy out of the kernel member object
+                  final Field rfield = getFieldFromClassHierarchy(c.getClassWeAreModelling(), f.getNameAndTypeEntry()
+                        .getNameUTF8Entry().getUTF8());
+
+                  c.getStructMemberOffsets().add(UnsafeWrapper.objectFieldOffset(rfield));
+
+                  final String fType = f.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
+                  //c.getStructMemberTypes().add(TypeSpec.valueOf(fType.equals("Z") ? "B" : fType));
+                  c.getStructMemberTypes().add(TypeSpec.valueOf(fType));
+                  final int fSize = TypeSpec.valueOf(fType.equals("Z") ? "B" : fType).getSize();
+                  if (fSize > alignTo) {
+                     alignTo = fSize;
+                  }
+
+                  totalSize += fSize;
                   if (logger.isLoggable(Level.FINEST)) {
-                     logger.finest("adding = " + superModel.getClassWeAreModelling().getName() + " fields into "
-                           + memberObjClass.getClassWeAreModelling().getName());
-                  }
-                  memberObjClass.getStructMembers().addAll(superModel.getStructMembers());
-                  superModel = superModel.getSuperClazz();
-               }
-            }
-
-            // Sort fields of each class biggest->smallest
-            final Comparator<FieldEntry> fieldSizeComparator = new Comparator<FieldEntry>(){
-               @Override public int compare(FieldEntry aa, FieldEntry bb) {
-                  final String aType = aa.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-                  final String bType = bb.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-
-                  // Booleans get converted down to bytes
-                  final int aSize = InstructionSet.TypeSpec.valueOf(aType.equals("Z") ? "B" : aType).getSize();
-                  final int bSize = InstructionSet.TypeSpec.valueOf(bType.equals("Z") ? "B" : bType).getSize();
-
-                  if (logger.isLoggable(Level.FINEST)) {
-                     logger.finest("aType= " + aType + " aSize= " + aSize + " . . bType= " + bType + " bSize= " + bSize);
-                  }
-
-                  // Note this is sorting in reverse order so the biggest is first
-                  if (aSize > bSize) {
-                     return -1;
-                  } else if (aSize == bSize) {
-                     return 0;
-                  } else {
-                     return 1;
+                     logger.finest("Field = " + f.getNameAndTypeEntry().getNameUTF8Entry().getUTF8() + " size=" + fSize
+                           + " totalSize=" + totalSize);
                   }
                }
-            };
 
-            for (final ClassModel c : objectArrayFieldsClasses.values()) {
-               final ArrayList<FieldEntry> fields = c.getStructMembers();
-               if (fields.size() > 0) {
-                  Collections.sort(fields, fieldSizeComparator);
-
-                  // Now compute the total size for the struct
-                  int totalSize = 0;
-                  int alignTo = 0;
-
-                  for (final FieldEntry f : fields) {
-                     // Record field offset for use while copying
-                     // Get field we will copy out of the kernel member object
-                     final Field rfield = getFieldFromClassHierarchy(c.getClassWeAreModelling(), f.getNameAndTypeEntry()
-                           .getNameUTF8Entry().getUTF8());
-
-                     c.getStructMemberOffsets().add(UnsafeWrapper.objectFieldOffset(rfield));
-
-                     final String fType = f.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-                     //c.getStructMemberTypes().add(TypeSpec.valueOf(fType.equals("Z") ? "B" : fType));
-                     c.getStructMemberTypes().add(TypeSpec.valueOf(fType));
-                     final int fSize = TypeSpec.valueOf(fType.equals("Z") ? "B" : fType).getSize();
-                     if (fSize > alignTo) {
-                        alignTo = fSize;
-                     }
-
-                     totalSize += fSize;
-                     if (logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Field = " + f.getNameAndTypeEntry().getNameUTF8Entry().getUTF8() + " size=" + fSize
-                              + " totalSize=" + totalSize);
-                     }
-                  }
-
-                  // compute total size for OpenCL buffer
-                  int totalStructSize = 0;
-                  if ((totalSize % alignTo) == 0) {
-                     totalStructSize = totalSize;
-                  } else {
-                     // Pad up if necessary
-                     totalStructSize = ((totalSize / alignTo) + 1) * alignTo;
-                  }
-                  c.setTotalStructSize(totalStructSize);
+               // compute total size for OpenCL buffer
+               int totalStructSize = 0;
+               if ((totalSize % alignTo) == 0) {
+                  totalStructSize = totalSize;
+               } else {
+                  // Pad up if necessary
+                  totalStructSize = ((totalSize / alignTo) + 1) * alignTo;
                }
+               c.setTotalStructSize(totalStructSize);
             }
          }
-
       }
    }
 
@@ -805,10 +796,6 @@ public class Entrypoint implements Cloneable {
 
    private FieldEntry getSimpleGetterField(MethodModel method) {
       return method.getAccessorVariableFieldEntry();
-   }
-
-   public boolean shouldFallback() {
-      return (fallback);
    }
 
    public List<ClassModel.ClassModelField> getReferencedClassModelFields() {

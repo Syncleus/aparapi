@@ -1,8 +1,10 @@
 package com.amd.aparapi.test.runtime;
 
-import static org.junit.Assert.assertTrue;
-import org.junit.Test;
-import com.amd.aparapi.Kernel;
+import com.amd.aparapi.*;
+import com.amd.aparapi.device.*;
+import org.junit.*;
+
+import static org.junit.Assert.*;
 
 class AnotherClass{
    static public int foo(int i) {
@@ -42,7 +44,7 @@ public class CallStaticFromAnonymousKernel{
          }
       };
       kernel.execute(size);
-      assertTrue("ran on GPU", kernel.getExecutionMode() == Kernel.EXECUTION_MODE.GPU);
+      assertTrue("ran on GPU", kernel.getTargetDevice().getType() == Device.TYPE.GPU);
 
       for (int i = 0; i < size; i++) {
          assertTrue("results == fooBar", results[i] == (fooBar(values[i]) + AnotherClass.foo(i)));

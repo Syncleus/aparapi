@@ -84,7 +84,7 @@ public class Source{
 
    public Source(Class<?> _clazz, File _rootDir) {
       clazz = _clazz;
-      String srcName = clazz.getPackage().getName().replace(".", "/") + "/" + clazz.getSimpleName() + ".java";
+      String srcName = clazz.getPackage().getName().replace(".", "/") + "/" + clazz + ".java";
       file = new File(_rootDir, srcName);
       try {
          BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));

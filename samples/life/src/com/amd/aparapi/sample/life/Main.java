@@ -38,26 +38,14 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 
 package com.amd.aparapi.sample.life;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
-import java.util.List;
-
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
-
 import com.amd.aparapi.Kernel;
-import com.amd.aparapi.ProfileInfo;
-import com.amd.aparapi.Range;
+import com.amd.aparapi.*;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.*;
+import java.util.List;
 
 /**
  * An example Aparapi application which demonstrates Conways 'Game Of Life'.
@@ -239,7 +227,7 @@ public class Main{
          }
       });
       controlPanel.add(startButton);
-      controlPanel.add(new JLabel(lifeKernel.getExecutionMode().toString()));
+      controlPanel.add(new JLabel(lifeKernel.getTargetDevice().getShortDescription()));
 
       controlPanel.add(new JLabel("  Generations/Second="));
       final JLabel generationsPerSecond = new JLabel("0.00");

@@ -1,7 +1,7 @@
 package com.amd.aparapi.internal.model;
 
-import java.util.NoSuchElementException;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.*;
+import java.util.concurrent.atomic.*;
 
 interface Optional<E> {
    final class Some<E> implements Optional<E>{
@@ -49,7 +49,7 @@ interface Optional<E> {
    boolean isPresent();
 }
 
-public interface Memoizer<T> extends Supplier<T>{
+public interface Memoizer<T> extends Supplier<T> {
    public final class Impl<T> implements Memoizer<T>{
       private final Supplier<T> supplier;
 

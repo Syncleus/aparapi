@@ -91,6 +91,28 @@ First consider editing the properties in build.properties
       </condition>
 
       <echo message=" intel.app.sdk.dir ${intel.app.sdk.dir}"/>
+      
+      <available property="freebsd.opencl.exists" file="/usr/local/lib/libOpenCL.so" type="file"/>
+      <condition property="freebsd.app.sdk.dir" value="/usr/local">
+         <and>
+            <os name="FreeBSD" />
+            <isset property="freebsd.opencl.exists" />
+            <not>
+               <isset property="win32.amd.app.sdk.exists" />
+            </not>
+            <not>
+               <isset property="win64.amd.app.sdk.exists" />
+            </not>
+            <not>
+               <isset property="linux.amd.app.sdk.exists" />
+            </not>
+	    <not>
+	      <isset property="linux.intel.app.sdk.exists" />
+	    </not>
+         </and>
+      </condition>
+      
+      <echo message=" freebsd.app.sdk.dir ${freebsd.app.sdk.dir}"/>
 
       <condition property="vendor.name" value="amd">
          <isset property="amd.app.sdk.dir" /> 
@@ -105,6 +127,18 @@ First consider editing the properties in build.properties
          </and>
       </condition>
 
+      <condition property="vendor.name" value="freebsd">
+         <and>
+            <isset property="freebsd.app.sdk.dir" /> 
+            <not>
+                <isset property="amd.app.sdk.dir" /> 
+            </not>
+	    <not>
+                <isset property="intel.app.sdk.dir" /> 
+            </not>
+         </and>
+      </condition>
+      
       <echo message=" vendor.name ${vendor.name}"/>
   
       <condition property="app.sdk.dir" value="${amd.app.sdk.dir}">
@@ -114,6 +148,15 @@ First consider editing the properties in build.properties
       <condition property="app.sdk.dir" value="${intel.app.sdk.dir}">
          <and>
             <isset property="intel.app.sdk.dir" /> 
+            <not>
+                <isset property="app.sdk.dir" /> 
+            </not>
+         </and>
+      </condition>
+      
+      <condition property="freebsd.sdk.dir" value="${freebsd.app.sdk.dir}">
+         <and>
+            <isset property="freebsd.app.sdk.dir" /> 
             <not>
                 <isset property="app.sdk.dir" /> 
             </not>
@@ -348,12 +391,19 @@ First consider editing the properties in build.properties
             <os family="unix" />
             <not>
                <os family="mac" />
+            </not>	 
+	    <not>
+               <os name="FreeBSD" />
             </not>
          </and>
       </condition>
 
       <condition property="use.gcc_mac">
          <os family="mac" />
+      </condition>
+      
+      <condition property="use.clang_freebsd">
+         <os name="FreeBSD" />
       </condition>
 
       <condition property="x86_or_x86_64" value="x86" else="x86_64">
@@ -406,7 +456,10 @@ First consider editing the properties in build.properties
                <not>
                   <os family="mac" />
                </not>
-               <not>
+	       <not>
+                  <os name="FreeBSD" />
+               </not>
+	       <not>
                   <isset property="app.sdk.dir" />
                </not>
             </and>
@@ -425,6 +478,9 @@ First consider editing the properties in build.properties
             <and>
                <not>
                   <os family="mac" />
+               </not>
+	       <not>
+                  <os name="FreeBSD" />
                </not>
                <not>
                   <isset property="app.sdk.dir.exists" />
@@ -582,6 +638,45 @@ First consider editing the properties in build.properties
          <arg value="-Wno-write-strings" />
       </exec>
    </target>
+   
+   <target name="clang_freebsd" if="use.clang_freebsd">
+      <mkdir dir="${basedir}/dist"/>
+      <echo message="freebsdcc ${os.arch}" />
+      <exec executable="clang++" failonerror="true">
+         <arg value="-m${gcc.m.value}" />
+         <arg value="-O3" />
+         <arg value="-g" />
+         <arg value="-fPIC" />
+         <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
+         <arg value="-I${java.home}/../include" />
+         <arg value="-I${java.home}/../include/freebsd" />
+         <arg value="-Iinclude" />
+         <arg value="-I/usr/local/include" />
+         <arg value="-Isrc/cpp" />
+         <arg value="-Isrc/cpp/runKernel" />
+         <arg value="-Isrc/cpp/invoke" />
+         <arg value="-shared" />
+         <arg value="-o" />
+         <arg value="${basedir}/dist/libaparapi_${x86_or_x86_64}.so" />
+	 <arg value="src/cpp/runKernel/Aparapi.cpp" />
+         <arg value="src/cpp/runKernel/ArrayBuffer.cpp" />
+         <arg value="src/cpp/runKernel/AparapiBuffer.cpp" />
+         <arg value="src/cpp/runKernel/Config.cpp" />
+         <arg value="src/cpp/runKernel/JNIContext.cpp" />
+         <arg value="src/cpp/runKernel/KernelArg.cpp" />
+         <arg value="src/cpp/runKernel/ProfileInfo.cpp" />
+         <arg value="src/cpp/runKernel/Range.cpp" />
+         <arg value="src/cpp/invoke/OpenCLJNI.cpp" />
+         <arg value="src/cpp/invoke/OpenCLArgDescriptor.cpp" />
+         <arg value="src/cpp/invoke/OpenCLMem.cpp" />
+         <arg value="src/cpp/CLHelper.cpp" />
+         <arg value="src/cpp/classtools.cpp" />
+         <arg value="src/cpp/JNIHelper.cpp" />
+         <arg value="src/cpp/agent.cpp" />
+         <arg value="-L/usr/local/lib" />
+         <arg value="-lOpenCL" />
+      </exec>
+   </target>
 
    <target name="msvc" if="use.msvc">
       <mkdir dir="${basedir}\dist"/>
@@ -632,7 +727,7 @@ First consider editing the properties in build.properties
       </exec>
    </target>
 
-   <target name="build" depends="clean, javah, msvc, gcc, gcc_mac" />
+   <target name="build" depends="clean, javah, msvc, gcc, gcc_mac, clang_freebsd" />
 
    <target name="msvc_cltest" if="use.msvc">
       <mkdir dir="${basedir}\dist"/>
@@ -684,6 +779,24 @@ First consider editing the properties in build.properties
          <arg value="OpenCL" />
       </exec>
    </target>
+   
+   <target name="freebsd_cltest" if="use.clang_freebsd">
+      <mkdir dir="${basedir}/dist"/>
+      <echo message="clang cltest ${os.arch}" />
+      <exec executable="clang++" failonerror="true">
+         <arg value="-O3" />
+         <arg value="-g" />
+         <arg value="-fPIC" />
+         <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
+         <arg value="-I${java.home}/../include" />
+         <arg value="-I${java.home}/../include/freebsd" />
+         <arg value="-I/usr/local/include" />
+         <arg value="src/cpp/cltest.cpp" />
+         <arg value="-L/usr/local/lib -lOpenCL" />
+         <arg value="-o" />
+         <arg value="${basedir}/dist/cltest" />
+      </exec>
+   </target>
 
    <target name="gcc_cltest" if="use.gcc">
       <mkdir dir="${basedir}/dist"/>
@@ -733,6 +846,6 @@ First consider editing the properties in build.properties
       </exec>
    </target>
 
-   <target name="cltest" depends="check,msvc_cltest,mac_cltest,gcc_cltest" />
-   <target name="clt" depends="check,gcc_clt,mac_clt" />
+   <target name="cltest" depends="check,msvc_cltest,mac_cltest,freebsd_cltest,gcc_cltest" />
+   <target name="clt" depends="check,gcc_clt,mac_clt,freebsd_cltest" />
 </project>

@@ -28,7 +28,8 @@ public class MedianKernel7x7 extends Kernel {
    protected int[] _destPixels;
 
    // NB could also use suffix naming instead of annotation ... field would be named _window_$private$49
-   @PrivateMemorySpace(MAX_WINDOW_SIZE) private short[] _window = new short[MAX_WINDOW_SIZE];
+   @PrivateMemorySpace(MAX_WINDOW_SIZE)
+   private short[] _window = new short[MAX_WINDOW_SIZE];
    @NoCL private static ThreadLocal<short[]> _threadLocalWindow = new ThreadLocal<short[]>() {
       @Override
       protected short[] initialValue() {
