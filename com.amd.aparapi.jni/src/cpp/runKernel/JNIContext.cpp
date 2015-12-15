@@ -21,8 +21,7 @@ JNIContext::JNIContext(JNIEnv *jenv, jobject _kernelObject, jobject _openCLDevic
    deviceId = OpenCLDevice::getDeviceId(jenv, openCLDeviceObject);
    cl_device_type returnedDeviceType;
    clGetDeviceInfo(deviceId, CL_DEVICE_TYPE,  sizeof(returnedDeviceType), &returnedDeviceType, NULL);
-   //fprintf(stderr, "device[%d] CL_DEVICE_TYPE = %x\n", deviceId, returnedDeviceType);
-
+   //fprintf(stderr, "device[%p] CL_DEVICE_TYPE = %x\n", deviceId, returnedDeviceType);
 
    cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platformId, 0 };
    cl_context_properties* cprops = (NULL == platformId) ? NULL : cps;
@@ -34,7 +33,7 @@ JNIContext::JNIContext(JNIEnv *jenv, jobject _kernelObject, jobject _openCLDevic
 }
 
 void JNIContext::dispose(JNIEnv *jenv, Config* config) {
-   //fprintf(stdout, "dispose()\n");
+   //fprintf(stderr, "dispose()\n");
    cl_int status = CL_SUCCESS;
    jenv->DeleteGlobalRef(kernelObject);
    jenv->DeleteGlobalRef(kernelClass);
@@ -69,21 +68,41 @@ void JNIContext::dispose(JNIEnv *jenv, Config* config) {
       for (int i=0; i< argc; i++){
          KernelArg *arg = args[i];
          if (!arg->isPrimitive()){
-            if (arg->arrayBuffer != NULL){
-               if (arg->arrayBuffer->mem != 0){
-                  if (config->isTrackingOpenCLResources()){
-                     memList.remove((cl_mem)arg->arrayBuffer->mem, __LINE__, __FILE__);
+            if (arg->isArray()) {
+               if (arg->arrayBuffer != NULL){
+                  if (arg->arrayBuffer->mem != 0){
+                     if (config->isTrackingOpenCLResources()){
+                        memList.remove((cl_mem)arg->arrayBuffer->mem, __LINE__, __FILE__);
+                     }
+                     status = clReleaseMemObject((cl_mem)arg->arrayBuffer->mem);
+                     //fprintf(stdout, "dispose arg %d %0lx\n", i, arg->arrayBuffer->mem);
+                     CLException::checkCLError(status, "clReleaseMemObject()");
+                     arg->arrayBuffer->mem = (cl_mem)0;
                   }
-                  status = clReleaseMemObject((cl_mem)arg->arrayBuffer->mem);
-                  //fprintf(stdout, "dispose arg %d %0lx\n", i, arg->arrayBuffer->mem);
-                  CLException::checkCLError(status, "clReleaseMemObject()");
-                  arg->arrayBuffer->mem = (cl_mem)0;
+                  if (arg->arrayBuffer->javaArray != NULL)  {
+                     jenv->DeleteWeakGlobalRef((jweak) arg->arrayBuffer->javaArray);
+                  }
+                  delete arg->arrayBuffer;
+                  arg->arrayBuffer = NULL;
                }
-               if (arg->arrayBuffer->javaArray != NULL)  {
-                  jenv->DeleteWeakGlobalRef((jweak) arg->arrayBuffer->javaArray);
+            } else if (arg->isAparapiBuffer()) {
+               if (arg->aparapiBuffer != NULL){
+                  if (arg->aparapiBuffer->mem != 0){
+                     if (config->isTrackingOpenCLResources()){
+                        memList.remove((cl_mem)arg->aparapiBuffer->mem, __LINE__, __FILE__);
+                     }
+                     status = clReleaseMemObject((cl_mem)arg->aparapiBuffer->mem);
+                     //fprintf(stdout, "dispose arg %d %0lx\n", i, arg->aparapiBuffer->mem);
+                     CLException::checkCLError(status, "clReleaseMemObject()");
+                     arg->aparapiBuffer->mem = (cl_mem)0;
+                  }
+                  if (arg->aparapiBuffer->javaObject != NULL)  {
+                     jenv->DeleteWeakGlobalRef((jweak) arg->aparapiBuffer->javaObject); 
+                  }
+                  delete arg->aparapiBuffer;
+                  arg->aparapiBuffer = NULL;
                }
-               delete arg->arrayBuffer;
-               arg->arrayBuffer = NULL;
+
             }
          }
          if (arg->name != NULL){
@@ -93,7 +112,7 @@ void JNIContext::dispose(JNIEnv *jenv, Config* config) {
             jenv->DeleteGlobalRef((jobject) arg->javaArg);
          }
          delete arg; arg=args[i]=NULL;
-      }
+      } // for
       delete[] args; args=NULL;
 
       // do we need to call clReleaseEvent on any of these that are still retained....

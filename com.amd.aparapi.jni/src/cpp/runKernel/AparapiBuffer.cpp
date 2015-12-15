@@ -42,7 +42,7 @@
 AparapiBuffer::AparapiBuffer():
    javaObject((jobject) 0),
    numDims(0),
-   dims(NULL),
+   offsets(NULL),
    lengthInBytes(0),
    mem((cl_mem) 0),
    data(NULL),
@@ -58,11 +58,11 @@ AparapiBuffer::AparapiBuffer(void* _data, cl_uint* _lens, cl_uint _numDims, long
    mem((cl_mem) 0),
    memMask((cl_uint)0)
 {
-   dims = new cl_uint[_numDims];
+   offsets = new cl_uint[_numDims];
    for(int i = 0; i < _numDims; i++) {
-      dims[i] = 1;
+      offsets[i] = 1;
       for(int j = i+1; j < _numDims; j++) {
-         dims[i] *= lens[j];
+         offsets[i] *= lens[j];
       }
    }
 }
@@ -72,44 +72,61 @@ jobject AparapiBuffer::getJavaObject(JNIEnv* env, KernelArg* arg) {
 }
 
 
-AparapiBuffer* AparapiBuffer::flatten(JNIEnv* env, jobject arg, int type) {
-   int numDims = JNIHelper::getInstanceField<jint>(env, arg, "numDims", IntArg);
-   if(numDims == 2 && isBoolean(type)) {
-      return AparapiBuffer::flattenBoolean2D(env,arg);
-   } else if(numDims == 2 && isByte(type)) {
-      return AparapiBuffer::flattenByte2D(env,arg);
-   } else if(numDims == 2 && isShort(type)) {
-      return AparapiBuffer::flattenShort2D(env,arg);
-   } else if(numDims == 2 && isInt(type)) {
-      return AparapiBuffer::flattenInt2D(env,arg);
-   } else if(numDims == 2 && isLong(type)) {
-      return AparapiBuffer::flattenLong2D(env,arg);
-   } else if(numDims == 2 && isFloat(type)) {
-      return AparapiBuffer::flattenFloat2D(env,arg);
-   } else if(numDims == 2 && isDouble(type)) {
-      return AparapiBuffer::flattenDouble2D(env,arg);
-   } else if(numDims == 3 && isBoolean(type)) {
-      return AparapiBuffer::flattenBoolean3D(env,arg);
-   } else if(numDims == 3 && isByte(type)) {
-      return AparapiBuffer::flattenByte3D(env,arg);
-   } else if(numDims == 3 && isShort(type)) {
-      return AparapiBuffer::flattenShort3D(env,arg);
-   } else if(numDims == 3 && isInt(type)) {
-      return AparapiBuffer::flattenInt3D(env,arg);
-   } else if(numDims == 3 && isLong(type)) {
-      return AparapiBuffer::flattenLong3D(env,arg);
-   } else if(numDims == 3 && isFloat(type)) {
-      return AparapiBuffer::flattenFloat3D(env,arg);
-   } else if(numDims == 3 && isDouble(type)) {
-      return AparapiBuffer::flattenDouble3D(env,arg);
+void AparapiBuffer::flatten(JNIEnv* env, KernelArg* arg) {
+   int numDims = JNIHelper::getInstanceField<jint>(env, arg->javaArg, "numDims", IntArg);
+   if(numDims == 2 && arg->isBoolean()) {
+      flattenBoolean2D(env,arg);
+   } else if(numDims == 2 && arg->isByte()) {
+      flattenByte2D(env,arg);
+   } else if(numDims == 2 && arg->isShort()) {
+      flattenShort2D(env,arg);
+   } else if(numDims == 2 && arg->isInt()) {
+      flattenInt2D(env,arg);
+   } else if(numDims == 2 && arg->isLong()) {
+      flattenLong2D(env,arg);
+   } else if(numDims == 2 && arg->isFloat()) {
+      flattenFloat2D(env,arg);
+   } else if(numDims == 2 && arg->isDouble()) {
+      flattenDouble2D(env,arg);
+   } else if(numDims == 3 && arg->isBoolean()) {
+      flattenBoolean3D(env,arg);
+   } else if(numDims == 3 && arg->isByte()) {
+      flattenByte3D(env,arg);
+   } else if(numDims == 3 && arg->isShort()) {
+      flattenShort3D(env,arg);
+   } else if(numDims == 3 && arg->isInt()) {
+      flattenInt3D(env,arg);
+   } else if(numDims == 3 && arg->isLong()) {
+      flattenLong3D(env,arg);
+   } else if(numDims == 3 && arg->isFloat()) {
+      flattenFloat3D(env,arg);
+   } else if(numDims == 3 && arg->isDouble()) {
+      flattenDouble3D(env,arg);
+   } else {
+      fprintf(stderr,"flatten() not understand argument type\n");
    }
-   return new AparapiBuffer();
+
+}
+
+void AparapiBuffer::buildBuffer(void* _data, cl_uint* _dims, cl_uint _numDims, long _lengthInBytes, jobject _javaObject) {
+   data = _data;
+   lens = _dims;
+   numDims = _numDims;
+   lengthInBytes = _lengthInBytes;
+   javaObject = _javaObject;
+   offsets = new cl_uint[_numDims];
+   for(int i = 0; i < _numDims; i++) {
+      offsets[i] = 1;
+      for(int j = i+1; j < _numDims; j++) {
+         offsets[i] *= lens[j];
+      }
+   }
 }
 
 
-AparapiBuffer* AparapiBuffer::flattenBoolean2D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenBoolean2D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[2];
    dims[0] = env->GetArrayLength((jobjectArray)javaBuffer);
    dims[1] = env->GetArrayLength((jbooleanArray)env->GetObjectArrayElement((jobjectArray)javaBuffer, 0));
@@ -148,14 +165,16 @@ AparapiBuffer* AparapiBuffer::flattenBoolean2D(JNIEnv* env, jobject arg) {
          array[i*dims[1] + j] = elems[j];
       }
       env->ReleaseBooleanArrayElements(jArray, elems, 0);
+      // Does DeleteLocalRef required?
+      // env->DeleteLocalRef(jArray);
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
 }
 
-AparapiBuffer* AparapiBuffer::flattenByte2D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenByte2D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[2];
    dims[0] = env->GetArrayLength((jobjectArray)javaBuffer);
    dims[1] = env->GetArrayLength((jbyteArray)env->GetObjectArrayElement((jobjectArray)javaBuffer, 0));
@@ -196,12 +215,12 @@ AparapiBuffer* AparapiBuffer::flattenByte2D(JNIEnv* env, jobject arg) {
       env->ReleaseByteArrayElements(jArray, elems, 0);
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
 }
 
-AparapiBuffer* AparapiBuffer::flattenShort2D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenShort2D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[2];
    dims[0] = env->GetArrayLength((jobjectArray)javaBuffer);
    dims[1] = env->GetArrayLength((jshortArray)env->GetObjectArrayElement((jobjectArray)javaBuffer, 0));
@@ -242,12 +261,12 @@ AparapiBuffer* AparapiBuffer::flattenShort2D(JNIEnv* env, jobject arg) {
       env->ReleaseShortArrayElements(jArray, elems, 0);
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
 }
 
-AparapiBuffer* AparapiBuffer::flattenInt2D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenInt2D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[2];
    dims[0] = env->GetArrayLength((jobjectArray)javaBuffer);
    dims[1] = env->GetArrayLength((jintArray)env->GetObjectArrayElement((jobjectArray)javaBuffer, 0));
@@ -288,12 +307,12 @@ AparapiBuffer* AparapiBuffer::flattenInt2D(JNIEnv* env, jobject arg) {
       env->ReleaseIntArrayElements(jArray, elems, 0);
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
 }
 
-AparapiBuffer* AparapiBuffer::flattenLong2D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenLong2D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[2];
    dims[0] = env->GetArrayLength((jobjectArray)javaBuffer);
    dims[1] = env->GetArrayLength((jlongArray)env->GetObjectArrayElement((jobjectArray)javaBuffer, 0));
@@ -334,12 +353,12 @@ AparapiBuffer* AparapiBuffer::flattenLong2D(JNIEnv* env, jobject arg) {
       env->ReleaseLongArrayElements(jArray, elems, 0);
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
 }
 
-AparapiBuffer* AparapiBuffer::flattenFloat2D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenFloat2D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[2];
    dims[0] = env->GetArrayLength((jobjectArray)javaBuffer);
    dims[1] = env->GetArrayLength((jfloatArray)env->GetObjectArrayElement((jobjectArray)javaBuffer, 0));
@@ -380,12 +399,12 @@ AparapiBuffer* AparapiBuffer::flattenFloat2D(JNIEnv* env, jobject arg) {
       env->ReleaseFloatArrayElements(jArray, elems, 0);
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
 }
 
-AparapiBuffer* AparapiBuffer::flattenDouble2D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenDouble2D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[2];
    dims[0] = env->GetArrayLength((jobjectArray)javaBuffer);
    dims[1] = env->GetArrayLength((jdoubleArray)env->GetObjectArrayElement((jobjectArray)javaBuffer, 0));
@@ -426,13 +445,13 @@ AparapiBuffer* AparapiBuffer::flattenDouble2D(JNIEnv* env, jobject arg) {
       env->ReleaseDoubleArrayElements(jArray, elems, 0);
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 2, bitSize, javaBuffer);
 }
 
 
-AparapiBuffer* AparapiBuffer::flattenBoolean3D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenBoolean3D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[3];
    jobjectArray j0 = (jobjectArray)javaBuffer;
    jobjectArray j1 = (jobjectArray)env->GetObjectArrayElement(j0, 0);
@@ -491,12 +510,12 @@ AparapiBuffer* AparapiBuffer::flattenBoolean3D(JNIEnv* env, jobject arg) {
       }
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
 }
 
-AparapiBuffer* AparapiBuffer::flattenByte3D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenByte3D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[3];
    jobjectArray j0 = (jobjectArray)javaBuffer;
    jobjectArray j1 = (jobjectArray)env->GetObjectArrayElement(j0, 0);
@@ -555,12 +574,12 @@ AparapiBuffer* AparapiBuffer::flattenByte3D(JNIEnv* env, jobject arg) {
       }
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
 }
 
-AparapiBuffer* AparapiBuffer::flattenShort3D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenShort3D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[3];
    jobjectArray j0 = (jobjectArray)javaBuffer;
    jobjectArray j1 = (jobjectArray)env->GetObjectArrayElement(j0, 0);
@@ -619,12 +638,12 @@ AparapiBuffer* AparapiBuffer::flattenShort3D(JNIEnv* env, jobject arg) {
       }
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
 }
 
-AparapiBuffer* AparapiBuffer::flattenInt3D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenInt3D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[3];
    jobjectArray j0 = (jobjectArray)javaBuffer;
    jobjectArray j1 = (jobjectArray)env->GetObjectArrayElement(j0, 0);
@@ -683,12 +702,12 @@ AparapiBuffer* AparapiBuffer::flattenInt3D(JNIEnv* env, jobject arg) {
       }
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
 }
 
-AparapiBuffer* AparapiBuffer::flattenLong3D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenLong3D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[3];
    jobjectArray j0 = (jobjectArray)javaBuffer;
    jobjectArray j1 = (jobjectArray)env->GetObjectArrayElement(j0, 0);
@@ -747,12 +766,12 @@ AparapiBuffer* AparapiBuffer::flattenLong3D(JNIEnv* env, jobject arg) {
       }
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
 }
 
-AparapiBuffer* AparapiBuffer::flattenFloat3D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenFloat3D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[3];
    jobjectArray j0 = (jobjectArray)javaBuffer;
    jobjectArray j1 = (jobjectArray)env->GetObjectArrayElement(j0, 0);
@@ -811,12 +830,12 @@ AparapiBuffer* AparapiBuffer::flattenFloat3D(JNIEnv* env, jobject arg) {
       }
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
 }
 
-AparapiBuffer* AparapiBuffer::flattenDouble3D(JNIEnv* env, jobject arg) {
+void AparapiBuffer::flattenDouble3D(JNIEnv* env, KernelArg* arg) {
 
-   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg, "javaBuffer", ObjectClassArg);
+   jobject javaBuffer = JNIHelper::getInstanceField<jobject>(env, arg->javaArg, "javaBuffer", ObjectClassArg);
    cl_uint* dims = new cl_uint[3];
    jobjectArray j0 = (jobjectArray)javaBuffer;
    jobjectArray j1 = (jobjectArray)env->GetObjectArrayElement(j0, 0);
@@ -875,7 +894,7 @@ AparapiBuffer* AparapiBuffer::flattenDouble3D(JNIEnv* env, jobject arg) {
       }
    }
   
-   return new AparapiBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
+   buildBuffer((void*)array, (cl_uint*)dims, 3, bitSize, javaBuffer);
 }
 
 
@@ -934,7 +953,7 @@ void AparapiBuffer::inflateBoolean2D(JNIEnv *env, KernelArg* arg) {
    #pragma omp parallel for
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
-         body[i][j] = array[i*dims[0] + j];
+         body[i][j] = array[i*offsets[0] + j];
       }
    }
 
@@ -949,7 +968,7 @@ void AparapiBuffer::inflateBoolean2D(JNIEnv *env, KernelArg* arg) {
       jbooleanArray jArray = (jbooleanArray)env->GetObjectArrayElement(buffer, i);
       jboolean* body = env->GetBooleanArrayElements(jArray,0);
       for(int j = 0; j < lens[1]; j++) {
-         body[j] = array[i*dims[0] + j];
+         body[j] = array[i*offsets[0] + j];
       }
       env->ReleaseBooleanArrayElements(jArray, body, 0);
    }
@@ -971,7 +990,7 @@ void AparapiBuffer::inflateByte2D(JNIEnv *env, KernelArg* arg) {
    #pragma omp parallel for
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
-         body[i][j] = array[i*dims[0] + j];
+         body[i][j] = array[i*offsets[0] + j];
       }
    }
 
@@ -986,7 +1005,7 @@ void AparapiBuffer::inflateByte2D(JNIEnv *env, KernelArg* arg) {
       jbyteArray jArray = (jbyteArray)env->GetObjectArrayElement(buffer, i);
       jbyte* body = env->GetByteArrayElements(jArray,0);
       for(int j = 0; j < lens[1]; j++) {
-         body[j] = array[i*dims[0] + j];
+         body[j] = array[i*offsets[0] + j];
       }
       env->ReleaseByteArrayElements(jArray, body, 0);
    }
@@ -1008,7 +1027,7 @@ void AparapiBuffer::inflateShort2D(JNIEnv *env, KernelArg* arg) {
    #pragma omp parallel for
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
-         body[i][j] = array[i*dims[0] + j];
+         body[i][j] = array[i*offsets[0] + j];
       }
    }
 
@@ -1023,7 +1042,7 @@ void AparapiBuffer::inflateShort2D(JNIEnv *env, KernelArg* arg) {
       jshortArray jArray = (jshortArray)env->GetObjectArrayElement(buffer, i);
       jshort* body = env->GetShortArrayElements(jArray,0);
       for(int j = 0; j < lens[1]; j++) {
-         body[j] = array[i*dims[0] + j];
+         body[j] = array[i*offsets[0] + j];
       }
       env->ReleaseShortArrayElements(jArray, body, 0);
    }
@@ -1045,7 +1064,7 @@ void AparapiBuffer::inflateInt2D(JNIEnv *env, KernelArg* arg) {
    #pragma omp parallel for
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
-         body[i][j] = array[i*dims[0] + j];
+         body[i][j] = array[i*offsets[0] + j];
       }
    }
 
@@ -1060,7 +1079,7 @@ void AparapiBuffer::inflateInt2D(JNIEnv *env, KernelArg* arg) {
       jintArray jArray = (jintArray)env->GetObjectArrayElement(buffer, i);
       jint* body = env->GetIntArrayElements(jArray,0);
       for(int j = 0; j < lens[1]; j++) {
-         body[j] = array[i*dims[0] + j];
+         body[j] = array[i*offsets[0] + j];
       }
       env->ReleaseIntArrayElements(jArray, body, 0);
    }
@@ -1082,7 +1101,7 @@ void AparapiBuffer::inflateLong2D(JNIEnv *env, KernelArg* arg) {
    #pragma omp parallel for
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
-         body[i][j] = array[i*dims[0] + j];
+         body[i][j] = array[i*offsets[0] + j];
       }
    }
 
@@ -1097,7 +1116,7 @@ void AparapiBuffer::inflateLong2D(JNIEnv *env, KernelArg* arg) {
       jlongArray jArray = (jlongArray)env->GetObjectArrayElement(buffer, i);
       jlong* body = env->GetLongArrayElements(jArray,0);
       for(int j = 0; j < lens[1]; j++) {
-         body[j] = array[i*dims[0] + j];
+         body[j] = array[i*offsets[0] + j];
       }
       env->ReleaseLongArrayElements(jArray, body, 0);
    }
@@ -1119,7 +1138,7 @@ void AparapiBuffer::inflateFloat2D(JNIEnv *env, KernelArg* arg) {
    #pragma omp parallel for
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
-         body[i][j] = array[i*dims[0] + j];
+         body[i][j] = array[i*offsets[0] + j];
       }
    }
 
@@ -1134,7 +1153,7 @@ void AparapiBuffer::inflateFloat2D(JNIEnv *env, KernelArg* arg) {
       jfloatArray jArray = (jfloatArray)env->GetObjectArrayElement(buffer, i);
       jfloat* body = env->GetFloatArrayElements(jArray,0);
       for(int j = 0; j < lens[1]; j++) {
-         body[j] = array[i*dims[0] + j];
+         body[j] = array[i*offsets[0] + j];
       }
       env->ReleaseFloatArrayElements(jArray, body, 0);
    }
@@ -1156,7 +1175,7 @@ void AparapiBuffer::inflateDouble2D(JNIEnv *env, KernelArg* arg) {
    #pragma omp parallel for
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
-         body[i][j] = array[i*dims[0] + j];
+         body[i][j] = array[i*offsets[0] + j];
       }
    }
 
@@ -1171,7 +1190,7 @@ void AparapiBuffer::inflateDouble2D(JNIEnv *env, KernelArg* arg) {
       jdoubleArray jArray = (jdoubleArray)env->GetObjectArrayElement(buffer, i);
       jdouble* body = env->GetDoubleArrayElements(jArray,0);
       for(int j = 0; j < lens[1]; j++) {
-         body[j] = array[i*dims[0] + j];
+         body[j] = array[i*offsets[0] + j];
       }
       env->ReleaseDoubleArrayElements(jArray, body, 0);
    }
@@ -1200,7 +1219,7 @@ void AparapiBuffer::inflateBoolean3D(JNIEnv *env, KernelArg* arg) {
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
          for(int k = 0; k < lens[2]; k++) {
-            body[i][j][k] = array[i*dims[0] + j*dims[1] + k];
+            body[i][j][k] = array[i*offsets[0] + j*offsets[1] + k];
          }
       }
    }
@@ -1222,7 +1241,7 @@ void AparapiBuffer::inflateBoolean3D(JNIEnv *env, KernelArg* arg) {
          jbooleanArray jArray = (jbooleanArray)env->GetObjectArrayElement(jrow, j);
          jboolean* body = env->GetBooleanArrayElements(jArray,0);
          for(int k = 0; k < lens[2]; k++) {
-            body[k] = array[i*dims[0] + j*dims[1] + k];
+            body[k] = array[i*offsets[0] + j*offsets[1] + k];
          }
          env->ReleaseBooleanArrayElements(jArray, body, 0);
       }
@@ -1251,7 +1270,7 @@ void AparapiBuffer::inflateByte3D(JNIEnv *env, KernelArg* arg) {
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
          for(int k = 0; k < lens[2]; k++) {
-            body[i][j][k] = array[i*dims[0] + j*dims[1] + k];
+            body[i][j][k] = array[i*offsets[0] + j*offsets[1] + k];
          }
       }
    }
@@ -1273,7 +1292,7 @@ void AparapiBuffer::inflateByte3D(JNIEnv *env, KernelArg* arg) {
          jbyteArray jArray = (jbyteArray)env->GetObjectArrayElement(jrow, j);
          jbyte* body = env->GetByteArrayElements(jArray,0);
          for(int k = 0; k < lens[2]; k++) {
-            body[k] = array[i*dims[0] + j*dims[1] + k];
+            body[k] = array[i*offsets[0] + j*offsets[1] + k];
          }
          env->ReleaseByteArrayElements(jArray, body, 0);
       }
@@ -1302,7 +1321,7 @@ void AparapiBuffer::inflateShort3D(JNIEnv *env, KernelArg* arg) {
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
          for(int k = 0; k < lens[2]; k++) {
-            body[i][j][k] = array[i*dims[0] + j*dims[1] + k];
+            body[i][j][k] = array[i*offsets[0] + j*offsets[1] + k];
          }
       }
    }
@@ -1324,7 +1343,7 @@ void AparapiBuffer::inflateShort3D(JNIEnv *env, KernelArg* arg) {
          jshortArray jArray = (jshortArray)env->GetObjectArrayElement(jrow, j);
          jshort* body = env->GetShortArrayElements(jArray,0);
          for(int k = 0; k < lens[2]; k++) {
-            body[k] = array[i*dims[0] + j*dims[1] + k];
+            body[k] = array[i*offsets[0] + j*offsets[1] + k];
          }
          env->ReleaseShortArrayElements(jArray, body, 0);
       }
@@ -1353,7 +1372,7 @@ void AparapiBuffer::inflateInt3D(JNIEnv *env, KernelArg* arg) {
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
          for(int k = 0; k < lens[2]; k++) {
-            body[i][j][k] = array[i*dims[0] + j*dims[1] + k];
+            body[i][j][k] = array[i*offsets[0] + j*offsets[1] + k];
          }
       }
    }
@@ -1375,7 +1394,7 @@ void AparapiBuffer::inflateInt3D(JNIEnv *env, KernelArg* arg) {
          jintArray jArray = (jintArray)env->GetObjectArrayElement(jrow, j);
          jint* body = env->GetIntArrayElements(jArray,0);
          for(int k = 0; k < lens[2]; k++) {
-            body[k] = array[i*dims[0] + j*dims[1] + k];
+            body[k] = array[i*offsets[0] + j*offsets[1] + k];
          }
          env->ReleaseIntArrayElements(jArray, body, 0);
       }
@@ -1404,7 +1423,7 @@ void AparapiBuffer::inflateLong3D(JNIEnv *env, KernelArg* arg) {
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
          for(int k = 0; k < lens[2]; k++) {
-            body[i][j][k] = array[i*dims[0] + j*dims[1] + k];
+            body[i][j][k] = array[i*offsets[0] + j*offsets[1] + k];
          }
       }
    }
@@ -1426,7 +1445,7 @@ void AparapiBuffer::inflateLong3D(JNIEnv *env, KernelArg* arg) {
          jlongArray jArray = (jlongArray)env->GetObjectArrayElement(jrow, j);
          jlong* body = env->GetLongArrayElements(jArray,0);
          for(int k = 0; k < lens[2]; k++) {
-            body[k] = array[i*dims[0] + j*dims[1] + k];
+            body[k] = array[i*offsets[0] + j*offsets[1] + k];
          }
          env->ReleaseLongArrayElements(jArray, body, 0);
       }
@@ -1455,7 +1474,7 @@ void AparapiBuffer::inflateFloat3D(JNIEnv *env, KernelArg* arg) {
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
          for(int k = 0; k < lens[2]; k++) {
-            body[i][j][k] = array[i*dims[0] + j*dims[1] + k];
+            body[i][j][k] = array[i*offsets[0] + j*offsets[1] + k];
          }
       }
    }
@@ -1477,7 +1496,7 @@ void AparapiBuffer::inflateFloat3D(JNIEnv *env, KernelArg* arg) {
          jfloatArray jArray = (jfloatArray)env->GetObjectArrayElement(jrow, j);
          jfloat* body = env->GetFloatArrayElements(jArray,0);
          for(int k = 0; k < lens[2]; k++) {
-            body[k] = array[i*dims[0] + j*dims[1] + k];
+            body[k] = array[i*offsets[0] + j*offsets[1] + k];
          }
          env->ReleaseFloatArrayElements(jArray, body, 0);
       }
@@ -1506,7 +1525,7 @@ void AparapiBuffer::inflateDouble3D(JNIEnv *env, KernelArg* arg) {
    for(int i = 0; i < lens[0]; i++) {
       for(int j = 0; j < lens[1]; j++) {
          for(int k = 0; k < lens[2]; k++) {
-            body[i][j][k] = array[i*dims[0] + j*dims[1] + k];
+            body[i][j][k] = array[i*offsets[0] + j*offsets[1] + k];
          }
       }
    }
@@ -1528,7 +1547,7 @@ void AparapiBuffer::inflateDouble3D(JNIEnv *env, KernelArg* arg) {
          jdoubleArray jArray = (jdoubleArray)env->GetObjectArrayElement(jrow, j);
          jdouble* body = env->GetDoubleArrayElements(jArray,0);
          for(int k = 0; k < lens[2]; k++) {
-            body[k] = array[i*dims[0] + j*dims[1] + k];
+            body[k] = array[i*offsets[0] + j*offsets[1] + k];
          }
          env->ReleaseDoubleArrayElements(jArray, body, 0);
       }
@@ -1537,7 +1556,7 @@ void AparapiBuffer::inflateDouble3D(JNIEnv *env, KernelArg* arg) {
 
 void AparapiBuffer::deleteBuffer(KernelArg* arg)
 {
-      delete[] dims;
+      delete[] offsets;
       delete[] lens;
    if(arg->isBoolean()) {
       delete[] (jboolean*)data;
