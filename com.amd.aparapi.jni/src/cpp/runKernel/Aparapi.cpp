@@ -422,10 +422,10 @@ void updateBuffer(JNIEnv* jenv, JNIContext* jniContext, KernelArg* arg, int& arg
             fprintf(stderr, "runKernel arg %d %s, length = %d\n", argIdx, arg->name, buffer->lens[i]);
          }
          argPos++;
-         status = clSetKernelArg(jniContext->kernel, argPos, sizeof(cl_uint), &(buffer->dims[i]));
-         if(status != CL_SUCCESS) throw CLException(status,"clSetKernelArg (buffer dimension)");
+         status = clSetKernelArg(jniContext->kernel, argPos, sizeof(cl_uint), &(buffer->offsets[i]));
+         if(status != CL_SUCCESS) throw CLException(status,"clSetKernelArg (buffer offset)");
          if (config->isVerbose()){
-            fprintf(stderr, "runKernel arg %d %s, dim = %d\n", argIdx, arg->name, buffer->dims[i]);
+            fprintf(stderr, "runKernel arg %d %s, offsets = %d\n", argIdx, arg->name, buffer->offsets[i]);
          }
       }
    }
@@ -469,7 +469,7 @@ void processArray(JNIEnv* jenv, JNIContext* jniContext, KernelArg* arg, int& arg
    arg->pin(jenv);
 
    if (config->isVerbose()) {
-      fprintf(stderr, "runKernel: arrayOrBuf ref %p, oldAddr=%p, newAddr=%p, ref.mem=%p isCopy=%s\n",
+      fprintf(stderr, "runKernel: array ref %p, oldAddr=%p, newAddr=%p, ref.mem=%p isCopy=%s\n",
             arg->arrayBuffer->javaArray, 
             prevAddr,
             arg->arrayBuffer->addr,
@@ -528,8 +528,11 @@ void processBuffer(JNIEnv* jenv, JNIContext* jniContext, KernelArg* arg, int& ar
       arg->aparapiBuffer->write.valid = false;
    }
 
+   // TODO: check if the object was moved and required re-flatten
+   arg->aparapiBuffer->flatten(jenv,arg);
+
    if (config->isVerbose()) {
-      fprintf(stderr, "runKernel: arrayOrBuf addr=%p, ref.mem=%p\n",
+      fprintf(stderr, "runKernel: Buf addr=%p, ref.mem=%p\n",
             arg->aparapiBuffer->data,
             arg->aparapiBuffer->mem);
       fprintf(stderr, "at memory addr %p, contents: ", arg->aparapiBuffer->data);

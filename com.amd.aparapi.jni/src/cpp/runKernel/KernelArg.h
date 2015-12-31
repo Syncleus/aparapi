@@ -64,7 +64,7 @@ class KernelArg{
       static jfieldID javaArrayFieldID; 
    public:
       JNIContext *jniContext;  
-      jobject argObj;    // the Java KernelRunner.KernelArg object that we are mirroring.
+      jobject argObj;    // the Java KernelRunner.KernelArg object that we are mirroring. Do not use it outside constructor due to GC. Use javaArg instead.
       jobject javaArg;   // global reference to the corresponding java KernelArg object we grabbed our own global reference so that the object won't be collected until we dispose!
       char *name;        // used for debugging printfs
       jint type;         // a bit mask determining the type of this arg

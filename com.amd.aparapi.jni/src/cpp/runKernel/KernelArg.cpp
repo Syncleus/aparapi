@@ -35,7 +35,7 @@ KernelArg::KernelArg(JNIEnv *jenv, JNIContext *jniContext, jobject argObj):
       if (isArray()){
          arrayBuffer = new ArrayBuffer();
       } else if(isAparapiBuffer()) {
-         aparapiBuffer = AparapiBuffer::flatten(jenv, argObj, type);
+         aparapiBuffer = new AparapiBuffer();
       }
    }
 
