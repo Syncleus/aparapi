@@ -31,7 +31,7 @@ public class KernelProfile {
 
    public double getLastConversionTime() {
       KernelDeviceProfile lastDeviceProfile = getLastDeviceProfile();
-      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getLastElapsedTime(ProfilingEvent.START, ProfilingEvent.EXECUTED) / MILLION;
+      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getLastElapsedTime(ProfilingEvent.START, ProfilingEvent.PREPARE_EXECUTE) / MILLION;
    }
 
    public double getAccumulatedTotalTime() {
