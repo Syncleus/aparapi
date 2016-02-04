@@ -986,6 +986,34 @@ public class KernelRunner extends KernelRunnerJNI{
 
                arg.setArray(newArrayRef);
                assert arg.getArray() != null : "null array ref";
+            } else if ((arg.getType() & ARG_APARAPI_BUFFER) != 0) {
+               // TODO: check if the 2D/3D array is changed. 
+               //   can Arrays.equals help?
+               needsSync = true; // Always need syn
+               Object buffer = new Object();
+               try {
+                  buffer = arg.getField().get(kernel);
+               } catch (IllegalAccessException e) {
+                  e.printStackTrace();
+               }
+               int numDims = arg.getNumDims();
+               Object subBuffer = buffer;
+               int[] dims = new int[numDims];
+               for (int d = 0; d < numDims - 1; d++) {
+                  dims[d] = Array.getLength(subBuffer);
+                  subBuffer = Array.get(subBuffer, 0);
+               }
+               dims[numDims - 1] = Array.getLength(subBuffer);
+               arg.setDims(dims);
+
+               int primitiveSize = getPrimitiveSize(arg.getType());
+               int totalElements = 1;
+               for (int d = 0; d < numDims; d++) {
+                  totalElements *= dims[d];
+               }
+               arg.setJavaBuffer(buffer);
+               arg.setSizeInBytes(totalElements * primitiveSize);
+               arg.setArray(buffer);
             }
          } catch (final IllegalArgumentException e) {
             e.printStackTrace();
@@ -1619,53 +1647,32 @@ public class KernelRunner extends KernelRunnerJNI{
       while (type.getName().charAt(numDims) == '[') {
          numDims++;
       }
-      Object buffer = new Object();
-      try {
-         buffer = arg.getField().get(kernel);
-      } catch (IllegalAccessException e) {
-         e.printStackTrace();
-      }
-      arg.setJavaBuffer(buffer);
       arg.setNumDims(numDims);
-      Object subBuffer = buffer;
-      int[] dims = new int[numDims];
-      for (int i = 0; i < numDims - 1; i++) {
-         dims[i] = Array.getLength(subBuffer);
-         subBuffer = Array.get(subBuffer, 0);
-      }
-      dims[numDims - 1] = Array.getLength(subBuffer);
-      arg.setDims(dims);
+      arg.setJavaBuffer(null); // will get updated in updateKernelArrayRefs
+      arg.setArray(null); // will get updated in updateKernelArrayRefs
 
-      if (subBuffer.getClass().isAssignableFrom(float[].class)) {
+      Class<?> elementType = arg.getField().getType();
+      while (elementType.isArray()) {
+         elementType = elementType.getComponentType();
+      }
+
+      if (elementType.isAssignableFrom(float.class)) {
          arg.setType(arg.getType() | ARG_FLOAT);
-      }
-      if (subBuffer.getClass().isAssignableFrom(int[].class)) {
+      } else if (elementType.isAssignableFrom(int.class)) {
          arg.setType(arg.getType() | ARG_INT);
-      }
-      if (subBuffer.getClass().isAssignableFrom(boolean[].class)) {
+      } else if (elementType.isAssignableFrom(boolean.class)) {
          arg.setType(arg.getType() | ARG_BOOLEAN);
-      }
-      if (subBuffer.getClass().isAssignableFrom(byte[].class)) {
+      } else if (elementType.isAssignableFrom(byte.class)) {
          arg.setType(arg.getType() | ARG_BYTE);
-      }
-      if (subBuffer.getClass().isAssignableFrom(char[].class)) {
+      } else if (elementType.isAssignableFrom(char.class)) {
          arg.setType(arg.getType() | ARG_CHAR);
-      }
-      if (subBuffer.getClass().isAssignableFrom(double[].class)) {
+      } else if (elementType.isAssignableFrom(double.class)) {
          arg.setType(arg.getType() | ARG_DOUBLE);
-      }
-      if (subBuffer.getClass().isAssignableFrom(long[].class)) {
+      } else if (elementType.isAssignableFrom(long.class)) {
          arg.setType(arg.getType() | ARG_LONG);
-      }
-      if (subBuffer.getClass().isAssignableFrom(short[].class)) {
+      } else if (elementType.isAssignableFrom(short.class)) {
          arg.setType(arg.getType() | ARG_SHORT);
       }
-      int primitiveSize = getPrimitiveSize(arg.getType());
-      int totalElements = 1;
-      for (int i = 0; i < numDims; i++) {
-         totalElements *= dims[i];
-      }
-      arg.setSizeInBytes(totalElements * primitiveSize);
    }
 
    private final Set<Object> puts = new HashSet<Object>();

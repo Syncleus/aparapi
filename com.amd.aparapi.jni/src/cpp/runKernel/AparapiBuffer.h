@@ -70,10 +70,12 @@ private:
       return (type&com_amd_aparapi_internal_jni_KernelRunnerJNI_ARG_SHORT);
    }
 
+   void buildBuffer(void* _data, cl_uint* _dims, cl_uint _numDims, long _lengthInBytes, jobject _javaObject);
+
 public:
       jobject javaObject;       // The java array that this arg is mapped to 
-      cl_uint numDims;          // sizes of dimensions of the object (array lengths for ND arrays)
-      cl_uint* dims;            // sizes of offsets of the object (first element offset in ND arrays)
+      cl_uint numDims;          // number of dimensions of the object (array lengths for ND arrays)
+      cl_uint* offsets;         // offsets of the next element in ND arrays)
       cl_uint* lens;            // sizes of dimensions of the object (array lengths for ND arrays)
       jint lengthInBytes;       // bytes in the array or directBuf
       cl_mem mem;               // the opencl buffer 
@@ -87,25 +89,25 @@ public:
 
       void deleteBuffer(KernelArg* arg);
 
-      static AparapiBuffer* flatten(JNIEnv *env, jobject arg, int type);
+      void flatten(JNIEnv *env, KernelArg* arg);
 
-      static AparapiBuffer* flattenBoolean2D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenChar2D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenByte2D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenShort2D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenInt2D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenLong2D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenFloat2D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenDouble2D(JNIEnv *env, jobject arg);
+      void flattenBoolean2D(JNIEnv *env, KernelArg* arg);
+      void flattenChar2D(JNIEnv *env, KernelArg* arg);
+      void flattenByte2D(JNIEnv *env, KernelArg* arg);
+      void flattenShort2D(JNIEnv *env, KernelArg* arg);
+      void flattenInt2D(JNIEnv *env, KernelArg* arg);
+      void flattenLong2D(JNIEnv *env, KernelArg* arg);
+      void flattenFloat2D(JNIEnv *env, KernelArg* arg);
+      void flattenDouble2D(JNIEnv *env, KernelArg* arg);
 
-      static AparapiBuffer* flattenBoolean3D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenChar3D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenByte3D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenShort3D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenInt3D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenLong3D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenFloat3D(JNIEnv *env, jobject arg);
-      static AparapiBuffer* flattenDouble3D(JNIEnv *env, jobject arg);
+      void flattenBoolean3D(JNIEnv *env, KernelArg* arg);
+      void flattenChar3D(JNIEnv *env, KernelArg* arg);
+      void flattenByte3D(JNIEnv *env, KernelArg* arg);
+      void flattenShort3D(JNIEnv *env, KernelArg* arg);
+      void flattenInt3D(JNIEnv *env, KernelArg* arg);
+      void flattenLong3D(JNIEnv *env, KernelArg* arg);
+      void flattenFloat3D(JNIEnv *env, KernelArg* arg);
+      void flattenDouble3D(JNIEnv *env, KernelArg* arg);
 
       void inflate(JNIEnv *env, KernelArg* arg);
 
