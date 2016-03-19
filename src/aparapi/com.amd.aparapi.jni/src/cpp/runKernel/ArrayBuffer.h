@@ -41,6 +41,31 @@
 #include "Common.h"
 #include "ProfileInfo.h"
 
+/////////////////////////////////
+// if not in memory alignment test mode
+#ifndef TEST_ALIGNED_MEM
+/////////////////////////////////
+class ArrayBuffer{
+   public:
+      jobject javaArray;        // The java array that this arg is mapped to
+      cl_uint length;           // the number of elements for arrays (used only when ARRAYLENGTH bit is set for this arg)
+      jint lengthInBytes;       // bytes in the array or directBuf
+      cl_mem mem;               // the opencl buffer
+      void *addr;               // the last address where we saw this java array object
+      cl_uint memMask;          // the mask used for createBuffer
+      jboolean isCopy;
+      jboolean isPinned;
+      char memSpec[128];        // The string form of the mask we used for create buffer. for debugging
+      ProfileInfo read;
+      ProfileInfo write;
+
+      ArrayBuffer();
+      void unpinAbort(JNIEnv *jenv);
+      void unpinCommit(JNIEnv *jenv);
+      void pin(JNIEnv *jenv);
+};
+
+#else // defined TEST_ALIGNED_MEM
 // !!! oren mem tests
 ////////////////
 // Need to align host data to 32 bytes to be able to use DMA
@@ -107,5 +132,6 @@ class ArrayBuffer{
       void unpinCommit(JNIEnv *jenv);
       void pin(JNIEnv *jenv);
 };
+#endif // eof TEST_ALIGNED_MEM
 
 #endif // ARRAYBUFFER_H
