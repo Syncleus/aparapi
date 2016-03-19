@@ -49,6 +49,23 @@ ArrayBuffer::ArrayBuffer():
    isPinned(false){
    }
 
+#ifndef TEST_ALIGNED_MEM
+
+void ArrayBuffer::unpinAbort(JNIEnv *jenv){
+   jenv->ReleasePrimitiveArrayCritical((jarray)javaArray, addr,JNI_ABORT);
+   isPinned = JNI_FALSE;
+}
+void ArrayBuffer::unpinCommit(JNIEnv *jenv){
+   jenv->ReleasePrimitiveArrayCritical((jarray)javaArray, addr, 0);
+   isPinned = JNI_FALSE;
+}
+void ArrayBuffer::pin(JNIEnv *jenv){
+   void *ptr = addr;
+   addr = jenv->GetPrimitiveArrayCritical((jarray)javaArray,&isCopy);
+   isPinned = JNI_TRUE;
+}
+
+#else // defined TEST_ALIGNED_MEM
 ArrayBuffer::~ArrayBuffer()
 {
    // !!! oren fix mem leak
@@ -119,3 +136,4 @@ void ArrayBuffer::pin(JNIEnv *jenv){
    ////////////////////
    isPinned = JNI_TRUE;
 }
+#endif // TEST_ALIGNED_MEM

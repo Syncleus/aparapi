@@ -17,10 +17,10 @@
 # sh selectPlatform.sh AMD CPU 0 source std
 # sh selectPlatform.sh Altera ACC 0 binary fpga
 
-java \
- -Djava.library.path=../../com.amd.aparapi.jni/dist.$5 \
- -classpath ../../com.amd.aparapi/dist/aparapi.jar:add.jar \
- com.amd.aparapi.sample.add.MainSelectPlatform $1 $2 $3 $4
+#java \
+# -Djava.library.path=../../com.amd.aparapi.jni/dist.$5 \
+# -classpath ../../com.amd.aparapi/dist/aparapi.jar:add.jar \
+# com.amd.aparapi.sample.add.MainSelectPlatform $1 $2 $3 $4
 
 #
 # other script variants uncomment to use ->
@@ -38,5 +38,14 @@ java \
 # -Dcom.amd.aparapi.flowType=$4 \
 # -classpath ../../com.amd.aparapi/dist/aparapi.jar:add.jar \
 # com.amd.aparapi.sample.add.MainSelectPlatform $1 $2 $3
+
+# to inc logging level
+#-Dcom.amd.aparapi.logLevel=FINE \
+#-Dcom.amd.aparapi.MemOverideLib=[abs path to MemOverideLib.so] \
+
+java \
+ -Djava.library.path=../../com.amd.aparapi.jni/dist.$5 \
+ -classpath ../../com.amd.aparapi/dist/aparapi.jar:add.jar \
+ com.amd.aparapi.sample.add.MainSelectPlatform $1 $2 $3 $4
 
 

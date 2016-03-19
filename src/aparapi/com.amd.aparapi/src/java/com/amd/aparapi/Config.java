@@ -230,4 +230,10 @@ public class Config extends ConfigJNI{
    public static String getLoggerName() {
       return logPropName;
    }
+  
+   // !!! oren change -> expose pkg name beyond inheritance
+   public static String getPkgName() {
+      return propPkgName;
+   }
+
 }
