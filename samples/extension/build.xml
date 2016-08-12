@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+
+<project name="extension" default="build" basedir=".">
+
+	<!-- Ideally this would be the latest version of Java but not everyone is going to have it installed -->
+	<!-- Additionally we want to avoid "Class not found: javac1.8" errors from old Ant versions (i.e. Eclipse) -->
+	<property name="build.compiler" value="javac1.7" />
+	<property name="ant.build.javac.source" value="1.7" />
+	<property name="ant.build.javac.target" value="1.7" />
+
+	<target name="build" depends="clean">
+		<mkdir dir="classes" />
+		<javac srcdir="src" destdir="classes" debug="on" includeantruntime="false">
+			<classpath>
+				<pathelement path="../../com.amd.aparapi/dist/aparapi.jar" />
+			</classpath>
+		</javac>
+		<copy todir="classes/com\amd\aparapi\sample\extension" file="src\com\amd\aparapi\sample\extension\fft.cl" />
+		<copy todir="classes/com\amd\aparapi\sample\extension" file="src\com\amd\aparapi\sample\extension\HistogramKernel.cl" />
+		<copy todir="classes/com\amd\aparapi\sample\extension" file="src\com\amd\aparapi\sample\extension\mandel.cl" />
+		<copy todir="classes/com\amd\aparapi\sample\extension" file="src\com\amd\aparapi\sample\extension\mandel2.cl" />
+		<copy todir="classes/com\amd\aparapi\sample\extension" file="src\com\amd\aparapi\sample\extension\squarer.cl" />
+		<jar jarfile="${ant.project.name}.jar" basedir="classes" />
+	</target>
+
+	<target name="clean">
+		<delete dir="classes" />
+		<delete file="${ant.project.name}.jar" />
+	</target>
+
+	<path id="compiler.class.path">
+		<pathelement path="../../com.amd.aparapi/dist/aparapi.jar" />
+	</path>
+
+	<path id="runtime.class.path" cache="true">
+		<path refid="compiler.class.path" />
+		<pathelement path="${ant.project.name}.jar" />
+	</path>
+
+	<!-- FFT -->
+	<target name="run-fft-gpu">
+		<java classname="com.amd.aparapi.sample.extension.FFTExample" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="GPU" />
+		</java>
+	</target>
+
+	<target name="run-fft-jtp">
+		<java classname="com.amd.aparapi.sample.extension.FFTExample" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="JTP" />
+		</java>
+	</target>
+
+	<!-- Histogram -->
+	<target name="run-histogram-gpu">
+		<java classname="com.amd.aparapi.sample.extension.Histogram" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="GPU" />
+		</java>
+	</target>
+
+	<target name="run-histogram-jtp">
+		<java classname="com.amd.aparapi.sample.extension.Histogram" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="JTP" />
+		</java>
+	</target>
+
+	<target name="run-histogram-ideal-gpu">
+		<java classname="com.amd.aparapi.sample.extension.HistogramIdeal" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="GPU" />
+		</java>
+	</target>
+
+	<target name="run-histogram-ideal-jtp">
+		<java classname="com.amd.aparapi.sample.extension.HistogramIdeal" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="JTP" />
+		</java>
+	</target>
+
+	<!-- Mandel -->
+	<target name="run-mandel-gpu">
+		<java classname="com.amd.aparapi.sample.extension.MandelExample" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="GPU" />
+		</java>
+	</target>
+
+	<target name="run-mandel-jtp">
+		<java classname="com.amd.aparapi.sample.extension.MandelExample" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="JTP" />
+		</java>
+	</target>
+
+	<!-- Square -->
+	<target name="run-square-gpu">
+		<java classname="com.amd.aparapi.sample.extension.SquareExample" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="GPU" />
+		</java>
+	</target>
+
+	<target name="run-square-jtp">
+		<java classname="com.amd.aparapi.sample.extension.SquareExample" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="JTP" />
+		</java>
+	</target>
+
+</project>

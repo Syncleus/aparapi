@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+
+<project name="oopnbody" default="build" basedir=".">
+
+	<echo>This project REQUIRES NBODY to be built first!!!</echo>
+		
+	<!-- Ideally this would be the latest version of Java but not everyone is going to have it installed -->
+	<!-- Additionally we want to avoid "Class not found: javac1.8" errors from old Ant versions (i.e. Eclipse) -->
+	<property name="build.compiler" value="javac1.7" />
+	<property name="ant.build.javac.source" value="1.7" />
+	<property name="ant.build.javac.target" value="1.7" />
+
+	<property name="nbody.path" value="../nbody" />
+	<property name="libs.root" value=".libs" />
+
+	<property name="jogl.all.jar" value="jogl-all.jar" />
+	<property name="jogl.all.natives.macosx.jar" value="jogl-all-natives-macosx-universal.jar" />
+	<property name="jogl.all.natives.windows.i586.jar" value="jogl-all-natives-windows-i586.jar" />
+	<property name="jogl.all.natives.windows.amd64.jar" value="jogl-all-natives-windows-amd64.jar" />
+	<property name="jogl.all.natives.linux.i586.jar" value="jogl-all-natives-linux-i586.jar" />
+	<property name="jogl.all.natives.linux.amd64.jar" value="jogl-all-natives-linux-amd64.jar" />
+
+	<property name="gluegen.rt.jar" value="gluegen-rt.jar" />
+	<property name="gluegen.rt.natives.macosx.jar" value="gluegen-rt-natives-macosx-universal.jar" />
+	<property name="gluegen.rt.natives.windows.i586.jar" value="gluegen-rt-natives-windows-i586.jar" />
+	<property name="gluegen.rt.natives.windows.amd64.jar" value="gluegen-rt-natives-windows-amd64.jar" />
+	<property name="gluegen.rt.natives.linux.i586.jar" value="gluegen-rt-natives-linux-i586.jar" />
+	<property name="gluegen.rt.natives.linux.amd64.jar" value="gluegen-rt-natives-linux-amd64.jar" />
+
+	<path id="compiler.class.path">
+		<pathelement path="../../com.amd.aparapi/dist/aparapi.jar" />
+		<pathelement path="${nbody.path}/${libs.root}/${jogl.all.jar}" />
+		<pathelement path="${nbody.path}/${libs.root}/${jogl.all.natives.macosx.jar}" />
+		<pathelement path="${nbody.path}/${libs.root}/${jogl.all.natives.windows.i586.jar}" />
+		<pathelement path="${nbody.path}/${libs.root}/${jogl.all.natives.windows.amd64.jar}" />
+		<pathelement path="${nbody.path}/${libs.root}/${jogl.all.natives.linux.i586.jar}" />
+		<pathelement path="${nbody.path}/${libs.root}/${jogl.all.natives.linux.amd64.jar}" />
+		<pathelement path="${nbody.path}/${libs.root}/${gluegen.rt.jar}" />
+		<pathelement path="${nbody.path}/${libs.root}/${gluegen.rt.natives.macosx.jar}" />
+		<pathelement path="${nbody.path}/${libs.root}/${gluegen.rt.natives.windows.i586.jar}" />
+		<pathelement path="${nbody.path}/${libs.root}/${gluegen.rt.natives.windows.amd64.jar}" />
+		<pathelement path="${nbody.path}/${libs.root}/${gluegen.rt.natives.linux.i586.jar}" />
+		<pathelement path="${nbody.path}/${libs.root}/${gluegen.rt.natives.linux.amd64.jar}" />
+		<pathelement path="classes" />
+	</path>
+
+	<path id="runtime.class.path" cache="true">
+		<path refid="compiler.class.path" />
+		<pathelement path="${ant.project.name}.jar" />
+	</path>
+
+	<target name="build" depends="clean">
+		<mkdir dir="classes" />
+		<javac srcdir="src" destdir="classes" debug="on" includeantruntime="false">
+			<classpath refid="compiler.class.path" />
+		</javac>
+		<copy todir="classes/com/amd/aparapi/examples/oopnbody" file="src/com/amd/aparapi/examples/oopnbody/particle.jpg" />
+		<jar jarfile="${ant.project.name}.jar" basedir="classes" />
+	</target>
+
+	<target name="clean">
+		<delete dir="classes" />
+		<delete file="${ant.project.name}.jar" />
+	</target>
+
+	<target name="run-jtp">
+		<java classname="com.amd.aparapi.examples.oopnbody.Main" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist;jogamp" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="JTP" />
+			<sysproperty key="bodies" value="16384" />
+			<sysproperty key="height" value="800" />
+			<sysproperty key="width" value="800" />
+		</java>
+	</target>
+
+	<target name="run-gpu">
+		<java classname="com.amd.aparapi.examples.oopnbody.Main" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist;jogamp" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="GPU" />
+			<sysproperty key="bodies" value="16384" />
+			<sysproperty key="height" value="800" />
+			<sysproperty key="width" value="800" />
+		</java>
+	</target>
+
+	<target name="run" depends="run-gpu" />
+
+</project>

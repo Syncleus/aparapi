@@ -1,0 +1,30 @@
+# Useful examples
+# https://github.com/github/gitignore
+
+# OS X
+*.DS_Store
+
+# Java
+*.jar
+*.war
+*.ear
+
+# C/C++
+*.so
+*.dylib
+*.dSYM
+*.dll
+*.jnilib
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# Directories
+**/bin/
+**/classes/
+**/dist/
+**/include/
+**/nbproject/

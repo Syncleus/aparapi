@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+
+<project name="squares" default="build" basedir=".">
+
+	<!-- Ideally this would be the latest version of Java but not everyone is going to have it installed -->
+	<!-- Additionally we want to avoid "Class not found: javac1.8" errors from old Ant versions (i.e. Eclipse) -->
+	<property name="build.compiler" value="javac1.7" />
+	<property name="ant.build.javac.source" value="1.7" />
+	<property name="ant.build.javac.target" value="1.7" />
+
+	<path id="compiler.class.path">
+		<pathelement path="../../com.amd.aparapi/dist/aparapi.jar" />
+	</path>
+
+	<path id="runtime.class.path" cache="true">
+		<path refid="compiler.class.path" />
+		<pathelement path="${ant.project.name}.jar" />
+	</path>
+
+	<target name="build" depends="clean">
+		<mkdir dir="classes" />
+		<javac srcdir="src" destdir="classes" debug="on" includeantruntime="false">
+			<classpath>
+				<pathelement path="../../com.amd.aparapi/dist/aparapi.jar" />
+			</classpath>
+		</javac>
+		<jar jarfile="${ant.project.name}.jar" basedir="classes" />
+	</target>
+
+	<target name="clean">
+		<delete dir="classes" />
+		<delete file="${ant.project.name}.jar" />
+	</target>
+
+	<target name="run-gpu">
+		<java classname="com.amd.aparapi.sample.squares.Main" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="GPU" />
+		</java>
+	</target>
+
+	<target name="run-jtp">
+		<java classname="com.amd.aparapi.sample.squares.Main" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="JTP" />
+		</java>
+	</target>
+
+	<target name="run" depends="run-gpu" />
+
+</project>

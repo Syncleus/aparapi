@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+
+<project name="correlation-matrix" default="junit" basedir=".">
+
+	<!-- 
+			USER CONFIGURABLE PROPERTIES 
+	-->
+	<property name="libs.root" value="${basedir}/.libs" />
+
+	<property name="commons.lang.jar" value="commons-lang3-3.1.jar" />
+	<property name="log4j.jar" value="log4j-1.2.17.jar" />
+	<property name="lucene.jar" value="lucene-core-3.5.0.jar" />
+	<property name="junit.jar" value="junit-4.10.jar" />
+
+	<property name="commons.lang.url" value="http://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.1/${commons.lang.jar}" />
+	<property name="log4j.url" value="http://repo1.maven.org/maven2/log4j/log4j/1.2.17/${log4j.jar}" />
+	<property name="lucene.url" value="http://repo1.maven.org/maven2/org/apache/lucene/lucene-core/3.5.0/${lucene.jar}" />
+	<property name="junit.url" value="http://repo1.maven.org/maven2/junit/junit/4.10/${junit.jar}" />
+
+	<!-- 
+			SYSTEM PROPERTIES
+	-->
+	<echo>OS Name:    	${os.name}</echo>
+	<echo>OS Version: 	${os.version}</echo>
+	<echo>OS Arch:    	${os.arch}</echo>
+	<echo>Java Version:   	${java.version}</echo>
+
+	<!-- Ideally this would be the latest version of Java but not everyone is going to have it installed -->
+	<!-- Additionally we want to avoid "Class not found: javac1.8" errors from old Ant versions (i.e. Eclipse) -->
+	<property name="build.compiler" value="javac1.7" />
+	<property name="ant.build.javac.source" value="1.7" />
+	<property name="ant.build.javac.target" value="1.7" />
+
+	<path id="classpath">
+		<pathelement path="${basedir}/../../com.amd.aparapi/dist/aparapi.jar" />
+		<pathelement path="${libs.root}/${commons.lang.jar}" />
+		<pathelement path="${libs.root}/${log4j.jar}" />
+		<pathelement path="${libs.root}/${lucene.jar}" />
+		<pathelement path="${libs.root}/${junit.jar}" />
+		<pathelement path="classes" />
+	</path>
+	
+	<target name="install.deps">
+		<mkdir dir="${libs.root}" />
+		<!-- Cleanup all existing deps -->
+		<delete failonerror="false" includeEmptyDirs="true">
+			<fileset dir="${libs.root}" includes="*/" />
+		</delete>
+		<!-- Download and unzip requested deps -->
+		<get src="${commons.lang.url}" dest="${libs.root}/${commons.lang.jar}" />
+		<get src="${log4j.url}" dest="${libs.root}/${log4j.jar}" />
+		<get src="${lucene.url}" dest="${libs.root}/${lucene.jar}" />
+		<get src="${junit.url}" dest="${libs.root}/${junit.jar}" />
+	</target>
+
+	<target name="clean">
+		<delete dir="classes" />
+		<delete dir="junit" />
+		<delete file="correlation-matrix.jar" />
+	</target>
+
+	<target name="junit" depends="clean">
+		<mkdir dir="classes" />
+		<mkdir dir="junit/data" />
+
+		<!-- Runtime Code -->
+		<javac debug="true" debuglevel="lines,vars,source" srcdir="src/java" destdir="classes" includeAntRuntime="false" classpathref="classpath">
+			<compilerarg value="-Xlint" />
+			<compilerarg value="-Xlint:-path" />
+		</javac>
+
+		<!-- JUnit Tests -->
+		<javac debug="true" debuglevel="lines,vars,source" srcdir="src/test" destdir="classes" includeAntRuntime="false" classpathref="classpath">
+			<compilerarg value="-Xlint" />
+			<compilerarg value="-Xlint:-path" />
+		</javac>
+
+		<copy todir="classes" file="src/java/log4j.xml" />
+
+		<!-- Even though fork is slower we need to set the library path and this requires fork -->
+		<junit printsummary="false" fork="true" haltonfailure="false" failureproperty="tests.failed" showoutput="true">
+			<sysproperty key="java.library.path" value="${basedir}/../../com.amd.aparapi.jni/dist" />
+
+			<!-- USER DEFINED PROPERTIES -->
+			<sysproperty key="numRows" value="1024" />
+			<sysproperty key="numColumns" value="16384" />
+			<sysproperty key="useGPU" value="true" />
+
+			<formatter type="xml" />
+			<classpath refid="classpath" />
+			<batchtest todir="junit/data">
+				<fileset dir="src/test" />
+			</batchtest>
+		</junit>
+
+		<junitreport todir="junit/data">
+			<fileset dir="junit/data" />
+		</junitreport>
+	</target>
+
+</project>

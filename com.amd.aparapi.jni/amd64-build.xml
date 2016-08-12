@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+
+<project name="com.amd.aparapi.jni" default="build" basedir=".">
+   <property environment="env" />
+   <echo>Looking for ${os.name}.${compiler}</echo>
+   <property file="${os.arch}.${compiler}"/>
+
+   <target name="clean" >
+      <delete dir="include" />
+      <delete dir="${basedir}/dist" />
+      <delete file="cltest.exe" />
+      <delete>
+	  <fileset dir="." includes="**/*.obj, **/*.exp, **/*.lib"/>
+      </delete>
+   </target>
+
+   <target name="javah">
+      <mkdir dir="include" />
+      <javah classpath="..\com.amd.aparapi\classes" destdir="include" force="true">
+         <class name="com.amd.aparapi.internal.jni.ConfigJNI" />
+         <class name="com.amd.aparapi.internal.jni.KernelArgJNI" />
+         <class name="com.amd.aparapi.internal.jni.KernelRunnerJNI" />
+         <class name="com.amd.aparapi.internal.jni.OpenCLJNI" />
+         <class name="com.amd.aparapi.internal.jni.RangeJNI" />
+         <!-- Non-Native Classes -->
+         <class name="com.amd.aparapi.Kernel"/>
+         <class name="com.amd.aparapi.Range"/>
+         <class name="com.amd.aparapi.Config" />
+         <class name="com.amd.aparapi.device.Device" />
+         <class name="com.amd.aparapi.device.OpenCLDevice" />
+         <class name="com.amd.aparapi.internal.kernel.KernelRunner"/>
+         <class name="com.amd.aparapi.internal.opencl.OpenCLArgDescriptor" />
+         <class name="com.amd.aparapi.internal.opencl.OpenCLMem" />
+      </javah>
+   </target>
+   
+
+   <target name="build" depends="clean, javah">
+      <mkdir dir="${basedir}\dist"/>
+      <exec executable="${cl}">
+         <env key="PATH" path="${path}" />
+         <arg value="/nologo" />
+         <arg value="/TP" />
+         <arg value="/Ox" />
+         <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
+         <arg value="/EHsc" />
+	 <arg value="/I${vs}\vc\include" />
+         <arg value="/I${java.home}\..\include" />
+         <arg value="/I${java.home}\..\include\win32" />
+         <arg value="/Iinclude" />
+	 <arg value="/I${ocl}\include" />
+	 <arg value="/I${wk}\Include\shared" />
+	 <arg value="/I${wk}\Include\um" />
+	 <arg value="/Isrc/cpp" />
+         <arg value="/Isrc/cpp/runKernel" />
+	 <arg value="/Isrc/cpp/invoke" /> 
+         <arg value="src/cpp/runKernel/Aparapi.cpp" />
+         <arg value="src/cpp/runKernel/ArrayBuffer.cpp" />
+         <arg value="src/cpp/runKernel/AparapiBuffer.cpp" />
+         <arg value="src/cpp/runKernel/Config.cpp" />
+         <arg value="src/cpp/runKernel/JNIContext.cpp" />
+         <arg value="src/cpp/runKernel/KernelArg.cpp" />
+         <arg value="src/cpp/runKernel/ProfileInfo.cpp" />
+         <arg value="src/cpp/runKernel/Range.cpp" />
+         <arg value="src/cpp/invoke/OpenCLJNI.cpp" />
+         <arg value="src/cpp/invoke/OpenCLArgDescriptor.cpp" />
+         <arg value="src/cpp/invoke/OpenCLMem.cpp" />
+         <arg value="src/cpp/CLHelper.cpp" />
+         <arg value="src/cpp/classtools.cpp" />
+         <arg value="src/cpp/JNIHelper.cpp" />
+         <arg value="src/cpp/agent.cpp" />
+         <arg value="/LD" />
+         <arg value="/link" />
+	 <arg value="/libpath:${sdk}\Lib\x64"/>
+	 <arg value="/libpath:${vs}\VC\lib\amd64"/>
+	 <arg value="/libpath:${ocl}\lib\x86_64" />
+         <arg value="OpenCL.lib" />
+         <arg value="/out:dist\aparapi_x86_64.dll" />
+      </exec>
+   </target>
+
+
+   <target name="cltest" depends="clean" >
+      <mkdir dir="${basedir}\dist"/>
+      <exec executable="${cl}">
+	 <env key="PATH" path="${path}" />
+         <arg value="/nologo" />
+         <arg value="/TP" />
+         <arg value="/Ox" />
+         <arg value="-DCL_USE_DEPRECATED_OPENCL_1_1_APIS"/>
+	 <arg value="/I${vs}\vc\include" />
+         <arg value="/Iinclude" />
+	 <arg value="/I${ocl}\include" />
+	 <arg value="/I${wk}\Include\shared" />
+	 <arg value="/I${wk}\Include\um" />
+         <arg value="src\cpp\CLTest.cpp" />
+         <arg value="/link" />
+	 <arg value="/libpath:${sdk}\Lib\x64"/>
+	 <arg value="/libpath:${vs}\VC\lib\amd64"/>
+	 <arg value="/libpath:${ocl}\lib\x86_64" />
+         <arg value="OpenCL.lib" />
+         <arg value="/out:cltest.exe" />
+      </exec>
+   </target>
+</project>

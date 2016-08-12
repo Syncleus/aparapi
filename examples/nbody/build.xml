@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+
+<project name="nbody" default="build" basedir=".">
+
+	<!-- Ideally this would be the latest version of Java but not everyone is going to have it installed -->
+	<!-- Additionally we want to avoid "Class not found: javac1.8" errors from old Ant versions (i.e. Eclipse) -->
+	<property name="build.compiler" value="javac1.7" />
+	<property name="ant.build.javac.source" value="1.7" />
+	<property name="ant.build.javac.target" value="1.7" />
+
+	<property name="libs.root" value="${basedir}/.libs" />
+
+	<property name="jogl.all.jar" value="jogl-all.jar" />
+	<property name="jogl.all.natives.macosx.jar" value="jogl-all-natives-macosx-universal.jar" />
+	<property name="jogl.all.natives.windows.i586.jar" value="jogl-all-natives-windows-i586.jar" />
+	<property name="jogl.all.natives.windows.amd64.jar" value="jogl-all-natives-windows-amd64.jar" />
+	<property name="jogl.all.natives.linux.i586.jar" value="jogl-all-natives-linux-i586.jar" />
+	<property name="jogl.all.natives.linux.amd64.jar" value="jogl-all-natives-linux-amd64.jar" />
+
+	<property name="gluegen.rt.jar" value="gluegen-rt.jar" />
+	<property name="gluegen.rt.natives.macosx.jar" value="gluegen-rt-natives-macosx-universal.jar" />
+	<property name="gluegen.rt.natives.windows.i586.jar" value="gluegen-rt-natives-windows-i586.jar" />
+	<property name="gluegen.rt.natives.windows.amd64.jar" value="gluegen-rt-natives-windows-amd64.jar" />
+	<property name="gluegen.rt.natives.linux.i586.jar" value="gluegen-rt-natives-linux-i586.jar" />
+	<property name="gluegen.rt.natives.linux.amd64.jar" value="gluegen-rt-natives-linux-amd64.jar" />
+
+	<property name="jogamp.url" value="http://jogamp.org/deployment/archive/rc/gluegen_52-joal_32-jogl_66-jocl_41/jar" />
+
+	<property name="jogl.all.url" value="${jogamp.url}/${jogl.all.jar}" />
+	<property name="jogl.all.natives.macosx.url" value="${jogamp.url}/${jogl.all.natives.macosx.jar}" />
+	<property name="jogl.all.natives.windows.i586.url" value="${jogamp.url}/${jogl.all.natives.windows.i586.jar}" />
+	<property name="jogl.all.natives.windows.amd64.url" value="${jogamp.url}/${jogl.all.natives.windows.amd64.jar}" />
+	<property name="jogl.all.natives.linux.i586.url" value="${jogamp.url}/${jogl.all.natives.linux.i586.jar}" />
+	<property name="jogl.all.natives.linux.amd64.url" value="${jogamp.url}/${jogl.all.natives.linux.amd64.jar}" />
+
+	<property name="gluegen.rt.url" value="${jogamp.url}/${gluegen.rt.jar}" />
+	<property name="gluegen.rt.natives.macosx.url" value="${jogamp.url}/${gluegen.rt.natives.macosx.jar}" />
+	<property name="gluegen.rt.natives.windows.i586.url" value="${jogamp.url}/${gluegen.rt.natives.windows.1586.jar}" />
+	<property name="gluegen.rt.natives.windows.amd64.url" value="${jogamp.url}/${gluegen.rt.natives.windows.amd64.jar}" />
+	<property name="gluegen.rt.natives.linux.i586.url" value="${jogamp.url}/${gluegen.rt.natives.linux.i586.jar}" />
+	<property name="gluegen.rt.natives.linux.amd64.url" value="${jogamp.url}/${gluegen.rt.natives.linux.amd64.jar}" />
+
+	<path id="compiler.class.path">
+		<pathelement path="../../com.amd.aparapi/dist/aparapi.jar" />
+		<pathelement path="${libs.root}/${jogl.all.jar}" />
+		<pathelement path="${libs.root}/${jogl.all.natives.macosx.jar}" />
+		<pathelement path="${libs.root}/${jogl.all.natives.windows.i586.jar}" />
+		<pathelement path="${libs.root}/${jogl.all.natives.windows.amd64.jar}" />
+		<pathelement path="${libs.root}/${jogl.all.natives.linux.i586.jar}" />
+		<pathelement path="${libs.root}/${jogl.all.natives.linux.amd64.jar}" />
+		<pathelement path="${libs.root}/${gluegen.rt.jar}" />
+		<pathelement path="${libs.root}/${gluegen.rt.natives.macosx.jar}" />
+		<pathelement path="${libs.root}/${gluegen.rt.natives.windows.i586.jar}" />
+		<pathelement path="${libs.root}/${gluegen.rt.natives.windows.amd64.jar}" />
+		<pathelement path="${libs.root}/${gluegen.rt.natives.linux.i586.jar}" />
+		<pathelement path="${libs.root}/${gluegen.rt.natives.linux.amd64.jar}" />
+		<pathelement path="classes" />
+	</path>
+
+	<path id="runtime.class.path" cache="true">
+		<path refid="compiler.class.path" />
+		<pathelement path="${ant.project.name}.jar" />
+	</path>
+
+	<target name="install.deps">
+		<mkdir dir="${libs.root}" />
+		<!-- Cleanup all existing deps -->
+		<delete failonerror="false" includeEmptyDirs="true">
+			<fileset dir="${libs.root}" includes="*/" />
+		</delete>
+		<!-- Download and unzip requested deps -->
+		<get src="${jogl.all.url}" dest="${libs.root}/${jogl.all.jar}" />
+		<get src="${jogl.all.natives.macosx.url}" dest="${libs.root}/${jogl.all.natives.macosx.jar}" />
+		<get src="${jogl.all.natives.macosx.url}" dest="${libs.root}/${jogl.all.natives.windows.i586.jar}" />
+		<get src="${jogl.all.natives.macosx.url}" dest="${libs.root}/${jogl.all.natives.windows.amd64.jar}" />
+		<get src="${jogl.all.natives.macosx.url}" dest="${libs.root}/${jogl.all.natives.linux.i586.jar}" />
+		<get src="${jogl.all.natives.macosx.url}" dest="${libs.root}/${jogl.all.natives.linux.amd64.jar}" />
+		<get src="${gluegen.rt.url}" dest="${libs.root}/${gluegen.rt.jar}" />
+		<get src="${gluegen.rt.natives.macosx.url}" dest="${libs.root}/${gluegen.rt.natives.macosx.jar}" />
+		<get src="${gluegen.rt.natives.macosx.url}" dest="${libs.root}/${gluegen.rt.natives.windows.i586.jar}" />
+		<get src="${gluegen.rt.natives.macosx.url}" dest="${libs.root}/${gluegen.rt.natives.windows.amd64.jar}" />
+		<get src="${gluegen.rt.natives.macosx.url}" dest="${libs.root}/${gluegen.rt.natives.linux.i586.jar}" />
+		<get src="${gluegen.rt.natives.macosx.url}" dest="${libs.root}/${gluegen.rt.natives.linux.amd64.jar}" />
+	</target>
+
+	<target name="build" depends="clean">
+		<mkdir dir="classes" />
+		<javac srcdir="src" destdir="classes" debug="on" includeantruntime="false">
+			<classpath refid="compiler.class.path" />
+		</javac>
+		<copy todir="classes/com/amd/aparapi/examples/nbody" file="src/com/amd/aparapi/examples/nbody/particle.jpg" />
+		<jar jarfile="${ant.project.name}.jar" basedir="classes" />
+	</target>
+
+	<target name="clean">
+		<delete dir="classes" />
+		<delete file="${ant.project.name}.jar" />
+	</target>
+
+	<target name="run-jtp">
+		<java classname="com.amd.aparapi.examples.nbody.Main" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist;jogamp" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="JTP" />
+			<sysproperty key="bodies" value="16384" />
+			<sysproperty key="height" value="800" />
+			<sysproperty key="width" value="800" />
+		</java>
+	</target>
+
+	<target name="run-gpu">
+		<java classname="com.amd.aparapi.examples.nbody.Main" fork="true">
+			<classpath refid="runtime.class.path" />
+			<sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni\dist;jogamp" />
+			<sysproperty key="com.amd.aparapi.executionMode" value="GPU" />
+			<sysproperty key="bodies" value="16384" />
+			<sysproperty key="height" value="800" />
+			<sysproperty key="width" value="800" />
+		</java>
+	</target>
+
+	<target name="run" depends="run-gpu" />
+
+</project>

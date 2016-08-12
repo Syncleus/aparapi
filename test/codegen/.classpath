@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/java"/>
+	<classpathentry kind="src" path="src/genjava"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/com.amd.aparapi/dist/aparapi.jar" sourcepath="/com.amd.aparapi">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="com.amd.aparapi.jni/dist"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path=".libs/junit-4.10.jar"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>
