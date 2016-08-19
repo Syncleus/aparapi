@@ -190,6 +190,7 @@ public class KernelRunner extends KernelRunnerJNI{
    public synchronized void dispose() {
       if (kernel.isRunningCL()) {
          disposeJNI(jniContextHandle);
+         seenBinaryKeys.clear();
       }
       // We are using a shared pool, so there's no need no shutdown it when kernel is disposed
       //      threadPool.shutdownNow();
