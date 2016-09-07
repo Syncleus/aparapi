@@ -1,5 +1,9 @@
 # Aparapi Change Log
 
+## 1.2.0
+
+* Kernels of the same class are now eligible to be run on different devices
+
 ## 1.1.2
 
 * Fixed a bug where OpenCL kernels were getting compiled twice.

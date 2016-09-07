@@ -28,7 +28,7 @@ import java.util.*;
 public class KernelManager {
 
    private static KernelManager INSTANCE = new KernelManager();
-   private LinkedHashMap<Class<? extends Kernel>, KernelPreferences> preferences = new LinkedHashMap<>();
+   private LinkedHashMap<Integer, PreferencesWrapper> preferences = new LinkedHashMap<>();
    private LinkedHashMap<Class<? extends Kernel>, KernelProfile> profiles = new LinkedHashMap<>();
    private LinkedHashMap<Class<? extends Kernel>, Kernel> sharedInstances = new LinkedHashMap<>();
 
@@ -88,8 +88,9 @@ public class KernelManager {
          builder.append(" (showing mean elapsed times in milliseconds)");
       }
       builder.append("\n\n");
-      for (Class<? extends Kernel> klass : preferences.keySet()) {
-         KernelPreferences preferences = this.preferences.get(klass);
+      for (PreferencesWrapper wrapper : preferences.values()) {
+         KernelPreferences preferences = wrapper.getPreferences();
+         Class<? extends Kernel> klass = wrapper.getKernel().getClass();
          KernelProfile profile = withProfilingInfo ? profiles.get(klass) : null;
          builder.append(klass.getName()).append(":\n\tusing ").append(preferences.getPreferredDevice(null).getShortDescription());
          List<Device> failedDevices = preferences.getFailedDevices();
@@ -139,10 +140,13 @@ public class KernelManager {
 
    public KernelPreferences getPreferences(Kernel kernel) {
       synchronized (preferences) {
-         KernelPreferences kernelPreferences = preferences.get(kernel.getClass());
-         if (kernelPreferences == null) {
+         PreferencesWrapper wrapper = preferences.get(kernel.hashCode());
+         KernelPreferences kernelPreferences;
+         if (wrapper == null) {
             kernelPreferences = new KernelPreferences(this, kernel.getClass());
-            preferences.put(kernel.getClass(), kernelPreferences);
+            preferences.put(kernel.hashCode(), new PreferencesWrapper(kernel, kernelPreferences));
+         }else{
+           kernelPreferences = preferences.get(kernel.hashCode()).getPreferences();
          }
          return kernelPreferences;
       }
