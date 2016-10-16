@@ -1,13 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.syncleus</groupId>
+        <artifactId>syncleus</artifactId>
+        <version>3-SNAPSHOT</version>
+    </parent>
+
     <groupId>com.syncleus.aparapi</groupId>
     <artifactId>aparapi</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
+
+    <name>Aparapi</name>
+    <description>A java OpenCl framework.</description>
+    <url>https://github.com/Syncleus/aparapi</url>
+
+    <licenses>
+        <license>
+            <name>Apache Software License version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>Syncleus</name>
+        <url>http://www.syncleus.com</url>
+    </organization>
+
+    <scm>
+        <connection>scm:git:https://github.com/Syncleus/aparapi.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/Syncleus/aparapi.git</developerConnection>
+        <url>https://github.com/Syncleus/aparapi</url>
+    </scm>
+
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/Syncleus/aparapi/issues</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <id>JeffreyPhillipsFreeman</id>
+            <name>Jeffrey Phillips Freeman</name>
+            <email>Jeffrey.Freeman@Syncleus.com</email>
+            <url>http://JeffreyFreeman.me</url>
+            <organization>Syncleus</organization>
+            <organizationUrl>http://www.syncleus.com</organizationUrl>
+            <roles>
+                <role>Chief Technology Officer</role>
+                <role>Project Owner</role>
+                <role>Developer</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+    </developers>
+
+    <repositories>
+        <repository>
+            <id>ossrh.snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <build>
+        <defaultGoal>package</defaultGoal>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>sign</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
