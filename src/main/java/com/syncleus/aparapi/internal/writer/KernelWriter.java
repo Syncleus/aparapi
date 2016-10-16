@@ -350,7 +350,7 @@ public abstract class KernelWriter extends BlockWriter{
          // If it is a converted array of objects, emit the struct param
          String className = null;
          if (signature.startsWith("L")) {
-            // Turn Lcom/amd/javalabs/opencl/demo/DummyOOA; into com_amd_javalabs_opencl_demo_DummyOOA for example
+            // Turn Lcom/syncleus/javalabs/opencl/demo/DummyOOA; into com_amd_javalabs_opencl_demo_DummyOOA for example
             className = (signature.substring(1, signature.length() - 1)).replace('/', '_');
             // if (logger.isLoggable(Level.FINE)) {
             // logger.fine("Examining object parameter: " + signature + " new: " + className);
