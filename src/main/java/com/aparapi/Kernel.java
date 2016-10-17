@@ -1856,6 +1856,199 @@ public abstract class Kernel implements Cloneable {
       return Math.tan(_d);
    }
 
+    private static final double LOG_2_RECIPROCAL = 1.0D / Math.log(2.0D);
+    private static final double PI_RECIPROCAL = 1.0D / Math.PI;
+
+    @OpenCLMapping(mapTo = "acospi")
+    protected final double acospi(final double a) {
+        return Math.acos(a) * PI_RECIPROCAL;
+    }
+
+    @OpenCLMapping(mapTo = "acospi")
+    protected final float acospi(final float a) {
+        return (float)(Math.acos(a) * PI_RECIPROCAL);
+    }
+
+    @OpenCLMapping(mapTo = "asinpi")
+    protected final double asinpi(final double a) {
+        return Math.asin(a) * PI_RECIPROCAL;
+    }
+
+    @OpenCLMapping(mapTo = "asinpi")
+    protected final float asinpi(final float a) {
+        return (float)(Math.asin(a) * PI_RECIPROCAL);
+    }
+
+    @OpenCLMapping(mapTo = "atanpi")
+    protected final double atanpi(final double a) {
+        return Math.atan(a) * PI_RECIPROCAL;
+    }
+
+    @OpenCLMapping(mapTo = "atanpi")
+    protected final float atanpi(final float a) {
+        return (float)(Math.atan(a) * PI_RECIPROCAL);
+    }
+
+    @OpenCLMapping(mapTo = "atan2pi")
+    protected final double atan2pi(final double y, final double x) {
+        return Math.atan2(y, x) * PI_RECIPROCAL;
+    }
+
+    @OpenCLMapping(mapTo = "atan2pi")
+    protected final float atan2pi(final float y, final double x) {
+        return (float)(Math.atan2(y, x) * PI_RECIPROCAL);
+    }
+
+    @OpenCLMapping(mapTo = "cbrt")
+    protected final double cbrt(final double a) {
+        return Math.cbrt(a);
+    }
+
+    @OpenCLMapping(mapTo = "cbrt")
+    protected final float cbrt(final float a) {
+        return (float)(Math.cbrt(a));
+    }
+
+    @OpenCLMapping(mapTo = "cosh")
+    protected final double cosh(final double x) {
+        return Math.cosh(x);
+    }
+
+    @OpenCLMapping(mapTo = "cosh")
+    protected final float cosh(final float x) {
+        return (float)(Math.cosh(x));
+    }
+
+    @OpenCLMapping(mapTo = "cospi")
+    protected final double cospi(final double a) {
+        return Math.cos(a * Math.PI);
+    }
+
+    @OpenCLMapping(mapTo = "cospi")
+    protected final float cospi(final float a) {
+        return (float)(Math.cos(a * Math.PI));
+    }
+
+    @OpenCLMapping(mapTo = "exp2")
+    protected final double exp2(final double a) {
+        return Math.pow(2.0D, a);
+    }
+
+    @OpenCLMapping(mapTo = "exp2")
+    protected final float exp2(final float a) {
+        return (float)(Math.pow(2.0D, a));
+    }
+
+    @OpenCLMapping(mapTo = "exp10")
+    protected final double exp10(final double a) {
+        return Math.pow(10.0D, a);
+    }
+
+    @OpenCLMapping(mapTo = "exp10")
+    protected final float exp10(final float a) {
+        return (float)(Math.pow(10.0D, a));
+    }
+
+    @OpenCLMapping(mapTo = "expm1")
+    protected final double expm1(final double x) {
+        return Math.expm1(x);
+    }
+
+    @OpenCLMapping(mapTo = "expm1")
+    protected final float expm1(final float x) {
+        return (float)(Math.expm1(x));
+    }
+
+    @OpenCLMapping(mapTo = "log2")
+    protected final double log2(final double a) {
+        return log(a) * LOG_2_RECIPROCAL;
+    }
+
+    @OpenCLMapping(mapTo = "log2")
+    protected final float log2(final float a) {
+        return (float)(log(a) * LOG_2_RECIPROCAL);
+    }
+
+    @OpenCLMapping(mapTo = "log10")
+    protected final double log10(final double a) {
+        return Math.log10(a);
+    }
+
+    @OpenCLMapping(mapTo = "log10")
+    protected final float log10(final float a) {
+        return (float)(Math.log10(a));
+    }
+
+    @OpenCLMapping(mapTo = "log1p")
+    protected final double log1p(final double x) {
+        return Math.log1p(x);
+    }
+
+    @OpenCLMapping(mapTo = "log1p")
+    protected final float log1p(final float x) {
+        return (float)(Math.log1p(x));
+    }
+
+    @OpenCLMapping(mapTo = "mad")
+    protected final double mad(final double a, final double b, final double c) {
+        return a * b + c;
+    }
+
+    @OpenCLMapping(mapTo = "mad")
+    protected final float mad(final float a, final float b, final float c) {
+        return a * b + c;
+    }
+
+    @OpenCLMapping(mapTo = "nextafter")
+    protected final double nextAfter(final double start, final double direction) {
+        return Math.nextAfter(start, direction);
+    }
+
+    @OpenCLMapping(mapTo = "nextafter")
+    protected final float nextAfter(final float start, final float direction) {
+        return (float)(Math.nextAfter(start, direction));
+    }
+
+    @OpenCLMapping(mapTo = "sinh")
+    protected final double sinh(final double x) {
+        return Math.sinh(x);
+    }
+
+    @OpenCLMapping(mapTo = "sinh")
+    protected final float sinh(final float x) {
+        return (float)(Math.sinh(x));
+    }
+
+    @OpenCLMapping(mapTo = "sinpi")
+    protected final double sinpi(final double a) {
+        return Math.sin(a * Math.PI);
+    }
+
+    @OpenCLMapping(mapTo = "sinpi")
+    protected final float sinpi(final float a) {
+        return (float)(Math.sin(a * Math.PI));
+    }
+
+    @OpenCLMapping(mapTo = "tanh")
+    protected final double tanh(final double x) {
+        return Math.tanh(x);
+    }
+
+    @OpenCLMapping(mapTo = "tanh")
+    protected final float tanh(final float x) {
+        return (float)(Math.tanh(x));
+    }
+
+    @OpenCLMapping(mapTo = "tanpi")
+    protected final double tanpi(final double a) {
+        return Math.tan(a * Math.PI);
+    }
+
+    @OpenCLMapping(mapTo = "tanpi")
+    protected final float tanpi(final float a) {
+        return (float)(Math.tan(a * Math.PI));
+    }
+
    // the following rsqrt and native_sqrt and native_rsqrt don't exist in java Math
    // but added them here for nbody testing, not sure if we want to expose them
    /**
