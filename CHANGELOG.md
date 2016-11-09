@@ -3,6 +3,7 @@
 ## 1.2.0
 
 * Kernels of the same class are now eligible to be run on different devices
+* Added method to set execution mode without any fallback.
 
 ## 1.1.2
 
