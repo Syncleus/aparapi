@@ -4,6 +4,7 @@
 
 * Kernels of the same class are now eligible to be run on different devices
 * Added method to set execution mode without any fallback.
+* Added opencl device method for name
 
 ## 1.1.2
 
