@@ -58,4 +58,4 @@ E:1 or E:2 any restricted technology, software, or source code you receive hereu
 D:1, E:1 or E:2 the direct product of such technology or software, if such foreign produced direct product is subject
 to national security controls as identified on the Commerce Control List (currently found in Supplement 1 to Part 774
 of EAR).  For the most current Country Group listings, or for additional information about the EAR or your obligations
-under those regulations, please refer to the U.S. Bureau of Industry and Security�s website at http://www.bis.doc.gov/. 
+under those regulations, please refer to the U.S. Bureau of Industry and Security�s website at http://www.bis.doc.gov/.
