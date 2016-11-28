@@ -15,12 +15,20 @@
  */
 package com.aparapi.internal.kernel;
 
-import com.aparapi.*;
-import com.aparapi.device.*;
-import com.aparapi.internal.util.*;
+import java.lang.reflect.Constructor;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 
-import java.lang.reflect.*;
-import java.util.*;
+import com.aparapi.Config;
+import com.aparapi.Kernel;
+import com.aparapi.device.Device;
+import com.aparapi.device.JavaDevice;
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.util.Reflection;
 
 /**
  * Created by Barney on 24/08/2015.
@@ -90,7 +98,7 @@ public class KernelManager {
       builder.append("\n\n");
       for (PreferencesWrapper wrapper : preferences.values()) {
          KernelPreferences preferences = wrapper.getPreferences();
-         Class<? extends Kernel> klass = wrapper.getKernel().getClass();
+         Class<? extends Kernel> klass = wrapper.getKernelClass();
          KernelProfile profile = withProfilingInfo ? profiles.get(klass) : null;
          builder.append(klass.getName()).append(":\n\tusing ").append(preferences.getPreferredDevice(null).getShortDescription());
          List<Device> failedDevices = preferences.getFailedDevices();
@@ -144,7 +152,7 @@ public class KernelManager {
          KernelPreferences kernelPreferences;
          if (wrapper == null) {
             kernelPreferences = new KernelPreferences(this, kernel.getClass());
-            preferences.put(kernel.hashCode(), new PreferencesWrapper(kernel, kernelPreferences));
+            preferences.put(kernel.hashCode(), new PreferencesWrapper(kernel.getClass(), kernelPreferences));
          }else{
            kernelPreferences = preferences.get(kernel.hashCode()).getPreferences();
          }

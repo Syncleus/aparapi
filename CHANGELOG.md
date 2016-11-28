@@ -2,9 +2,10 @@
 
 ## 1.2.0
 
-* Kernels of the same class are now eligible to be run on different devices
+* Kernels of the same class are now eligible to be run on different devices.
 * Added method to set execution mode without any fallback.
-* Added opencl device method for name
+* Added opencl device method for name.
+* Fixed a memory leak.
 
 ## 1.1.2
 
