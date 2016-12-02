@@ -6,6 +6,7 @@
 * Added method to set execution mode without any fallback.
 * Added opencl device method for name.
 * Fixed a memory leak.
+* Added method for uncached platform retrieval.
 
 ## 1.1.2
 
