@@ -7,7 +7,7 @@
 * Oliver Coleman
 * Steven Libby
 * Paul Miner
-* lgalluci
+* Lorenzo Gallucci
 * AMD Corporation
 
 # Details
