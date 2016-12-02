@@ -4,58 +4,73 @@
 [![Javadocs](http://www.javadoc.io/badge/com.syncleus.aparapi/aparapi.svg)](http://www.javadoc.io/doc/com.syncleus.aparapi/aparapi)
 [![Gitter](https://badges.gitter.im/Syncleus/aparapi.svg)](https://gitter.im/Syncleus/aparapi?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Aparapi allows Java developers to take advantage of the compute power of GPU and APU devices by executing data parallel
-code fragments on the GPU rather than being confined to the local CPU. It does this by converting Java bytecode to
-OpenCL at runtime and executing on the GPU, if for any reason Aparapi can't execute on the GPU it will execute in a
-Java thread pool.
+A framework for executing native Java code on the GPU.
 
-We like to think that for the appropriate workload this extends Java's 'Write Once Run Anywhere' to include GPU devices.
+**Licensed under the Apache Software License v2**
 
-## About the name
+Aparapi allows developers to write native Javacode capable of being executed directly on a graphics card GPU by converting Java byte code to an OpenCL kernel dynamically at runtime. Because it is backed by OpenCL Aparapi is compatible with all OpenCL compatible Graphics Cards.
 
-Aparapi is just a contraction of "A PARallel API"
+A GPU has a unique architecture that causes them to behave differently than a CPU. One of the most noticeable differences is that while a typical CPU has less than a dozen cores a high end GPU may have hundreds of cores. This makes them uniquely suited for data-parallel computation that can result in speedups hundreds of times more than what is capable with your average CPU. This can mean the difference between needing a whole data center to house your application versus just one or two computers, potentially saving millions in server costs.
 
-However... "Apa rapi" in Indonesian (the language spoken on the island of Java) translates to "What a neat...". So
-"Apa rapi Java Project" translates to "What a neat Java Project" How cool is that?
+Aparapi was originally a project conceived and developed by AMD corporation. It was later abandoned by AMD and sat mostly-idle for several years. Despite this there were some failed efforts by the community to keep the project alive, but without a clear community leader no new releases ever came. Eventually we came along and rescued the project, and modernized the project. Finally after such a long wait the first Aparapi release in 5 years was published and the community continues to push forward with renewed excitement.
 
-## License
+For detailed documentation see [Aparapi.com](http://Aparapi.com) or check out the [latest Javadocs](http://www.javadoc.io/doc/com.syncleus.ferma/ferma).
 
-Aparapi is currently licensed under the Apache License version 2. However it is important to note that this project has
-used code from other projects originally licensed under seperate, but compatible licenses. Since these license require
-retaining original copyrights, and a reference to the original license it is important to mention that here. The text
-of the original license used by AMD contained the following text:
+For support please use [Gitter](https://gitter.im/Syncleus/aparapi) or the [official Aparapi mailing list](https://groups.google.com/a/syncleus.com/d/forum/aparapi-list).
 
-Copyright (c) 2010-2011, Advanced Micro Devices, Inc.
-All rights reserved.
+Please file bugs and feature requests on [Github](https://github.com/Syncleus/aparapi/issues).
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
-following conditions are met:
+## Dependency
 
-Redistributions of source code must retain the above copyright notice, this list of conditions and the following
-disclaimer.
+To include Aparapi in your project of choice include the following Maven dependency into your build.
 
-Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
-disclaimer in the documentation and/or other materials provided with the distribution.
+```xml
 
-Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products
-derived from this software without specific prior written permission.
+<dependency>
+    <groupId>com.syncleus.aparapi</groupId>
+    <artifactId>aparapi</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## Obtaining the Source
 
-If you use the software (in whole or in part), you shall adhere to all applicable U.S., European, and other export
-laws, including but not limited to the U.S. Export Administration Regulations ("EAR"), (15 C.F.R. Sections 730 through
-774), and E.U. Council Regulation (EC) No 1334/2000 of 22 June 2000.  Further, pursuant to Section 740.6 of the EAR,
-you hereby certify that, except pursuant to a license granted by the United States Department of Commerce Bureau of
-Industry and Security or as otherwise permitted pursuant to a License Exception under the U.S. Export Administration
-Regulations ("EAR"), you will not (1) export, re-export or release to a national of a country in Country Groups D:1,
-E:1 or E:2 any restricted technology, software, or source code you receive hereunder, or (2) export to Country Groups
-D:1, E:1 or E:2 the direct product of such technology or software, if such foreign produced direct product is subject
-to national security controls as identified on the Commerce Control List (currently found in Supplement 1 to Part 774
-of EAR).  For the most current Country Group listings, or for additional information about the EAR or your obligations
-under those regulations, please refer to the U.S. Bureau of Industry and Security�s website at http://www.bis.doc.gov/.
+The official source repository for Aparapi is located in the Syncleus Github repository and can be cloned using the
+following command.
+
+```bash
+
+git clone https://github.com/Syncleus/aparapi.git
+```
+
+## Getting Started
+
+With Aparapi we can take a sequential loop such as this (which adds each element from inA and inB arrays and puts the result in result).
+
+```java
+
+final float inA[] = .... // get a float array of data from somewhere
+final float inB[] = .... // get a float array of data from somewhere
+assert (inA.length == inB.length);
+final float result = new float[inA.length];
+
+for (int i = 0; i < array.length; i++) {
+    result[i] = intA[i] + inB[i];
+}
+```
+
+And refactor the sequential loop to the following form:
+
+```java
+
+Kernel kernel = new Kernel() {
+    @Override
+    public void run() {
+        int i = getGlobalId();
+        result[i] = intA[i] + inB[i];
+    }
+};
+
+Range range = Range.create(result.length);
+kernel.execute(range);
+```
