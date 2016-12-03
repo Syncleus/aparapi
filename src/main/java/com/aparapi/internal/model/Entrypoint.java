@@ -517,11 +517,12 @@ public class Entrypoint implements Cloneable {
          }
       }
 
-      methodModel.checkForRecursion(new HashSet<MethodModel>());
+      Set<MethodModel> deepestLast = methodModel.deepestLast(new HashSet<MethodModel>(), new LinkedHashSet<MethodModel>());
+      ArrayList<MethodModel> deepestFirst = new ArrayList<MethodModel>(deepestLast);
+      Collections.reverse(deepestFirst);
+      calledMethods.addAll(deepestFirst);
 
-      calledMethods.addAll(methodMap.values());
-      Collections.reverse(calledMethods);
-      final List<MethodModel> methods = new ArrayList<MethodModel>(calledMethods);
+      final List<MethodModel> methods=calledMethods;
 
       // add method to the calledMethods so we can include in this list
       methods.add(methodModel);

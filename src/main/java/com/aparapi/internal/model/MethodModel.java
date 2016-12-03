@@ -129,7 +129,7 @@ public class MethodModel{
       return calledMethods;
    }
 
-   public void checkForRecursion(Set<MethodModel> transitiveCalledMethods) throws AparapiException {
+   public LinkedHashSet<MethodModel> deepestLast(Set<MethodModel> transitiveCalledMethods, LinkedHashSet<MethodModel> result) throws AparapiException {
 
       if (transitiveCalledMethods.contains(this)) {
          throw new ClassParseException(ClassParseException.TYPE.RECURSION, getName());
@@ -138,15 +138,21 @@ public class MethodModel{
       // Add myself
       transitiveCalledMethods.add(this);
 
+      if (result.contains(this)) {
+         result.remove(this);
+      }
+      result.add(this);
+
       // For each callee, send him a copy of the call chain up to this method
       final Iterator<MethodModel> cmi = getCalledMethods().iterator();
       while (cmi.hasNext()) {
          final MethodModel next = cmi.next();
-         next.checkForRecursion(transitiveCalledMethods);
+         next.deepestLast(transitiveCalledMethods, result);
       }
 
       // Done examining this call path, remove myself
       transitiveCalledMethods.remove(this);
+      return result;
    }
 
    /**
@@ -302,8 +308,8 @@ public class MethodModel{
     * <p>
     * Following this call the branch node at pc offset 100 will have a 'target' field which actually references the instruction at pc offset 200, and the instruction at pc offset 200 will 
     * have the branch node (at 100) added to it's forwardUnconditional list.
-    * 
-    * @see InstructionSet.Branch#getTarget()
+    *
+    * @see com.aparapi.internal.instruction.InstructionSet.Branch#getTarget()
     */
    public void buildBranchGraphs(Map<Integer, Instruction> pcMap) {
       for (Instruction instruction = pcHead; instruction != null; instruction = instruction.getNextPC()) {
@@ -432,7 +438,7 @@ public class MethodModel{
     * 
     * @param _expressionList
     * @param _instruction
-    * @throws ClassParseException
+    * @throws com.aparapi.internal.exception.ClassParseException
     */
    public void txFormDups(ExpressionList _expressionList, final Instruction _instruction) throws ClassParseException {
       if (_instruction instanceof InstructionSet.I_DUP) {
@@ -531,7 +537,7 @@ public class MethodModel{
     *  Try to fold the instructions into higher level structures. 
     * At the end we have a folded instruction tree with 'roots' containing the 
     * top level branches (stores mostly)
-    * @throws ClassParseException
+    * @throws com.aparapi.internal.exception.ClassParseException
     */
 
    void foldExpressions() throws ClassParseException {
@@ -1560,7 +1566,6 @@ public class MethodModel{
             pc = entry.getKey();
             instruction = entry.getValue();
             InstructionSet.StoreSpec storeSpec = instruction.getByteCode().getStore();
-
             if (storeSpec != InstructionSet.StoreSpec.NONE) {
                int slotIndex = ((InstructionSet.LocalVariableTableIndexAccessor) instruction).getLocalVariableTableIndex();
                Var prevVar = vars[slotIndex];
