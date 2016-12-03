@@ -1,6 +1,7 @@
 # Contributors
 
 * Jeffrey Phillips Freeman <jeffrey.freeman@syncleus.com>
+* George Vinokhodov
 * Witold Bolt 
 * Kenneth Skovhede
 * Ryan LaMothe
@@ -25,4 +26,5 @@ Below are some of the specific details of various contributions.
 * Steven Libby provided patch for #6 (Allow finer control over fallback mode selection) Aug 21th 2012
 * Steven Libby and Ryan Lamothe for #10 (Support for OpenMP, major refactoring cleanup and support for multidim arrays) March 28th 2013
 * Paul Miner issue #61 and #115 (JTP Speed up and fixes to explicit puts) June 13th 2013
-& lgalluci for his fix for issue #121 (incorrect toString for 3D ranges) July 6th 2013
+* lgalluci for his fix for issue #121 (incorrect toString for 3D ranges) July 6th 2013
+* George Vinokhodov submited a fix for a bug regarding forward references.
