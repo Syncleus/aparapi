@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.jni;
+package com.aparapi.internal.jni;
 
-import com.syncleus.aparapi.ProfileInfo;
+import com.aparapi.ProfileInfo;
 import java.util.List;
 
-import com.syncleus.aparapi.device.OpenCLDevice;
-import com.syncleus.aparapi.internal.opencl.OpenCLArgDescriptor;
-import com.syncleus.aparapi.internal.opencl.OpenCLKernel;
-import com.syncleus.aparapi.internal.opencl.OpenCLMem;
-import com.syncleus.aparapi.internal.opencl.OpenCLPlatform;
-import com.syncleus.aparapi.internal.opencl.OpenCLProgram;
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.opencl.OpenCLArgDescriptor;
+import com.aparapi.internal.opencl.OpenCLKernel;
+import com.aparapi.internal.opencl.OpenCLMem;
+import com.aparapi.internal.opencl.OpenCLPlatform;
+import com.aparapi.internal.opencl.OpenCLProgram;
 
 /**
  * This class is intended to be used as a 'proxy' or 'facade' object for Java code to interact with JNI

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.model;
+package com.aparapi.internal.model;
 
 import java.util.*;
 import java.util.concurrent.atomic.*;

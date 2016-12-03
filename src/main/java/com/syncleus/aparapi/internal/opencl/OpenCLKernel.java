@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.opencl;
+package com.aparapi.internal.opencl;
 
 import java.util.List;
 
-import com.syncleus.aparapi.internal.jni.OpenCLJNI;
+import com.aparapi.internal.jni.OpenCLJNI;
 
 public class OpenCLKernel extends OpenCLJNI{
 

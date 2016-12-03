@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.kernel;
+package com.aparapi.internal.kernel;
 
-import com.syncleus.aparapi.*;
-import com.syncleus.aparapi.device.*;
+import com.aparapi.*;
+import com.aparapi.device.*;
 
 import java.util.*;
 import java.util.logging.*;

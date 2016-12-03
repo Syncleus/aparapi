@@ -50,16 +50,16 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
 */
-package com.syncleus.aparapi.internal.model;
+package com.aparapi.internal.model;
 
-import com.syncleus.aparapi.*;
-import com.syncleus.aparapi.internal.exception.*;
-import com.syncleus.aparapi.internal.instruction.*;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.*;
-import com.syncleus.aparapi.internal.model.ClassModel.*;
-import com.syncleus.aparapi.internal.model.ClassModel.ConstantPool.*;
-import com.syncleus.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.*;
-import com.syncleus.aparapi.internal.util.*;
+import com.aparapi.*;
+import com.aparapi.internal.exception.*;
+import com.aparapi.internal.instruction.*;
+import com.aparapi.internal.instruction.InstructionSet.*;
+import com.aparapi.internal.model.ClassModel.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.*;
+import com.aparapi.internal.util.*;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -602,7 +602,7 @@ public class Entrypoint implements Cloneable {
 
                // Add the class model for the referenced obj array
                if (signature.startsWith("[L")) {
-                  // Turn [Lcom/syncleus/javalabs/opencl/demo/DummyOOA; into com.syncleus.javalabs.opencl.demo.DummyOOA for example
+                  // Turn [Lcom/aparapi/javalabs/opencl/demo/DummyOOA; into com.aparapi.javalabs.opencl.demo.DummyOOA for example
                   final String className = (signature.substring(2, signature.length() - 1)).replace('/', '.');
                   final ClassModel arrayFieldModel = getOrUpdateAllClassAccesses(className);
                   if (arrayFieldModel != null) {

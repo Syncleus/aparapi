@@ -50,7 +50,7 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
 */
-package com.syncleus.aparapi.internal.instruction;
+package com.aparapi.internal.instruction;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -58,20 +58,20 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.syncleus.aparapi.Config;
-import com.syncleus.aparapi.internal.exception.ClassParseException;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.AssignToLocalVariable;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.Branch;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.ByteCode;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.CompositeArbitraryScopeInstruction;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.ConditionalBranch;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.FakeGoto;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.Return;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.UnconditionalBranch;
-import com.syncleus.aparapi.internal.model.MethodModel;
-import com.syncleus.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
-import com.syncleus.aparapi.internal.model.ClassModel.LocalVariableInfo;
+import com.aparapi.Config;
+import com.aparapi.internal.exception.ClassParseException;
+import com.aparapi.internal.instruction.InstructionSet.AssignToLocalVariable;
+import com.aparapi.internal.instruction.InstructionSet.Branch;
+import com.aparapi.internal.instruction.InstructionSet.ByteCode;
+import com.aparapi.internal.instruction.InstructionSet.CompositeArbitraryScopeInstruction;
+import com.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
+import com.aparapi.internal.instruction.InstructionSet.ConditionalBranch;
+import com.aparapi.internal.instruction.InstructionSet.FakeGoto;
+import com.aparapi.internal.instruction.InstructionSet.Return;
+import com.aparapi.internal.instruction.InstructionSet.UnconditionalBranch;
+import com.aparapi.internal.model.MethodModel;
+import com.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
+import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
 
 /**
  * Essentially a glorified linked list of Instructions plus some additional state to allow us to transform sequences.

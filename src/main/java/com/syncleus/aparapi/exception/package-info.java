@@ -16,4 +16,4 @@
 /**
  *
  */
-package com.syncleus.aparapi.exception;
+package com.aparapi.exception;

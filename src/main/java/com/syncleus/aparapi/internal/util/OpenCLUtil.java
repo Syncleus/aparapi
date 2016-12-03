@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.util;
+package com.aparapi.internal.util;
 
 import java.util.List;
 
-import com.syncleus.aparapi.internal.opencl.OpenCLPlatform;
+import com.aparapi.internal.opencl.OpenCLPlatform;
 
 /**
  * This utility class encapsulates the necessary actions required to query underlying OpenCL information

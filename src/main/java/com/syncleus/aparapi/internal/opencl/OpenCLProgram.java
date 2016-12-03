@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.opencl;
+package com.aparapi.internal.opencl;
 
-import com.syncleus.aparapi.ProfileInfo;
+import com.aparapi.ProfileInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.syncleus.aparapi.device.OpenCLDevice;
-import com.syncleus.aparapi.internal.jni.OpenCLJNI;
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.jni.OpenCLJNI;
 
 public class OpenCLProgram extends OpenCLJNI{
 

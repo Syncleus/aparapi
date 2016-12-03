@@ -16,4 +16,4 @@
 /**
  *
  */
-package com.syncleus.aparapi.internal.tool;
+package com.aparapi.internal.tool;

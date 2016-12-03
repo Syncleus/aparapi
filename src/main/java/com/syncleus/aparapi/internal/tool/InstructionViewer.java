@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.tool;
+package com.aparapi.internal.tool;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -64,17 +64,17 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.syncleus.aparapi.Config;
-import com.syncleus.aparapi.internal.exception.AparapiException;
-import com.syncleus.aparapi.internal.exception.ClassParseException;
-import com.syncleus.aparapi.internal.instruction.Instruction;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
-import com.syncleus.aparapi.internal.model.ClassModel;
-import com.syncleus.aparapi.internal.model.Entrypoint;
-import com.syncleus.aparapi.internal.model.MethodModel;
-import com.syncleus.aparapi.internal.tool.InstructionViewer.Form.Check;
-import com.syncleus.aparapi.internal.tool.InstructionViewer.Form.Template;
-import com.syncleus.aparapi.internal.tool.InstructionViewer.Form.Toggle;
+import com.aparapi.Config;
+import com.aparapi.internal.exception.AparapiException;
+import com.aparapi.internal.exception.ClassParseException;
+import com.aparapi.internal.instruction.Instruction;
+import com.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
+import com.aparapi.internal.model.ClassModel;
+import com.aparapi.internal.model.Entrypoint;
+import com.aparapi.internal.model.MethodModel;
+import com.aparapi.internal.tool.InstructionViewer.Form.Check;
+import com.aparapi.internal.tool.InstructionViewer.Form.Template;
+import com.aparapi.internal.tool.InstructionViewer.Form.Toggle;
 
 public class InstructionViewer implements Config.InstructionListener{
 

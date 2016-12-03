@@ -50,20 +50,20 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
 */
-package com.syncleus.aparapi.internal.kernel;
+package com.aparapi.internal.kernel;
 
-import com.syncleus.aparapi.*;
-import com.syncleus.aparapi.Kernel.Constant;
-import com.syncleus.aparapi.Kernel.*;
-import com.syncleus.aparapi.device.*;
-import com.syncleus.aparapi.internal.annotation.*;
-import com.syncleus.aparapi.internal.exception.*;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.*;
-import com.syncleus.aparapi.internal.jni.*;
-import com.syncleus.aparapi.internal.model.*;
-import com.syncleus.aparapi.internal.util.*;
-import com.syncleus.aparapi.internal.writer.*;
-import com.syncleus.aparapi.opencl.*;
+import com.aparapi.*;
+import com.aparapi.Kernel.Constant;
+import com.aparapi.Kernel.*;
+import com.aparapi.device.*;
+import com.aparapi.internal.annotation.*;
+import com.aparapi.internal.exception.*;
+import com.aparapi.internal.instruction.InstructionSet.*;
+import com.aparapi.internal.jni.*;
+import com.aparapi.internal.model.*;
+import com.aparapi.internal.util.*;
+import com.aparapi.internal.writer.*;
+import com.aparapi.opencl.*;
 
 import java.lang.reflect.*;
 import java.nio.*;
@@ -83,7 +83,7 @@ import java.util.logging.*;
  * time the <code>ExecutionMode</code> is consulted to determine the default requested mode.  This will dictate how 
  * the <code>KernelRunner</code> will attempt to execute the <code>Kernel</code>
  *   
- * @see com.syncleus.aparapi.Kernel#execute(int _globalSize)
+ * @see com.aparapi.Kernel#execute(int _globalSize)
  * 
  * @author gfrost
  *

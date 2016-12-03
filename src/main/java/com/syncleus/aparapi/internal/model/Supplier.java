@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.model;
+package com.aparapi.internal.model;
 
 /**
  * Substitute of Java8's Supplier<V> interface, used in Java7 backport of caches.

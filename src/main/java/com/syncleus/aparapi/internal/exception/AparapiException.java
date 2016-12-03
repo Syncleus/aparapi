@@ -50,7 +50,7 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
 */
-package com.syncleus.aparapi.internal.exception;
+package com.aparapi.internal.exception;
 
 /**
  * We use <code>AparapiException</code> class and subclasses to wrap other
@@ -59,8 +59,8 @@ package com.syncleus.aparapi.internal.exception;
  * The class parser for example will throw a specific <code>ClassParseException</code> if any Aparapi unfriendly 
  * constructs are found.  This allows us to <strong>fail fast</strong> during classfile parsing.
  * 
- * @see com.syncleus.aparapi.internal.exception.ClassParseException
- * @see com.syncleus.aparapi.internal.exception.CodeGenException
+ * @see com.aparapi.internal.exception.ClassParseException
+ * @see com.aparapi.internal.exception.CodeGenException
  *
  * @author gfrost
  *

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.annotation;
+package com.aparapi.internal.annotation;
 
 /**
  * Used to tag unused features (methods/fields) 

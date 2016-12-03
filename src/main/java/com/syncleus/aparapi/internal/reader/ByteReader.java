@@ -50,7 +50,7 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
 */
-package com.syncleus.aparapi.internal.reader;
+package com.aparapi.internal.reader;
 
 import java.io.InputStream;
 
@@ -60,7 +60,7 @@ import java.io.InputStream;
  * Basically wraps a <code>ByteBuffer</code> and keeps track of the current offset. All requests on 
  * this <code>ByteReader</code> will be delegated to wrapped<code>ByteBuffer</code>.
  * </p>
- * @see com.syncleus.aparapi.internal.reader.ByteBuffer
+ * @see com.aparapi.internal.reader.ByteBuffer
  * 
  * @author gfrost
  *

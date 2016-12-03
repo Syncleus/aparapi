@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.device;
+package com.aparapi.device;
 
-import com.syncleus.aparapi.*;
-import com.syncleus.aparapi.internal.opencl.*;
-import com.syncleus.aparapi.opencl.*;
-import com.syncleus.aparapi.opencl.OpenCL.*;
-import com.syncleus.aparapi.opencl.OpenCL.Kernel;
+import com.aparapi.*;
+import com.aparapi.internal.opencl.*;
+import com.aparapi.opencl.*;
+import com.aparapi.opencl.OpenCL.*;
+import com.aparapi.opencl.OpenCL.Kernel;
 
 import java.io.*;
 import java.lang.annotation.*;

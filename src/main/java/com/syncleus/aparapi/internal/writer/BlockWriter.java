@@ -50,19 +50,19 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/.
 
 */
-package com.syncleus.aparapi.internal.writer;
+package com.aparapi.internal.writer;
 
-import com.syncleus.aparapi.*;
-import com.syncleus.aparapi.internal.exception.*;
-import com.syncleus.aparapi.internal.instruction.*;
-import com.syncleus.aparapi.internal.instruction.BranchSet.LogicalExpressionNode;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.AccessInstanceField;
-import com.syncleus.aparapi.internal.instruction.BranchSet.*;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.*;
-import com.syncleus.aparapi.internal.model.ClassModel.ConstantPool.*;
-import com.syncleus.aparapi.internal.model.ClassModel.*;
-import com.syncleus.aparapi.internal.model.*;
-import com.syncleus.aparapi.internal.model.ClassModel.ConstantPool.NameAndTypeEntry;
+import com.aparapi.*;
+import com.aparapi.internal.exception.*;
+import com.aparapi.internal.instruction.*;
+import com.aparapi.internal.instruction.BranchSet.LogicalExpressionNode;
+import com.aparapi.internal.instruction.InstructionSet.AccessInstanceField;
+import com.aparapi.internal.instruction.BranchSet.*;
+import com.aparapi.internal.instruction.InstructionSet.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.*;
+import com.aparapi.internal.model.ClassModel.*;
+import com.aparapi.internal.model.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.NameAndTypeEntry;
 
 import java.util.*;
 

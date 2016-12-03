@@ -16,4 +16,4 @@
 /**
  *
  */
-package com.syncleus.aparapi;
+package com.aparapi;

@@ -50,11 +50,11 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
  */
-package com.syncleus.aparapi;
+package com.aparapi;
 
-import com.syncleus.aparapi.internal.instruction.*;
-import com.syncleus.aparapi.internal.jni.*;
-import com.syncleus.aparapi.internal.tool.*;
+import com.aparapi.internal.instruction.*;
+import com.aparapi.internal.jni.*;
+import com.aparapi.internal.tool.*;
 
 import java.util.logging.*;
 
@@ -78,7 +78,7 @@ public class Config extends ConfigJNI{
     * Allows the user to request to use a jvmti agent to 
     * access JNI code rather than loading explicitly.
     * 
-    * Usage -agentpath=/full/path/to/agent.dll -Dcom.syncleus.aparapi.useAgent=true
+    * Usage -agentpath=/full/path/to/agent.dll -Dcom.aparapi.useAgent=true
     */
 
    public static final boolean useAgent = Boolean.getBoolean(propPkgName + ".useAgent");
@@ -91,16 +91,16 @@ public class Config extends ConfigJNI{
    /**
     * Allows the user to request a specific Kernel.EXECUTION_MODE enum value for all Kernels.
     *
-    *  Usage -Dcom.syncleus.aparapi.executionMode={SEQ|JTP|CPU|GPU|ACC}
+    *  Usage -Dcom.aparapi.executionMode={SEQ|JTP|CPU|GPU|ACC}
     *  
-    *  @see com.syncleus.aparapi.Kernel.EXECUTION_MODE
+    *  @see com.aparapi.Kernel.EXECUTION_MODE
     */
    public static final String executionMode = System.getProperty(propPkgName + ".executionMode");
 
    /**
     * Allows the user to request that the execution mode of each kernel invocation be reported to stdout.
     *
-    *  Usage -Dcom.syncleus.aparapi.enableExecutionModeReporting={true|false}
+    *  Usage -Dcom.aparapi.enableExecutionModeReporting={true|false}
     *  
     */
    public static final boolean enableExecutionModeReporting = Boolean.getBoolean(propPkgName + ".enableExecutionModeReporting");
@@ -108,7 +108,7 @@ public class Config extends ConfigJNI{
    /**
     * Allows the user to request that generated OpenCL code is dumped to standard out.
     *
-    *  Usage -Dcom.syncleus.aparapi.enableShowGeneratedOpenCL={true|false}
+    *  Usage -Dcom.aparapi.enableShowGeneratedOpenCL={true|false}
     *  
     */
    public static final boolean enableShowGeneratedOpenCL = Boolean.getBoolean(propPkgName + ".enableShowGeneratedOpenCL");
@@ -116,7 +116,7 @@ public class Config extends ConfigJNI{
    /**
     * Upon exiting the JVM, dumps kernel profiling info to standard out.
     *
-    *  Usage -Dcom.syncleus.aparapi.dumpProfilesOnExit={true|false}
+    *  Usage -Dcom.aparapi.dumpProfilesOnExit={true|false}
     *  
     */
    public static final boolean dumpProfilesOnExit = Boolean.getBoolean(propPkgName + ".dumpProfilesOnExit");
@@ -124,7 +124,7 @@ public class Config extends ConfigJNI{
    /**
     * Dumps profiling info (for a single execution) after every Kernel execution.
     *
-    *  Usage -Dcom.syncleus.aparapi.dumpProfileOnExecution={true|false}
+    *  Usage -Dcom.aparapi.dumpProfileOnExecution={true|false}
     *
     */
    public static final boolean dumpProfileOnExecution = Boolean.getBoolean(propPkgName + ".dumpProfileOnExecution");
@@ -228,7 +228,7 @@ public class Config extends ConfigJNI{
          System.out.println(propPkgName + ".enableExecutionModeReporting{true|false}=" + enableExecutionModeReporting);
          System.out.println(propPkgName + ".enableInstructionDecodeViewer{true|false}=" + enableInstructionDecodeViewer);
          System.out.println(propPkgName
-               + ".instructionListenerClassName{<class name which extends com.syncleus.aparapi.Config.InstructionListener>}="
+               + ".instructionListenerClassName{<class name which extends com.aparapi.Config.InstructionListener>}="
                + instructionListenerClassName);
       }
    }

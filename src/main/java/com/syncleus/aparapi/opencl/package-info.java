@@ -16,4 +16,4 @@
 /**
  *
  */
-package com.syncleus.aparapi.opencl;
+package com.aparapi.opencl;

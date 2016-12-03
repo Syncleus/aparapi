@@ -50,17 +50,17 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
  */
-package com.syncleus.aparapi.internal.model;
+package com.aparapi.internal.model;
 
-import com.syncleus.aparapi.*;
-import com.syncleus.aparapi.internal.exception.*;
-import com.syncleus.aparapi.internal.instruction.*;
-import com.syncleus.aparapi.internal.instruction.InstructionPattern.*;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.*;
-import com.syncleus.aparapi.internal.model.ClassModel.*;
-import com.syncleus.aparapi.internal.model.ClassModel.ConstantPool.*;
-import com.syncleus.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.*;
-import com.syncleus.aparapi.internal.reader.*;
+import com.aparapi.*;
+import com.aparapi.internal.exception.*;
+import com.aparapi.internal.instruction.*;
+import com.aparapi.internal.instruction.InstructionPattern.*;
+import com.aparapi.internal.instruction.InstructionSet.*;
+import com.aparapi.internal.model.ClassModel.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.*;
+import com.aparapi.internal.reader.*;
 
 import java.util.*;
 import java.util.Map.Entry;

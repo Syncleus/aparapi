@@ -50,19 +50,19 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
 */
-package com.syncleus.aparapi.internal.instruction;
+package com.aparapi.internal.instruction;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import com.syncleus.aparapi.internal.model.MethodModel;
-import com.syncleus.aparapi.internal.model.ClassModel.ConstantPool;
-import com.syncleus.aparapi.internal.model.ClassModel.ConstantPool.Entry;
-import com.syncleus.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
-import com.syncleus.aparapi.internal.model.ClassModel.ConstantPool.MethodEntry;
-import com.syncleus.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
-import com.syncleus.aparapi.internal.model.ClassModel.LocalVariableInfo;
-import com.syncleus.aparapi.internal.reader.ByteReader;
+import com.aparapi.internal.model.MethodModel;
+import com.aparapi.internal.model.ClassModel.ConstantPool;
+import com.aparapi.internal.model.ClassModel.ConstantPool.Entry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodEntry;
+import com.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
+import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
+import com.aparapi.internal.reader.ByteReader;
 
 public class InstructionSet{
 

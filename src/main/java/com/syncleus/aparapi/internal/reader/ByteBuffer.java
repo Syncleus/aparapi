@@ -50,7 +50,7 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
 */
-package com.syncleus.aparapi.internal.reader;
+package com.aparapi.internal.reader;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -63,7 +63,7 @@ import java.io.InputStream;
  * 
  * Does not keep track of accesses.  For this you will need a <code>ByteReader</code>
  * 
- * @see com.syncleus.aparapi.internal.reader.ByteReader
+ * @see com.aparapi.internal.reader.ByteReader
  * 
  * @author gfrost
  *

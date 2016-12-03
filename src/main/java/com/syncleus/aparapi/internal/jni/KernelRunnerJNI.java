@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.jni;
+package com.aparapi.internal.jni;
 
-import com.syncleus.aparapi.Kernel;
-import com.syncleus.aparapi.ProfileInfo;
-import com.syncleus.aparapi.Range;
-import com.syncleus.aparapi.annotation.Experimental;
-import com.syncleus.aparapi.device.OpenCLDevice;
-import com.syncleus.aparapi.internal.annotation.DocMe;
-import com.syncleus.aparapi.internal.annotation.UsedByJNICode;
+import com.aparapi.Kernel;
+import com.aparapi.ProfileInfo;
+import com.aparapi.Range;
+import com.aparapi.annotation.Experimental;
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.annotation.DocMe;
+import com.aparapi.internal.annotation.UsedByJNICode;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -35,7 +35,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>boolean</code> type (array or primitive).
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -45,7 +45,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>byte</code> type (array or primitive).
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -55,7 +55,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>float</code> type (array or primitive).
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -65,7 +65,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>int</code> type (array or primitive).
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -75,7 +75,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>double</code> type (array or primitive).
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -85,7 +85,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>long</code> type (array or primitive).
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -94,7 +94,7 @@ public abstract class KernelRunnerJNI{
    /**
     * TODO:
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -105,7 +105,7 @@ public abstract class KernelRunnerJNI{
     * So <code>ARG_ARRAY|ARG_INT</code> tells us this arg is an array of <code>int</code>.
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -116,7 +116,7 @@ public abstract class KernelRunnerJNI{
     * So <code>ARG_PRIMITIVE|ARG_INT</code> tells us this arg is a primitive <code>int</code>.
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -127,7 +127,7 @@ public abstract class KernelRunnerJNI{
     * So <code>ARG_ARRAY|ARG_INT|ARG_READ</code> tells us this arg is an array of int's that are read by the kernel.
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -138,7 +138,7 @@ public abstract class KernelRunnerJNI{
     * So <code>ARG_ARRAY|ARG_INT|ARG_WRITE</code> tells us this arg is an array of int's that we expect the kernel to mutate.
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -148,8 +148,8 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> resides in local memory in the generated OpenCL code.<br/>
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
-    * @see com.syncleus.aparapi.annotation.Experimental
+    * @see com.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.annotation.Experimental
     * 
     * @author gfrost
     */
@@ -159,8 +159,8 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> resides in global memory in the generated OpenCL code.<br/>
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
-    * @see com.syncleus.aparapi.annotation.Experimental
+    * @see com.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.annotation.Experimental
     * 
     * @author gfrost
     */
@@ -170,8 +170,8 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> resides in constant memory in the generated OpenCL code.<br/>
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
-    * @see com.syncleus.aparapi.annotation.Experimental
+    * @see com.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.annotation.Experimental
     * 
     * @author gfrost
     */
@@ -181,7 +181,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> has it's length reference, in which case a synthetic arg is passed (name mangled) to the OpenCL kernel.<br/>
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -190,7 +190,7 @@ public abstract class KernelRunnerJNI{
    /**
     * TODO:
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -199,7 +199,7 @@ public abstract class KernelRunnerJNI{
    /**
     * This 'bit' indicates that the arg has been explicitly marked for reading
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -208,7 +208,7 @@ public abstract class KernelRunnerJNI{
    /**
     * This 'bit' indicates that the arg has been explicitly marked for writing
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -217,7 +217,7 @@ public abstract class KernelRunnerJNI{
    /**
     * TODO:
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -228,7 +228,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>char</code> type (array or primitive).
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author rlamothe
     */
@@ -238,7 +238,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>static</code> field (array or primitive).
     * 
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -247,7 +247,7 @@ public abstract class KernelRunnerJNI{
    /**
     * This 'bit' indicates that we wish to enable profiling from the JNI code.
     * 
-    * @see com.syncleus.aparapi.annotations.UsedByJNICode
+    * @see com.aparapi.annotations.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -256,7 +256,7 @@ public abstract class KernelRunnerJNI{
    /**
     * This 'bit' indicates that we wish to store profiling information in a CSV file from JNI code.
     * 
-    * @see com.syncleus.aparapi.annotations.UsedByJNICode
+    * @see com.aparapi.annotations.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -267,7 +267,7 @@ public abstract class KernelRunnerJNI{
     * 
     * Be careful changing final constants starting with JNI.<br/>
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -276,7 +276,7 @@ public abstract class KernelRunnerJNI{
    /**
     * This 'bit' indicates that we wish to enable verbose JNI layer messages to stderr.<br/>
     * 
-    * @see com.syncleus.aparapi.annotations.UsedByJNICode
+    * @see com.aparapi.annotations.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -285,8 +285,8 @@ public abstract class KernelRunnerJNI{
    /**
     * This 'bit' indicates that we wish to enable OpenCL resource tracking by JNI layer to be written to stderr.<br/>
     * 
-    * @see com.syncleus.aparapi.annotations.UsedByJNICode
-    * @see com.syncleus.aparapi.annotations.Experimental
+    * @see com.aparapi.annotations.UsedByJNICode
+    * @see com.aparapi.annotations.Experimental
     * 
     * @author gfrost
     */
@@ -297,7 +297,7 @@ public abstract class KernelRunnerJNI{
     * 
     * Be careful changing final constants starting with JNI.<br/>
     * 
-    * @see com.syncleus.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author ekasit
     */

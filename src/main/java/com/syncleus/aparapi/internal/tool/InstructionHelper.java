@@ -13,33 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.tool;
+package com.aparapi.internal.tool;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.syncleus.aparapi.internal.exception.CodeGenException;
-import com.syncleus.aparapi.internal.instruction.Instruction;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.AssignToLocalVariable;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.Branch;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.ByteCode;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.CloneInstruction;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.ConditionalBranch16;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.Constant;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.FieldReference;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.I_ACONST_NULL;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.I_IINC;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.LocalVariableTableIndexAccessor;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.MethodCall;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.OperatorInstruction;
-import com.syncleus.aparapi.internal.model.ClassModel;
-import com.syncleus.aparapi.internal.model.Entrypoint;
-import com.syncleus.aparapi.internal.model.MethodModel;
-import com.syncleus.aparapi.internal.model.ClassModel.LocalVariableInfo;
-import com.syncleus.aparapi.internal.writer.BlockWriter;
+import com.aparapi.internal.exception.CodeGenException;
+import com.aparapi.internal.instruction.Instruction;
+import com.aparapi.internal.instruction.InstructionSet.AssignToLocalVariable;
+import com.aparapi.internal.instruction.InstructionSet.Branch;
+import com.aparapi.internal.instruction.InstructionSet.ByteCode;
+import com.aparapi.internal.instruction.InstructionSet.CloneInstruction;
+import com.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
+import com.aparapi.internal.instruction.InstructionSet.ConditionalBranch16;
+import com.aparapi.internal.instruction.InstructionSet.Constant;
+import com.aparapi.internal.instruction.InstructionSet.FieldReference;
+import com.aparapi.internal.instruction.InstructionSet.I_ACONST_NULL;
+import com.aparapi.internal.instruction.InstructionSet.I_IINC;
+import com.aparapi.internal.instruction.InstructionSet.LocalVariableTableIndexAccessor;
+import com.aparapi.internal.instruction.InstructionSet.MethodCall;
+import com.aparapi.internal.instruction.InstructionSet.OperatorInstruction;
+import com.aparapi.internal.model.ClassModel;
+import com.aparapi.internal.model.Entrypoint;
+import com.aparapi.internal.model.MethodModel;
+import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
+import com.aparapi.internal.writer.BlockWriter;
 
 public class InstructionHelper{
 

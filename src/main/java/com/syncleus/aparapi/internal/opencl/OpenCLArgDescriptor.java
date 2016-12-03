@@ -16,7 +16,7 @@
 /**
  * 
  */
-package com.syncleus.aparapi.internal.opencl;
+package com.aparapi.internal.opencl;
 
 public class OpenCLArgDescriptor{
 

@@ -50,17 +50,17 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
  */
-package com.syncleus.aparapi.internal.writer;
+package com.aparapi.internal.writer;
 
-import com.syncleus.aparapi.*;
-import com.syncleus.aparapi.internal.exception.*;
-import com.syncleus.aparapi.internal.instruction.*;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.*;
-import com.syncleus.aparapi.internal.model.*;
-import com.syncleus.aparapi.internal.model.ClassModel.AttributePool.*;
-import com.syncleus.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEntry.*;
-import com.syncleus.aparapi.internal.model.ClassModel.*;
-import com.syncleus.aparapi.internal.model.ClassModel.ConstantPool.*;
+import com.aparapi.*;
+import com.aparapi.internal.exception.*;
+import com.aparapi.internal.instruction.*;
+import com.aparapi.internal.instruction.InstructionSet.*;
+import com.aparapi.internal.model.*;
+import com.aparapi.internal.model.ClassModel.AttributePool.*;
+import com.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEntry.*;
+import com.aparapi.internal.model.ClassModel.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.*;
 
 import java.util.*;
 
@@ -295,9 +295,9 @@ public abstract class KernelWriter extends BlockWriter{
 
    public final static String __private = "__private";
 
-   public final static String LOCAL_ANNOTATION_NAME = "L" + com.syncleus.aparapi.Kernel.Local.class.getName().replace('.', '/') + ";";
+   public final static String LOCAL_ANNOTATION_NAME = "L" + com.aparapi.Kernel.Local.class.getName().replace('.', '/') + ";";
 
-   public final static String CONSTANT_ANNOTATION_NAME = "L" + com.syncleus.aparapi.Kernel.Constant.class.getName().replace('.', '/')
+   public final static String CONSTANT_ANNOTATION_NAME = "L" + com.aparapi.Kernel.Constant.class.getName().replace('.', '/')
          + ";";
 
    @Override public void write(Entrypoint _entryPoint) throws CodeGenException {
@@ -365,7 +365,7 @@ public abstract class KernelWriter extends BlockWriter{
          // If it is a converted array of objects, emit the struct param
          String className = null;
          if (signature.startsWith("L")) {
-            // Turn Lcom/syncleus/javalabs/opencl/demo/DummyOOA; into com_amd_javalabs_opencl_demo_DummyOOA for example
+            // Turn Lcom/aparapi/javalabs/opencl/demo/DummyOOA; into com_amd_javalabs_opencl_demo_DummyOOA for example
             className = (signature.substring(1, signature.length() - 1)).replace('/', '_');
             // if (logger.isLoggable(Level.FINE)) {
             // logger.fine("Examining object parameter: " + signature + " new: " + className);

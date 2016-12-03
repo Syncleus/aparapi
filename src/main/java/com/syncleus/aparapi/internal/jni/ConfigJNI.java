@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.jni;
+package com.aparapi.internal.jni;
 
-import com.syncleus.aparapi.Config;
-import com.syncleus.aparapi.internal.annotation.UsedByJNICode;
+import com.aparapi.Config;
+import com.aparapi.internal.annotation.UsedByJNICode;
 
 /**
  * This class is intended to be used as a 'proxy' or 'facade' object for Java code to interact with JNI
@@ -24,14 +24,14 @@ import com.syncleus.aparapi.internal.annotation.UsedByJNICode;
 public abstract class ConfigJNI{
 
    /**
-    * Value defaults to com.syncleus.aparapi.config if not overridden by extending classes
+    * Value defaults to com.aparapi.config if not overridden by extending classes
     */
    protected static final String propPkgName = Config.class.getPackage().getName();
 
    /**
     * Allows the user to turn on OpenCL profiling for the JNI/OpenCL layer.
     * 
-    * Usage -Dcom.syncleus.aparapi.enableProfiling={true|false}
+    * Usage -Dcom.aparapi.enableProfiling={true|false}
     * 
     */
    @UsedByJNICode public static final boolean enableProfiling = Boolean.getBoolean(propPkgName + ".enableProfiling");
@@ -39,7 +39,7 @@ public abstract class ConfigJNI{
    /**
     * Allows the user to turn on OpenCL profiling for the JNI/OpenCL layer, this information will be written to CSV file
     * 
-    * Usage -Dcom.syncleus.aparapi.enableProfiling={true|false}
+    * Usage -Dcom.aparapi.enableProfiling={true|false}
     * 
     */
    @UsedByJNICode public static final boolean enableProfilingCSV = Boolean.getBoolean(propPkgName + ".enableProfilingCSV");
@@ -47,7 +47,7 @@ public abstract class ConfigJNI{
    /**
     * Allows the user to request that verbose JNI messages be dumped to stderr.
     * 
-    * Usage -Dcom.syncleus.aparapi.enableVerboseJNI={true|false}
+    * Usage -Dcom.aparapi.enableVerboseJNI={true|false}
     * 
     */
    @UsedByJNICode public static final boolean enableVerboseJNI = Boolean.getBoolean(propPkgName + ".enableVerboseJNI");
@@ -57,7 +57,7 @@ public abstract class ConfigJNI{
     * 
     * This is really a debugging option to help locate leaking OpenCL resources, this will be dumped to stderr.
     * 
-    * Usage -Dcom.syncleus.aparapi.enableOpenCLResourceTracking={true|false}
+    * Usage -Dcom.aparapi.enableOpenCLResourceTracking={true|false}
     * 
     */
    @UsedByJNICode public static final boolean enableVerboseJNIOpenCLResourceTracking = Boolean.getBoolean(propPkgName

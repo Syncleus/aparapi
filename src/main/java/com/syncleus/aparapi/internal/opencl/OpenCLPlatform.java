@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.opencl;
+package com.aparapi.internal.opencl;
 
-import com.syncleus.aparapi.device.*;
-import com.syncleus.aparapi.internal.jni.*;
+import com.aparapi.device.*;
+import com.aparapi.internal.jni.*;
 
 import java.util.*;
 

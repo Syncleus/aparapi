@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.device;
+package com.aparapi.device;
 
-import com.syncleus.aparapi.*;
-import com.syncleus.aparapi.internal.kernel.*;
+import com.aparapi.*;
+import com.aparapi.internal.kernel.*;
 
 public abstract class Device{
 
@@ -38,7 +38,7 @@ public abstract class Device{
    };
 
    /** @deprecated  use {@link KernelManager#bestDevice()}
-    *  @see com.syncleus.aparapi.device
+    *  @see com.aparapi.device
     */
    @Deprecated
    public static Device best() {
@@ -46,7 +46,7 @@ public abstract class Device{
    }
 
    /**
-    *  @see com.syncleus.aparapi.device
+    *  @see com.aparapi.device
     */
    @SuppressWarnings("deprecation")
    @Deprecated
@@ -55,7 +55,7 @@ public abstract class Device{
    }
 
    /**
-    *  @see com.syncleus.aparapi.device
+    *  @see com.aparapi.device
     */
    @Deprecated
    public static Device first(final Device.TYPE _type) {
@@ -63,7 +63,7 @@ public abstract class Device{
    }
 
    /**
-    *  @see com.syncleus.aparapi.device
+    *  @see com.aparapi.device
     */
    @SuppressWarnings("deprecation")
    @Deprecated
@@ -72,7 +72,7 @@ public abstract class Device{
    }
 
    /**
-    *  @see com.syncleus.aparapi.device
+    *  @see com.aparapi.device
     */
    @SuppressWarnings("deprecation")
    @Deprecated
@@ -81,7 +81,7 @@ public abstract class Device{
    }
 
    /**
-    *  @see com.syncleus.aparapi.device
+    *  @see com.aparapi.device
     */
    @Deprecated
    public static Device bestACC() {

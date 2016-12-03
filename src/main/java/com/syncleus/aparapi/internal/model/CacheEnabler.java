@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.model;
+package com.aparapi.internal.model;
 
-import com.syncleus.aparapi.Kernel;
+import com.aparapi.Kernel;
 
 public class CacheEnabler{
    private static volatile boolean cachesEnabled = true;

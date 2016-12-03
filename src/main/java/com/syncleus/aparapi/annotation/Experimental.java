@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.annotation;
+package com.aparapi.annotation;
 
 /**
  * Used to tag experimental features (methods/fields)

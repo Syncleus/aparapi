@@ -50,15 +50,15 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
 */
-package com.syncleus.aparapi.internal.exception;
+package com.aparapi.internal.exception;
 
-import com.syncleus.aparapi.internal.instruction.Instruction;
+import com.aparapi.internal.instruction.Instruction;
 
 /**
  * We throw <code>ClassParseException</code>s (derived from <code>AparapiException</code>) if we encounter any Aparapi unfriendly 
  * constructs.  This allows us to <strong>fail fast</strong>.
  * 
- * @see com.syncleus.aparapi.internal.exception.AparapiException
+ * @see com.aparapi.internal.exception.AparapiException
  *
  * @author gfrost
  *

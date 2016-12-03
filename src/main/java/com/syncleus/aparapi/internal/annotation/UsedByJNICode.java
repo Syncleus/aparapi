@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.annotation;
+package com.aparapi.internal.annotation;
 
 /**
  * Be careful changing the name/type of this field as it is referenced from JNI code.

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.kernel;
+package com.aparapi.internal.kernel;
 
-import com.syncleus.aparapi.internal.jni.*;
-import com.syncleus.aparapi.internal.model.*;
-import com.syncleus.aparapi.internal.util.*;
+import com.aparapi.internal.jni.*;
+import com.aparapi.internal.model.*;
+import com.aparapi.internal.util.*;
 
 import java.lang.reflect.*;
 import java.nio.*;
@@ -26,7 +26,7 @@ import java.nio.*;
  * Each field (or captured field in the case of an anonymous inner class) referenced by any bytecode reachable from the users Kernel.run(), will
  * need to be represented as a <code>KernelArg</code>.
  * 
- * @see com.syncleus.aparapi.Kernel#execute(int _globalSize)
+ * @see com.aparapi.Kernel#execute(int _globalSize)
  * 
  * @author gfrost
  * 

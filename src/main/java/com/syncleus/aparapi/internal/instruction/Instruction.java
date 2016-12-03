@@ -50,16 +50,16 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
 */
-package com.syncleus.aparapi.internal.instruction;
+package com.aparapi.internal.instruction;
 
 import java.util.LinkedList;
 
-import com.syncleus.aparapi.internal.instruction.InstructionSet.Branch;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.ByteCode;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
-import com.syncleus.aparapi.internal.instruction.InstructionSet.ConditionalBranch;
-import com.syncleus.aparapi.internal.model.MethodModel;
-import com.syncleus.aparapi.internal.reader.ByteReader;
+import com.aparapi.internal.instruction.InstructionSet.Branch;
+import com.aparapi.internal.instruction.InstructionSet.ByteCode;
+import com.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
+import com.aparapi.internal.instruction.InstructionSet.ConditionalBranch;
+import com.aparapi.internal.model.MethodModel;
+import com.aparapi.internal.reader.ByteReader;
 
 /**
  * Initially represents a single Java bytecode instruction.

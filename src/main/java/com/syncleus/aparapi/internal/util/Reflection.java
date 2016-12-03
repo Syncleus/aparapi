@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.util;
+package com.aparapi.internal.util;
 
 /**
  * Created by Barney on 03/09/2015.

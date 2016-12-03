@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.model;
+package com.aparapi.internal.model;
 
 final class MethodKey{
    static MethodKey of(String name, String signature) {

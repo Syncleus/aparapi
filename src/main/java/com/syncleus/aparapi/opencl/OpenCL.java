@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.opencl;
+package com.aparapi.opencl;
 
-import com.syncleus.aparapi.ProfileInfo;
+import com.aparapi.ProfileInfo;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

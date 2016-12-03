@@ -16,4 +16,4 @@
 /**
  *
  */
-package com.syncleus.aparapi.annotation;
+package com.aparapi.annotation;

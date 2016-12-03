@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.syncleus.aparapi.internal.opencl;
+package com.aparapi.internal.opencl;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.syncleus.aparapi.Config;
-import com.syncleus.aparapi.internal.jni.OpenCLJNI;
+import com.aparapi.Config;
+import com.aparapi.internal.jni.OpenCLJNI;
 
 /**
  * This class is intended to be a singleton which determines if OpenCL is available upon startup of Aparapi

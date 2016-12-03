@@ -50,20 +50,20 @@ of EAR).  For the most current Country Group listings, or for additional informa
 under those regulations, please refer to the U.S. Bureau of Industry and Security's website at http://www.bis.doc.gov/. 
 
 */
-package com.syncleus.aparapi;
+package com.aparapi;
 
-import com.syncleus.aparapi.annotation.Experimental;
-import com.syncleus.aparapi.device.*;
-import com.syncleus.aparapi.exception.DeprecatedException;
-import com.syncleus.aparapi.internal.kernel.*;
-import com.syncleus.aparapi.internal.model.CacheEnabler;
-import com.syncleus.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry;
-import com.syncleus.aparapi.internal.model.ClassModel.ConstantPool.NameAndTypeEntry;
-import com.syncleus.aparapi.internal.model.ValueCache;
-import com.syncleus.aparapi.internal.model.ValueCache.ThrowingValueComputer;
-import com.syncleus.aparapi.internal.model.ValueCache.ValueComputer;
-import com.syncleus.aparapi.internal.opencl.OpenCLLoader;
-import com.syncleus.aparapi.internal.util.*;
+import com.aparapi.annotation.Experimental;
+import com.aparapi.device.*;
+import com.aparapi.exception.DeprecatedException;
+import com.aparapi.internal.kernel.*;
+import com.aparapi.internal.model.CacheEnabler;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.NameAndTypeEntry;
+import com.aparapi.internal.model.ValueCache;
+import com.aparapi.internal.model.ValueCache.ThrowingValueComputer;
+import com.aparapi.internal.model.ValueCache.ValueComputer;
+import com.aparapi.internal.opencl.OpenCLLoader;
+import com.aparapi.internal.util.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -323,8 +323,8 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
-    * @deprecated It is no longer recommended that {@code EXECUTION_MODE}s are used, as a more sophisticated {@link com.syncleus.aparapi.device.Device}
-    * preference mechanism is in place, see {@link com.syncleus.aparapi.internal.kernel.KernelManager}. Though {@link #setExecutionMode(EXECUTION_MODE)}
+    * @deprecated It is no longer recommended that {@code EXECUTION_MODE}s are used, as a more sophisticated {@link com.aparapi.device.Device}
+    * preference mechanism is in place, see {@link com.aparapi.internal.kernel.KernelManager}. Though {@link #setExecutionMode(EXECUTION_MODE)}
     * is still honored, the default EXECUTION_MODE is now {@link EXECUTION_MODE#AUTO}, which indicates that the KernelManager
     * will determine execution behaviours.
     *
@@ -358,10 +358,10 @@ public abstract class Kernel implements Cloneable {
     *     kernel.execute(values.length);
     * </pre></blockquote>
     * <p>
-    * Alternatively, the property <code>com.syncleus.aparapi.executionMode</code> can be set to one of <code>JTP,GPU,ACC,CPU,SEQ</code>
+    * Alternatively, the property <code>com.aparapi.executionMode</code> can be set to one of <code>JTP,GPU,ACC,CPU,SEQ</code>
     * when an application is launched. 
     * <p><blockquote><pre>
-    *    java -classpath ....;aparapi.jar -Dcom.syncleus.aparapi.executionMode=GPU MyApplication
+    *    java -classpath ....;aparapi.jar -Dcom.aparapi.executionMode=GPU MyApplication
     * </pre></blockquote><p>
     * Generally setting the execution mode is not recommended (it is best to let Aparapi decide automatically) but the option
     * provides a way to compare a kernel's performance under multiple execution modes.
