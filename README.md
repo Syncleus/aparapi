@@ -1,7 +1,7 @@
 # Aparapi
 
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
-[![Javadocs](http://www.javadoc.io/badge/com.syncleus.aparapi/aparapi.svg)](http://www.javadoc.io/doc/com.syncleus.aparapi/aparapi)
+[![Javadocs](http://www.javadoc.io/badge/com.aparapi/aparapi.svg)](http://www.javadoc.io/doc/com.aparapi/aparapi)
 [![Gitter](https://badges.gitter.im/Syncleus/aparapi.svg)](https://gitter.im/Syncleus/aparapi?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 A framework for executing native Java code on the GPU.
@@ -27,7 +27,7 @@ To include Aparapi in your project of choice include the following Maven depende
 ```xml
 
 <dependency>
-    <groupId>com.syncleus.aparapi</groupId>
+    <groupId>com.aparapi</groupId>
     <artifactId>aparapi</artifactId>
     <version>1.0.0</version>
 </dependency>

@@ -55,9 +55,9 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
-import com.syncleus.aparapi.Kernel;
-import com.syncleus.aparapi.internal.model.CacheEnabler;
-import com.syncleus.aparapi.internal.model.Supplier;
+import com.aparapi.Kernel;
+import com.aparapi.internal.model.CacheEnabler;
+import com.aparapi.internal.model.Supplier;
 
 public class ConvolutionLargeTest{
 

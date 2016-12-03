@@ -34,7 +34,7 @@
 
     <organization>
         <name>Syncleus</name>
-        <url>http://www.syncleus.com</url>
+        <url>http://syncleus.com</url>
     </organization>
 
     <scm>
@@ -55,7 +55,7 @@
             <email>Jeffrey.Freeman@Syncleus.com</email>
             <url>http://JeffreyFreeman.me</url>
             <organization>Syncleus</organization>
-            <organizationUrl>http://www.syncleus.com</organizationUrl>
+            <organizationUrl>http://syncleus.com</organizationUrl>
             <roles>
                 <role>Chief Technology Officer</role>
                 <role>Project Owner</role>
