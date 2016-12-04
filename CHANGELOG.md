@@ -1,5 +1,9 @@
 # Aparapi Change Log
 
+## 1.1.2
+
+* Fixed a bug where OpenCL kernels were getting compiled twice.
+
 ## 1.1.1
 
 * Fixed a bug where forward references existed when they shouldnt.
