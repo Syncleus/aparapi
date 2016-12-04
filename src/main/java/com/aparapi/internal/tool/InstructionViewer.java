@@ -64,14 +64,14 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.aparapi.internal.instruction.Instruction;
-import com.aparapi.internal.instruction.InstructionSet;
-import com.aparapi.internal.model.ClassModel;
-import com.aparapi.internal.model.Entrypoint;
-import com.aparapi.internal.model.MethodModel;
 import com.aparapi.Config;
 import com.aparapi.internal.exception.AparapiException;
 import com.aparapi.internal.exception.ClassParseException;
+import com.aparapi.internal.instruction.Instruction;
+import com.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
+import com.aparapi.internal.model.ClassModel;
+import com.aparapi.internal.model.Entrypoint;
+import com.aparapi.internal.model.MethodModel;
 import com.aparapi.internal.tool.InstructionViewer.Form.Check;
 import com.aparapi.internal.tool.InstructionViewer.Form.Template;
 import com.aparapi.internal.tool.InstructionViewer.Form.Toggle;
@@ -890,7 +890,7 @@ public class InstructionViewer implements Config.InstructionListener{
                lastInstruction = instruction;
             }
             lastInstruction.getRootExpr();
-            while (lastInstruction instanceof InstructionSet.CompositeInstruction) {
+            while (lastInstruction instanceof CompositeInstruction) {
                lastInstruction = lastInstruction.getLastChild();
             }
             for (Instruction instruction = lastInstruction.getNextPC(); instruction != null; instruction = instruction.getNextPC()) {

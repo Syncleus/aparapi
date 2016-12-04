@@ -15,14 +15,15 @@
  */
 package com.aparapi.internal.opencl;
 
-import com.aparapi.device.OpenCLDevice;
-import com.aparapi.internal.jni.OpenCLJNI;
 import com.aparapi.ProfileInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OpenCLProgram extends OpenCLJNI {
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.jni.OpenCLJNI;
+
+public class OpenCLProgram extends OpenCLJNI{
 
    private final long programId;
 

@@ -52,23 +52,18 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi;
 
-import com.aparapi.device.Device;
-import com.aparapi.device.JavaDevice;
-import com.aparapi.device.OpenCLDevice;
-import com.aparapi.exception.DeprecatedException;
-import com.aparapi.internal.kernel.KernelArg;
-import com.aparapi.internal.kernel.KernelManager;
-import com.aparapi.internal.kernel.KernelProfile;
-import com.aparapi.internal.kernel.KernelRunner;
-import com.aparapi.internal.model.ClassModel;
 import com.aparapi.annotation.Experimental;
-import com.aparapi.internal.util.Reflection;
-import com.aparapi.internal.util.UnsafeWrapper;
+import com.aparapi.device.*;
+import com.aparapi.exception.DeprecatedException;
+import com.aparapi.internal.kernel.*;
 import com.aparapi.internal.model.CacheEnabler;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.NameAndTypeEntry;
 import com.aparapi.internal.model.ValueCache;
 import com.aparapi.internal.model.ValueCache.ThrowingValueComputer;
 import com.aparapi.internal.model.ValueCache.ValueComputer;
 import com.aparapi.internal.opencl.OpenCLLoader;
+import com.aparapi.internal.util.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -328,8 +323,8 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
-    * @deprecated It is no longer recommended that {@code EXECUTION_MODE}s are used, as a more sophisticated {@link Device}
-    * preference mechanism is in place, see {@link KernelManager}. Though {@link #setExecutionMode(EXECUTION_MODE)}
+    * @deprecated It is no longer recommended that {@code EXECUTION_MODE}s are used, as a more sophisticated {@link com.aparapi.device.Device}
+    * preference mechanism is in place, see {@link com.aparapi.internal.kernel.KernelManager}. Though {@link #setExecutionMode(EXECUTION_MODE)}
     * is still honored, the default EXECUTION_MODE is now {@link EXECUTION_MODE#AUTO}, which indicates that the KernelManager
     * will determine execution behaviours.
     *
@@ -2269,7 +2264,7 @@ public abstract class Kernel implements Cloneable {
       return mapping;
    }
 
-   public static String getMappedMethodName(ClassModel.ConstantPool.MethodReferenceEntry _methodReferenceEntry) {
+   public static String getMappedMethodName(MethodReferenceEntry _methodReferenceEntry) {
       if (CacheEnabler.areCachesEnabled())
          return getProperty(mappedMethodNamesCache, _methodReferenceEntry, null);
       String mappedName = null;
@@ -2309,7 +2304,7 @@ public abstract class Kernel implements Cloneable {
       return (mappedName);
    }
 
-   public static boolean isMappedMethod(ClassModel.ConstantPool.MethodReferenceEntry methodReferenceEntry) {
+   public static boolean isMappedMethod(MethodReferenceEntry methodReferenceEntry) {
       if (CacheEnabler.areCachesEnabled())
          return getBoolean(mappedMethodFlags, methodReferenceEntry);
       boolean isMapped = false;
@@ -2325,7 +2320,7 @@ public abstract class Kernel implements Cloneable {
       return (isMapped);
    }
 
-   public static boolean isOpenCLDelegateMethod(ClassModel.ConstantPool.MethodReferenceEntry methodReferenceEntry) {
+   public static boolean isOpenCLDelegateMethod(MethodReferenceEntry methodReferenceEntry) {
       if (CacheEnabler.areCachesEnabled())
          return getBoolean(openCLDelegateMethodFlags, methodReferenceEntry);
       boolean isMapped = false;
@@ -2341,7 +2336,7 @@ public abstract class Kernel implements Cloneable {
       return (isMapped);
    }
 
-   public static boolean usesAtomic32(ClassModel.ConstantPool.MethodReferenceEntry methodReferenceEntry) {
+   public static boolean usesAtomic32(MethodReferenceEntry methodReferenceEntry) {
       if (CacheEnabler.areCachesEnabled())
          return getProperty(atomic32Cache, methodReferenceEntry, false);
       for (final Method kernelMethod : Kernel.class.getDeclaredMethods()) {
@@ -2356,7 +2351,7 @@ public abstract class Kernel implements Cloneable {
    }
 
    // For alpha release atomic64 is not supported
-   public static boolean usesAtomic64(ClassModel.ConstantPool.MethodReferenceEntry methodReferenceEntry) {
+   public static boolean usesAtomic64(MethodReferenceEntry methodReferenceEntry) {
       //      if (CacheEnabler.areCachesEnabled())
       //      return getProperty(atomic64Cache, methodReferenceEntry, false);
       //for (java.lang.reflect.Method kernelMethod : Kernel.class.getDeclaredMethods()) {
@@ -2899,7 +2894,7 @@ public abstract class Kernel implements Cloneable {
    });
 
    private static boolean getBoolean(ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> methodNamesCache,
-         ClassModel.ConstantPool.MethodReferenceEntry methodReferenceEntry) {
+         MethodReferenceEntry methodReferenceEntry) {
       return getProperty(methodNamesCache, methodReferenceEntry, false);
    }
 
@@ -2935,7 +2930,7 @@ public abstract class Kernel implements Cloneable {
    }
 
    private static <V, T extends Throwable> V getProperty(ValueCache<Class<?>, Map<String, V>, T> cache,
-                                                         ClassModel.ConstantPool.MethodReferenceEntry methodReferenceEntry, V defaultValue) throws T {
+         MethodReferenceEntry methodReferenceEntry, V defaultValue) throws T {
       Map<String, V> map = cache.computeIfAbsent(methodReferenceEntry.getOwnerClassModel().getClassWeAreModelling());
       String key = toSignature(methodReferenceEntry);
       if (map.containsKey(key))
@@ -2943,8 +2938,8 @@ public abstract class Kernel implements Cloneable {
       return defaultValue;
    }
 
-   private static String toSignature(ClassModel.ConstantPool.MethodReferenceEntry methodReferenceEntry) {
-      ClassModel.ConstantPool.NameAndTypeEntry nameAndTypeEntry = methodReferenceEntry.getNameAndTypeEntry();
+   private static String toSignature(MethodReferenceEntry methodReferenceEntry) {
+      NameAndTypeEntry nameAndTypeEntry = methodReferenceEntry.getNameAndTypeEntry();
       return nameAndTypeEntry.getNameUTF8Entry().getUTF8() + nameAndTypeEntry.getDescriptorUTF8Entry().getUTF8();
    }
 

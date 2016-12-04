@@ -54,6 +54,10 @@ package com.aparapi.internal.instruction;
 
 import java.util.LinkedList;
 
+import com.aparapi.internal.instruction.InstructionSet.Branch;
+import com.aparapi.internal.instruction.InstructionSet.ByteCode;
+import com.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
+import com.aparapi.internal.instruction.InstructionSet.ConditionalBranch;
 import com.aparapi.internal.model.MethodModel;
 import com.aparapi.internal.reader.ByteReader;
 
@@ -72,7 +76,7 @@ public abstract class Instruction{
 
    protected MethodModel method;
 
-   private final InstructionSet.ByteCode byteCode;
+   private final ByteCode byteCode;
 
    private int length;
 
@@ -90,13 +94,13 @@ public abstract class Instruction{
 
    private Instruction parentExpr = null;
 
-   private LinkedList<InstructionSet.ConditionalBranch> forwardConditionalBranchTargets;
+   private LinkedList<ConditionalBranch> forwardConditionalBranchTargets;
 
-   private LinkedList<InstructionSet.ConditionalBranch> reverseConditionalBranchTargets;
+   private LinkedList<ConditionalBranch> reverseConditionalBranchTargets;
 
-   private LinkedList<InstructionSet.Branch> forwardUnconditionalBranchTargets;
+   private LinkedList<Branch> forwardUnconditionalBranchTargets;
 
-   private LinkedList<InstructionSet.Branch> reverseUnconditionalBranchTargets;
+   private LinkedList<Branch> reverseUnconditionalBranchTargets;
 
    private Instruction firstChild = null;
 
@@ -156,7 +160,7 @@ public abstract class Instruction{
       length = _length;
    }
 
-   public final InstructionSet.ByteCode getByteCode() {
+   public final ByteCode getByteCode() {
       return (byteCode);
    }
 
@@ -168,13 +172,13 @@ public abstract class Instruction{
       return (getFirstChild() == null ? pc : getFirstChild().getStartPC());
    }
 
-   protected Instruction(MethodModel _method, InstructionSet.ByteCode _byteCode, int _pc) {
+   protected Instruction(MethodModel _method, ByteCode _byteCode, int _pc) {
       method = _method;
       pc = _pc;
       byteCode = _byteCode;
    }
 
-   protected Instruction(MethodModel _method, InstructionSet.ByteCode _byteCode, ByteReader _byteReader, boolean _wide) {
+   protected Instruction(MethodModel _method, ByteCode _byteCode, ByteReader _byteReader, boolean _wide) {
       this(_method, _byteCode, _wide ? _byteReader.getOffset() - 2 : _byteReader.getOffset() - 1);
    }
 
@@ -196,7 +200,7 @@ public abstract class Instruction{
    }
 
    public boolean isBranch() {
-      return (this instanceof InstructionSet.Branch);
+      return (this instanceof Branch);
    }
 
    public int compareTo(Instruction _other) {
@@ -292,51 +296,51 @@ public abstract class Instruction{
    }
 
    public boolean producesStack() {
-      return ((this instanceof InstructionSet.CompositeInstruction) || (getStackProduceCount() > 0));
+      return ((this instanceof CompositeInstruction) || (getStackProduceCount() > 0));
    }
 
    public Instruction getReal() {
       return (this);
    }
 
-   public InstructionSet.Branch asBranch() {
-      return ((InstructionSet.Branch) this);
+   public Branch asBranch() {
+      return ((Branch) this);
    }
 
    public boolean consumesStack() {
       return (getStackConsumeCount() > 0);
    }
 
-   public void addBranchTarget(InstructionSet.Branch _branch) {
+   public void addBranchTarget(Branch _branch) {
 
       if (_branch.isReverse()) {
          if (_branch.isConditional()) {
             if (reverseConditionalBranchTargets == null) {
-               reverseConditionalBranchTargets = new LinkedList<InstructionSet.ConditionalBranch>();
+               reverseConditionalBranchTargets = new LinkedList<ConditionalBranch>();
             }
-            reverseConditionalBranchTargets.add((InstructionSet.ConditionalBranch) _branch);
+            reverseConditionalBranchTargets.add((ConditionalBranch) _branch);
          } else {
             if (reverseUnconditionalBranchTargets == null) {
-               reverseUnconditionalBranchTargets = new LinkedList<InstructionSet.Branch>();
+               reverseUnconditionalBranchTargets = new LinkedList<Branch>();
             }
             reverseUnconditionalBranchTargets.add(_branch);
          }
       } else {
          if (_branch.isConditional()) {
             if (forwardConditionalBranchTargets == null) {
-               forwardConditionalBranchTargets = new LinkedList<InstructionSet.ConditionalBranch>();
+               forwardConditionalBranchTargets = new LinkedList<ConditionalBranch>();
             }
-            forwardConditionalBranchTargets.add((InstructionSet.ConditionalBranch) _branch);
+            forwardConditionalBranchTargets.add((ConditionalBranch) _branch);
          } else {
             if (forwardUnconditionalBranchTargets == null) {
-               forwardUnconditionalBranchTargets = new LinkedList<InstructionSet.Branch>();
+               forwardUnconditionalBranchTargets = new LinkedList<Branch>();
             }
             forwardUnconditionalBranchTargets.add(_branch);
          }
       }
    }
 
-   public void removeBranchTarget(InstructionSet.Branch _branch) {
+   public void removeBranchTarget(Branch _branch) {
       if (_branch.isReverse()) {
          if (_branch.isConditional()) {
             if (reverseConditionalBranchTargets != null) {
@@ -372,19 +376,19 @@ public abstract class Instruction{
       }
    }
 
-   public LinkedList<InstructionSet.Branch> getForwardUnconditionalBranches() {
+   public LinkedList<Branch> getForwardUnconditionalBranches() {
       return (forwardUnconditionalBranchTargets);
    }
 
-   public LinkedList<InstructionSet.ConditionalBranch> getForwardConditionalBranches() {
+   public LinkedList<ConditionalBranch> getForwardConditionalBranches() {
       return (forwardConditionalBranchTargets);
    }
 
-   public LinkedList<InstructionSet.Branch> getReverseUnconditionalBranches() {
+   public LinkedList<Branch> getReverseUnconditionalBranches() {
       return (reverseUnconditionalBranchTargets);
    }
 
-   public LinkedList<InstructionSet.ConditionalBranch> getReverseConditionalBranches() {
+   public LinkedList<ConditionalBranch> getReverseConditionalBranches() {
       return (reverseConditionalBranchTargets);
    }
 

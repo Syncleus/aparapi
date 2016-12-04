@@ -15,9 +15,8 @@
  */
 package com.aparapi.internal.kernel;
 
-import com.aparapi.Kernel;
-import com.aparapi.device.Device;
 import com.aparapi.*;
+import com.aparapi.device.*;
 
 import java.util.*;
 

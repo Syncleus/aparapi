@@ -11,7 +11,7 @@
 
     <groupId>com.aparapi</groupId>
     <artifactId>aparapi</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -34,7 +34,7 @@
 
     <organization>
         <name>Syncleus</name>
-        <url>http://syncleus.com</url>
+        <url>http://aparapi.com</url>
     </organization>
 
     <scm>

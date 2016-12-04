@@ -52,16 +52,15 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.internal.model;
 
-import com.aparapi.Config;
-import com.aparapi.Kernel;
-import com.aparapi.internal.annotation.DocMe;
-import com.aparapi.internal.exception.AparapiException;
-import com.aparapi.internal.exception.ClassParseException;
-import com.aparapi.internal.instruction.InstructionSet;
-import com.aparapi.internal.reader.ByteReader;
-import com.aparapi.internal.util.Reflection;
 import com.aparapi.*;
+import com.aparapi.internal.annotation.*;
+import com.aparapi.internal.exception.*;
+import com.aparapi.internal.instruction.InstructionSet.*;
 import com.aparapi.internal.model.ValueCache.ThrowingValueComputer;
+import com.aparapi.internal.model.ClassModel.AttributePool.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.*;
+import com.aparapi.internal.reader.*;
+import com.aparapi.internal.util.*;
 
 import java.io.*;
 import java.lang.reflect.*;
@@ -2301,7 +2300,7 @@ public class ClassModel {
          for (int i = 0; i < attributeCount; i++) {
             final int attributeNameIndex = _byteReader.u2();
             final int length = _byteReader.u4();
-            ConstantPool.UTF8Entry utf8Entry = constantPool.getUTF8Entry(attributeNameIndex);
+            UTF8Entry utf8Entry = constantPool.getUTF8Entry(attributeNameIndex);
             if (utf8Entry == null) {
                throw new IllegalStateException("corrupted state reading attributes for " + name);
             }
@@ -2485,7 +2484,7 @@ public class ClassModel {
 
       private final int nameIndex;
 
-      private final AttributePool.CodeEntry codeEntry;
+      private final CodeEntry codeEntry;
 
       public ClassModelMethod(ByteReader _byteReader, int _index) {
          index = _index;
@@ -2738,7 +2737,7 @@ public class ClassModel {
     * 
     * @return The Method or null if we fail to locate a given method.
     */
-   public ClassModelMethod getMethod(ConstantPool.MethodEntry _methodEntry, boolean _isSpecial) {
+   public ClassModelMethod getMethod(MethodEntry _methodEntry, boolean _isSpecial) {
       final String entryClassNameInDotForm = _methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.');
 
       // Shortcut direct calls to supers to allow "foo() { super.foo() }" type stuff to work
@@ -2750,7 +2749,7 @@ public class ClassModel {
          return superClazz.getMethod(_methodEntry, false);
       }
 
-      ConstantPool.NameAndTypeEntry nameAndTypeEntry = _methodEntry.getNameAndTypeEntry();
+      NameAndTypeEntry nameAndTypeEntry = _methodEntry.getNameAndTypeEntry();
       ClassModelMethod methodOrNull = getMethodOrNull(nameAndTypeEntry.getNameUTF8Entry().getUTF8(), nameAndTypeEntry
             .getDescriptorUTF8Entry().getUTF8());
       if (methodOrNull == null)
@@ -2789,15 +2788,15 @@ public class ClassModel {
    }
 
    // These fields use for accessor conversion
-   private final ArrayList<ConstantPool.FieldEntry> structMembers = new ArrayList<ConstantPool.FieldEntry>();
+   private final ArrayList<FieldEntry> structMembers = new ArrayList<FieldEntry>();
 
    private final ArrayList<Long> structMemberOffsets = new ArrayList<Long>();
 
-   private final ArrayList<InstructionSet.TypeSpec> structMemberTypes = new ArrayList<InstructionSet.TypeSpec>();
+   private final ArrayList<TypeSpec> structMemberTypes = new ArrayList<TypeSpec>();
 
    private int totalStructSize = 0;
 
-   public ArrayList<ConstantPool.FieldEntry> getStructMembers() {
+   public ArrayList<FieldEntry> getStructMembers() {
       return structMembers;
    }
 
@@ -2805,7 +2804,7 @@ public class ClassModel {
       return structMemberOffsets;
    }
 
-   public ArrayList<InstructionSet.TypeSpec> getStructMemberTypes() {
+   public ArrayList<TypeSpec> getStructMemberTypes() {
       return structMemberTypes;
    }
 

@@ -15,13 +15,9 @@
  */
 package com.aparapi.internal.kernel;
 
-import com.aparapi.Config;
-import com.aparapi.Kernel;
-import com.aparapi.device.Device;
-import com.aparapi.device.JavaDevice;
-import com.aparapi.device.OpenCLDevice;
-import com.aparapi.internal.util.Reflection;
 import com.aparapi.*;
+import com.aparapi.device.*;
+import com.aparapi.internal.util.*;
 
 import java.lang.reflect.*;
 import java.util.*;

@@ -15,12 +15,12 @@
  */
 package com.aparapi.internal.jni;
 
-import com.aparapi.internal.opencl.OpenCLKernel;
 import com.aparapi.ProfileInfo;
 import java.util.List;
 
 import com.aparapi.device.OpenCLDevice;
 import com.aparapi.internal.opencl.OpenCLArgDescriptor;
+import com.aparapi.internal.opencl.OpenCLKernel;
 import com.aparapi.internal.opencl.OpenCLMem;
 import com.aparapi.internal.opencl.OpenCLPlatform;
 import com.aparapi.internal.opencl.OpenCLProgram;

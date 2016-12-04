@@ -15,7 +15,7 @@
  */
 package com.aparapi.internal.jni;
 
-import com.aparapi.internal.annotation.UsedByJNICode;
+import com.aparapi.internal.annotation.*;
 
 import java.lang.reflect.*;
 
@@ -47,8 +47,7 @@ public abstract class KernelArgJNI{
     * @see KernelRunnerJNI#ARG_EXPLICIT_WRITE
     * @see KernelRunnerJNI#ARG_OBJ_ARRAY_STRUCT
     */
-   @UsedByJNICode
-   protected int type;
+   @UsedByJNICode protected int type;
 
    /**
     * Name of the field

@@ -58,10 +58,19 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.aparapi.internal.model.ClassModel;
 import com.aparapi.Config;
 import com.aparapi.internal.exception.ClassParseException;
+import com.aparapi.internal.instruction.InstructionSet.AssignToLocalVariable;
+import com.aparapi.internal.instruction.InstructionSet.Branch;
+import com.aparapi.internal.instruction.InstructionSet.ByteCode;
+import com.aparapi.internal.instruction.InstructionSet.CompositeArbitraryScopeInstruction;
+import com.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
+import com.aparapi.internal.instruction.InstructionSet.ConditionalBranch;
+import com.aparapi.internal.instruction.InstructionSet.FakeGoto;
+import com.aparapi.internal.instruction.InstructionSet.Return;
+import com.aparapi.internal.instruction.InstructionSet.UnconditionalBranch;
 import com.aparapi.internal.model.MethodModel;
+import com.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
 import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
 
 /**
@@ -143,7 +152,7 @@ public class ExpressionList{
    public boolean doesNotContainCompositeOrBranch(Instruction _start, Instruction _exclusiveEnd) {
       boolean ok = true;
       for (Instruction i = _start; (i != null) && (i != _exclusiveEnd); i = i.getNextExpr()) {
-         if (!(i instanceof InstructionSet.CompositeInstruction) && (i.isBranch())) {
+         if (!(i instanceof CompositeInstruction) && (i.isBranch())) {
             ok = false;
             break;
          }
@@ -462,7 +471,7 @@ public class ExpressionList{
                    *       <----------
                    * </pre>
                    **/
-                  final BranchSet branchSet = ((InstructionSet.ConditionalBranch) tail.asBranch()).getOrCreateBranchSet();
+                  final BranchSet branchSet = ((ConditionalBranch) tail.asBranch()).getOrCreateBranchSet();
                   Instruction loopTop = branchSet.getTarget().getRootExpr();
                   final Instruction beginingOfBranch = branchSet.getFirst();
 
@@ -471,14 +480,14 @@ public class ExpressionList{
                   if (startOfBeginningOfBranch == loopTop) {
 
                      loopTop = loopTop.getPrevExpr();
-                     if (loopTop instanceof InstructionSet.AssignToLocalVariable) {
-                        final ClassModel.LocalVariableInfo localVariableInfo = ((InstructionSet.AssignToLocalVariable) loopTop).getLocalVariableInfo();
+                     if (loopTop instanceof AssignToLocalVariable) {
+                        final LocalVariableInfo localVariableInfo = ((AssignToLocalVariable) loopTop).getLocalVariableInfo();
                         if ((localVariableInfo.getStart() == loopTop.getNextExpr().getStartPC())
                               && (localVariableInfo.getEnd() == _instruction.getThisPC())) {
                            loopTop = loopTop.getPrevExpr(); // back up over the initialization
                         }
                      }
-                     addAsComposites(InstructionSet.ByteCode.COMPOSITE_EMPTY_LOOP, loopTop, branchSet);
+                     addAsComposites(ByteCode.COMPOSITE_EMPTY_LOOP, loopTop, branchSet);
                      handled = true;
                   } else {
 
@@ -490,14 +499,14 @@ public class ExpressionList{
                            loopTop = loopTop.getPrevExpr();
                            // looptop == the unconditional?
                            loopTop = loopTop.getPrevExpr();
-                           if (loopTop instanceof InstructionSet.AssignToLocalVariable) {
-                              final ClassModel.LocalVariableInfo localVariableInfo = ((InstructionSet.AssignToLocalVariable) loopTop).getLocalVariableInfo();
+                           if (loopTop instanceof AssignToLocalVariable) {
+                              final LocalVariableInfo localVariableInfo = ((AssignToLocalVariable) loopTop).getLocalVariableInfo();
                               if ((localVariableInfo.getStart() == loopTop.getNextExpr().getStartPC())
                                     && (localVariableInfo.getEnd() == _instruction.getThisPC())) {
                                  loopTop = loopTop.getPrevExpr(); // back up over the initialization
                               }
                            }
-                           addAsComposites(InstructionSet.ByteCode.COMPOSITE_FOR_ECLIPSE, loopTop, branchSet);
+                           addAsComposites(ByteCode.COMPOSITE_FOR_ECLIPSE, loopTop, branchSet);
                            handled = true;
                         }
                      }
@@ -511,7 +520,7 @@ public class ExpressionList{
                                  .getPrevExpr())) {
                               loopTop = loopTop.getPrevExpr();
                               branchSet.unhook();
-                              addAsComposites(InstructionSet.ByteCode.COMPOSITE_DO_WHILE, loopTop, branchSet);
+                              addAsComposites(ByteCode.COMPOSITE_DO_WHILE, loopTop, branchSet);
                               handled = true;
                            }
                         } else {
@@ -546,9 +555,9 @@ public class ExpressionList{
                    *               
                    *</pre>
                    */
-                  final InstructionSet.ConditionalBranch lastForwardConditional = _instruction.getForwardConditionalBranches().getLast();
+                  final ConditionalBranch lastForwardConditional = _instruction.getForwardConditionalBranches().getLast();
                   final BranchSet branchSet = lastForwardConditional.getOrCreateBranchSet();
-                  final InstructionSet.Branch reverseGoto = tail.asBranch();
+                  final Branch reverseGoto = tail.asBranch();
                   final Instruction loopBackTarget = reverseGoto.getTarget();
                   if (loopBackTarget.getReverseUnconditionalBranches().size() > 1) {
                      throw new ClassParseException(ClassParseException.TYPE.CONFUSINGBRANCHESPOSSIBLYCONTINUE);
@@ -565,7 +574,7 @@ public class ExpressionList{
                       *               
                       *</pre>
                       */
-                     final InstructionSet.Branch lastForwardUnconditional = _instruction.getForwardUnconditionalBranches().getLast();
+                     final Branch lastForwardUnconditional = _instruction.getForwardUnconditionalBranches().getLast();
                      if ((lastForwardUnconditional != null) && lastForwardUnconditional.isAfter(lastForwardConditional)) {
                         throw new ClassParseException(ClassParseException.TYPE.CONFUSINGBRANCHESPOSSIBLYBREAK);
                      }
@@ -598,7 +607,7 @@ public class ExpressionList{
 
                      final Instruction loopbackTargetRoot = loopBackTarget.getRootExpr();
                      if (loopbackTargetRoot.isBranch() && loopbackTargetRoot.asBranch().isConditional()) {
-                        final InstructionSet.ConditionalBranch topOfRealLoop = (InstructionSet.ConditionalBranch) loopbackTargetRoot.asBranch();
+                        final ConditionalBranch topOfRealLoop = (ConditionalBranch) loopbackTargetRoot.asBranch();
                         BranchSet extentBranchSet = topOfRealLoop.getBranchSet();
                         if (topOfRealLoop.getBranchSet() == null) {
                            extentBranchSet = topOfRealLoop.findEndOfConditionalBranchSet(_instruction.getNextPC())
@@ -608,8 +617,8 @@ public class ExpressionList{
                         if (doesNotContainCompositeOrBranch(extentBranchSet.getLast().getNextExpr(), reverseGoto)) {
 
                            Instruction loopTop = topOfRealLoop.getPrevExpr();
-                           if (loopTop instanceof InstructionSet.AssignToLocalVariable) {
-                              final ClassModel.LocalVariableInfo localVariableInfo = ((InstructionSet.AssignToLocalVariable) loopTop).getLocalVariableInfo();
+                           if (loopTop instanceof AssignToLocalVariable) {
+                              final LocalVariableInfo localVariableInfo = ((AssignToLocalVariable) loopTop).getLocalVariableInfo();
                               if ((localVariableInfo.getStart() == loopTop.getNextExpr().getStartPC())
                                     && (localVariableInfo.getEnd() == _instruction.getThisPC())) {
                                  loopTop = loopTop.getPrevExpr(); // back up over the initialization
@@ -617,8 +626,8 @@ public class ExpressionList{
                            }
                            extentBranchSet.unhook();
 
-                           addAsComposites(InstructionSet.ByteCode.COMPOSITE_FOR_SUN, loopTop, extentBranchSet);
-                           final InstructionSet.UnconditionalBranch fakeGoto = new InstructionSet.FakeGoto(methodModel, extentBranchSet.getLast().getTarget());
+                           addAsComposites(ByteCode.COMPOSITE_FOR_SUN, loopTop, extentBranchSet);
+                           final UnconditionalBranch fakeGoto = new FakeGoto(methodModel, extentBranchSet.getLast().getTarget());
 
                            add(fakeGoto);
                            extentBranchSet.getLast().getTarget().addBranchTarget(fakeGoto);
@@ -642,8 +651,8 @@ public class ExpressionList{
                            }
                         }
 
-                        if (loopTop instanceof InstructionSet.AssignToLocalVariable) {
-                           final ClassModel.LocalVariableInfo localVariableInfo = ((InstructionSet.AssignToLocalVariable) loopTop).getLocalVariableInfo();
+                        if (loopTop instanceof AssignToLocalVariable) {
+                           final LocalVariableInfo localVariableInfo = ((AssignToLocalVariable) loopTop).getLocalVariableInfo();
                            if ((localVariableInfo.getStart() == loopTop.getNextExpr().getStartPC())
                                  && (localVariableInfo.getEnd() == _instruction.getThisPC())) {
                               loopTop = loopTop.getPrevExpr(); // back up over the initialization
@@ -654,10 +663,10 @@ public class ExpressionList{
 
                         // If there is an inner scope, it is likely that the loop counter var
                         // is modified using an inner scope variable so use while rather than for
-                        if (reverseGoto.getPrevExpr() instanceof InstructionSet.CompositeArbitraryScopeInstruction) {
-                           addAsComposites(InstructionSet.ByteCode.COMPOSITE_WHILE, loopTop, branchSet);
+                        if (reverseGoto.getPrevExpr() instanceof CompositeArbitraryScopeInstruction) {
+                           addAsComposites(ByteCode.COMPOSITE_WHILE, loopTop, branchSet);
                         } else {
-                           addAsComposites(InstructionSet.ByteCode.COMPOSITE_FOR_SUN, loopTop, branchSet);
+                           addAsComposites(ByteCode.COMPOSITE_FOR_SUN, loopTop, branchSet);
                         }
                         handled = true;
                      }
@@ -674,31 +683,31 @@ public class ExpressionList{
                    *
                    *</pre>
                    */
-                  final InstructionSet.ConditionalBranch lastForwardConditional = _instruction.getForwardConditionalBranches().getLast();
+                  final ConditionalBranch lastForwardConditional = _instruction.getForwardConditionalBranches().getLast();
                   final BranchSet branchSet = lastForwardConditional.getOrCreateBranchSet();
                   if (doesNotContainContinueOrBreak(branchSet.getLast().getNextExpr(), _instruction)) {
                      branchSet.unhook();
-                     addAsComposites(InstructionSet.ByteCode.COMPOSITE_IF, branchSet.getFirst().getPrevExpr(), branchSet);
+                     addAsComposites(ByteCode.COMPOSITE_IF, branchSet.getFirst().getPrevExpr(), branchSet);
                      handled = true;
                   }
                }
                if (!handled && !tail.isForwardBranch() && _instruction.isForwardUnconditionalBranchTarget()) {
 
-                  final LinkedList<InstructionSet.Branch> forwardUnconditionalBranches = _instruction.getForwardUnconditionalBranches();
+                  final LinkedList<Branch> forwardUnconditionalBranches = _instruction.getForwardUnconditionalBranches();
 
-                  final InstructionSet.Branch lastForwardUnconditional = forwardUnconditionalBranches.getLast();
+                  final Branch lastForwardUnconditional = forwardUnconditionalBranches.getLast();
                   final Instruction afterGoto = lastForwardUnconditional.getNextExpr();
                   if (afterGoto.getStartInstruction().isForwardConditionalBranchTarget()) {
-                     final LinkedList<InstructionSet.ConditionalBranch> forwardConditionalBranches = afterGoto.getStartInstruction()
+                     final LinkedList<ConditionalBranch> forwardConditionalBranches = afterGoto.getStartInstruction()
                            .getForwardConditionalBranches();
-                     final InstructionSet.ConditionalBranch lastForwardConditional = forwardConditionalBranches.getLast();
+                     final ConditionalBranch lastForwardConditional = forwardConditionalBranches.getLast();
                      final BranchSet branchSet = lastForwardConditional.getOrCreateBranchSet();
 
                      if (doesNotContainCompositeOrBranch(branchSet.getLast().getNextExpr(), lastForwardUnconditional)) {
                         if (doesNotContainContinueOrBreak(afterGoto.getNextExpr(), _instruction)) {
                            branchSet.unhook();
                            lastForwardUnconditional.unhook();
-                           addAsComposites(InstructionSet.ByteCode.COMPOSITE_IF_ELSE, branchSet.getFirst().getPrevExpr(), branchSet);
+                           addAsComposites(ByteCode.COMPOSITE_IF_ELSE, branchSet.getFirst().getPrevExpr(), branchSet);
                            handled = true;
                         }
                      } else {
@@ -721,8 +730,8 @@ public class ExpressionList{
                            // as a possible end
 
                            for (int i = forwardUnconditionalBranches.size(); i > 1; i--) {
-                              final InstructionSet.Branch thisGoto = forwardUnconditionalBranches.get(i - 1);
-                              final InstructionSet.Branch elseGoto = forwardUnconditionalBranches.get(i - 2);
+                              final Branch thisGoto = forwardUnconditionalBranches.get(i - 1);
+                              final Branch elseGoto = forwardUnconditionalBranches.get(i - 2);
                               final Instruction afterElseGoto = elseGoto.getNextExpr();
                               if (afterElseGoto.getStartInstruction().isConditionalBranchTarget()) {
                                  final BranchSet elseBranchSet = afterElseGoto.getStartInstruction()
@@ -739,8 +748,8 @@ public class ExpressionList{
 
                                        }
 
-                                       final InstructionSet.CompositeInstruction composite = InstructionSet.CompositeInstruction.create(
-                                             InstructionSet.ByteCode.COMPOSITE_IF_ELSE, methodModel, elseBranchSet.getFirst(), thisGoto,
+                                       final CompositeInstruction composite = CompositeInstruction.create(
+                                             ByteCode.COMPOSITE_IF_ELSE, methodModel, elseBranchSet.getFirst(), thisGoto,
                                              elseBranchSet);
                                        replaceInclusive(elseBranchSet.getFirst(), thisGoto.getPrevExpr(), composite);
 
@@ -763,8 +772,8 @@ public class ExpressionList{
                      && _instruction.isForwardUnconditionalBranchTarget()) {
                   // here we have multiple composites ending at the same point
 
-                  final InstructionSet.Branch lastForwardUnconditional = _instruction.getForwardUnconditionalBranches().getLast();
-                  final InstructionSet.ConditionalBranch lastForwardConditional = _instruction.getStartInstruction()
+                  final Branch lastForwardUnconditional = _instruction.getForwardUnconditionalBranches().getLast();
+                  final ConditionalBranch lastForwardConditional = _instruction.getStartInstruction()
                         .getForwardConditionalBranches().getLast();
                   // we will clip the tail and see if recursing helps
 
@@ -787,11 +796,11 @@ public class ExpressionList{
          } else {
 
             // might be end of arbitrary scope
-            final ClassModel.LocalVariableTableEntry<LocalVariableInfo> localVariableTable = methodModel.getMethod()
+            final LocalVariableTableEntry<LocalVariableInfo> localVariableTable = methodModel.getMethod()
                   .getLocalVariableTableEntry();
             int startPc = Short.MAX_VALUE;
 
-            for (final ClassModel.LocalVariableInfo localVariableInfo : localVariableTable) {
+            for (final LocalVariableInfo localVariableInfo : localVariableTable) {
                if (localVariableInfo.getEnd() == _instruction.getThisPC()) {
                   logger.fine(localVariableInfo.getVariableName() + "  scope  " + localVariableInfo.getStart() + " ,"
                         + localVariableInfo.getEnd());
@@ -807,7 +816,7 @@ public class ExpressionList{
                      final Instruction startInstruction = i.getRootExpr().getPrevExpr();
                      logger.fine("Start = " + startInstruction);
 
-                     addAsComposites(InstructionSet.ByteCode.COMPOSITE_ARBITRARY_SCOPE, startInstruction.getPrevExpr(), null);
+                     addAsComposites(ByteCode.COMPOSITE_ARBITRARY_SCOPE, startInstruction.getPrevExpr(), null);
                      handled = true;
                      break;
                   }
@@ -830,10 +839,10 @@ public class ExpressionList{
       return (handled);
    }
 
-   private void addAsComposites(InstructionSet.ByteCode _byteCode, Instruction _start, BranchSet _branchSet) {
+   private void addAsComposites(ByteCode _byteCode, Instruction _start, BranchSet _branchSet) {
       final Instruction childTail = tail;
       final Instruction childHead = createList(_start);
-      final InstructionSet.CompositeInstruction composite = InstructionSet.CompositeInstruction.create(_byteCode, methodModel, childHead, childTail, _branchSet);
+      final CompositeInstruction composite = CompositeInstruction.create(_byteCode, methodModel, childHead, childTail, _branchSet);
       add(composite);
    }
 
@@ -865,7 +874,7 @@ public class ExpressionList{
       final Instruction[] array = list.toArray(new Instruction[0]);
       boolean lastWasCursor = false;
 
-      final List<InstructionSet.Branch> branches = new ArrayList<InstructionSet.Branch>();
+      final List<Branch> branches = new ArrayList<Branch>();
       for (final Instruction i : list) {
          sb.append(String.format(" %3d", i.getStartPC()));
       }
@@ -905,9 +914,9 @@ public class ExpressionList{
             } else {
                sb.append("<<");
             }
-         } else if (i instanceof InstructionSet.CompositeInstruction) {
+         } else if (i instanceof CompositeInstruction) {
             sb.append(" C");
-         } else if (i instanceof InstructionSet.Return) {
+         } else if (i instanceof Return) {
 
             sb.append(" R");
             // } else if (i instanceof AssignToLocalVariable) {
@@ -923,7 +932,7 @@ public class ExpressionList{
          sb.append("  ");
       }
 
-      for (final InstructionSet.Branch b : branches) {
+      for (final Branch b : branches) {
          sb.append("\n   ");
          if (b.isForward()) {
             for (int i = 0; i < array.length; i++) {

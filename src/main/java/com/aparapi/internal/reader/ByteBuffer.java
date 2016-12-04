@@ -63,7 +63,7 @@ import java.io.InputStream;
  * 
  * Does not keep track of accesses.  For this you will need a <code>ByteReader</code>
  * 
- * @see ByteReader
+ * @see com.aparapi.internal.reader.ByteReader
  * 
  * @author gfrost
  *

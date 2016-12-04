@@ -59,8 +59,8 @@ package com.aparapi.internal.exception;
  * The class parser for example will throw a specific <code>ClassParseException</code> if any Aparapi unfriendly 
  * constructs are found.  This allows us to <strong>fail fast</strong> during classfile parsing.
  * 
- * @see ClassParseException
- * @see CodeGenException
+ * @see com.aparapi.internal.exception.ClassParseException
+ * @see com.aparapi.internal.exception.CodeGenException
  *
  * @author gfrost
  *

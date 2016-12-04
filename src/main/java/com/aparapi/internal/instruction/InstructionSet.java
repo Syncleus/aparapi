@@ -55,8 +55,13 @@ package com.aparapi.internal.instruction;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import com.aparapi.internal.model.ClassModel;
 import com.aparapi.internal.model.MethodModel;
+import com.aparapi.internal.model.ClassModel.ConstantPool;
+import com.aparapi.internal.model.ClassModel.ConstantPool.Entry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodEntry;
+import com.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
+import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
 import com.aparapi.internal.reader.ByteReader;
 
 public class InstructionSet{
@@ -1245,7 +1250,7 @@ public class InstructionSet{
          return (index);
       }
 
-      @Override public ClassModel.LocalVariableInfo getLocalVariableInfo() {
+      @Override public LocalVariableInfo getLocalVariableInfo() {
          return (method.getLocalVariableTableEntry().getVariable(getThisPC() + getLength(), getLocalVariableTableIndex()));
       }
    }
@@ -1269,7 +1274,7 @@ public class InstructionSet{
       }
 
       @Override public boolean isDeclaration() {
-         ClassModel.LocalVariableInfo lvi = method.getLocalVariableTableEntry().getVariable(getThisPC() + getLength(),
+         LocalVariableInfo lvi = method.getLocalVariableTableEntry().getVariable(getThisPC() + getLength(),
                getLocalVariableTableIndex());
          return (lvi.getStart() == getThisPC() + getLength());
       }
@@ -1288,7 +1293,7 @@ public class InstructionSet{
          return (index);
       }
 
-      @Override public ClassModel.LocalVariableInfo getLocalVariableInfo() {
+      @Override public LocalVariableInfo getLocalVariableInfo() {
          return (method.getLocalVariableTableEntry().getVariable(getThisPC() + getLength(), getLocalVariableTableIndex()));
       }
    }
@@ -1309,8 +1314,8 @@ public class InstructionSet{
       }
 
       @Override public boolean isDeclaration() {
-         final ClassModel.LocalVariableTableEntry localVariableTableEntry = method.getLocalVariableTableEntry();
-         final ClassModel.LocalVariableInfo localVarInfo = localVariableTableEntry.getVariable(getThisPC() + getLength(),
+         final LocalVariableTableEntry localVariableTableEntry = method.getLocalVariableTableEntry();
+         final LocalVariableInfo localVarInfo = localVariableTableEntry.getVariable(getThisPC() + getLength(),
                getLocalVariableTableIndex());
          return ((localVarInfo != null) && (localVarInfo.getStart() == (getThisPC() + getLength())));
       }
@@ -2045,7 +2050,7 @@ public class InstructionSet{
          return (index);
       }
 
-      @Override public ClassModel.ConstantPool.FieldEntry getConstantPoolFieldEntry() {
+      @Override public FieldEntry getConstantPoolFieldEntry() {
          return (method.getConstantPool().getFieldEntry(getConstantPoolFieldIndex()));
       }
 
@@ -2075,7 +2080,7 @@ public class InstructionSet{
          return (index);
       }
 
-      @Override public ClassModel.ConstantPool.FieldEntry getConstantPoolFieldEntry() {
+      @Override public FieldEntry getConstantPoolFieldEntry() {
          return (method.getConstantPool().getFieldEntry(getConstantPoolFieldIndex()));
       }
 
@@ -2468,7 +2473,7 @@ public class InstructionSet{
          return ("inc var index 08 bit by byte");
       }
 
-      public ClassModel.LocalVariableInfo getLocalVariableInfo() {
+      public LocalVariableInfo getLocalVariableInfo() {
          return (method.getLocalVariableTableEntry().getVariable(getThisPC(), getLocalVariableTableIndex()));
       }
 
@@ -2581,7 +2586,7 @@ public class InstructionSet{
          return (index);
       }
 
-      @Override public ClassModel.ConstantPool.InterfaceMethodEntry getConstantPoolInterfaceMethodEntry() {
+      @Override public ConstantPool.InterfaceMethodEntry getConstantPoolInterfaceMethodEntry() {
          return (method.getConstantPool().getInterfaceMethodEntry(getConstantPoolInterfaceMethodIndex()));
       }
 
@@ -2632,7 +2637,7 @@ public class InstructionSet{
          return (index);
       }
 
-      @Override public ClassModel.ConstantPool.InterfaceMethodEntry getConstantPoolInterfaceMethodEntry() {
+      @Override public ConstantPool.InterfaceMethodEntry getConstantPoolInterfaceMethodEntry() {
          return (method.getConstantPool().getInterfaceMethodEntry(getConstantPoolInterfaceMethodIndex()));
       }
 
@@ -2674,7 +2679,7 @@ public class InstructionSet{
          return (index);
       }
 
-      @Override public ClassModel.ConstantPool.MethodEntry getConstantPoolMethodEntry() {
+      @Override public ConstantPool.MethodEntry getConstantPoolMethodEntry() {
          return (method.getConstantPool().getMethodEntry(getConstantPoolMethodIndex()));
       }
 
@@ -2716,7 +2721,7 @@ public class InstructionSet{
          return (index);
       }
 
-      @Override public ClassModel.ConstantPool.MethodEntry getConstantPoolMethodEntry() {
+      @Override public ConstantPool.MethodEntry getConstantPoolMethodEntry() {
          return (method.getConstantPool().getMethodEntry(getConstantPoolMethodIndex()));
       }
 
@@ -2754,7 +2759,7 @@ public class InstructionSet{
          return (index);
       }
 
-      @Override public ClassModel.ConstantPool.MethodEntry getConstantPoolMethodEntry() {
+      @Override public ConstantPool.MethodEntry getConstantPoolMethodEntry() {
          return (method.getConstantPool().getMethodEntry(getConstantPoolMethodIndex()));
       }
 
@@ -3030,7 +3035,7 @@ public class InstructionSet{
          return (index);
       }
 
-      @Override public ClassModel.ConstantPool.Entry getConstantPoolEntry() {
+      @Override public Entry getConstantPoolEntry() {
          return (method.getConstantPool().get(getConstantPoolIndex()));
       }
    }
@@ -3053,7 +3058,7 @@ public class InstructionSet{
 
       }
 
-      @Override public ClassModel.ConstantPool.Entry getConstantPoolEntry() {
+      @Override public Entry getConstantPoolEntry() {
          return (method.getConstantPool().get(getConstantPoolIndex()));
       }
    }
@@ -3071,7 +3076,7 @@ public class InstructionSet{
          return (index);
       }
 
-      @Override public ClassModel.ConstantPool.Entry getConstantPoolEntry() {
+      @Override public Entry getConstantPoolEntry() {
          return (method.getConstantPool().get(getConstantPoolIndex()));
       }
 
@@ -3391,7 +3396,7 @@ public class InstructionSet{
          return (index);
       }
 
-      @Override public ClassModel.ConstantPool.FieldEntry getConstantPoolFieldEntry() {
+      @Override public FieldEntry getConstantPoolFieldEntry() {
          return (method.getConstantPool().getFieldEntry(getConstantPoolFieldIndex()));
       }
 
@@ -3425,7 +3430,7 @@ public class InstructionSet{
          return (index);
       }
 
-      @Override public ClassModel.ConstantPool.FieldEntry getConstantPoolFieldEntry() {
+      @Override public FieldEntry getConstantPoolFieldEntry() {
          return (method.getConstantPool().getFieldEntry(getConstantPoolFieldIndex()));
       }
 
@@ -3451,7 +3456,7 @@ public class InstructionSet{
          return ("return to pc in local var index 08 bit");
       }
 
-      @Override public ClassModel.LocalVariableInfo getLocalVariableInfo() {
+      @Override public LocalVariableInfo getLocalVariableInfo() {
          return (method.getLocalVariableTableEntry().getVariable(getThisPC() + getLength(), getLocalVariableTableIndex()));
       }
 
@@ -3680,7 +3685,7 @@ public class InstructionSet{
    public interface MethodCall{
       int getConstantPoolMethodIndex();
 
-      ClassModel.ConstantPool.MethodEntry getConstantPoolMethodEntry();
+      MethodEntry getConstantPoolMethodEntry();
 
       Instruction getArg(int _arg);
    }
@@ -3692,7 +3697,7 @@ public class InstructionSet{
    public interface InterfaceConstantPoolMethodIndexAccessor{
       public int getConstantPoolInterfaceMethodIndex();
 
-      public ClassModel.ConstantPool.InterfaceMethodEntry getConstantPoolInterfaceMethodEntry();
+      public ConstantPool.InterfaceMethodEntry getConstantPoolInterfaceMethodEntry();
 
       public Instruction getInstanceReference();
 
@@ -3707,7 +3712,7 @@ public class InstructionSet{
    public interface FieldReference{
       public int getConstantPoolFieldIndex();
 
-      public ClassModel.ConstantPool.FieldEntry getConstantPoolFieldEntry();
+      public FieldEntry getConstantPoolFieldEntry();
    }
 
    public interface AccessField extends FieldReference{
@@ -3729,7 +3734,7 @@ public class InstructionSet{
    public interface LocalVariableTableIndexAccessor{
       int getLocalVariableTableIndex();
 
-      ClassModel.LocalVariableInfo getLocalVariableInfo();
+      LocalVariableInfo getLocalVariableInfo();
    }
 
    public interface AccessLocalVariable extends LocalVariableTableIndexAccessor{
@@ -3747,7 +3752,7 @@ public class InstructionSet{
    @SuppressWarnings("unchecked") public interface ConstantPoolEntryConstant extends Constant{
       int getConstantPoolIndex();
 
-      ClassModel.ConstantPool.Entry getConstantPoolEntry();
+      ConstantPool.Entry getConstantPoolEntry();
    };
 
    public interface HasOperator{

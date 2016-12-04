@@ -20,10 +20,10 @@
  * as now the preferred mechanism for device selection is to rely on the {@link com.aparapi.internal.kernel.KernelManager} to
  * select an appropriate device. Where a particular device is required to be used for a certain kernel, for such purposes as
  * debugging or unit testing, this can be achieved by using
- * {@link com.aparapi.internal.kernel.KernelManager#setKernelManager(KernelManager)} prior to
- * invoking any Kernel executions, by overriding {@link com.aparapi.Kernel#isAllowDevice(Device)}
+ * {@link com.aparapi.internal.kernel.KernelManager#setKernelManager(com.aparapi.internal.kernel.KernelManager)} prior to
+ * invoking any Kernel executions, by overriding {@link com.aparapi.Kernel#isAllowDevice(com.aparapi.device.Device)}
   * to veto/approve devices from the available devices for a given Kernel class, or (not recommended) by using
- * {@link com.aparapi.internal.kernel.KernelManager#setPreferredDevices(Kernel, java.util.LinkedHashSet)} to specify
+ * {@link com.aparapi.internal.kernel.KernelManager#setPreferredDevices(com.aparapi.Kernel, java.util.LinkedHashSet)} to specify
  * a particular device list for a given Kernel class.
  *
  * <p>In order to determine the Device which will be used to execute a particular Kernel, use {@link com.aparapi.Kernel#getTargetDevice()}.
@@ -32,6 +32,3 @@
  *
  */
 package com.aparapi.device;
-
-import com.aparapi.Kernel;
-import com.aparapi.internal.kernel.KernelManager;

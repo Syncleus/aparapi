@@ -60,7 +60,7 @@ import java.io.InputStream;
  * Basically wraps a <code>ByteBuffer</code> and keeps track of the current offset. All requests on 
  * this <code>ByteReader</code> will be delegated to wrapped<code>ByteBuffer</code>.
  * </p>
- * @see ByteBuffer
+ * @see com.aparapi.internal.reader.ByteBuffer
  * 
  * @author gfrost
  *

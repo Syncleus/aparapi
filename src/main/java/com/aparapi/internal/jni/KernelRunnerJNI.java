@@ -16,10 +16,10 @@
 package com.aparapi.internal.jni;
 
 import com.aparapi.Kernel;
-import com.aparapi.Range;
-import com.aparapi.device.OpenCLDevice;
 import com.aparapi.ProfileInfo;
+import com.aparapi.Range;
 import com.aparapi.annotation.Experimental;
+import com.aparapi.device.OpenCLDevice;
 import com.aparapi.internal.annotation.DocMe;
 import com.aparapi.internal.annotation.UsedByJNICode;
 
@@ -35,7 +35,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>boolean</code> type (array or primitive).
     * 
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -45,7 +45,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>byte</code> type (array or primitive).
     * 
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -55,7 +55,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>float</code> type (array or primitive).
     * 
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -65,7 +65,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>int</code> type (array or primitive).
     * 
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -75,7 +75,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>double</code> type (array or primitive).
     * 
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -85,7 +85,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>long</code> type (array or primitive).
     * 
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -94,7 +94,7 @@ public abstract class KernelRunnerJNI{
    /**
     * TODO:
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -105,7 +105,7 @@ public abstract class KernelRunnerJNI{
     * So <code>ARG_ARRAY|ARG_INT</code> tells us this arg is an array of <code>int</code>.
     * 
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -116,7 +116,7 @@ public abstract class KernelRunnerJNI{
     * So <code>ARG_PRIMITIVE|ARG_INT</code> tells us this arg is a primitive <code>int</code>.
     * 
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -127,7 +127,7 @@ public abstract class KernelRunnerJNI{
     * So <code>ARG_ARRAY|ARG_INT|ARG_READ</code> tells us this arg is an array of int's that are read by the kernel.
     * 
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -138,7 +138,7 @@ public abstract class KernelRunnerJNI{
     * So <code>ARG_ARRAY|ARG_INT|ARG_WRITE</code> tells us this arg is an array of int's that we expect the kernel to mutate.
     * 
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -148,8 +148,8 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> resides in local memory in the generated OpenCL code.<br/>
     * 
     * 
-    * @see UsedByJNICode
-    * @see Experimental
+    * @see com.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.annotation.Experimental
     * 
     * @author gfrost
     */
@@ -159,8 +159,8 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> resides in global memory in the generated OpenCL code.<br/>
     * 
     * 
-    * @see UsedByJNICode
-    * @see Experimental
+    * @see com.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.annotation.Experimental
     * 
     * @author gfrost
     */
@@ -170,8 +170,8 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> resides in constant memory in the generated OpenCL code.<br/>
     * 
     * 
-    * @see UsedByJNICode
-    * @see Experimental
+    * @see com.aparapi.internal.annotation.UsedByJNICode
+    * @see com.aparapi.annotation.Experimental
     * 
     * @author gfrost
     */
@@ -181,7 +181,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> has it's length reference, in which case a synthetic arg is passed (name mangled) to the OpenCL kernel.<br/>
     * 
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -190,7 +190,7 @@ public abstract class KernelRunnerJNI{
    /**
     * TODO:
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -199,7 +199,7 @@ public abstract class KernelRunnerJNI{
    /**
     * This 'bit' indicates that the arg has been explicitly marked for reading
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -208,7 +208,7 @@ public abstract class KernelRunnerJNI{
    /**
     * This 'bit' indicates that the arg has been explicitly marked for writing
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -217,7 +217,7 @@ public abstract class KernelRunnerJNI{
    /**
     * TODO:
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -228,7 +228,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>char</code> type (array or primitive).
     * 
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author rlamothe
     */
@@ -238,7 +238,7 @@ public abstract class KernelRunnerJNI{
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>static</code> field (array or primitive).
     * 
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -267,7 +267,7 @@ public abstract class KernelRunnerJNI{
     * 
     * Be careful changing final constants starting with JNI.<br/>
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author gfrost
     */
@@ -297,7 +297,7 @@ public abstract class KernelRunnerJNI{
     * 
     * Be careful changing final constants starting with JNI.<br/>
     * 
-    * @see UsedByJNICode
+    * @see com.aparapi.internal.annotation.UsedByJNICode
     * 
     * @author ekasit
     */

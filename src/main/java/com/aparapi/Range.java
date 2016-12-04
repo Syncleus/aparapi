@@ -15,10 +15,8 @@
  */
 package com.aparapi;
 
-import com.aparapi.device.Device;
-import com.aparapi.device.JavaDevice;
-import com.aparapi.device.OpenCLDevice;
-import com.aparapi.internal.jni.RangeJNI;
+import com.aparapi.device.*;
+import com.aparapi.internal.jni.*;
 
 import java.util.*;
 
@@ -64,7 +62,7 @@ import java.util.*;
  *  Range.create3D(width, height, depth, groupWidth, groupHeight, groupDepth);
  * </pre></blockquote>
  */
-public class Range extends RangeJNI {
+public class Range extends RangeJNI{
 
    public static final int THREADS_PER_CORE = 16;
 

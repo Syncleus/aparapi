@@ -52,24 +52,18 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.internal.kernel;
 
-import com.aparapi.Config;
-import com.aparapi.Kernel;
-import com.aparapi.ProfileInfo;
-import com.aparapi.Range;
-import com.aparapi.device.Device;
-import com.aparapi.device.JavaDevice;
-import com.aparapi.device.OpenCLDevice;
-import com.aparapi.internal.annotation.UsedByJNICode;
-import com.aparapi.internal.exception.AparapiException;
-import com.aparapi.internal.exception.CodeGenException;
-import com.aparapi.internal.instruction.InstructionSet;
-import com.aparapi.internal.jni.KernelRunnerJNI;
-import com.aparapi.internal.model.ClassModel;
-import com.aparapi.internal.model.Entrypoint;
-import com.aparapi.internal.util.UnsafeWrapper;
-import com.aparapi.internal.writer.KernelWriter;
-import com.aparapi.opencl.OpenCL;
 import com.aparapi.*;
+import com.aparapi.Kernel.Constant;
+import com.aparapi.Kernel.*;
+import com.aparapi.device.*;
+import com.aparapi.internal.annotation.*;
+import com.aparapi.internal.exception.*;
+import com.aparapi.internal.instruction.InstructionSet.*;
+import com.aparapi.internal.jni.*;
+import com.aparapi.internal.model.*;
+import com.aparapi.internal.util.*;
+import com.aparapi.internal.writer.*;
+import com.aparapi.opencl.*;
 
 import java.lang.reflect.*;
 import java.nio.*;
@@ -89,20 +83,19 @@ import java.util.logging.*;
  * time the <code>ExecutionMode</code> is consulted to determine the default requested mode.  This will dictate how 
  * the <code>KernelRunner</code> will attempt to execute the <code>Kernel</code>
  *   
- * @see Kernel#execute(int _globalSize)
+ * @see com.aparapi.Kernel#execute(int _globalSize)
  * 
  * @author gfrost
  *
  */
-public class KernelRunner extends KernelRunnerJNI {
+public class KernelRunner extends KernelRunnerJNI{
 
    public static boolean BINARY_CACHING_DISABLED = false;
 
    private static final int MINIMUM_ARRAY_SIZE = 1;
 
    /** @see #getCurrentPass() */
-   @UsedByJNICode
-   public static final int PASS_ID_PREPARING_EXECUTION = -2;
+   @UsedByJNICode public static final int PASS_ID_PREPARING_EXECUTION = -2;
    /** @see #getCurrentPass() */
    @UsedByJNICode public static final int PASS_ID_COMPLETED_EXECUTION = -1;
    @UsedByJNICode public static final int CANCEL_STATUS_FALSE = 0;
@@ -345,7 +338,7 @@ public class KernelRunner extends KernelRunnerJNI {
 
    //   @FunctionalInterface
    private interface ThreadIdSetter{
-      void set(Kernel.KernelState kernelState, int globalGroupId, int threadId);
+      void set(KernelState kernelState, int globalGroupId, int threadId);
    }
 
    /**
@@ -390,7 +383,7 @@ public class KernelRunner extends KernelRunnerJNI {
                }
 
                final Kernel kernelClone = kernel.clone();
-               final Kernel.KernelState kernelState = kernelClone.getKernelState();
+               final KernelState kernelState = kernelClone.getKernelState();
 
                kernelState.setRange(_settings.range);
                kernelState.setGroupId(0, 0);
@@ -474,7 +467,7 @@ public class KernelRunner extends KernelRunnerJNI {
                if (_settings.range.getDims() == 1) {
                   threadIdSetter = new ThreadIdSetter() {
                      @Override
-                     public void set(Kernel.KernelState kernelState, int globalGroupId, int threadId) {
+                     public void set(KernelState kernelState, int globalGroupId, int threadId) {
                         //                   (kernelState, globalGroupId, threadId) ->{
                         kernelState.setLocalId(0, (threadId % localSize0));
                         kernelState.setGlobalId(0, (threadId + (globalGroupId * threads)));
@@ -553,7 +546,7 @@ public class KernelRunner extends KernelRunnerJNI {
                    */
                   threadIdSetter = new ThreadIdSetter() {
                      @Override
-                     public void set(Kernel.KernelState kernelState, int globalGroupId, int threadId) {
+                     public void set(KernelState kernelState, int globalGroupId, int threadId) {
                         //                   (kernelState, globalGroupId, threadId) ->{
                         kernelState.setLocalId(0, (threadId % localSize0)); // threadId % localWidth =  (for 33 = 1 % 4 = 1)
                         kernelState.setLocalId(1, (threadId / localSize0)); // threadId / localWidth = (for 33 = 1 / 4 == 0)
@@ -572,7 +565,7 @@ public class KernelRunner extends KernelRunnerJNI {
                   //Same as 2D actually turns out that localId[0] is identical for all three dims so could be hoisted out of conditional code
                   threadIdSetter = new ThreadIdSetter() {
                      @Override
-                     public void set(Kernel.KernelState kernelState, int globalGroupId, int threadId) {
+                     public void set(KernelState kernelState, int globalGroupId, int threadId) {
                         //                   (kernelState, globalGroupId, threadId) ->{
                         kernelState.setLocalId(0, (threadId % localSize0));
 
@@ -641,7 +634,7 @@ public class KernelRunner extends KernelRunnerJNI {
                       *  about other threads.
                       */
                      final Kernel kernelClone = kernel.clone();
-                     final Kernel.KernelState kernelState = kernelClone.getKernelState();
+                     final KernelState kernelState = kernelClone.getKernelState();
                      kernelState.setRange(_settings.range);
                      kernelState.setPassId(passId);
 
@@ -772,7 +765,7 @@ public class KernelRunner extends KernelRunnerJNI {
 
          final Object object = UnsafeWrapper.getObject(newRef, arrayBaseOffset + (arrayScale * j));
          for (int i = 0; i < c.getStructMemberTypes().size(); i++) {
-            final InstructionSet.TypeSpec t = c.getStructMemberTypes().get(i);
+            final TypeSpec t = c.getStructMemberTypes().get(i);
             final long offset = c.getStructMemberOffsets().get(i);
 
             if (logger.isLoggable(Level.FINEST)) {
@@ -803,7 +796,7 @@ public class KernelRunner extends KernelRunnerJNI {
                   final boolean x = UnsafeWrapper.getBoolean(object, offset);
                   arg.getObjArrayByteBuffer().put(x == true ? (byte) 1 : (byte) 0);
                   // Booleans converted to 1 byte C chars for opencl
-                  sizeWritten += InstructionSet.TypeSpec.B.getSize();
+                  sizeWritten += TypeSpec.B.getSize();
                   break;
                }
                case B: {
@@ -873,7 +866,7 @@ public class KernelRunner extends KernelRunnerJNI {
          int sizeWritten = 0;
          final Object object = UnsafeWrapper.getObject(arg.getArray(), arrayBaseOffset + (arrayScale * j));
          for (int i = 0; i < c.getStructMemberTypes().size(); i++) {
-            final InstructionSet.TypeSpec t = c.getStructMemberTypes().get(i);
+            final TypeSpec t = c.getStructMemberTypes().get(i);
             final long offset = c.getStructMemberOffsets().get(i);
             switch (t) {
                case I: {
@@ -911,7 +904,7 @@ public class KernelRunner extends KernelRunnerJNI {
                   }
                   UnsafeWrapper.putBoolean(object, offset, (x == 1 ? true : false));
                   // Booleans converted to 1 byte C chars for open cl
-                  sizeWritten += InstructionSet.TypeSpec.B.getSize();
+                  sizeWritten += TypeSpec.B.getSize();
                   break;
                }
                case B: {
@@ -1199,7 +1192,7 @@ public class KernelRunner extends KernelRunnerJNI {
          throw new IllegalStateException("range can't be null");
       }
 
-      Kernel.EXECUTION_MODE requestedExecutionMode = kernel.getExecutionMode();
+      EXECUTION_MODE requestedExecutionMode = kernel.getExecutionMode();
 
       if (requestedExecutionMode.isOpenCL() && _settings.range.getDevice() != null && !(_settings.range.getDevice() instanceof OpenCLDevice)) {
          fallBackToNextDevice(_settings, "OpenCL EXECUTION_MODE was requested but Device supplied was not an OpenCLDevice");
@@ -1216,9 +1209,9 @@ public class KernelRunner extends KernelRunnerJNI {
                device = JavaDevice.THREAD_POOL;
             }
          } else {
-            if (requestedExecutionMode == Kernel.EXECUTION_MODE.JTP) {
+            if (requestedExecutionMode == EXECUTION_MODE.JTP) {
                device = JavaDevice.THREAD_POOL;
-            } else if (requestedExecutionMode == Kernel.EXECUTION_MODE.SEQ) {
+            } else if (requestedExecutionMode == EXECUTION_MODE.SEQ) {
                device = JavaDevice.SEQUENTIAL;
             }
          }
@@ -1236,14 +1229,14 @@ public class KernelRunner extends KernelRunnerJNI {
          int jniFlags = 0;
          // for legacy reasons use old logic where Kernel.EXECUTION_MODE is not AUTO
          if (_settings.legacyExecutionMode && !userSpecifiedDevice && requestedExecutionMode.isOpenCL()) {
-            if (requestedExecutionMode.equals(Kernel.EXECUTION_MODE.GPU)) {
+            if (requestedExecutionMode.equals(EXECUTION_MODE.GPU)) {
                // Get the best GPU
                openCLDevice = (OpenCLDevice) KernelManager.DeprecatedMethods.bestGPU();
                jniFlags |= JNI_FLAG_USE_GPU; // this flag might be redundant now.
                if (openCLDevice == null) {
                   return fallBackToNextDevice(_settings, "GPU request can't be honored, no GPU device");
                }
-            } else if (requestedExecutionMode.equals(Kernel.EXECUTION_MODE.ACC)) {
+            } else if (requestedExecutionMode.equals(EXECUTION_MODE.ACC)) {
                // Get the best ACC
                openCLDevice = (OpenCLDevice) KernelManager.DeprecatedMethods.bestACC();
                jniFlags |= JNI_FLAG_USE_ACC; // this flag might be redundant now.
@@ -1402,9 +1395,9 @@ public class KernelRunner extends KernelRunnerJNI {
                         final Class<?> type = field.getType();
                         if (type.isArray()) {
 
-                           if (field.getAnnotation(Kernel.Local.class) != null || args[i].getName().endsWith(Kernel.LOCAL_SUFFIX)) {
+                           if (field.getAnnotation(Local.class) != null || args[i].getName().endsWith(Kernel.LOCAL_SUFFIX)) {
                               args[i].setType(args[i].getType() | ARG_LOCAL);
-                           } else if ((field.getAnnotation(Kernel.Constant.class) != null)
+                           } else if ((field.getAnnotation(Constant.class) != null)
                                  || args[i].getName().endsWith(Kernel.CONSTANT_SUFFIX)) {
                               args[i].setType(args[i].getType() | ARG_CONSTANT);
                            } else {

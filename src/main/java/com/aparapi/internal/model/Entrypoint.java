@@ -52,14 +52,14 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.internal.model;
 
-import com.aparapi.Config;
-import com.aparapi.Kernel;
-import com.aparapi.internal.exception.AparapiException;
-import com.aparapi.internal.exception.ClassParseException;
-import com.aparapi.internal.instruction.Instruction;
-import com.aparapi.internal.instruction.InstructionSet;
-import com.aparapi.internal.util.UnsafeWrapper;
 import com.aparapi.*;
+import com.aparapi.internal.exception.*;
+import com.aparapi.internal.instruction.*;
+import com.aparapi.internal.instruction.InstructionSet.*;
+import com.aparapi.internal.model.ClassModel.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.*;
+import com.aparapi.internal.util.*;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -275,13 +275,13 @@ public class Entrypoint implements Cloneable {
       return memberClassModel;
    }
 
-   public ClassModel.ClassModelMethod resolveAccessorCandidate(InstructionSet.MethodCall _methodCall, ClassModel.ConstantPool.MethodEntry _methodEntry) throws AparapiException {
+   public ClassModelMethod resolveAccessorCandidate(MethodCall _methodCall, MethodEntry _methodEntry) throws AparapiException {
       final String methodsActualClassName = (_methodEntry.getClassEntry().getNameUTF8Entry().getUTF8()).replace('/', '.');
 
-      if (_methodCall instanceof InstructionSet.VirtualMethodCall) {
-         final Instruction callInstance = ((InstructionSet.VirtualMethodCall) _methodCall).getInstanceReference();
-         if (callInstance instanceof InstructionSet.AccessArrayElement) {
-            final InstructionSet.AccessArrayElement arrayAccess = (InstructionSet.AccessArrayElement) callInstance;
+      if (_methodCall instanceof VirtualMethodCall) {
+         final Instruction callInstance = ((VirtualMethodCall) _methodCall).getInstanceReference();
+         if (callInstance instanceof AccessArrayElement) {
+            final AccessArrayElement arrayAccess = (AccessArrayElement) callInstance;
             final Instruction refAccess = arrayAccess.getArrayRef();
             //if (refAccess instanceof I_GETFIELD) {
 
@@ -303,7 +303,7 @@ public class Entrypoint implements Cloneable {
     * Update accessor structures when there is a direct access to an 
     * obect array element's data members
     */
-   public void updateObjectMemberFieldAccesses(String className, ClassModel.ConstantPool.FieldEntry field) throws AparapiException {
+   public void updateObjectMemberFieldAccesses(String className, FieldEntry field) throws AparapiException {
       final String accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
 
       // Quickly bail if it is a ref
@@ -343,8 +343,8 @@ public class Entrypoint implements Cloneable {
 
       // Look at super's fields for a match
       if (superCandidate != null) {
-         final ArrayList<ClassModel.ConstantPool.FieldEntry> structMemberSet = superCandidate.getStructMembers();
-         for (final ClassModel.ConstantPool.FieldEntry f : structMemberSet) {
+         final ArrayList<FieldEntry> structMemberSet = superCandidate.getStructMembers();
+         for (final FieldEntry f : structMemberSet) {
             if (f.getNameAndTypeEntry().getNameUTF8Entry().getUTF8().equals(accessedFieldName)
                   && f.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8()
                         .equals(field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8())) {
@@ -375,8 +375,8 @@ public class Entrypoint implements Cloneable {
       // if not already there
       if (add) {
          boolean found = false;
-         final ArrayList<ClassModel.ConstantPool.FieldEntry> structMemberSet = memberClassModel.getStructMembers();
-         for (final ClassModel.ConstantPool.FieldEntry f : structMemberSet) {
+         final ArrayList<FieldEntry> structMemberSet = memberClassModel.getStructMembers();
+         for (final FieldEntry f : structMemberSet) {
             if (f.getNameAndTypeEntry().getNameUTF8Entry().getUTF8().equals(accessedFieldName)
                   && f.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8()
                         .equals(field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8())) {
@@ -397,12 +397,12 @@ public class Entrypoint implements Cloneable {
    /*
     * Find a suitable call target in the kernel class, supers, object members or static calls
     */
-   ClassModel.ClassModelMethod resolveCalledMethod(InstructionSet.MethodCall methodCall, ClassModel classModel) throws AparapiException {
-      ClassModel.ConstantPool.MethodEntry methodEntry = methodCall.getConstantPoolMethodEntry();
+   ClassModelMethod resolveCalledMethod(MethodCall methodCall, ClassModel classModel) throws AparapiException {
+      MethodEntry methodEntry = methodCall.getConstantPoolMethodEntry();
       int thisClassIndex = classModel.getThisClassConstantPoolIndex();//arf
       boolean isMapped = (thisClassIndex != methodEntry.getClassIndex()) && Kernel.isMappedMethod(methodEntry);
       if (logger.isLoggable(Level.FINE)) {
-         if (methodCall instanceof InstructionSet.I_INVOKESPECIAL) {
+         if (methodCall instanceof I_INVOKESPECIAL) {
             logger.fine("Method call to super: " + methodEntry);
          } else if (thisClassIndex != methodEntry.getClassIndex()) {
             logger.fine("Method call to ??: " + methodEntry + ", isMappedMethod=" + isMapped);
@@ -411,7 +411,7 @@ public class Entrypoint implements Cloneable {
          }
       }
 
-      ClassModel.ClassModelMethod m = classModel.getMethod(methodEntry, (methodCall instanceof InstructionSet.I_INVOKESPECIAL) ? true : false);
+      ClassModelMethod m = classModel.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL) ? true : false);
 
       // Did not find method in this class or supers. Look for data member object arrays
       if (m == null && !isMapped) {
@@ -423,7 +423,7 @@ public class Entrypoint implements Cloneable {
          for (ClassModel c : allFieldsClasses.values()) {
             if (c.getClassWeAreModelling().getName()
                   .equals(methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.'))) {
-               m = c.getMethod(methodEntry, (methodCall instanceof InstructionSet.I_INVOKESPECIAL) ? true : false);
+               m = c.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL) ? true : false);
                assert m != null;
                break;
             }
@@ -431,7 +431,7 @@ public class Entrypoint implements Cloneable {
       }
 
       // Look for static call to some other class
-      if ((m == null) && !isMapped && (methodCall instanceof InstructionSet.I_INVOKESTATIC)) {
+      if ((m == null) && !isMapped && (methodCall instanceof I_INVOKESTATIC)) {
          String otherClassName = methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.');
          ClassModel otherClassModel = getOrUpdateAllClassAccesses(otherClassName);
 
@@ -454,7 +454,7 @@ public class Entrypoint implements Cloneable {
       methodModel = _methodModel;
       kernelInstance = _k;
 
-      final Map<ClassModel.ClassModelMethod, MethodModel> methodMap = new LinkedHashMap<ClassModel.ClassModelMethod, MethodModel>();
+      final Map<ClassModelMethod, MethodModel> methodMap = new LinkedHashMap<ClassModelMethod, MethodModel>();
 
       boolean discovered = true;
 
@@ -474,9 +474,9 @@ public class Entrypoint implements Cloneable {
       }
 
       // Collect all methods called directly from kernel's run method
-      for (final InstructionSet.MethodCall methodCall : methodModel.getMethodCalls()) {
+      for (final MethodCall methodCall : methodModel.getMethodCalls()) {
 
-         ClassModel.ClassModelMethod m = resolveCalledMethod(methodCall, classModel);
+         ClassModelMethod m = resolveCalledMethod(methodCall, classModel);
          if ((m != null) && !methodMap.keySet().contains(m) && !noCL(m)) {
             final MethodModel target = new MethodModel(m, this);
             methodMap.put(m, target);
@@ -490,9 +490,9 @@ public class Entrypoint implements Cloneable {
       while (discovered) {
          discovered = false;
          for (final MethodModel mm : new ArrayList<MethodModel>(methodMap.values())) {
-            for (final InstructionSet.MethodCall methodCall : mm.getMethodCalls()) {
+            for (final MethodCall methodCall : mm.getMethodCalls()) {
 
-               ClassModel.ClassModelMethod m = resolveCalledMethod(methodCall, classModel);
+               ClassModelMethod m = resolveCalledMethod(methodCall, classModel);
                if (m != null && !noCL(m)) {
                   MethodModel target = null;
                   if (methodMap.keySet().contains(m)) {
@@ -517,12 +517,11 @@ public class Entrypoint implements Cloneable {
          }
       }
 
-      Set<MethodModel> deepestLast = methodModel.deepestLast(new HashSet<MethodModel>(), new LinkedHashSet<MethodModel>());
-      ArrayList<MethodModel> deepestFirst = new ArrayList<MethodModel>(deepestLast);
-      Collections.reverse(deepestFirst);
-      calledMethods.addAll(deepestFirst);
+      methodModel.checkForRecursion(new HashSet<MethodModel>());
 
-      final List<MethodModel> methods=calledMethods;
+      calledMethods.addAll(methodMap.values());
+      Collections.reverse(calledMethods);
+      final List<MethodModel> methods = new ArrayList<MethodModel>(calledMethods);
 
       // add method to the calledMethods so we can include in this list
       methods.add(methodModel);
@@ -549,49 +548,49 @@ public class Entrypoint implements Cloneable {
 
          for (Instruction instruction = methodModel.getPCHead(); instruction != null; instruction = instruction.getNextPC()) {
 
-            if (instruction instanceof InstructionSet.AssignToArrayElement) {
-               final InstructionSet.AssignToArrayElement assignment = (InstructionSet.AssignToArrayElement) instruction;
+            if (instruction instanceof AssignToArrayElement) {
+               final AssignToArrayElement assignment = (AssignToArrayElement) instruction;
 
                final Instruction arrayRef = assignment.getArrayRef();
                // AccessField here allows instance and static array refs
-               if (arrayRef instanceof InstructionSet.I_GETFIELD) {
-                  final InstructionSet.I_GETFIELD getField = (InstructionSet.I_GETFIELD) arrayRef;
-                  final ClassModel.ConstantPool.FieldEntry field = getField.getConstantPoolFieldEntry();
+               if (arrayRef instanceof I_GETFIELD) {
+                  final I_GETFIELD getField = (I_GETFIELD) arrayRef;
+                  final FieldEntry field = getField.getConstantPoolFieldEntry();
                   final String assignedArrayFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
                   arrayFieldAssignments.add(assignedArrayFieldName);
                   referencedFieldNames.add(assignedArrayFieldName);
 
                }
-            } else if (instruction instanceof InstructionSet.AccessArrayElement) {
-               final InstructionSet.AccessArrayElement access = (InstructionSet.AccessArrayElement) instruction;
+            } else if (instruction instanceof AccessArrayElement) {
+               final AccessArrayElement access = (AccessArrayElement) instruction;
 
                final Instruction arrayRef = access.getArrayRef();
                // AccessField here allows instance and static array refs
-               if (arrayRef instanceof InstructionSet.I_GETFIELD) {
-                  final InstructionSet.I_GETFIELD getField = (InstructionSet.I_GETFIELD) arrayRef;
-                  final ClassModel.ConstantPool.FieldEntry field = getField.getConstantPoolFieldEntry();
+               if (arrayRef instanceof I_GETFIELD) {
+                  final I_GETFIELD getField = (I_GETFIELD) arrayRef;
+                  final FieldEntry field = getField.getConstantPoolFieldEntry();
                   final String accessedArrayFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
                   arrayFieldAccesses.add(accessedArrayFieldName);
                   referencedFieldNames.add(accessedArrayFieldName);
 
                }
-            } else if (instruction instanceof InstructionSet.I_ARRAYLENGTH) {
+            } else if (instruction instanceof I_ARRAYLENGTH) {
                Instruction child = instruction.getFirstChild();
-               while(child instanceof InstructionSet.I_AALOAD) {
+               while(child instanceof I_AALOAD) {
                   child = child.getFirstChild();
                }
-               if (!(child instanceof InstructionSet.AccessField)) {
+               if (!(child instanceof AccessField)) {
                   throw new ClassParseException(ClassParseException.TYPE.LOCALARRAYLENGTHACCESS);
                }
-               final InstructionSet.AccessField childField = (InstructionSet.AccessField) child;
+               final AccessField childField = (AccessField) child;
                final String arrayName = childField.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
                arrayFieldArrayLengthUsed.add(arrayName);
                if (logger.isLoggable(Level.FINE)) {
                   logger.fine("Noted arraylength in " + methodModel.getName() + " on " + arrayName);
                }
-            } else if (instruction instanceof InstructionSet.AccessField) {
-               final InstructionSet.AccessField access = (InstructionSet.AccessField) instruction;
-               final ClassModel.ConstantPool.FieldEntry field = access.getConstantPoolFieldEntry();
+            } else if (instruction instanceof AccessField) {
+               final AccessField access = (AccessField) instruction;
+               final FieldEntry field = access.getConstantPoolFieldEntry();
                final String accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
                fieldAccesses.add(accessedFieldName);
                referencedFieldNames.add(accessedFieldName);
@@ -642,9 +641,9 @@ public class Entrypoint implements Cloneable {
                   }
                }
 
-            } else if (instruction instanceof InstructionSet.AssignToField) {
-               final InstructionSet.AssignToField assignment = (InstructionSet.AssignToField) instruction;
-               final ClassModel.ConstantPool.FieldEntry field = assignment.getConstantPoolFieldEntry();
+            } else if (instruction instanceof AssignToField) {
+               final AssignToField assignment = (AssignToField) instruction;
+               final FieldEntry field = assignment.getConstantPoolFieldEntry();
                final String assignedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
                fieldAssignments.add(assignedFieldName);
                referencedFieldNames.add(assignedFieldName);
@@ -663,27 +662,27 @@ public class Entrypoint implements Cloneable {
                }
 
             }
-            else if (instruction instanceof InstructionSet.I_INVOKEVIRTUAL) {
-               final InstructionSet.I_INVOKEVIRTUAL invokeInstruction = (InstructionSet.I_INVOKEVIRTUAL) instruction;
+            else if (instruction instanceof I_INVOKEVIRTUAL) {
+               final I_INVOKEVIRTUAL invokeInstruction = (I_INVOKEVIRTUAL) instruction;
                MethodModel invokedMethod = invokeInstruction.getMethod();
-               ClassModel.ConstantPool.FieldEntry getterField = getSimpleGetterField(invokedMethod);
+               FieldEntry getterField = getSimpleGetterField(invokedMethod);
                if (getterField != null) {
                   referencedFieldNames.add(getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
                }
                else {
-                  final ClassModel.ConstantPool.MethodEntry methodEntry = invokeInstruction.getConstantPoolMethodEntry();
+                  final MethodEntry methodEntry = invokeInstruction.getConstantPoolMethodEntry();
                   if (Kernel.isMappedMethod(methodEntry)) { //only do this for intrinsics
 
                      if (Kernel.usesAtomic32(methodEntry)) {
                         setRequiresAtomics32Pragma(true);
                      }
 
-                     final ClassModel.ConstantPool.MethodReferenceEntry.Arg methodArgs[] = methodEntry.getArgs();
+                     final Arg methodArgs[] = methodEntry.getArgs();
                      if ((methodArgs.length > 0) && methodArgs[0].isArray()) { //currently array arg can only take slot 0
                         final Instruction arrInstruction = invokeInstruction.getArg(0);
-                        if (arrInstruction instanceof InstructionSet.AccessField) {
-                           final InstructionSet.AccessField access = (InstructionSet.AccessField) arrInstruction;
-                           final ClassModel.ConstantPool.FieldEntry field = access.getConstantPoolFieldEntry();
+                        if (arrInstruction instanceof AccessField) {
+                           final AccessField access = (AccessField) arrInstruction;
+                           final FieldEntry field = access.getConstantPoolFieldEntry();
                            final String accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
                            arrayFieldAssignments.add(accessedFieldName);
                            referencedFieldNames.add(accessedFieldName);
@@ -706,7 +705,7 @@ public class Entrypoint implements Cloneable {
             final Field field = getFieldFromClassHierarchy(clazz, referencedFieldName);
             if (field != null) {
                referencedFields.add(field);
-               final ClassModel.ClassModelField ff = classModel.getField(referencedFieldName);
+               final ClassModelField ff = classModel.getField(referencedFieldName);
                assert ff != null : "ff should not be null for " + clazz.getName() + "." + referencedFieldName;
                referencedClassModelFields.add(ff);
             }
@@ -735,8 +734,8 @@ public class Entrypoint implements Cloneable {
          }
 
          // Sort fields of each class biggest->smallest
-         final Comparator<ClassModel.ConstantPool.FieldEntry> fieldSizeComparator = new Comparator<ClassModel.ConstantPool.FieldEntry>(){
-            @Override public int compare(ClassModel.ConstantPool.FieldEntry aa, ClassModel.ConstantPool.FieldEntry bb) {
+         final Comparator<FieldEntry> fieldSizeComparator = new Comparator<FieldEntry>(){
+            @Override public int compare(FieldEntry aa, FieldEntry bb) {
                final String aType = aa.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
                final String bType = bb.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
 
@@ -760,7 +759,7 @@ public class Entrypoint implements Cloneable {
          };
 
          for (final ClassModel c : objectArrayFieldsClasses.values()) {
-            final ArrayList<ClassModel.ConstantPool.FieldEntry> fields = c.getStructMembers();
+            final ArrayList<FieldEntry> fields = c.getStructMembers();
             if (fields.size() > 0) {
                Collections.sort(fields, fieldSizeComparator);
 
@@ -768,7 +767,7 @@ public class Entrypoint implements Cloneable {
                int totalSize = 0;
                int alignTo = 0;
 
-               for (final ClassModel.ConstantPool.FieldEntry f : fields) {
+               for (final FieldEntry f : fields) {
                   // Record field offset for use while copying
                   // Get field we will copy out of the kernel member object
                   final Field rfield = getFieldFromClassHierarchy(c.getClassWeAreModelling(), f.getNameAndTypeEntry()
@@ -778,8 +777,8 @@ public class Entrypoint implements Cloneable {
 
                   final String fType = f.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
                   //c.getStructMemberTypes().add(TypeSpec.valueOf(fType.equals("Z") ? "B" : fType));
-                  c.getStructMemberTypes().add(InstructionSet.TypeSpec.valueOf(fType));
-                  final int fSize = InstructionSet.TypeSpec.valueOf(fType.equals("Z") ? "B" : fType).getSize();
+                  c.getStructMemberTypes().add(TypeSpec.valueOf(fType));
+                  final int fSize = TypeSpec.valueOf(fType.equals("Z") ? "B" : fType).getSize();
                   if (fSize > alignTo) {
                      alignTo = fSize;
                   }
@@ -805,12 +804,12 @@ public class Entrypoint implements Cloneable {
       }
    }
 
-   private boolean noCL(ClassModel.ClassModelMethod m) {
+   private boolean noCL(ClassModelMethod m) {
       boolean found = m.getClassModel().getNoCLMethods().contains(m.getName());
       return found;
    }
 
-   private ClassModel.ConstantPool.FieldEntry getSimpleGetterField(MethodModel method) {
+   private FieldEntry getSimpleGetterField(MethodModel method) {
       return method.getAccessorVariableFieldEntry();
    }
 
@@ -853,10 +852,10 @@ public class Entrypoint implements Cloneable {
    /*
     * Return the best call target MethodModel by looking in the class hierarchy
     * @param _methodEntry MethodEntry for the desired target
-    * @return the fully qualified name such as "com_aparapi_javalabs_opencl_demo_PaternityTest$SimpleKernel__actuallyDoIt"
+    * @return the fully qualified name such as "com_amd_javalabs_opencl_demo_PaternityTest$SimpleKernel__actuallyDoIt"
     */
-   public MethodModel getCallTarget(ClassModel.ConstantPool.MethodEntry _methodEntry, boolean _isSpecial) {
-      ClassModel.ClassModelMethod target = getClassModel().getMethod(_methodEntry, _isSpecial);
+   public MethodModel getCallTarget(MethodEntry _methodEntry, boolean _isSpecial) {
+      ClassModelMethod target = getClassModel().getMethod(_methodEntry, _isSpecial);
       boolean isMapped = Kernel.isMappedMethod(_methodEntry);
 
       if (logger.isLoggable(Level.FINE) && (target == null)) {

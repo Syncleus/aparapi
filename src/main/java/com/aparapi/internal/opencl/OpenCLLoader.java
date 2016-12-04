@@ -18,13 +18,13 @@ package com.aparapi.internal.opencl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.aparapi.internal.jni.OpenCLJNI;
 import com.aparapi.Config;
+import com.aparapi.internal.jni.OpenCLJNI;
 
 /**
  * This class is intended to be a singleton which determines if OpenCL is available upon startup of Aparapi
  */
-public class OpenCLLoader extends OpenCLJNI {
+public class OpenCLLoader extends OpenCLJNI{
 
    private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 

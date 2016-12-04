@@ -58,7 +58,7 @@ import com.aparapi.internal.instruction.Instruction;
  * We throw <code>ClassParseException</code>s (derived from <code>AparapiException</code>) if we encounter any Aparapi unfriendly 
  * constructs.  This allows us to <strong>fail fast</strong>.
  * 
- * @see AparapiException
+ * @see com.aparapi.internal.exception.AparapiException
  *
  * @author gfrost
  *

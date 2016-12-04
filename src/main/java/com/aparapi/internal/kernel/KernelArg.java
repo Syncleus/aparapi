@@ -15,10 +15,9 @@
  */
 package com.aparapi.internal.kernel;
 
-import com.aparapi.Kernel;
-import com.aparapi.internal.jni.KernelArgJNI;
-import com.aparapi.internal.model.ClassModel;
-import com.aparapi.internal.util.Reflection;
+import com.aparapi.internal.jni.*;
+import com.aparapi.internal.model.*;
+import com.aparapi.internal.util.*;
 
 import java.lang.reflect.*;
 import java.nio.*;
@@ -27,12 +26,12 @@ import java.nio.*;
  * Each field (or captured field in the case of an anonymous inner class) referenced by any bytecode reachable from the users Kernel.run(), will
  * need to be represented as a <code>KernelArg</code>.
  * 
- * @see Kernel#execute(int _globalSize)
+ * @see com.aparapi.Kernel#execute(int _globalSize)
  * 
  * @author gfrost
  * 
  */
-public class KernelArg extends KernelArgJNI {
+public class KernelArg extends KernelArgJNI{
 
    /**
     * The byte array for obj conversion passed to opencl

@@ -52,9 +52,9 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
  */
 package com.aparapi;
 
-import com.aparapi.internal.instruction.Instruction;
-import com.aparapi.internal.jni.ConfigJNI;
-import com.aparapi.internal.tool.InstructionViewer;
+import com.aparapi.internal.instruction.*;
+import com.aparapi.internal.jni.*;
+import com.aparapi.internal.tool.*;
 
 import java.util.logging.*;
 
@@ -67,7 +67,7 @@ import java.util.logging.*;
  * @author gfrost
  * 
  */
-public class Config extends ConfigJNI {
+public class Config extends ConfigJNI{
 
    // Logging setup
    private static final String logPropName = propPkgName + ".logLevel";
@@ -93,7 +93,7 @@ public class Config extends ConfigJNI {
     *
     *  Usage -Dcom.aparapi.executionMode={SEQ|JTP|CPU|GPU|ACC}
     *  
-    *  @see Kernel.EXECUTION_MODE
+    *  @see com.aparapi.Kernel.EXECUTION_MODE
     */
    public static final String executionMode = System.getProperty(propPkgName + ".executionMode");
 
@@ -228,7 +228,7 @@ public class Config extends ConfigJNI {
          System.out.println(propPkgName + ".enableExecutionModeReporting{true|false}=" + enableExecutionModeReporting);
          System.out.println(propPkgName + ".enableInstructionDecodeViewer{true|false}=" + enableInstructionDecodeViewer);
          System.out.println(propPkgName
-               + ".instructionListenerClassName{<class name which extends Config.InstructionListener>}="
+               + ".instructionListenerClassName{<class name which extends com.aparapi.Config.InstructionListener>}="
                + instructionListenerClassName);
       }
    }

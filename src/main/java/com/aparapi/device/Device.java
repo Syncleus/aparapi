@@ -15,9 +15,8 @@
  */
 package com.aparapi.device;
 
-import com.aparapi.Range;
-import com.aparapi.internal.kernel.KernelManager;
 import com.aparapi.*;
+import com.aparapi.internal.kernel.*;
 
 public abstract class Device{
 

@@ -15,12 +15,12 @@
  */
 package com.aparapi.internal.opencl;
 
-import com.aparapi.device.OpenCLDevice;
-import com.aparapi.internal.jni.OpenCLJNI;
+import com.aparapi.device.*;
+import com.aparapi.internal.jni.*;
 
 import java.util.*;
 
-public class OpenCLPlatform extends OpenCLJNI {
+public class OpenCLPlatform extends OpenCLJNI{
 
    private long platformId;
 

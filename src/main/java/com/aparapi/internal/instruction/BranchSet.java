@@ -57,6 +57,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.aparapi.internal.instruction.InstructionSet.Branch;
+import com.aparapi.internal.instruction.InstructionSet.ConditionalBranch;
+
 /**
  * Deals with the issue of recognizing that a sequence of bytecode branch instructions actually represent a single if/while with a logical expression.
  * 
@@ -169,15 +172,15 @@ public class BranchSet {
     *
     */
    public static class SimpleLogicalExpressionNode extends LogicalExpressionNode {
-      private final InstructionSet.ConditionalBranch branch;
+      private final ConditionalBranch branch;
 
       private boolean invert;
 
-      public SimpleLogicalExpressionNode(InstructionSet.ConditionalBranch _branch) {
+      public SimpleLogicalExpressionNode(ConditionalBranch _branch) {
          this(_branch, false);
       }
 
-      private SimpleLogicalExpressionNode(InstructionSet.ConditionalBranch _branch, boolean _invert) {
+      private SimpleLogicalExpressionNode(ConditionalBranch _branch, boolean _invert) {
          branch = _branch;
          invert = _invert;
       }
@@ -206,7 +209,7 @@ public class BranchSet {
          return (invert);
       }
 
-      public InstructionSet.ConditionalBranch getBranch() {
+      public ConditionalBranch getBranch() {
          return branch;
       }
 
@@ -297,15 +300,15 @@ public class BranchSet {
 
    }
 
-   private final List<InstructionSet.ConditionalBranch> set = new ArrayList<InstructionSet.ConditionalBranch>();
+   private final List<ConditionalBranch> set = new ArrayList<ConditionalBranch>();
 
    private final Instruction fallThrough;
 
    private final Instruction target;
 
-   private final InstructionSet.Branch last;
+   private final Branch last;
 
-   private InstructionSet.Branch first;
+   private Branch first;
 
    private LogicalExpressionNode logicalExpressionNode = null;
 
@@ -316,11 +319,11 @@ public class BranchSet {
     * 
     * @param _branch
     */
-   public BranchSet(InstructionSet.Branch _branch) {
+   public BranchSet(Branch _branch) {
       target = _branch.getTarget();
       last = _branch;
 
-      final Set<InstructionSet.Branch> expandedSet = new LinkedHashSet<InstructionSet.Branch>();
+      final Set<Branch> expandedSet = new LinkedHashSet<Branch>();
       final Instruction fallThroughRoot = last.getNextExpr();
       fallThrough = fallThroughRoot == null ? last.getNextPC() : fallThroughRoot.getStartInstruction();
       first = last;
@@ -335,14 +338,14 @@ public class BranchSet {
          }
       }
       for (Instruction i = first; i != fallThroughRoot; i = i.getNextExpr()) {
-         set.add((InstructionSet.ConditionalBranch) i.asBranch());
-         ((InstructionSet.ConditionalBranch) i.asBranch()).setBranchSet(this);
+         set.add((ConditionalBranch) i.asBranch());
+         ((ConditionalBranch) i.asBranch()).setBranchSet(this);
       }
 
       //   ConditionalBranch16 branches[] = set.toArray(new ConditionalBranch16[0]);
 
       LogicalExpressionNode end = null;
-      for (final InstructionSet.ConditionalBranch cb : set) {
+      for (final ConditionalBranch cb : set) {
          final SimpleLogicalExpressionNode sn = new SimpleLogicalExpressionNode(cb);
          if (logicalExpressionNode == null) {
             logicalExpressionNode = sn;
@@ -388,21 +391,21 @@ public class BranchSet {
       }
    }
 
-   public List<InstructionSet.ConditionalBranch> getBranches() {
+   public List<ConditionalBranch> getBranches() {
       return (set);
    }
 
-   public InstructionSet.Branch getFirst() {
+   public Branch getFirst() {
       return (first);
    }
 
-   public InstructionSet.Branch getLast() {
+   public Branch getLast() {
 
       return (last);
    }
 
    public void unhook() {
-      for (final InstructionSet.Branch b : set) {
+      for (final Branch b : set) {
          b.unhook();
       }
    }

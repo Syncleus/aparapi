@@ -52,16 +52,15 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
  */
 package com.aparapi.internal.writer;
 
-import com.aparapi.Config;
-import com.aparapi.Kernel;
-import com.aparapi.internal.exception.ClassParseException;
-import com.aparapi.internal.exception.CodeGenException;
-import com.aparapi.internal.instruction.Instruction;
-import com.aparapi.internal.instruction.InstructionSet;
-import com.aparapi.internal.model.ClassModel;
-import com.aparapi.internal.model.Entrypoint;
-import com.aparapi.internal.model.MethodModel;
 import com.aparapi.*;
+import com.aparapi.internal.exception.*;
+import com.aparapi.internal.instruction.*;
+import com.aparapi.internal.instruction.InstructionSet.*;
+import com.aparapi.internal.model.*;
+import com.aparapi.internal.model.ClassModel.AttributePool.*;
+import com.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEntry.*;
+import com.aparapi.internal.model.ClassModel.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.*;
 
 import java.util.*;
 
@@ -184,7 +183,7 @@ public abstract class KernelWriter extends BlockWriter{
       }
    }
 
-   @Override public void writeMethod(InstructionSet.MethodCall _methodCall, ClassModel.ConstantPool.MethodEntry _methodEntry) throws CodeGenException {
+   @Override public void writeMethod(MethodCall _methodCall, MethodEntry _methodEntry) throws CodeGenException {
       final int argc = _methodEntry.getStackConsumeCount();
 
       final String methodName = _methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
@@ -209,10 +208,10 @@ public abstract class KernelWriter extends BlockWriter{
             write(barrierAndGetterMappings);
          }
       } else {
-         final boolean isSpecial = _methodCall instanceof InstructionSet.I_INVOKESPECIAL;
+         final boolean isSpecial = _methodCall instanceof I_INVOKESPECIAL;
          MethodModel m = entryPoint.getCallTarget(_methodEntry, isSpecial);
 
-         ClassModel.ConstantPool.FieldEntry getterField = null;
+         FieldEntry getterField = null;
          if (m != null && m.isGetter()) {
             getterField = m.getAccessorVariableFieldEntry();
          }
@@ -249,17 +248,17 @@ public abstract class KernelWriter extends BlockWriter{
 
          write("(");
 
-         if ((intrinsicMapping == null) && (_methodCall instanceof InstructionSet.VirtualMethodCall) && (!isIntrinsic)) {
+         if ((intrinsicMapping == null) && (_methodCall instanceof VirtualMethodCall) && (!isIntrinsic)) {
 
-            final Instruction i = ((InstructionSet.VirtualMethodCall) _methodCall).getInstanceReference();
+            final Instruction i = ((VirtualMethodCall) _methodCall).getInstanceReference();
 
-            if (i instanceof InstructionSet.I_ALOAD_0) {
+            if (i instanceof I_ALOAD_0) {
                write("this");
-            } else if (i instanceof InstructionSet.AccessArrayElement) {
-               final InstructionSet.AccessArrayElement arrayAccess = (InstructionSet.AccessArrayElement) ((InstructionSet.VirtualMethodCall) _methodCall).getInstanceReference();
+            } else if (i instanceof AccessArrayElement) {
+               final AccessArrayElement arrayAccess = (AccessArrayElement) ((VirtualMethodCall) _methodCall).getInstanceReference();
                final Instruction refAccess = arrayAccess.getArrayRef();
                //assert refAccess instanceof I_GETFIELD : "ref should come from getfield";
-               final String fieldName = ((InstructionSet.AccessField) refAccess).getConstantPoolFieldEntry().getNameAndTypeEntry()
+               final String fieldName = ((AccessField) refAccess).getConstantPoolFieldEntry().getNameAndTypeEntry()
                      .getNameUTF8Entry().getUTF8();
                write(" &(this->" + fieldName);
                write("[");
@@ -270,7 +269,7 @@ public abstract class KernelWriter extends BlockWriter{
             }
          }
          for (int arg = 0; arg < argc; arg++) {
-            if (((intrinsicMapping == null) && (_methodCall instanceof InstructionSet.VirtualMethodCall) && (!isIntrinsic)) || (arg != 0)) {
+            if (((intrinsicMapping == null) && (_methodCall instanceof VirtualMethodCall) && (!isIntrinsic)) || (arg != 0)) {
                write(", ");
             }
             writeInstruction(_methodCall.getArg(arg));
@@ -280,7 +279,7 @@ public abstract class KernelWriter extends BlockWriter{
    }
 
    private boolean isThis(Instruction instruction) {
-      return instruction instanceof InstructionSet.I_ALOAD_0;
+      return instruction instanceof I_ALOAD_0;
    }
 
    public void writePragma(String _name, boolean _enable) {
@@ -296,9 +295,9 @@ public abstract class KernelWriter extends BlockWriter{
 
    public final static String __private = "__private";
 
-   public final static String LOCAL_ANNOTATION_NAME = "L" + Kernel.Local.class.getName().replace('.', '/') + ";";
+   public final static String LOCAL_ANNOTATION_NAME = "L" + com.aparapi.Kernel.Local.class.getName().replace('.', '/') + ";";
 
-   public final static String CONSTANT_ANNOTATION_NAME = "L" + Kernel.Constant.class.getName().replace('.', '/')
+   public final static String CONSTANT_ANNOTATION_NAME = "L" + com.aparapi.Kernel.Constant.class.getName().replace('.', '/')
          + ";";
 
    @Override public void write(Entrypoint _entryPoint) throws CodeGenException {
@@ -308,7 +307,7 @@ public abstract class KernelWriter extends BlockWriter{
 
       entryPoint = _entryPoint;
 
-      for (final ClassModel.ClassModelField field : _entryPoint.getReferencedClassModelFields()) {
+      for (final ClassModelField field : _entryPoint.getReferencedClassModelFields()) {
          // Field field = _entryPoint.getClassModel().getField(f.getName());
          final StringBuilder thisStructLine = new StringBuilder();
          final StringBuilder argLine = new StringBuilder();
@@ -334,10 +333,10 @@ public abstract class KernelWriter extends BlockWriter{
          if (privateMemorySize != null) {
             type = __private;
          }
-         final ClassModel.AttributePool.RuntimeAnnotationsEntry visibleAnnotations = field.getAttributePool().getRuntimeVisibleAnnotationsEntry();
+         final RuntimeAnnotationsEntry visibleAnnotations = field.getAttributePool().getRuntimeVisibleAnnotationsEntry();
 
          if (visibleAnnotations != null) {
-            for (final ClassModel.AttributePool.RuntimeAnnotationsEntry.AnnotationInfo ai : visibleAnnotations) {
+            for (final AnnotationInfo ai : visibleAnnotations) {
                final String typeDescriptor = ai.getTypeDescriptor();
                if (typeDescriptor.equals(LOCAL_ANNOTATION_NAME)) {
                   type = __local;
@@ -366,7 +365,7 @@ public abstract class KernelWriter extends BlockWriter{
          // If it is a converted array of objects, emit the struct param
          String className = null;
          if (signature.startsWith("L")) {
-            // Turn Lcom/aparapi/javalabs/opencl/demo/DummyOOA; into com_aparapi_javalabs_opencl_demo_DummyOOA for example
+            // Turn Lcom/aparapi/javalabs/opencl/demo/DummyOOA; into com_amd_javalabs_opencl_demo_DummyOOA for example
             className = (signature.substring(1, signature.length() - 1)).replace('/', '_');
             // if (logger.isLoggable(Level.FINE)) {
             // logger.fine("Examining object parameter: " + signature + " new: " + className);
@@ -416,7 +415,7 @@ public abstract class KernelWriter extends BlockWriter{
                final StringBuilder lenAssignLine = new StringBuilder();
 
                String suffix = numDimensions == 1 ? "" : Integer.toString(i);
-               String lenName = field.getName() + arrayLengthMangleSuffix + suffix;
+               String lenName = field.getName() + BlockWriter.arrayLengthMangleSuffix + suffix;
 
                lenStructLine.append("int " + lenName);
 
@@ -435,7 +434,7 @@ public abstract class KernelWriter extends BlockWriter{
                   final StringBuilder dimStructLine = new StringBuilder();
                   final StringBuilder dimArgLine = new StringBuilder();
                   final StringBuilder dimAssignLine = new StringBuilder();
-                  String dimName = field.getName() + arrayDimMangleSuffix + suffix;
+                  String dimName = field.getName() + BlockWriter.arrayDimMangleSuffix + suffix;
 
                   dimStructLine.append("int " + dimName);
 
@@ -499,7 +498,7 @@ public abstract class KernelWriter extends BlockWriter{
 
       // Emit structs for oop transformation accessors
       for (final ClassModel cm : _entryPoint.getObjectArrayFieldsClasses().values()) {
-         final ArrayList<ClassModel.ConstantPool.FieldEntry> fieldSet = cm.getStructMembers();
+         final ArrayList<FieldEntry> fieldSet = cm.getStructMembers();
          if (fieldSet.size() > 0) {
             final String mangledClassName = cm.getClassWeAreModelling().getName().replace('.', '_');
             newLine();
@@ -510,9 +509,9 @@ public abstract class KernelWriter extends BlockWriter{
             int totalSize = 0;
             int alignTo = 0;
 
-            final Iterator<ClassModel.ConstantPool.FieldEntry> it = fieldSet.iterator();
+            final Iterator<FieldEntry> it = fieldSet.iterator();
             while (it.hasNext()) {
-               final ClassModel.ConstantPool.FieldEntry field = it.next();
+               final FieldEntry field = it.next();
                final String fType = field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
                final int fSize = InstructionSet.TypeSpec.valueOf(fType.equals("Z") ? "B" : fType).getSize();
 
@@ -611,8 +610,8 @@ public abstract class KernelWriter extends BlockWriter{
 
          boolean alreadyHasFirstArg = !mm.getMethod().isStatic();
 
-         final ClassModel.LocalVariableTableEntry<ClassModel.LocalVariableInfo> lvte = mm.getLocalVariableTableEntry();
-         for (final ClassModel.LocalVariableInfo lvi : lvte) {
+         final LocalVariableTableEntry<LocalVariableInfo> lvte = mm.getLocalVariableTableEntry();
+         for (final LocalVariableInfo lvi : lvte) {
             if ((lvi.getStart() == 0) && ((lvi.getVariableIndex() != 0) || mm.getMethod().isStatic())) { // full scope but skip this
                final String descriptor = lvi.getVariableDescriptor();
                if (alreadyHasFirstArg) {
@@ -683,23 +682,23 @@ public abstract class KernelWriter extends BlockWriter{
    }
 
    @Override public void writeInstruction(Instruction _instruction) throws CodeGenException {
-      if ((_instruction instanceof InstructionSet.I_IUSHR) || (_instruction instanceof InstructionSet.I_LUSHR)) {
-         final InstructionSet.BinaryOperator binaryInstruction = (InstructionSet.BinaryOperator) _instruction;
+      if ((_instruction instanceof I_IUSHR) || (_instruction instanceof I_LUSHR)) {
+         final BinaryOperator binaryInstruction = (BinaryOperator) _instruction;
          final Instruction parent = binaryInstruction.getParentExpr();
          boolean needsParenthesis = true;
 
-         if (parent instanceof InstructionSet.AssignToLocalVariable) {
+         if (parent instanceof AssignToLocalVariable) {
             needsParenthesis = false;
-         } else if (parent instanceof InstructionSet.AssignToField) {
+         } else if (parent instanceof AssignToField) {
             needsParenthesis = false;
-         } else if (parent instanceof InstructionSet.AssignToArrayElement) {
+         } else if (parent instanceof AssignToArrayElement) {
             needsParenthesis = false;
          }
          if (needsParenthesis) {
             write("(");
          }
 
-         if (binaryInstruction instanceof InstructionSet.I_IUSHR) {
+         if (binaryInstruction instanceof I_IUSHR) {
             write("((unsigned int)");
          } else {
             write("((unsigned long)");
