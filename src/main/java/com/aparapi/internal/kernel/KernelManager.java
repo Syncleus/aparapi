@@ -15,12 +15,20 @@
  */
 package com.aparapi.internal.kernel;
 
-import com.aparapi.*;
-import com.aparapi.device.*;
-import com.aparapi.internal.util.*;
+import java.lang.reflect.Constructor;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 
-import java.lang.reflect.*;
-import java.util.*;
+import com.aparapi.Config;
+import com.aparapi.Kernel;
+import com.aparapi.device.Device;
+import com.aparapi.device.JavaDevice;
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.util.Reflection;
 
 /**
  * Created by Barney on 24/08/2015.
@@ -28,7 +36,7 @@ import java.util.*;
 public class KernelManager {
 
    private static KernelManager INSTANCE = new KernelManager();
-   private LinkedHashMap<Class<? extends Kernel>, KernelPreferences> preferences = new LinkedHashMap<>();
+   private LinkedHashMap<Integer, PreferencesWrapper> preferences = new LinkedHashMap<>();
    private LinkedHashMap<Class<? extends Kernel>, KernelProfile> profiles = new LinkedHashMap<>();
    private LinkedHashMap<Class<? extends Kernel>, Kernel> sharedInstances = new LinkedHashMap<>();
 
@@ -88,8 +96,9 @@ public class KernelManager {
          builder.append(" (showing mean elapsed times in milliseconds)");
       }
       builder.append("\n\n");
-      for (Class<? extends Kernel> klass : preferences.keySet()) {
-         KernelPreferences preferences = this.preferences.get(klass);
+      for (PreferencesWrapper wrapper : preferences.values()) {
+         KernelPreferences preferences = wrapper.getPreferences();
+         Class<? extends Kernel> klass = wrapper.getKernelClass();
          KernelProfile profile = withProfilingInfo ? profiles.get(klass) : null;
          builder.append(klass.getName()).append(":\n\tusing ").append(preferences.getPreferredDevice(null).getShortDescription());
          List<Device> failedDevices = preferences.getFailedDevices();
@@ -139,10 +148,13 @@ public class KernelManager {
 
    public KernelPreferences getPreferences(Kernel kernel) {
       synchronized (preferences) {
-         KernelPreferences kernelPreferences = preferences.get(kernel.getClass());
-         if (kernelPreferences == null) {
+         PreferencesWrapper wrapper = preferences.get(kernel.hashCode());
+         KernelPreferences kernelPreferences;
+         if (wrapper == null) {
             kernelPreferences = new KernelPreferences(this, kernel.getClass());
-            preferences.put(kernel.getClass(), kernelPreferences);
+            preferences.put(kernel.hashCode(), new PreferencesWrapper(kernel.getClass(), kernelPreferences));
+         }else{
+           kernelPreferences = preferences.get(kernel.hashCode()).getPreferences();
          }
          return kernelPreferences;
       }

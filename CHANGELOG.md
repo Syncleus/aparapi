@@ -1,5 +1,13 @@
 # Aparapi Change Log
 
+## 1.2.0
+
+* Kernels of the same class are now eligible to be run on different devices.
+* Added method to set execution mode without any fallback.
+* Added opencl device method for name.
+* Fixed a memory leak.
+* Added method for uncached platform retrieval.
+
 ## 1.1.2
 
 * Fixed a bug where OpenCL kernels were getting compiled twice.

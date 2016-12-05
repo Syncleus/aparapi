@@ -177,6 +177,6 @@ public abstract class Device{
 
    @Override
    public int hashCode() {
-      return Long.hashCode(getDeviceId());
+      return Long.valueOf(getDeviceId()).hashCode();
    }
 }

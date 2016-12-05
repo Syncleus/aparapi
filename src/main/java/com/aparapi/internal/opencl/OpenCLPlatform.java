@@ -15,10 +15,12 @@
  */
 package com.aparapi.internal.opencl;
 
-import com.aparapi.device.*;
-import com.aparapi.internal.jni.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import java.util.*;
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.jni.OpenCLJNI;
 
 public class OpenCLPlatform extends OpenCLJNI{
 
@@ -45,7 +47,7 @@ public class OpenCLPlatform extends OpenCLJNI{
 
    /**
     * Full constructor
-    * 
+    *
     * @param _platformId
     * @param _version
     * @param _vendor
@@ -75,6 +77,12 @@ public class OpenCLPlatform extends OpenCLJNI{
          }
       }
       return platforms;
+   }
+
+   public static List<OpenCLPlatform> getUncachedOpenCLPlatforms(){
+       platforms = null;
+       platforms = new OpenCLPlatform().getOpenCLPlatforms();
+       return platforms;
    }
 
    public String getName() {
