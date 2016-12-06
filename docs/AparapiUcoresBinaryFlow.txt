@@ -1,0 +1,34 @@
+Aparapi Ucores Binary Flow
+--------------------------
+
+This is currently used only for FPGAs but we plan to expand it for general manual optimization/compilation of OpenCL source code.
+
+A Binary flow is one where the Aparapi framework generates an OpenCL file while running and then tries to read and execute the binary compilation of that source file.
+
+Sequence of events
+------------------
+
+1. Aparapi Application is executed. Aparapi automatically generates an OpencL source file describing the kernel(file name is the full java kernel class name.cl)
+
+2. Aparapi Application automatically tries to load the binary compiled file (full java kernel class name.aocx)
+
+3. If Aparapi Application finds the compiled file it executes the compiled kernel (runs the kernel on the accelerator) else it will revert to JTP mode in which case the application runs as specified without acceleration (JTP mode). A simulation mode if you will.
+
+How this works for FPGAs
+------------------------
+
+1. We first run the Application CPU/GPU/ACC mode. Aparapi-Ucores will generate an OpenCL file (ClassXXXName.cl), but will not find the equivalent binary file (ClassXXXName.aocx). It will revert to another execution mode such as JTP. We can simulate if the kernel works logically correct using JTP.
+
+2. We feed the OpenCL file (ClassXXXName.cl) to an FPGA OpenCL compiler.
+
+Example:
+
+	a. aoc ClassXXXName.cl -O3 --board pcie385n_a7 -v --report
+
+	b. Wait until an optimized FPGA design is created...currently takes several hours
+
+	c. Output of the compiler will be: ClassXXXName.aocx
+
+	3. Copy the binary output file (ClassXXXName.aocx) to folder where the .cl file resides.
+
+4. Run application again in ACC/GPU mode. This time Aparapi will detect the ClassXXXName.aocx and use the FPGA as the acclerator.

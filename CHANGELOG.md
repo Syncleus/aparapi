@@ -1,5 +1,20 @@
 # Aparapi Change Log
 
+## 2.0.0
+
+* work on config, mem override, mem align, sync with java-ucores
+* Java for UCores is meant to be an accelerator 'friendly' Java version based on OpenJDK and obuildfactory. Accelerator users should consider using Java for UCores in conjunction with Aparapi UCores as it will automatically allocate memory on boundaries that can enhance PCIE transfer speeds.
+* Added a a more flexible way of per-platform config through ConfigSettings.cpp
+* Support for Altera OpenCL V15
+* Support for platform select using Altera OpenCL V15 ICD
+* Support for selection of binary/source flow for non-Altera platforms (usage examples below)
+* Control dynamic binary/source/default flow through kernel (usage examples below)
+* Device select for systems with multiple devices of the same type (usage examples below)
+* New Configuration Settings file for better per platform settings control (ConfigSettings.h)
+* Improved build system for Altera JNI
+* Aparapi Range.getFactors bug fix – fixed a bug in the original Aparapi distribution.
+* Altera ICD bug fix – only other accelerators were discovered
+
 ## 1.2.0
 
 * Kernels of the same class are now eligible to be run on different devices.

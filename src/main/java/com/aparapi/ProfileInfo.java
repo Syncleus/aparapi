@@ -54,7 +54,9 @@ package com.aparapi;
 
 public class ProfileInfo{
 
-   private enum TYPE {
+   // !!! oren change -> we need access to type at upper levels
+   //private 
+public static enum TYPE {
       R,
       X,
       W

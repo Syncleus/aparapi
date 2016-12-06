@@ -15,9 +15,9 @@
  */
 package com.aparapi.internal.jni;
 
-import com.aparapi.ProfileInfo;
 import java.util.List;
 
+import com.aparapi.ProfileInfo;
 import com.aparapi.device.OpenCLDevice;
 import com.aparapi.internal.opencl.OpenCLArgDescriptor;
 import com.aparapi.internal.opencl.OpenCLKernel;

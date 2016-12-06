@@ -49,6 +49,28 @@ public class OpenCLLoader extends OpenCLJNI{
             logger.warning("Expected property os.arch to contain amd64, x86_64, x86 or i386 but instead found " + arch
                   + " as a result we don't know which aparapi to attempt to load.");
          }
+
+/*
+         // !!! oren change - load mem overide lib
+         String memOverideLib = System.getProperty(Config.getPkgName() + ".MemOverideLib");
+         if (memOverideLib != null) {
+            logger.fine("attempting to load mem overide lib " + memOverideLib);
+         
+         try {
+               // !!! note load needs complete path
+               Runtime.getRuntime().load(memOverideLib);
+               // alternatively load by lib name
+               // Runtime.getRuntime().loadLibrary(memOverideLib);
+            } catch (final UnsatisfiedLinkError e) {
+               logger.log(Level.SEVERE, "Check your environment. Failed to load memOverideLib native library " + memOverideLib);
+            }
+         }
+         else
+            logger.warning("Not loading mem overide lib!");
+
+         // !!! eof oren change
+*/
+
          if (aparapiLibraryName != null) {
             logger.fine("attempting to load aparapi shared lib " + aparapiLibraryName);
 

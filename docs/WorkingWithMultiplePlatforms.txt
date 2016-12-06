@@ -1,0 +1,46 @@
+Working with multiple platforms
+-------------------------------
+
+The original version of Aparapi does not support platform selection (it just chooses the first available one).
+
+This means that in scenarios where you have multiple OpenCL platforms such as AMD, NVidia, Intel, Altera etc. you do not have control over what accelerator device will be used.
+
+One of the changes we made is to allow selection for platforms that support the OpenCL ICD model.
+(https://www.khronos.org/news/permalink/opencl-installable-client-driver-icd-loader)
+
+In the spirit of other Aparapi configuration options for device selection this can be set using a configuration option.
+
+The platform configuration option is called: com.amd.aparapi.platformHint
+
+When this option is set it causes Aparapi to search for the string platformHint inside the available platform names and if it found it will select that platform over other available ones.
+
+You can use it on the command line in the following way:
+
+java -Dcom.amd.aparapi.platformHint=AMD .... 
+
+or
+
+java -Dcom.amd.aparapi.platformHint=NVIDIA .... 
+
+
+Nbody simulation example with platform selection
+---------------------------------------------------------------------
+
+The script nbody.std.no-opengles-platform-select.sh contains the following java command line:
+
+java \
+  -Djava.library.path=../../com.amd.aparapi.jni/dist.std:../third-party/jogamp \
+  -Dcom.amd.aparapi.executionMode=$1 \
+  -Dbodies=$2 \
+  -Dcom.amd.aparapi.platformHint=$3 \
+  -Dheight=600 \
+  -Dwidth=600 \
+  -Djogl.disable.opengles \
+  -classpath ../third-party/jogamp/jogl-all.jar:../third-party/jogamp/gluegen-rt.jar:../../com.amd.aparapi/dist/aparapi.jar:nbody.jar \
+  com.amd.aparapi.examples.nbody.Main 
+
+To choose an AMD GPU for example we would invoke the script in the following way(the third parameter):
+
+nbody.std.no-opengles-platform-select.sh GPU 1024 AMD
+
+

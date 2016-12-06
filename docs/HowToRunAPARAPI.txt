@@ -1,0 +1,62 @@
+
+---------------------------------------------------------
+How to run APARAPI tests from the cmd line
+---------------------------------------------------------
+
+- open new terminal window 
+
+- set environment variables
+
+  source [project folder]/env/AlteraV14Env 
+
+- got to either samples/examples
+
+  - samples dir -> 
+
+    cd [project folder]/src/aparapi/samples
+
+  - examples dir-> 
+ 
+    cd [project folder]/src/aparapi/examples/
+
+- to run any sample or example: 
+
+  - run the shell script file named after the sample/example name and specify type of run
+
+  Format is*:
+ 
+  sh [name].sh [ACC|CPU|JTP|GPU|SEQ]
+
+  Examples:
+
+  - run nbody simulation
+    cd [project folder]/src/aparapi/examples/nbody
+    sh nbody.sh JTP
+    sh nbody.sh CPU
+    sh nbody.sh GPU
+    sh nbody.sh ACC
+
+  - run mandel
+    cd [project folder]/src/aparapi/samples/mandel/
+    sh mandel.sh JTP
+    sh mandel.sh CPU
+    sh mandel.sh GPU
+    sh mandel.sh ACC
+
+
+* For more sophisticated use cases with dual configs(fpga/std) you can use the following format:
+
+  sh [name].std.sh [ACC|CPU|JTP|GPU|SEQ]
+
+  sh [name].fpga.sh [ACC|CPU|JTP|GPU|SEQ]
+
+You can read more about dual config in how to build aparapi.
+  
+
+
+
+
+
+
+
+

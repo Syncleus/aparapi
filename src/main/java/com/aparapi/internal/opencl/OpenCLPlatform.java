@@ -18,9 +18,12 @@ package com.aparapi.internal.opencl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Iterator;
+import java.util.List;
 
 import com.aparapi.device.OpenCLDevice;
 import com.aparapi.internal.jni.OpenCLJNI;
+import com.aparapi.Config;
 
 public class OpenCLPlatform extends OpenCLJNI{
 
@@ -84,6 +87,48 @@ public class OpenCLPlatform extends OpenCLJNI{
        platforms = new OpenCLPlatform().getOpenCLPlatforms();
        return platforms;
    }
+
+   //!!! oren change 2.15.15 -> allow choosing a platform when multiple platforms are available
+   // Currently aparapi does not offer a way to choose a platform
+   public List<OpenCLPlatform> getOpenCLPlatformsFilteredByConfig()
+   {
+	   return getOpenCLPlatformsFilteredBy(Config.platformHint);
+   }
+
+   public List<OpenCLPlatform> getOpenCLPlatformsFilteredBy(String filter) 
+   {
+      if (OpenCLLoader.isOpenCLAvailable()) 
+      {
+    	  List<OpenCLPlatform> platformList = (getPlatforms());
+    	  if(filter==null)
+    	  {
+        	  System.out.println("Not Filtering Platforms. Platform filter is empty!");
+    	  }
+    	  else
+    	  {
+    		  System.out.println("Filtering Platforms using: " + filter );
+    		  for (Iterator<OpenCLPlatform> iterator = platformList.iterator(); iterator.hasNext(); ) 
+    		  {
+    			  String platformName = iterator.next().getName();
+    			  if (filter.equals("*") || platformName.contains(filter)) 
+    			  {
+                                  System.out.println("Adding Platform: " + platformName );
+    			  }
+                          else
+                          {
+    				  System.out.println("Discarding Platform: " + platformName);
+    				  iterator.remove();
+                          }
+
+    		  }
+    	  }
+    	  return (platformList);
+   	  } 
+      else 
+      {
+         return (new ArrayList<OpenCLPlatform>());
+      }
+  }
 
    public String getName() {
       return (name);

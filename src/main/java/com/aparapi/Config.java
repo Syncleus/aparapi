@@ -97,6 +97,25 @@ public class Config extends ConfigJNI{
     */
    public static final String executionMode = System.getProperty(propPkgName + ".executionMode");
 
+   //!!! oren change 2.15.15 -> allow choosing a platform when multiple platforms are available
+   // Currently aparapi does not offer a way to choose a platform
+   /**
+    * Allows the user to request a specific platform
+    *
+    *  Usage -Dcom.amd.aparapi.platformHint={platform name search string}
+    *  
+    */
+   public static final String platformHint = System.getProperty(propPkgName + ".platformHint");
+
+   //!!! oren change 7.15.15 -> allow choosing a flow type
+   /**
+    * Allows the user to select a flow type
+    *
+    *  Usage -Dcom.amd.aparapi.flowType={binary|source|default}
+    *  
+    */
+   public static final String flowType = System.getProperty(propPkgName + ".flowType");
+
    /**
     * Allows the user to request that the execution mode of each kernel invocation be reported to stdout.
     *
@@ -221,6 +240,10 @@ public class Config extends ConfigJNI{
          System.out.println(propPkgName + ".logLevel{OFF|FINEST|FINER|FINE|WARNING|SEVERE|ALL}=" + logger.getLevel());
          System.out.println(propPkgName + ".enableProfiling{true|false}=" + enableProfiling);
          System.out.println(propPkgName + ".enableProfilingCSV{true|false}=" + enableProfilingCSV);
+         // !!! oren change
+         System.out.println(propPkgName + ".profilingFileNameFormatStr{format str}=" + profilingFileNameFormatStr);
+         System.out.println(propPkgName + ".flowType{source|binary|default}=" + flowType);
+         //////////////////
          System.out.println(propPkgName + ".enableVerboseJNI{true|false}=" + enableVerboseJNI);
          System.out.println(propPkgName + ".enableVerboseJNIOpenCLResourceTracking{true|false}="
                + enableVerboseJNIOpenCLResourceTracking);
@@ -236,4 +259,10 @@ public class Config extends ConfigJNI{
    public static String getLoggerName() {
       return logPropName;
    }
+  
+   // !!! oren change -> expose pkg name beyond inheritance
+   public static String getPkgName() {
+      return propPkgName;
+   }
+
 }

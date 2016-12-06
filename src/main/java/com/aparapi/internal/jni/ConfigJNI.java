@@ -44,6 +44,15 @@ public abstract class ConfigJNI{
     */
    @UsedByJNICode public static final boolean enableProfilingCSV = Boolean.getBoolean(propPkgName + ".enableProfilingCSV");
 
+   //!!! oren change 2.15.19 -> Allows the user to set profile file name format 
+   /**
+    * Allows the user to set profile file name format 
+    * 
+    * Usage -Dcom.amd.aparapi.profilingFileNameFormatStr={format string}
+    * 
+    */
+   @UsedByJNICode public static final String profilingFileNameFormatStr =  System.getProperty(propPkgName + ".profilingFileNameFormatStr");
+
    /**
     * Allows the user to request that verbose JNI messages be dumped to stderr.
     * 

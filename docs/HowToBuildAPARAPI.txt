@@ -1,0 +1,63 @@
+
+---------------------------------------------------------
+How to build APARAPI from the cmd line after modifications to code 
+---------------------------------------------------------
+* first read APARAPI Installation Notes (APARAPIInstallationNotes.txt) for general instructions on getting the project setup and initial build steps
+
+- open new terminal window 
+
+- set environment variables
+
+  source [project folder]/env/AlteraV14Env 
+
+- to build the APARAPI src tree
+
+  cd [project folder]/src/aparapi
+
+  ant clean build dist
+
+  * this does not build the jni proxy with FPGA support automatically (see below for jni FPGA build)
+
+- to build the APARAPI jni proxy library (should run after initial build and after any changes to CPP source files)
+
+  - goto jni dir  
+
+   cd [project folder]/src/aparapi/com.amd.aparapi.jni/
+
+  - to use ant to build standard jni version *
+
+   ant 
+
+  - to use ant to build FPGA jni version *
+
+   ant -f build_altera_ocl.xml 
+
+* The output of the com.amd.aparapi.jni build is a dll stored in dist folder:
+
+  [project folder]/src/aparapi/com.amd.aparapi.jni/dist/libaparapi_x86_64.so
+
+If you have a system where you want to have both FPGA and standard versions available (i.e. with multi OpenCL hardware platforms)you can simply copy the dll's to diffrent locations after the build and link to them through the java vm command line parameters:
+
+Example:
+
+Copy the fpga and standard dll's to the following locations respectively:
+/src/aparapi/com.amd.aparapi.jni/dist.fpga/libaparapi_x86_64.so
+/src/aparapi/com.amd.aparapi.jni/dist.std/libaparapi_x86_64.so
+
+To select one JNI version or the other at execution time run use the following paramaters to the java command:
+java -Djava.library.path=../../com.amd.aparapi.jni/dist.std  [rest of cmd line]
+java -Djava.library.path=../../com.amd.aparapi.jni/dist.fpga [rest of cmd line]
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
