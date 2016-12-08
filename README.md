@@ -15,13 +15,30 @@ A GPU has a unique architecture that causes them to behave differently than a CP
 
 Aparapi was originally a project conceived and developed by AMD corporation. It was later abandoned by AMD and sat mostly-idle for several years. Despite this there were some failed efforts by the community to keep the project alive, but without a clear community leader no new releases ever came. Eventually we came along and rescued the project, and modernized the project. Finally after such a long wait the first Aparapi release in 5 years was published and the community continues to push forward with renewed excitement.
 
+## Support and Documentation
+
+Aparapi Javadocs: [latest](http://www.javadoc.io/doc/com.aparapi/aparapi) - [1.2.0](http://www.javadoc.io/doc/com.aparapi/aparapi/1.2.0) - [1.1.2](http://www.javadoc.io/doc/com.aparapi/aparapi/1.1.2) - [1.1.1](http://www.javadoc.io/doc/com.aparapi/aparapi/1.1.1) - [1.1.0](http://www.javadoc.io/doc/com.aparapi/aparapi/1.1.0) - [1.0.0](http://www.javadoc.io/doc/com.syncleus.aparapi/aparapi/1.0.0)
+
 For detailed documentation see [Aparapi.com](http://Aparapi.com) or check out the [latest Javadocs](http://www.javadoc.io/doc/com.aparapi/aparapi).
 
 For support please use [Gitter](https://gitter.im/Syncleus/aparapi) or the [official Aparapi mailing list](https://groups.google.com/d/forum/aparapi).
 
 Please file bugs and feature requests on [Github](https://github.com/Syncleus/aparapi/issues).
 
-## Dependency
+## Related Projects
+
+This particular repository only represents the core Java library. There are several other related repositories worth taking a look at.
+
+* [Aparapi Examples](https://github.com/Syncleus/aparapi-examples) - A collection of Java examples to showcase the Aparapi library and help developers get started.
+* [Aparapi JNI](https://github.com/Syncleus/aparapi-jni) - Represents the native library component. Without this the Java library can't talk to the graphics card.
+* [Aparapi Archlinux AUR](https://github.com/Syncleus/aparapi-archlinux) - An Archlinux AUR for installing the Aparapi JNI.
+* [Aparapi Archlinux Repository](https://github.com/Syncleus/aparapi-archlinux-repo) - A Archlinux binary repository containing all versions of the Aparapi JNI for easy installation.
+
+## Prerequisites
+
+Aparapi will run out of the box on the CPU, however in order to access the GPU it requires Aparapi JNI component to be installed first. To do that see the [Aparapi JNI](https://github.com/Syncleus/aparapi-jni) project for more details. 
+
+## Java Dependency
 
 To include Aparapi in your project of choice include the following Maven dependency into your build.
 
