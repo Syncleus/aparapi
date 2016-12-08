@@ -36,7 +36,7 @@ This particular repository only represents the core Java library. There are seve
 
 ## Prerequisites
 
-Aparapi will run out of the box on the CPU, however in order to access the GPU it requires Aparapi JNI component to be installed first. To do that see the [Aparapi JNI](https://github.com/Syncleus/aparapi-jni) project for more details. 
+Aparapi will run as-is on the CPU, however in order to access the GPU it requires an Aparapi JNI native library to be installed first. To do that see the [Aparapi JNI](https://github.com/Syncleus/aparapi-jni) project for more details. 
 
 ## Java Dependency
 
