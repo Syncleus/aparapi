@@ -1,4 +1,8 @@
-# Aparapi Change Log
+# Aparapi Changelog
+
+## 1.3.0
+
+* No longer needs Aparapi JNI library to be installed manually, this is loaded dynmically now.
 
 ## 1.2.0
 
