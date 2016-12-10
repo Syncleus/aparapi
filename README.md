@@ -30,7 +30,8 @@ Please file bugs and feature requests on [Github](https://github.com/Syncleus/ap
 This particular repository only represents the core Java library. There are several other related repositories worth taking a look at.
 
 * [Aparapi Examples](https://github.com/Syncleus/aparapi-examples) - A collection of Java examples to showcase the Aparapi library and help developers get started.
-* [Aparapi JNI](https://github.com/Syncleus/aparapi-jni) - Represents the native library component. Without this the Java library can't talk to the graphics card.
+* [Aparapi JNI](https://github.com/Syncleus/aparapi-jni) - A java JAR which embeds and loads the native components at runtime. This prevents the need to seperately install the Aparapi Native library.
+* [Aparapi Native](https://github.com/Syncleus/aparapi-native) - The native library component. Without this the Java library can't talk to the graphics card. This is not a java project but rather a C/C++ project.
 * [Aparapi Archlinux AUR](https://github.com/Syncleus/aparapi-archlinux) - An Archlinux AUR for installing the Aparapi JNI.
 * [Aparapi Archlinux Repository](https://github.com/Syncleus/aparapi-archlinux-repo) - A Archlinux binary repository containing all versions of the Aparapi JNI for easy installation.
 
