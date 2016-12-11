@@ -11,7 +11,7 @@
 
     <groupId>com.aparapi</groupId>
     <artifactId>aparapi</artifactId>
-    <version>1.3.1-SNAPSHOT</version>
+    <version>1.3.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
