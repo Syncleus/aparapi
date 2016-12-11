@@ -15,12 +15,12 @@
  */
 package com.aparapi.internal.opencl;
 
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.jni.OpenCLJNI;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.aparapi.device.OpenCLDevice;
-import com.aparapi.internal.jni.OpenCLJNI;
 
 public class OpenCLPlatform extends OpenCLJNI{
 
@@ -32,7 +32,7 @@ public class OpenCLPlatform extends OpenCLJNI{
 
    private final String name;
 
-   private final List<OpenCLDevice> devices = new ArrayList<OpenCLDevice>();
+   private final List<OpenCLDevice> devices = new ArrayList<>();
 
    private static List<OpenCLPlatform> platforms;
 

@@ -15,10 +15,12 @@
  */
 package com.aparapi;
 
-import com.aparapi.device.*;
-import com.aparapi.internal.jni.*;
+import com.aparapi.device.Device;
+import com.aparapi.device.JavaDevice;
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.jni.RangeJNI;
 
-import java.util.*;
+import java.util.Arrays;
 
 /**
  * 
@@ -64,21 +66,14 @@ import java.util.*;
  */
 public class Range extends RangeJNI{
 
-   public static final int THREADS_PER_CORE = 16;
-
-   public static final int MAX_OPENCL_GROUP_SIZE = 256;
-
-   public static final int MAX_GROUP_SIZE = Math.max(Runtime.getRuntime().availableProcessors() * THREADS_PER_CORE,
-         MAX_OPENCL_GROUP_SIZE);
-
    private OpenCLDevice device = null;
 
    private int maxWorkGroupSize;
 
    private int[] maxWorkItemSize = new int[] {
-         MAX_GROUP_SIZE,
-         MAX_GROUP_SIZE,
-         MAX_GROUP_SIZE
+         Config.MAX_GROUP_SIZE,
+         Config.MAX_GROUP_SIZE,
+         Config.MAX_GROUP_SIZE
    };
 
    /**
@@ -95,7 +90,7 @@ public class Range extends RangeJNI{
          maxWorkItemSize = device.getMaxWorkItemSize();
          maxWorkGroupSize = device.getMaxWorkGroupSize();
       } else {
-         maxWorkGroupSize = MAX_GROUP_SIZE;
+         maxWorkGroupSize = Config.MAX_GROUP_SIZE;
       }
    }
 
@@ -128,7 +123,7 @@ public class Range extends RangeJNI{
     */
 
    private static int[] getFactors(int _value, int _max) {
-      final int factors[] = new int[MAX_GROUP_SIZE];
+      final int factors[] = new int[Config.MAX_GROUP_SIZE];
       int factorIdx = 0;
 
       for (int possibleFactor = 1; possibleFactor <= _max; possibleFactor++) {
@@ -429,15 +424,13 @@ public class Range extends RangeJNI{
 
       switch (dims) {
          case 1:
-            sb.append("global:" + globalSize_0 + " local:" + (localIsDerived ? "(derived)" : "") + localSize_0);
+            sb.append("global:").append(globalSize_0).append(" local:").append(localIsDerived ? "(derived)" : "").append(localSize_0);
             break;
          case 2:
-            sb.append("2D(global:" + globalSize_0 + "x" + globalSize_1 + " local:" + (localIsDerived ? "(derived)" : "")
-                  + localSize_0 + "x" + localSize_1 + ")");
+            sb.append("2D(global:").append(globalSize_0).append("x").append(globalSize_1).append(" local:").append(localIsDerived ? "(derived)" : "").append(localSize_0).append("x").append(localSize_1).append(")");
             break;
          case 3:
-             sb.append("3D(global:" + globalSize_0 + "x" + globalSize_1 + "x" + globalSize_2 + " local:"
-                  + (localIsDerived ? "(derived)" : "") + localSize_0 + "x" + localSize_1 + "x" + localSize_2 + ")");
+             sb.append("3D(global:").append(globalSize_0).append("x").append(globalSize_1).append("x").append(globalSize_2).append(" local:").append(localIsDerived ? "(derived)" : "").append(localSize_0).append("x").append(localSize_1).append("x").append(localSize_2).append(")");
             break;
       }
 

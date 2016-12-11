@@ -52,19 +52,7 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.internal.instruction;
 
-import com.aparapi.internal.instruction.InstructionSet.AccessArrayElement;
-import com.aparapi.internal.instruction.InstructionSet.AccessInstanceField;
-import com.aparapi.internal.instruction.InstructionSet.AccessLocalVariable;
-import com.aparapi.internal.instruction.InstructionSet.AssignToArrayElement;
-import com.aparapi.internal.instruction.InstructionSet.AssignToInstanceField;
-import com.aparapi.internal.instruction.InstructionSet.AssignToLocalVariable;
-import com.aparapi.internal.instruction.InstructionSet.CastOperator;
-import com.aparapi.internal.instruction.InstructionSet.Constant;
-import com.aparapi.internal.instruction.InstructionSet.I_IADD;
-import com.aparapi.internal.instruction.InstructionSet.I_ICONST_1;
-import com.aparapi.internal.instruction.InstructionSet.I_IINC;
-import com.aparapi.internal.instruction.InstructionSet.I_ISUB;
-import com.aparapi.internal.instruction.InstructionSet.MethodCall;
+import com.aparapi.internal.instruction.InstructionSet.*;
 
 public class InstructionPattern{
 

@@ -15,12 +15,12 @@
  */
 package com.aparapi.device;
 
-import com.aparapi.*;
-import com.aparapi.internal.kernel.*;
+import com.aparapi.Range;
+import com.aparapi.internal.kernel.KernelManager;
 
 public abstract class Device{
 
-   public static enum TYPE {
+   public enum TYPE {
       UNKNOWN(Integer.MAX_VALUE),
       GPU(2),
       CPU(3),
@@ -35,7 +35,7 @@ public abstract class Device{
       TYPE(int rank) {
          this.rank = rank;
       }
-   };
+   }
 
    /** @deprecated  use {@link KernelManager#bestDevice()}
     *  @see com.aparapi.device

@@ -52,21 +52,21 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.internal.instruction;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
-import com.aparapi.internal.model.MethodModel;
 import com.aparapi.internal.model.ClassModel.ConstantPool;
 import com.aparapi.internal.model.ClassModel.ConstantPool.Entry;
 import com.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
 import com.aparapi.internal.model.ClassModel.ConstantPool.MethodEntry;
-import com.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
 import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
+import com.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
+import com.aparapi.internal.model.MethodModel;
 import com.aparapi.internal.reader.ByteReader;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 public class InstructionSet{
 
-   public static enum LoadSpec {
+   public enum LoadSpec {
       NONE, //
       F, // Float
       D, // Double
@@ -76,7 +76,7 @@ public class InstructionSet{
       O, // Object
    }
 
-   public static enum StoreSpec {
+   public enum StoreSpec {
       NONE, //
       F, // Float
       D, // Double
@@ -86,7 +86,7 @@ public class InstructionSet{
       O, // Object
    }
 
-   public static enum TypeSpec {
+   public enum TypeSpec {
       NONE("none", "none", 0, 0), //
       Z("Z", "boolean", 4, 1), // Note 'Z' is the java code for 'boolean' type
       C("C", "char", 2, 1), //
@@ -114,7 +114,7 @@ public class InstructionSet{
 
       private final int slots;
 
-      private TypeSpec(String _shortName, String _longName, int _size, int _slots) {
+      TypeSpec(String _shortName, String _longName, int _size, int _slots) {
          shortName = _shortName;
          longName = _longName;
          size = _size;
@@ -145,7 +145,7 @@ public class InstructionSet{
     *
     */
 
-   public static enum Operator {
+   public enum Operator {
       NONE,
       LogicalOr(true, "||"), //
       LogicalAnd(true, "&&", LogicalOr), //
@@ -198,19 +198,19 @@ public class InstructionSet{
 
       private Operator compliment;
 
-      private Operator(boolean _binary, String _text) {
+      Operator(boolean _binary, String _text) {
 
          text = _text;
          binary = _binary;
       }
 
-      private Operator(boolean _binary, String _text, Operator _c) {
+      Operator(boolean _binary, String _text, Operator _c) {
          this(_binary, _text);
          compliment = _c;
          compliment.compliment = this;
       }
 
-      private Operator() {
+      Operator() {
          this(false, null);
       }
 
@@ -237,7 +237,7 @@ public class InstructionSet{
       }
    }
 
-   public static enum PushSpec {
+   public enum PushSpec {
       NONE, //
       UNKNOWN, //
       I(TypeSpec.I), //
@@ -256,7 +256,7 @@ public class InstructionSet{
       LorD(TypeSpec.LorD), //
       RA(TypeSpec.RA);
 
-      private PushSpec(TypeSpec... _types) {
+      PushSpec(TypeSpec... _types) {
          types = _types;
       }
 
@@ -267,7 +267,7 @@ public class InstructionSet{
       }
    }
 
-   public static enum PopSpec {
+   public enum PopSpec {
       NONE, //
       UNKNOWN(TypeSpec.UNKNOWN), //
       I(TypeSpec.I), //
@@ -299,7 +299,7 @@ public class InstructionSet{
       OARGS(TypeSpec.O, TypeSpec.ARGS), //
       ;
 
-      private PopSpec(TypeSpec... _types) {
+      PopSpec(TypeSpec... _types) {
          types = _types;
       }
 
@@ -310,7 +310,7 @@ public class InstructionSet{
       }
    }
 
-   public static enum ImmediateSpec {
+   public enum ImmediateSpec {
       NONE("NONE"), //
       UNKNOWN("UNKNOWN"), //
       Bconst("byte constant value", TypeSpec.B), //
@@ -329,7 +329,7 @@ public class InstructionSet{
 
       private final String name;
 
-      private ImmediateSpec(String _name, TypeSpec... _types) {
+      ImmediateSpec(String _name, TypeSpec... _types) {
 
          name = _name;
          types = _types;
@@ -346,7 +346,7 @@ public class InstructionSet{
       }
    }
 
-   public static enum ByteCode {
+   public enum ByteCode {
       // name, operation type, immediateOperands, pop operands, push operands
       NOP(null, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, PopSpec.NONE, PushSpec.NONE, Operator.NONE), //
       ACONST_NULL(I_ACONST_NULL.class, PushSpec.N), //
@@ -640,14 +640,14 @@ public class InstructionSet{
 
       private final Operator operator;
 
-      private LoadSpec loadSpec;
+      private final LoadSpec loadSpec;
 
-      private StoreSpec storeSpec;
+      private final StoreSpec storeSpec;
 
       private Constructor<?> constructor;
 
-      private ByteCode(Class<?> _class, LoadSpec _loadSpec, StoreSpec _storeSpec, ImmediateSpec _immediate, PopSpec _pop,
-            PushSpec _push, Operator _operator) {
+      ByteCode(Class<?> _class, LoadSpec _loadSpec, StoreSpec _storeSpec, ImmediateSpec _immediate, PopSpec _pop,
+               PushSpec _push, Operator _operator) {
          clazz = _class;
          immediate = _immediate;
          push = _push;
@@ -660,68 +660,62 @@ public class InstructionSet{
 
             try {
                constructor = clazz.getDeclaredConstructor(MethodModel.class, ByteReader.class, boolean.class);
-            } catch (final SecurityException e) {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            } catch (final NoSuchMethodException e) {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            } catch (final IllegalArgumentException e) {
+            } catch (final SecurityException | IllegalArgumentException | NoSuchMethodException e) {
                // TODO Auto-generated catch block
                e.printStackTrace();
             }
          }
       }
 
-      private ByteCode(Class<?> _class, ImmediateSpec _immediate) {
+      ByteCode(Class<?> _class, ImmediateSpec _immediate) {
          this(_class, LoadSpec.NONE, StoreSpec.NONE, _immediate, PopSpec.NONE, PushSpec.NONE, Operator.NONE);
       }
 
-      private ByteCode(Class<?> _class, PushSpec _push) {
+      ByteCode(Class<?> _class, PushSpec _push) {
          this(_class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, PopSpec.NONE, _push, Operator.NONE);
       }
 
-      private ByteCode(Class<?> _class, StoreSpec _store, ImmediateSpec _immediate, PopSpec _pop) {
+      ByteCode(Class<?> _class, StoreSpec _store, ImmediateSpec _immediate, PopSpec _pop) {
          this(_class, LoadSpec.NONE, _store, _immediate, _pop, PushSpec.NONE, Operator.NONE);
       }
 
-      private ByteCode(Class<?> _class, StoreSpec _store, PopSpec _pop) {
+      ByteCode(Class<?> _class, StoreSpec _store, PopSpec _pop) {
          this(_class, LoadSpec.NONE, _store, ImmediateSpec.NONE, _pop, PushSpec.NONE, Operator.NONE);
       }
 
-      private ByteCode(Class<?> _class, ImmediateSpec _immediate, PopSpec _pop) {
+      ByteCode(Class<?> _class, ImmediateSpec _immediate, PopSpec _pop) {
          this(_class, LoadSpec.NONE, StoreSpec.NONE, _immediate, _pop, PushSpec.NONE, Operator.NONE);
       }
 
-      private ByteCode(Class<?> _class, ImmediateSpec _immediate, PopSpec _pop, Operator _operator) {
+      ByteCode(Class<?> _class, ImmediateSpec _immediate, PopSpec _pop, Operator _operator) {
          this(_class, LoadSpec.NONE, StoreSpec.NONE, _immediate, _pop, PushSpec.NONE, _operator);
       }
 
-      private ByteCode(Class<?> _class, LoadSpec _load, ImmediateSpec _immediate, PushSpec _push) {
+      ByteCode(Class<?> _class, LoadSpec _load, ImmediateSpec _immediate, PushSpec _push) {
          this(_class, _load, StoreSpec.NONE, _immediate, PopSpec.NONE, _push, Operator.NONE);
       }
 
-      private ByteCode(Class<?> _class, LoadSpec _load, PushSpec _push) {
+      ByteCode(Class<?> _class, LoadSpec _load, PushSpec _push) {
          this(_class, _load, StoreSpec.NONE, ImmediateSpec.NONE, PopSpec.NONE, _push, Operator.NONE);
       }
 
-      private ByteCode(Class<?> _class, ImmediateSpec _immediate, PushSpec _push) {
+      ByteCode(Class<?> _class, ImmediateSpec _immediate, PushSpec _push) {
          this(_class, LoadSpec.NONE, StoreSpec.NONE, _immediate, PopSpec.NONE, _push, Operator.NONE);
       }
 
-      private ByteCode(Class<?> _class, PopSpec _pop, PushSpec _push) {
+      ByteCode(Class<?> _class, PopSpec _pop, PushSpec _push) {
          this(_class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, _pop, _push, Operator.NONE);
       }
 
-      private ByteCode(Class<?> _class, PopSpec _pop, PushSpec _push, Operator _operator) {
+      ByteCode(Class<?> _class, PopSpec _pop, PushSpec _push, Operator _operator) {
          this(_class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, _pop, _push, _operator);
       }
 
-      private ByteCode(Class<?> _class, PopSpec _pop) {
+      ByteCode(Class<?> _class, PopSpec _pop) {
          this(_class, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, _pop, PushSpec.NONE, Operator.NONE);
       }
 
-      private ByteCode() {
+      ByteCode() {
          this(null, LoadSpec.NONE, StoreSpec.NONE, ImmediateSpec.NONE, PopSpec.NONE, PushSpec.NONE, Operator.NONE);
       }
 
@@ -754,11 +748,8 @@ public class InstructionSet{
          final PushSpec push = getPush();
          final PopSpec pop = getPop();
 
-         if ((push == PushSpec.D) || (pop == PopSpec.D) || (pop == PopSpec.DD) || (pop == PopSpec.AID)) {
-            return true;
-         }
+         return (push == PushSpec.D) || (pop == PopSpec.D) || (pop == PopSpec.DD) || (pop == PopSpec.AID);
 
-         return false;
       }
 
       public Instruction newInstruction(MethodModel _methodModel, ByteReader byteReader, boolean _isWide) {
@@ -767,19 +758,7 @@ public class InstructionSet{
             try {
                newInstruction = (Instruction) constructor.newInstance(_methodModel, byteReader, _isWide);
                newInstruction.setLength(byteReader.getOffset() - newInstruction.getThisPC());
-            } catch (final SecurityException e) {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            } catch (final IllegalArgumentException e) {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            } catch (final InstantiationException e) {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            } catch (final IllegalAccessException e) {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            } catch (final InvocationTargetException e) {
+            } catch (final SecurityException | InvocationTargetException | IllegalAccessException | InstantiationException | IllegalArgumentException e) {
                // TODO Auto-generated catch block
                e.printStackTrace();
             }
@@ -819,7 +798,7 @@ public class InstructionSet{
 
    public static class CompositeInstruction extends Instruction{
 
-      protected BranchSet branchSet;
+      protected final BranchSet branchSet;
 
       public CompositeInstruction(MethodModel method, ByteCode _byteCode, Instruction _firstChild, Instruction _lastChild,
             BranchSet _branchSet) {
@@ -2454,7 +2433,7 @@ public class InstructionSet{
    }
 
    public static class I_IINC extends Index08{
-      private int delta;
+      private final int delta;
 
       private final boolean wide;
 
@@ -3558,7 +3537,7 @@ public class InstructionSet{
    }
 
    public static class I_WIDE extends Instruction{
-      private boolean iinc;
+      private final boolean iinc;
 
       private int increment;
 
@@ -3695,24 +3674,24 @@ public class InstructionSet{
    }
 
    public interface InterfaceConstantPoolMethodIndexAccessor{
-      public int getConstantPoolInterfaceMethodIndex();
+      int getConstantPoolInterfaceMethodIndex();
 
-      public ConstantPool.InterfaceMethodEntry getConstantPoolInterfaceMethodEntry();
+      ConstantPool.InterfaceMethodEntry getConstantPoolInterfaceMethodEntry();
 
-      public Instruction getInstanceReference();
+      Instruction getInstanceReference();
 
-      public int getArgs();
+      int getArgs();
 
-      public Instruction getArg(int _arg);
+      Instruction getArg(int _arg);
    }
 
-   public static interface New{
+   public interface New{
    }
 
    public interface FieldReference{
-      public int getConstantPoolFieldIndex();
+      int getConstantPoolFieldIndex();
 
-      public FieldEntry getConstantPoolFieldEntry();
+      FieldEntry getConstantPoolFieldEntry();
    }
 
    public interface AccessField extends FieldReference{
@@ -3753,7 +3732,7 @@ public class InstructionSet{
       int getConstantPoolIndex();
 
       ConstantPool.Entry getConstantPoolEntry();
-   };
+   }
 
    public interface HasOperator{
       Operator getOperator();

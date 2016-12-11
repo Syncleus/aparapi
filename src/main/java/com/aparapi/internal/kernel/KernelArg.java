@@ -15,12 +15,12 @@
  */
 package com.aparapi.internal.kernel;
 
-import com.aparapi.internal.jni.*;
-import com.aparapi.internal.model.*;
-import com.aparapi.internal.util.*;
+import com.aparapi.internal.jni.KernelArgJNI;
+import com.aparapi.internal.model.ClassModel;
+import com.aparapi.internal.util.Reflection;
 
-import java.lang.reflect.*;
-import java.nio.*;
+import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 
 /**
  * Each field (or captured field in the case of an anonymous inner class) referenced by any bytecode reachable from the users Kernel.run(), will

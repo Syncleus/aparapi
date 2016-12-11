@@ -16,12 +16,12 @@
 package com.aparapi.internal.opencl;
 
 import com.aparapi.ProfileInfo;
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.jni.OpenCLJNI;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.aparapi.device.OpenCLDevice;
-import com.aparapi.internal.jni.OpenCLJNI;
 
 public class OpenCLProgram extends OpenCLJNI{
 
@@ -40,9 +40,9 @@ public class OpenCLProgram extends OpenCLJNI{
    /**
     * FIXME Why are these not ConcurrentHashMaps or at least synchronized at a finer grain?
     */
-   private final Map<Object, OpenCLMem> instanceToMem = new HashMap<Object, OpenCLMem>();
+   private final Map<Object, OpenCLMem> instanceToMem = new HashMap<>();
 
-   private final Map<Long, OpenCLMem> addressToMem = new HashMap<Long, OpenCLMem>();
+   private final Map<Long, OpenCLMem> addressToMem = new HashMap<>();
 
    /**
     * Minimal constructor

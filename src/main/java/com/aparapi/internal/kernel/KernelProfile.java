@@ -15,11 +15,14 @@
  */
 package com.aparapi.internal.kernel;
 
-import com.aparapi.*;
-import com.aparapi.device.*;
+import com.aparapi.Config;
+import com.aparapi.Kernel;
+import com.aparapi.device.Device;
 
-import java.util.*;
-import java.util.logging.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Collects profiling information per kernel class per device. Not thread safe, it is necessary for client code to correctly synchronize on
@@ -28,9 +31,9 @@ import java.util.logging.*;
 public class KernelProfile {
 
    private static final double MILLION = 1000000d;
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
    private final Class<? extends Kernel> kernelClass;
-   private LinkedHashMap<Device, KernelDeviceProfile> deviceProfiles = new LinkedHashMap<>();
+   private final LinkedHashMap<Device, KernelDeviceProfile> deviceProfiles = new LinkedHashMap<>();
    private Device currentDevice;
    private Device lastDevice;
    private KernelDeviceProfile currentDeviceProfile;

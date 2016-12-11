@@ -15,15 +15,16 @@
  */
 package com.aparapi.internal.kernel;
 
-import com.aparapi.*;
-import com.aparapi.device.*;
+import com.aparapi.Kernel;
+import com.aparapi.device.Device;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class KernelPreferences {
    private final Class<? extends Kernel> kernelClass;
    private final KernelManager manager;
-   private volatile LinkedList<Device> preferredDevices = null;
+   private final List<Device> preferredDevices = new CopyOnWriteArrayList<>();
    private final LinkedHashSet<Device> failedDevices = new LinkedHashSet<>();
 
    public KernelPreferences(KernelManager manager, Class<? extends Kernel> kernelClass) {
@@ -55,14 +56,14 @@ public class KernelPreferences {
       return Collections.unmodifiableList(localPreferredDevices);
    }
 
-   synchronized void setPreferredDevices(LinkedHashSet<Device> _preferredDevices) {
-      if (preferredDevices != null) {
+   synchronized void setPreferredDevices(Collection<Device> _preferredDevices) {
+      //if (preferredDevices != null) {
          preferredDevices.clear();
          preferredDevices.addAll(_preferredDevices);
-      }
+      /*}
       else {
          preferredDevices = new LinkedList<>(_preferredDevices);
-      }
+      }*/
       failedDevices.clear();
    }
 
@@ -78,16 +79,13 @@ public class KernelPreferences {
    }
 
    private void maybeSetUpDefaultPreferredDevices() {
-      if (preferredDevices == null) {
-         synchronized (this) {
-            if (preferredDevices == null) {
-               preferredDevices = new LinkedList<>(manager.getDefaultPreferences().getPreferredDevices(null));
-            }
-         }
+      synchronized (this) {
+         if (preferredDevices.isEmpty())
+            setPreferredDevices(manager.getDefaultPreferences().getPreferredDevices(null));
       }
    }
 
-   public List<Device> getFailedDevices() {
+   List<Device> getFailedDevices() {
       return new ArrayList<>(failedDevices);
    }
 }

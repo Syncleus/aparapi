@@ -15,7 +15,13 @@
  */
 package com.aparapi.device;
 
-import com.aparapi.opencl.OpenCL.Kernel;
+import com.aparapi.Range;
+import com.aparapi.internal.opencl.OpenCLArgDescriptor;
+import com.aparapi.internal.opencl.OpenCLKernel;
+import com.aparapi.internal.opencl.OpenCLPlatform;
+import com.aparapi.internal.opencl.OpenCLProgram;
+import com.aparapi.opencl.OpenCL;
+import com.aparapi.opencl.OpenCL.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,21 +35,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.aparapi.Range;
-import com.aparapi.internal.opencl.OpenCLArgDescriptor;
-import com.aparapi.internal.opencl.OpenCLKernel;
-import com.aparapi.internal.opencl.OpenCLPlatform;
-import com.aparapi.internal.opencl.OpenCLProgram;
-import com.aparapi.opencl.OpenCL;
-import com.aparapi.opencl.OpenCL.Arg;
-import com.aparapi.opencl.OpenCL.Constant;
-import com.aparapi.opencl.OpenCL.GlobalReadOnly;
-import com.aparapi.opencl.OpenCL.GlobalReadWrite;
-import com.aparapi.opencl.OpenCL.GlobalWriteOnly;
-import com.aparapi.opencl.OpenCL.Local;
-import com.aparapi.opencl.OpenCL.Resource;
-import com.aparapi.opencl.OpenCL.Source;
 
 public class OpenCLDevice extends Device{
 
@@ -162,8 +153,9 @@ public class OpenCLDevice extends Device{
                kernel.invoke(args);
             }
          } else {
-            if (method.getName().equals("put")) {
-               System.out.println("put not implemented");
+            switch (method.getName()) {
+               case "put":
+                  System.out.println("put not implemented");
 
                /*
                for (Object arg : args) {
@@ -186,8 +178,9 @@ public class OpenCLDevice extends Device{
                   }
                }
                */
-            } else if (method.getName().equals("get")) {
-               System.out.println("get not implemented");
+                  break;
+               case "get":
+                  System.out.println("get not implemented");
                /*
                for (Object arg : args) {
                   Class<?> argClass = arg.getClass();
@@ -209,20 +202,25 @@ public class OpenCLDevice extends Device{
                   }
                }
                */
-            } else if (method.getName().equals("begin")) {
-               System.out.println("begin not implemented");
-            } else if (method.getName().equals("dispose")) {
-              // System.out.println("dispose");
-               for (OpenCLKernel k:map.values()){
-                   k.dispose();
-               }
-               program.dispose();
-               map.clear();
-               disposed=true;
-            } else if (method.getName().equals("end")) {
-               System.out.println("end not implemented");
-            }  else if (method.getName().equals("getProfileInfo")){
-               proxy = program.getProfileInfo();
+                  break;
+               case "begin":
+                  System.out.println("begin not implemented");
+                  break;
+               case "dispose":
+                  // System.out.println("dispose");
+                  for (OpenCLKernel k : map.values()) {
+                     k.dispose();
+                  }
+                  program.dispose();
+                  map.clear();
+                  disposed = true;
+                  break;
+               case "end":
+                  System.out.println("end not implemented");
+                  break;
+               case "getProfileInfo":
+                  proxy = program.getProfileInfo();
+                  break;
             }
          }
          return proxy;
@@ -230,7 +228,7 @@ public class OpenCLDevice extends Device{
    }
 
    public List<OpenCLArgDescriptor> getArgs(Method m) {
-      final List<OpenCLArgDescriptor> args = new ArrayList<OpenCLArgDescriptor>();
+      final List<OpenCLArgDescriptor> args = new ArrayList<>();
       final Annotation[][] parameterAnnotations = m.getParameterAnnotations();
       final Class<?>[] parameterTypes = m.getParameterTypes();
 
@@ -352,7 +350,7 @@ public class OpenCLDevice extends Device{
    }
 
    public <T extends OpenCL<T>> T bind(Class<T> _interface, String _source) {
-      final Map<String, List<OpenCLArgDescriptor>> kernelNameToArgsMap = new HashMap<String, List<OpenCLArgDescriptor>>();
+      final Map<String, List<OpenCLArgDescriptor>> kernelNameToArgsMap = new HashMap<>();
 
       if (_source == null) {
          final StringBuilder sourceBuilder = new StringBuilder();
@@ -386,7 +384,7 @@ public class OpenCLDevice extends Device{
                      //  System.out.println("   annotation "+a);
                      // System.out.println("   annotation type " + a.annotationType());
                      if (a instanceof Kernel) {
-                        sourceBuilder.append("__kernel void " + m.getName() + "(");
+                        sourceBuilder.append("__kernel void ").append(m.getName()).append("(");
                         final List<OpenCLArgDescriptor> args = getArgs(m);
 
                         boolean first = true;
@@ -396,7 +394,7 @@ public class OpenCLDevice extends Device{
                            } else {
                               sourceBuilder.append(",");
                            }
-                           sourceBuilder.append("\n   " + arg);
+                           sourceBuilder.append("\n   ").append(arg);
                         }
 
                         sourceBuilder.append(")");
@@ -422,7 +420,7 @@ public class OpenCLDevice extends Device{
 
       final OpenCLProgram program = new OpenCLProgram(this, _source).createProgram(this);
 
-      final Map<String, OpenCLKernel> map = new HashMap<String, OpenCLKernel>();
+      final Map<String, OpenCLKernel> map = new HashMap<>();
       for (final String name : kernelNameToArgsMap.keySet()) {
          final OpenCLKernel kernel = OpenCLKernel.createKernel(program, name, kernelNameToArgsMap.get(name));
          //final OpenCLKernel kernel = new OpenCLKernel(program, name, kernelNameToArgsMap.get(name));
@@ -433,7 +431,7 @@ public class OpenCLDevice extends Device{
          map.put(name, kernel);
       }
 
-      final OpenCLInvocationHandler<T> invocationHandler = new OpenCLInvocationHandler<T>(program, map);
+      final OpenCLInvocationHandler<T> invocationHandler = new OpenCLInvocationHandler<>(program, map);
       final T instance = (T) Proxy.newProxyInstance(OpenCLDevice.class.getClassLoader(), new Class[] {
             _interface,
             OpenCL.class

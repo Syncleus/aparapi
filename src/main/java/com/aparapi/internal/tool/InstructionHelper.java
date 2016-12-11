@@ -15,31 +15,19 @@
  */
 package com.aparapi.internal.tool;
 
+import com.aparapi.internal.exception.CodeGenException;
+import com.aparapi.internal.instruction.Instruction;
+import com.aparapi.internal.instruction.InstructionSet.*;
+import com.aparapi.internal.model.ClassModel;
+import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
+import com.aparapi.internal.model.Entrypoint;
+import com.aparapi.internal.model.MethodModel;
+import com.aparapi.internal.writer.BlockWriter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import com.aparapi.internal.exception.CodeGenException;
-import com.aparapi.internal.instruction.Instruction;
-import com.aparapi.internal.instruction.InstructionSet.AssignToLocalVariable;
-import com.aparapi.internal.instruction.InstructionSet.Branch;
-import com.aparapi.internal.instruction.InstructionSet.ByteCode;
-import com.aparapi.internal.instruction.InstructionSet.CloneInstruction;
-import com.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
-import com.aparapi.internal.instruction.InstructionSet.ConditionalBranch16;
-import com.aparapi.internal.instruction.InstructionSet.Constant;
-import com.aparapi.internal.instruction.InstructionSet.FieldReference;
-import com.aparapi.internal.instruction.InstructionSet.I_ACONST_NULL;
-import com.aparapi.internal.instruction.InstructionSet.I_IINC;
-import com.aparapi.internal.instruction.InstructionSet.LocalVariableTableIndexAccessor;
-import com.aparapi.internal.instruction.InstructionSet.MethodCall;
-import com.aparapi.internal.instruction.InstructionSet.OperatorInstruction;
-import com.aparapi.internal.model.ClassModel;
-import com.aparapi.internal.model.Entrypoint;
-import com.aparapi.internal.model.MethodModel;
-import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
-import com.aparapi.internal.writer.BlockWriter;
 
 public class InstructionHelper{
 
@@ -47,14 +35,14 @@ public class InstructionHelper{
 
       final static String spaces = "                                                                                                                        ";
 
-      private final List<Table.Col> cols = new ArrayList<Table.Col>();
+      private final List<Table.Col> cols = new ArrayList<>();
 
       private int size = 0;
 
       private int col = 0;
 
       public static class Col{
-         private final List<String> text = new ArrayList<String>();
+         private final List<String> text = new ArrayList<>();
 
          private int width;
 
@@ -173,13 +161,13 @@ public class InstructionHelper{
    }
 
    public static class BranchVector{
-      protected Instruction from;
+      protected final Instruction from;
 
-      protected Instruction to;
+      protected final Instruction to;
 
-      protected Instruction start;
+      protected final Instruction start;
 
-      protected Instruction end;
+      protected final Instruction end;
 
       private boolean forward = false;
 
@@ -349,7 +337,7 @@ public class InstructionHelper{
                label.append(methodCall.getConstantPoolMethodEntry().getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8());
             } else if (instruction instanceof OperatorInstruction) {
                final OperatorInstruction operatorInstruction = (OperatorInstruction) instruction;
-               label.append(operatorInstruction.getOperator().getText() + "(" + byteCodeName + ")");
+               label.append(operatorInstruction.getOperator().getText()).append("(").append(byteCodeName).append(")");
             } else if (instruction instanceof FieldReference) {
                final FieldReference field = (FieldReference) instruction;
                label.append(field.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
@@ -386,8 +374,8 @@ public class InstructionHelper{
             } else if (instruction instanceof I_IINC) {
 
                label.append(instruction.getByteCode());
-               label.append(" " + ((I_IINC) instruction).getDelta());
-               label.append(" " + ((I_IINC) instruction).getLocalVariableInfo().getVariableName());
+               label.append(" ").append(((I_IINC) instruction).getDelta());
+               label.append(" ").append(((I_IINC) instruction).getLocalVariableInfo().getVariableName());
             } else if (instruction instanceof CompositeInstruction) {
                label.append("composite ");
                label.append(instruction.getByteCode());
@@ -505,7 +493,7 @@ public class InstructionHelper{
       return (table.toString());
    }
 
-   private static Comparator<BranchVector> branchInfoComparator = new Comparator<BranchVector>(){
+   private static final Comparator<BranchVector> branchInfoComparator = new Comparator<BranchVector>(){
       @Override public int compare(BranchVector left, BranchVector right) {
          final int value = left.getFrom().compareTo(right.getFrom());
          return (value);
@@ -514,7 +502,7 @@ public class InstructionHelper{
    };
 
    static List<BranchVector> getBranches(MethodModel _methodModel) {
-      final List<BranchVector> branchVectors = new ArrayList<BranchVector>();
+      final List<BranchVector> branchVectors = new ArrayList<>();
 
       for (Instruction instruction = _methodModel.getPCHead(); instruction != null; instruction = instruction.getNextPC()) {
          if (instruction.isBranch()) {
@@ -533,7 +521,7 @@ public class InstructionHelper{
       final String label = InstructionHelper.getLabel(i, false, true, true);
 
       if (i instanceof CloneInstruction) {
-         edump(_sb, ((CloneInstruction) i).getReal(), true);
+         edump(_sb, i.getReal(), true);
       } else {
 
          if (i.producesStack()) {
@@ -547,7 +535,7 @@ public class InstructionHelper{
          } else {
             _sb.append(" ");
          }
-         _sb.append(i.getThisPC() + ":" + label);
+         _sb.append(i.getThisPC()).append(":").append(label);
       }
 
    }
@@ -556,7 +544,7 @@ public class InstructionHelper{
       final String label = i.getByteCode().getName();// InstructionHelper.getLabel(i, false, false, false);
 
       if (i instanceof CloneInstruction) {
-         fdump(_depth, ((CloneInstruction) i).getReal(), true);
+         fdump(_depth, i.getReal(), true);
       } else {
          if (_depth == 0) {
             if (i.producesStack()) {
@@ -594,7 +582,7 @@ public class InstructionHelper{
       final String label = InstructionHelper.getLabel(i, true, false, false);
 
       if (i instanceof CloneInstruction) {
-         dump(_indent, ((CloneInstruction) i).getReal(), true);
+         dump(_indent, i.getReal(), true);
       } else {
          System.out.println(_indent + (clone ? "*" : " ") + label);
       }

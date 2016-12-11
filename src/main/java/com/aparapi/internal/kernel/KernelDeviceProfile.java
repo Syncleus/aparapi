@@ -15,19 +15,21 @@
  */
 package com.aparapi.internal.kernel;
 
-import com.aparapi.*;
-import com.aparapi.device.*;
+import com.aparapi.Config;
+import com.aparapi.Kernel;
+import com.aparapi.device.Device;
 
-import java.text.*;
-import java.util.*;
-import java.util.logging.*;
+import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by Barney on 02/09/2015.
  */
 public class KernelDeviceProfile {
 
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
    private static final double MILLION = 1000 * 1000;
    private static final int TABLE_COLUMN_HEADER_WIDTH = 21;
    private static final int TABLE_COLUMN_COUNT_WIDTH = 8;
@@ -35,8 +37,8 @@ public class KernelDeviceProfile {
    private static String tableHeader = null;
    private final Class<? extends Kernel> kernel;
    private final Device device;
-   private long[] currentTimes = new long[ProfilingEvent.values().length];
-   private long[] accumulatedTimes = new long[ProfilingEvent.values().length];
+   private final long[] currentTimes = new long[ProfilingEvent.values().length];
+   private final long[] accumulatedTimes = new long[ProfilingEvent.values().length];
    private ProfilingEvent lastEvent = null;
    private final DecimalFormat format;
    private long invocationCount = 0;

@@ -52,20 +52,28 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.internal.model;
 
-import com.aparapi.*;
-import com.aparapi.internal.annotation.*;
-import com.aparapi.internal.exception.*;
-import com.aparapi.internal.instruction.InstructionSet.*;
+import com.aparapi.Config;
+import com.aparapi.Kernel;
+import com.aparapi.internal.annotation.DocMe;
+import com.aparapi.internal.exception.AparapiException;
+import com.aparapi.internal.exception.ClassParseException;
+import com.aparapi.internal.instruction.InstructionSet.TypeSpec;
+import com.aparapi.internal.model.ClassModel.AttributePool.CodeEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.NameAndTypeEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.UTF8Entry;
 import com.aparapi.internal.model.ValueCache.ThrowingValueComputer;
-import com.aparapi.internal.model.ClassModel.AttributePool.*;
-import com.aparapi.internal.model.ClassModel.ConstantPool.*;
-import com.aparapi.internal.reader.*;
-import com.aparapi.internal.util.*;
+import com.aparapi.internal.reader.ByteReader;
+import com.aparapi.internal.util.Reflection;
 
-import java.io.*;
-import java.lang.reflect.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class represents a ClassFile (MyClass.class).
@@ -135,7 +143,7 @@ public class ClassModel {
 
    public static final char SIGC_PACKAGE = '/';
 
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
    private ClassModel superClazz = null;
 
@@ -148,7 +156,7 @@ public class ClassModel {
    });
 
    //   private Memoizer<Map<String, Kernel.PrivateMemorySpace>> privateMemoryFields = Memoizer.of(this::computePrivateMemoryFields);
-   private Memoizer<Map<String, Kernel.PrivateMemorySpace>> privateMemoryFields = Memoizer.Impl
+   private final Memoizer<Map<String, Kernel.PrivateMemorySpace>> privateMemoryFields = Memoizer.Impl
          .of(new Supplier<Map<String, Kernel.PrivateMemorySpace>>(){
             @Override
             public Map<String, Kernel.PrivateMemorySpace> get() {
@@ -158,7 +166,7 @@ public class ClassModel {
 
    //   private ValueCache<String, Integer, ClassParseException> privateMemorySizes = ValueCache.on(this::computePrivateMemorySize);
 
-   private ValueCache<String, Integer, ClassParseException> privateMemorySizes = ValueCache
+   private final ValueCache<String, Integer, ClassParseException> privateMemorySizes = ValueCache
          .on(new ThrowingValueComputer<String, Integer, ClassParseException>(){
             @Override
             public Integer compute(String fieldName) throws ClassParseException {
@@ -190,13 +198,13 @@ public class ClassModel {
       }
    }
 
-   ClassModel(InputStream _inputStream) throws ClassParseException {
+   ClassModel(InputStream _inputStream) {
 
       parse(_inputStream);
 
    }
 
-   ClassModel(Class<?> _clazz, byte[] _bytes) throws ClassParseException {
+   ClassModel(Class<?> _clazz, byte[] _bytes) {
       clazz = _clazz;
       parse(new ByteArrayInputStream(_bytes));
    }
@@ -208,13 +216,9 @@ public class ClassModel {
     * @return true if 'this' a superclass of another named class 
     */
    public boolean isSuperClass(String otherClassName) {
-      if (getClassWeAreModelling().getName().equals(otherClassName)) {
-         return true;
-      } else if (superClazz != null) {
-         return superClazz.isSuperClass(otherClassName);
-      } else {
-         return false;
-      }
+      return getClassWeAreModelling().getName().equals(otherClassName)
+              || ((superClazz != null)
+              && (superClazz.isSuperClass(otherClassName)));
    }
 
    /**
@@ -314,8 +318,8 @@ public class ClassModel {
    }
 
    private Map<String, Kernel.PrivateMemorySpace> computePrivateMemoryFields() {
-      Map<String, Kernel.PrivateMemorySpace> tempPrivateMemoryFields = new HashMap<String, Kernel.PrivateMemorySpace>();
-      Map<Field, Kernel.PrivateMemorySpace> privateMemoryFields = new HashMap<Field, Kernel.PrivateMemorySpace>();
+      Map<String, Kernel.PrivateMemorySpace> tempPrivateMemoryFields = new HashMap<>();
+      Map<Field, Kernel.PrivateMemorySpace> privateMemoryFields = new HashMap<>();
       for (Field field : getClassWeAreModelling().getDeclaredFields()) {
          Kernel.PrivateMemorySpace privateMemorySpace = field.getAnnotation(Kernel.PrivateMemorySpace.class);
          if (privateMemorySpace != null) {
@@ -348,7 +352,7 @@ public class ClassModel {
          int lastDollar = fieldName.lastIndexOf('$');
          String sizeText = fieldName.substring(lastDollar + 1);
          try {
-            return new Integer(Integer.parseInt(sizeText));
+            return Integer.parseInt(sizeText);
          } catch (NumberFormatException e) {
             throw new ClassParseException(ClassParseException.TYPE.IMPROPERPRIVATENAMEMANGLING, fieldName);
          }
@@ -361,8 +365,8 @@ public class ClassModel {
    }
 
    private Set<String> computeNoCLMethods() {
-      Set<String> tempNoClMethods = new HashSet<String>();
-      HashSet<Method> methods = new HashSet<Method>();
+      Set<String> tempNoClMethods = new HashSet<>();
+      HashSet<Method> methods = new HashSet<>();
       for (Method method : getClassWeAreModelling().getDeclaredMethods()) {
          if (method.getAnnotation(Kernel.NoCL.class) != null) {
             methods.add(method);
@@ -388,7 +392,7 @@ public class ClassModel {
    }
 
    public static String convert(String _string, String _insert, boolean _showFullClassName) {
-      Stack<String> stringStack = new Stack<String>();
+      Stack<String> stringStack = new Stack<>();
       Stack<String> methodStack = null;
       final int length = _string.length();
       final char[] chars = _string.toCharArray();
@@ -490,7 +494,7 @@ public class ClassModel {
                inArgs = false;
                stringStack.push(")");
                methodStack = stringStack;
-               stringStack = new Stack<String>();
+               stringStack = new Stack<>();
                i++; // step over this
             }
                break;
@@ -567,7 +571,7 @@ public class ClassModel {
          methodName = _string.substring(dotIndex + 1, parenIndex);
       }
 
-      Stack<String> stringStack = new Stack<String>();
+      Stack<String> stringStack = new Stack<>();
       Stack<String> methodStack = null;
       final int length = descriptor.length();
       final char[] chars = new char[descriptor.length()];
@@ -634,7 +638,7 @@ public class ClassModel {
                inMethod = true;
                inArray = false;
                methodStack = stringStack;
-               stringStack = new Stack<String>();
+               stringStack = new Stack<>();
                i++; // step over this
             }
                break;
@@ -651,25 +655,21 @@ public class ClassModel {
       return (methodDescription);
    }
 
-   private static final ValueCache<Class<?>, ClassModel, ClassParseException> classModelCache = ValueCache
-         .on(new ThrowingValueComputer<Class<?>, ClassModel, ClassParseException>(){
+   private static final ValueCache<Class<?>, ClassModel, ClassParseException>
+           classModelCache = ValueCache.on(new ThrowingValueComputer<Class<?>, ClassModel, ClassParseException>(){
             @Override
             public ClassModel compute(Class<?> key) throws ClassParseException {
-               return createClassModelInternal(key);
+               ClassModel classModel = new ClassModel(key);
+               return classModel;
             }
          });
-
-   private static ClassModel createClassModelInternal(Class<?> key) throws ClassParseException {
-      ClassModel classModel = new ClassModel(key);
-      return classModel;
-   }
 
    public static ClassModel createClassModel(Class<?> _class) throws ClassParseException {
       if (CacheEnabler.areCachesEnabled()) {
          return classModelCache.computeIfAbsent(_class);
       }
 
-      return createClassModelInternal(_class);
+      return new ClassModel(_class);
    }
 
    private int magic;
@@ -686,11 +686,11 @@ public class ClassModel {
 
    private int superClassConstantPoolIndex;
 
-   private final List<ClassModelInterface> interfaces = new ArrayList<ClassModelInterface>();
+   private final List<ClassModelInterface> interfaces = new ArrayList<>();
 
-   private final List<ClassModelField> fields = new ArrayList<ClassModelField>();
+   private final List<ClassModelField> fields = new ArrayList<>();
 
-   private final List<ClassModelMethod> methods = new ArrayList<ClassModelMethod>();
+   private final List<ClassModelMethod> methods = new ArrayList<>();
 
    private AttributePool attributePool;
 
@@ -714,7 +714,7 @@ public class ClassModel {
       METHODTYPE, //16
       UNUSED17,
       INVOKEDYNAMIC//18
-   };
+   }
 
    public enum Access {
       PUBLIC(0x00000001),
@@ -734,9 +734,9 @@ public class ClassModel {
       STRICT(0x00000800),
       ANNOTATION(0x00002000),
       ACC_ENUM(0x00004000);
-      int bits;
+      final int bits;
 
-      private Access(int _bits) {
+      Access(int _bits) {
          bits = _bits;
       }
 
@@ -745,10 +745,10 @@ public class ClassModel {
       }
 
       public String convert(int _accessFlags) {
-         final StringBuffer stringBuffer = new StringBuffer();
+         final StringBuilder stringBuffer = new StringBuilder();
          for (final Access access : Access.values()) {
             if (access.bitIsSet(_accessFlags)) {
-               stringBuffer.append(" " + access.name().toLowerCase());
+               stringBuffer.append(" ").append(access.name().toLowerCase());
             }
          }
 
@@ -756,17 +756,17 @@ public class ClassModel {
       }
    }
 
-   private static enum SignatureParseState {
+   private enum SignatureParseState {
       skipping,
       counting,
       inclass,
       inArray,
-      done;
-   };
+      done
+   }
 
    public class ConstantPool implements Iterable<ConstantPool.Entry>{
 
-      private final List<Entry> entries = new ArrayList<Entry>();
+      private final List<Entry> entries = new ArrayList<>();
 
       public abstract class Entry {
          private final ConstantPoolType constantPoolType;
@@ -923,7 +923,7 @@ public class ClassModel {
       }
 
       class MethodTypeEntry extends Entry{
-         private int descriptorIndex;
+         private final int descriptorIndex;
 
          MethodTypeEntry(ByteReader _byteReader, int _slot) {
             super(_byteReader, _slot, ConstantPoolType.METHODTYPE);
@@ -943,9 +943,9 @@ public class ClassModel {
       class MethodHandleEntry extends Entry{
          // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4
 
-         private int referenceKind;
+         private final int referenceKind;
 
-         private int referenceIndex;
+         private final int referenceIndex;
 
          MethodHandleEntry(ByteReader _byteReader, int _slot) {
             super(_byteReader, _slot, ConstantPoolType.METHODHANDLE);
@@ -966,9 +966,9 @@ public class ClassModel {
       class InvokeDynamicEntry extends Entry{
          // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4
 
-         private int bootstrapMethodAttrIndex;
+         private final int bootstrapMethodAttrIndex;
 
-         private int nameAndTypeIndex;
+         private final int nameAndTypeIndex;
 
          InvokeDynamicEntry(ByteReader _byteReader, int _slot) {
             super(_byteReader, _slot, ConstantPoolType.INVOKEDYNAMIC);
@@ -1043,7 +1043,7 @@ public class ClassModel {
 
          public Arg[] getArgs() {
             if ((args == null) || (returnType == null)) {
-               final List<Arg> argList = new ArrayList<Arg>();
+               final List<Arg> argList = new ArrayList<>();
                final NameAndTypeEntry nameAndTypeEntry = getNameAndTypeEntry();
 
                final String signature = nameAndTypeEntry.getDescriptorUTF8Entry().getUTF8();// "([[IF)V" for a method that takes an int[][], float and returns void.
@@ -1121,9 +1121,9 @@ public class ClassModel {
       }
 
       public abstract class ReferenceEntry extends Entry{
-         protected int referenceClassIndex;
+         protected final int referenceClassIndex;
 
-         protected int nameAndTypeIndex;
+         protected final int nameAndTypeIndex;
 
          protected int argCount = -1;
 
@@ -1397,7 +1397,6 @@ public class ClassModel {
       public String getDescription(ConstantPool.Entry _entry) {
          final StringBuilder sb = new StringBuilder();
          if (_entry instanceof ConstantPool.EmptyEntry) {
-            ;
          } else if (_entry instanceof ConstantPool.DoubleEntry) {
             final ConstantPool.DoubleEntry doubleEntry = (ConstantPool.DoubleEntry) _entry;
             sb.append(doubleEntry.getDoubleValue());
@@ -1425,7 +1424,7 @@ public class ClassModel {
             final ConstantPool.NameAndTypeEntry nameAndTypeEntry = (ConstantPool.NameAndTypeEntry) _entry;
             final ConstantPool.UTF8Entry utf8NameEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getNameIndex());
             final ConstantPool.UTF8Entry utf8DescriptorEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getDescriptorIndex());
-            sb.append(utf8NameEntry.getUTF8() + "." + utf8DescriptorEntry.getUTF8());
+            sb.append(utf8NameEntry.getUTF8()).append(".").append(utf8DescriptorEntry.getUTF8());
          } else if (_entry instanceof ConstantPool.MethodEntry) {
             final ConstantPool.MethodEntry methodEntry = (ConstantPool.MethodEntry) _entry;
             final ConstantPool.ClassEntry classEntry = (ConstantPool.ClassEntry) get(methodEntry.getClassIndex());
@@ -1526,7 +1525,7 @@ public class ClassModel {
       }
 
       public String getType(ConstantPool.Entry _entry) {
-         final StringBuffer sb = new StringBuffer();
+         final StringBuilder sb = new StringBuilder();
          if (_entry instanceof ConstantPool.EmptyEntry) {
             sb.append("empty");
          } else if (_entry instanceof ConstantPool.DoubleEntry) {
@@ -1582,7 +1581,7 @@ public class ClassModel {
    }
 
    public class AttributePool {
-      private final List<AttributePoolEntry> attributePoolEntries = new ArrayList<AttributePoolEntry>();
+      private final List<AttributePoolEntry> attributePoolEntries = new ArrayList<>();
 
       public class CodeEntry extends AttributePoolEntry{
 
@@ -1623,7 +1622,7 @@ public class ClassModel {
             }
          }
 
-         private final List<ExceptionPoolEntry> exceptionPoolEntries = new ArrayList<ExceptionPoolEntry>();
+         private final List<ExceptionPoolEntry> exceptionPoolEntries = new ArrayList<>();
 
          private final AttributePool codeEntryAttributePool;
 
@@ -1695,9 +1694,9 @@ public class ClassModel {
       }
 
       public abstract class AttributePoolEntry {
-         protected int length;
+         protected final int length;
 
-         protected int nameIndex;
+         protected final int nameIndex;
 
          public AttributePoolEntry(ByteReader _byteReader, int _nameIndex, int _length) {
             nameIndex = _nameIndex;
@@ -1722,7 +1721,7 @@ public class ClassModel {
       }
 
       public abstract class PoolEntry<T> extends AttributePoolEntry implements Iterable<T>{
-         private final List<T> pool = new ArrayList<T>();
+         private final List<T> pool = new ArrayList<>();
 
          public List<T> getPool() {
             return (pool);
@@ -1976,7 +1975,7 @@ public class ClassModel {
 
          public String getVariableName(int _pc, int _index) {
             String returnValue = "unknown";
-            final RealLocalVariableInfo localVariableInfo = (RealLocalVariableInfo) getVariable(_pc, _index);
+            final RealLocalVariableInfo localVariableInfo = getVariable(_pc, _index);
             if (localVariableInfo != null) {
                returnValue = convert(constantPool.getUTF8Entry(localVariableInfo.getDescriptorIndex()).getUTF8(), constantPool
                      .getUTF8Entry(localVariableInfo.getNameIndex()).getUTF8());
@@ -1994,7 +1993,7 @@ public class ClassModel {
                   argument = _byteReader.u2();
                }
 
-               int argument;// u2;
+               final int argument;// u2;
             }
 
             public BootstrapMethod(ByteReader _byteReader) {
@@ -2006,11 +2005,11 @@ public class ClassModel {
                }
             }
 
-            int bootstrapMethodRef; //u2
+            final int bootstrapMethodRef; //u2
 
-            int numBootstrapArguments; //u2
+            final int numBootstrapArguments; //u2
 
-            BootstrapArgument bootstrapArguments[];
+            final BootstrapArgument[] bootstrapArguments;
          }
 
          BootstrapMethodsEntry(ByteReader _byteReader, int _nameIndex, int _length) {
@@ -2022,9 +2021,9 @@ public class ClassModel {
             }
          }
 
-         private int numBootstrapMethods;
+         private final int numBootstrapMethods;
 
-         BootstrapMethod bootstrapMethods[];
+         final BootstrapMethod[] bootstrapMethods;
 
          int getNumBootstrapMethods() {
             return (numBootstrapMethods);
@@ -2052,7 +2051,7 @@ public class ClassModel {
       }
 
       class StackMapTableEntry extends AttributePoolEntry{
-         private byte[] bytes;
+         private final byte[] bytes;
 
          StackMapTableEntry(ByteReader _byteReader, int _nameIndex, int _length) {
             super(_byteReader, _nameIndex, _length);
@@ -2070,7 +2069,7 @@ public class ClassModel {
       }
 
       public class LocalVariableTypeTableEntry extends AttributePoolEntry{
-         private byte[] bytes;
+         private final byte[] bytes;
 
          public LocalVariableTypeTableEntry(ByteReader _byteReader, int _nameIndex, int _length) {
             super(_byteReader, _nameIndex, _length);
@@ -2123,7 +2122,7 @@ public class ClassModel {
                      tag = _tag;
                   }
 
-                  int tag;
+                  final int tag;
 
                }
 
@@ -2305,56 +2304,74 @@ public class ClassModel {
                throw new IllegalStateException("corrupted state reading attributes for " + name);
             }
             final String attributeName = utf8Entry.getUTF8();
-            if (attributeName.equals(LOCALVARIABLETABLE_TAG)) {
-               localVariableTableEntry = new RealLocalVariableTableEntry(_byteReader, attributeNameIndex, length);
-               entry = (RealLocalVariableTableEntry) localVariableTableEntry;
-            } else if (attributeName.equals(CONSTANTVALUE_TAG)) {
-               entry = new ConstantValueEntry(_byteReader, attributeNameIndex, length);
-            } else if (attributeName.equals(LINENUMBERTABLE_TAG)) {
-               lineNumberTableEntry = new LineNumberTableEntry(_byteReader, attributeNameIndex, length);
-               entry = lineNumberTableEntry;
-            } else if (attributeName.equals(SOURCEFILE_TAG)) {
-               sourceFileEntry = new SourceFileEntry(_byteReader, attributeNameIndex, length);
-               entry = sourceFileEntry;
-            } else if (attributeName.equals(SYNTHETIC_TAG)) {
-               syntheticEntry = new SyntheticEntry(_byteReader, attributeNameIndex, length);
-               entry = syntheticEntry;
-            } else if (attributeName.equals(EXCEPTIONS_TAG)) {
-               exceptionEntry = new ExceptionEntry(_byteReader, attributeNameIndex, length);
-               entry = exceptionEntry;
-            } else if (attributeName.equals(INNERCLASSES_TAG)) {
-               entry = new InnerClassesEntry(_byteReader, attributeNameIndex, length);
-            } else if (attributeName.equals(DEPRECATED_TAG)) {
-               deprecatedEntry = new DeprecatedEntry(_byteReader, attributeNameIndex, length);
-               entry = deprecatedEntry;
-            } else if (attributeName.equals(CODE_TAG)) {
-               codeEntry = new CodeEntry(_byteReader, attributeNameIndex, length);
-               entry = codeEntry;
-            } else if (attributeName.equals(ENCLOSINGMETHOD_TAG)) {
-               enclosingMethodEntry = new EnclosingMethodEntry(_byteReader, attributeNameIndex, length);
-               entry = enclosingMethodEntry;
-            } else if (attributeName.equals(SIGNATURE_TAG)) {
-               entry = new SignatureEntry(_byteReader, attributeNameIndex, length);
-            } else if (attributeName.equals(RUNTIMEINVISIBLEANNOTATIONS_TAG)) {
-               runtimeInvisibleAnnotationsEntry = new RuntimeAnnotationsEntry(_byteReader, attributeNameIndex, length);
-               entry = runtimeInvisibleAnnotationsEntry;
-            } else if (attributeName.equals(RUNTIMEVISIBLEANNOTATIONS_TAG)) {
-               runtimeVisibleAnnotationsEntry = new RuntimeAnnotationsEntry(_byteReader, attributeNameIndex, length);
-               entry = runtimeVisibleAnnotationsEntry;
-            } else if (attributeName.equals(BOOTSTRAPMETHODS_TAG)) {
-               bootstrapMethodsEntry = new BootstrapMethodsEntry(_byteReader, attributeNameIndex, length);
-               entry = bootstrapMethodsEntry;
-               // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.21
-            } else if (attributeName.equals(STACKMAPTABLE_TAG)) {
-               // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.4
+            switch (attributeName) {
+               case LOCALVARIABLETABLE_TAG:
+                  localVariableTableEntry = new RealLocalVariableTableEntry(_byteReader, attributeNameIndex, length);
+                  entry = (RealLocalVariableTableEntry) localVariableTableEntry;
+                  break;
+               case CONSTANTVALUE_TAG:
+                  entry = new ConstantValueEntry(_byteReader, attributeNameIndex, length);
+                  break;
+               case LINENUMBERTABLE_TAG:
+                  lineNumberTableEntry = new LineNumberTableEntry(_byteReader, attributeNameIndex, length);
+                  entry = lineNumberTableEntry;
+                  break;
+               case SOURCEFILE_TAG:
+                  sourceFileEntry = new SourceFileEntry(_byteReader, attributeNameIndex, length);
+                  entry = sourceFileEntry;
+                  break;
+               case SYNTHETIC_TAG:
+                  syntheticEntry = new SyntheticEntry(_byteReader, attributeNameIndex, length);
+                  entry = syntheticEntry;
+                  break;
+               case EXCEPTIONS_TAG:
+                  exceptionEntry = new ExceptionEntry(_byteReader, attributeNameIndex, length);
+                  entry = exceptionEntry;
+                  break;
+               case INNERCLASSES_TAG:
+                  entry = new InnerClassesEntry(_byteReader, attributeNameIndex, length);
+                  break;
+               case DEPRECATED_TAG:
+                  deprecatedEntry = new DeprecatedEntry(_byteReader, attributeNameIndex, length);
+                  entry = deprecatedEntry;
+                  break;
+               case CODE_TAG:
+                  codeEntry = new CodeEntry(_byteReader, attributeNameIndex, length);
+                  entry = codeEntry;
+                  break;
+               case ENCLOSINGMETHOD_TAG:
+                  enclosingMethodEntry = new EnclosingMethodEntry(_byteReader, attributeNameIndex, length);
+                  entry = enclosingMethodEntry;
+                  break;
+               case SIGNATURE_TAG:
+                  entry = new SignatureEntry(_byteReader, attributeNameIndex, length);
+                  break;
+               case RUNTIMEINVISIBLEANNOTATIONS_TAG:
+                  runtimeInvisibleAnnotationsEntry = new RuntimeAnnotationsEntry(_byteReader, attributeNameIndex, length);
+                  entry = runtimeInvisibleAnnotationsEntry;
+                  break;
+               case RUNTIMEVISIBLEANNOTATIONS_TAG:
+                  runtimeVisibleAnnotationsEntry = new RuntimeAnnotationsEntry(_byteReader, attributeNameIndex, length);
+                  entry = runtimeVisibleAnnotationsEntry;
+                  break;
+               case BOOTSTRAPMETHODS_TAG:
+                  bootstrapMethodsEntry = new BootstrapMethodsEntry(_byteReader, attributeNameIndex, length);
+                  entry = bootstrapMethodsEntry;
+                  // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.21
+                  break;
+               case STACKMAPTABLE_TAG:
+                  // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.4
 
-               entry = new StackMapTableEntry(_byteReader, attributeNameIndex, length);
-            } else if (attributeName.equals(LOCALVARIABLETYPETABLE_TAG)) {
-               // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.14
-               entry = new LocalVariableTypeTableEntry(_byteReader, attributeNameIndex, length);
-            } else {
-               logger.warning("Found unexpected Attribute (name = " + attributeName + ")");
-               entry = new OtherEntry(_byteReader, attributeNameIndex, length);
+                  entry = new StackMapTableEntry(_byteReader, attributeNameIndex, length);
+                  break;
+               case LOCALVARIABLETYPETABLE_TAG:
+                  // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.14
+                  entry = new LocalVariableTypeTableEntry(_byteReader, attributeNameIndex, length);
+                  break;
+               default:
+                  logger.warning("Found unexpected Attribute (name = " + attributeName + ")");
+                  entry = new OtherEntry(_byteReader, attributeNameIndex, length);
+                  break;
             }
             attributePoolEntries.add(entry);
 
@@ -2403,12 +2420,12 @@ public class ClassModel {
 
    }
 
-   private static ClassLoader classModelLoader = ClassModel.class.getClassLoader();
+   private static final ClassLoader classModelLoader = ClassModel.class.getClassLoader();
 
    public class ClassModelField {
       private final int fieldAccessFlags;
 
-      AttributePool fieldAttributePool;
+      final AttributePool fieldAttributePool;
 
       private final int descriptorIndex;
 
@@ -2617,12 +2634,12 @@ public class ClassModel {
     * @param _className The name of the class to load (we convert '.' to '/' and append ".class" so you don't have to).
     * @throws ClassParseException
     */
-   private void parse(ClassLoader _classLoader, String _className) throws ClassParseException {
+   private void parse(ClassLoader _classLoader, String _className) {
 
       parse(_classLoader.getResourceAsStream(_className.replace('.', '/') + ".class"));
    }
 
-   void parse(InputStream _inputStream) throws ClassParseException {
+   void parse(InputStream _inputStream) {
 
       ByteReader byteReader = new ByteReader(_inputStream);
       magic = byteReader.u4();
@@ -2758,7 +2775,7 @@ public class ClassModel {
    }
 
    //   private ValueCache<MethodKey, MethodModel, AparapiException> methodModelCache = ValueCache.on(this::computeMethodModel);
-   private ValueCache<MethodKey, MethodModel, AparapiException> methodModelCache = ValueCache
+   private final ValueCache<MethodKey, MethodModel, AparapiException> methodModelCache = ValueCache
          .on(new ThrowingValueComputer<MethodKey, MethodModel, AparapiException>(){
             @Override public MethodModel compute(MethodKey key) throws AparapiException {
                return computeMethodModel(key);
@@ -2788,11 +2805,11 @@ public class ClassModel {
    }
 
    // These fields use for accessor conversion
-   private final ArrayList<FieldEntry> structMembers = new ArrayList<FieldEntry>();
+   private final ArrayList<FieldEntry> structMembers = new ArrayList<>();
 
-   private final ArrayList<Long> structMemberOffsets = new ArrayList<Long>();
+   private final ArrayList<Long> structMemberOffsets = new ArrayList<>();
 
-   private final ArrayList<TypeSpec> structMemberTypes = new ArrayList<TypeSpec>();
+   private final ArrayList<TypeSpec> structMemberTypes = new ArrayList<>();
 
    private int totalStructSize = 0;
 
