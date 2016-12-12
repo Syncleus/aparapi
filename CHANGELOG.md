@@ -1,5 +1,9 @@
 # Aparapi Changelog
 
+## 1.3.3
+
+* Fixed a bug where calling createProgram resulted in an exception. 
+
 ## 1.3.2
 
 * Added Windows 64bit support.
