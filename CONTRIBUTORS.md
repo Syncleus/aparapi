@@ -1,6 +1,7 @@
 # Contributors
 
 * Jeffrey Phillips Freeman <jeffrey.freeman@syncleus.com>
+* automenta - https://github.com/automenta
 * Florian Roesler <florian.roesler@wooga.net>
 * George Vinokhodov
 * Witold Bolt 
