@@ -52,25 +52,43 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.internal.kernel;
 
-import com.aparapi.*;
+import com.aparapi.Config;
+import com.aparapi.Kernel;
 import com.aparapi.Kernel.Constant;
-import com.aparapi.Kernel.*;
-import com.aparapi.device.*;
-import com.aparapi.internal.annotation.*;
-import com.aparapi.internal.exception.*;
-import com.aparapi.internal.instruction.InstructionSet.*;
-import com.aparapi.internal.jni.*;
-import com.aparapi.internal.model.*;
-import com.aparapi.internal.util.*;
-import com.aparapi.internal.writer.*;
-import com.aparapi.opencl.*;
+import com.aparapi.Kernel.EXECUTION_MODE;
+import com.aparapi.Kernel.KernelState;
+import com.aparapi.Kernel.Local;
+import com.aparapi.ProfileInfo;
+import com.aparapi.Range;
+import com.aparapi.device.Device;
+import com.aparapi.device.JavaDevice;
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.annotation.UsedByJNICode;
+import com.aparapi.internal.exception.AparapiException;
+import com.aparapi.internal.exception.CodeGenException;
+import com.aparapi.internal.instruction.InstructionSet.TypeSpec;
+import com.aparapi.internal.jni.KernelRunnerJNI;
+import com.aparapi.internal.model.ClassModel;
+import com.aparapi.internal.model.Entrypoint;
+import com.aparapi.internal.util.UnsafeWrapper;
+import com.aparapi.internal.writer.KernelWriter;
+import com.aparapi.opencl.OpenCL;
 
-import java.lang.reflect.*;
-import java.nio.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.ForkJoinPool.*;
-import java.util.logging.*;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
+import java.util.concurrent.ForkJoinPool.ManagedBlocker;
+import java.util.concurrent.ForkJoinWorkerThread;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The class is responsible for executing <code>Kernel</code> implementations. <br/>
@@ -90,7 +108,7 @@ import java.util.logging.*;
  */
 public class KernelRunner extends KernelRunnerJNI{
 
-   public static boolean BINARY_CACHING_DISABLED = false;
+   public static final boolean BINARY_CACHING_DISABLED = false;
 
    private static final int MINIMUM_ARRAY_SIZE = 1;
 
@@ -102,7 +120,7 @@ public class KernelRunner extends KernelRunnerJNI{
    @UsedByJNICode public static final int CANCEL_STATUS_TRUE = 1;
    private static final String CODE_GEN_ERROR_MARKER = CodeGenException.class.getName();
 
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
    private long jniContextHandle = 0;
 
@@ -147,8 +165,8 @@ public class KernelRunner extends KernelRunnerJNI{
 
    private static final ForkJoinPool threadPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors(),
          lowPriorityThreadFactory, null, false);
-   private static HashMap<Class<? extends Kernel>, String> openCLCache = new HashMap<>();
-   private static LinkedHashSet<String> seenBinaryKeys = new LinkedHashSet<>();
+   private static final HashMap<Class<? extends Kernel>, String> openCLCache = new HashMap<>();
+   private static final LinkedHashSet<String> seenBinaryKeys = new LinkedHashSet<>();
 
    /**
     * Create a KernelRunner for a specific Kernel instance.
@@ -362,7 +380,7 @@ public class KernelRunner extends KernelRunnerJNI{
                }
             } else {
                boolean silently = true; // not having an alternative algorithm is the normal state, and does not need reporting
-               fallBackToNextDevice(_settings, (Exception) null, silently);
+               fallBackToNextDevice(_settings, null, silently);
             }
          } else {
             final int localSize0 = _settings.range.getLocalSize(0);
@@ -678,10 +696,7 @@ public class KernelRunner extends KernelRunnerJNI{
    private static void await(CyclicBarrier _barrier) {
       try {
          _barrier.await();
-      } catch (final InterruptedException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final BrokenBarrierException e) {
+      } catch (final InterruptedException | BrokenBarrierException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
@@ -902,7 +917,7 @@ public class KernelRunner extends KernelRunnerJNI{
                   if (logger.isLoggable(Level.FINEST)) {
                      logger.finest("fType = " + t.getShortName() + " x= " + x);
                   }
-                  UnsafeWrapper.putBoolean(object, offset, (x == 1 ? true : false));
+                  UnsafeWrapper.putBoolean(object, offset, (x == 1));
                   // Booleans converted to 1 byte C chars for open cl
                   sizeWritten += TypeSpec.B.getSize();
                   break;
@@ -1031,9 +1046,7 @@ public class KernelRunner extends KernelRunnerJNI{
                arg.setSizeInBytes(totalElements * primitiveSize);
                arg.setArray(buffer);
             }
-         } catch (final IllegalArgumentException e) {
-            e.printStackTrace();
-         } catch (final IllegalAccessException e) {
+         } catch (final IllegalArgumentException | IllegalAccessException e) {
             e.printStackTrace();
          }
       }
@@ -1164,6 +1177,7 @@ public class KernelRunner extends KernelRunnerJNI{
          boolean legacyExecutionMode = kernel.getExecutionMode() != Kernel.EXECUTION_MODE.AUTO;
 
          ExecutionSettings settings = new ExecutionSettings(preferences, profile, _entrypoint, _range, _passes, legacyExecutionMode);
+
          // Two Kernels of the same class share the same KernelPreferences object, and since failure (fallback) generally mutates
          // the preferences object, we must lock it. Note this prevents two Kernels of the same class executing simultaneously.
          synchronized (preferences) {
@@ -1296,7 +1310,7 @@ public class KernelRunner extends KernelRunnerJNI{
                   }
 
                   final String extensions = getExtensionsJNI(jniContextHandle);
-                  capabilitiesSet = new HashSet<String>();
+                  capabilitiesSet = new HashSet<>();
 
                   final StringTokenizer strTok = new StringTokenizer(extensions);
                   while (strTok.hasMoreTokens()) {
@@ -1526,7 +1540,7 @@ public class KernelRunner extends KernelRunnerJNI{
             if (!(device instanceof JavaDevice)) {
                fallBackToNextDevice(_settings, "Non-OpenCL Kernel.EXECUTION_MODE requested but device is not a JavaDevice ");
             }
-            executeJava(_settings, (JavaDevice) device);
+            executeJava(_settings, device);
          }
 
          if (Config.enableExecutionModeReporting) {
@@ -1691,7 +1705,7 @@ public class KernelRunner extends KernelRunnerJNI{
       }
    }
 
-   private final Set<Object> puts = new HashSet<Object>();
+   private final Set<Object> puts = new HashSet<>();
 
    /**
     * Enqueue a request to return this array from the GPU. This method blocks until the array is available.

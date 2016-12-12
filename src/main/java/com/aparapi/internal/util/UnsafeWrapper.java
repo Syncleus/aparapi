@@ -129,22 +129,7 @@ public class UnsafeWrapper{
          putLongMethod = uc.getDeclaredMethod("putLong", Object.class, long.class, long.class);
          putByteMethod = uc.getDeclaredMethod("putByte", Object.class, long.class, byte.class);
          compareAndSwapIntMethod = uc.getDeclaredMethod("compareAndSwapInt", Object.class, long.class, int.class, int.class);
-      } catch (final SecurityException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final NoSuchFieldException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final ClassNotFoundException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final NoSuchMethodException e) {
+      } catch (final SecurityException | NoSuchMethodException | ClassNotFoundException | IllegalAccessException | IllegalArgumentException | NoSuchFieldException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
@@ -164,13 +149,7 @@ public class UnsafeWrapper{
             if ((Boolean) compareAndSwapIntMethod.invoke(unsafe, _arr, rawIndex, current, next)) {
                return current;
             }
-         } catch (final IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         } catch (final IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         } catch (final InvocationTargetException e) {
+         } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
          }
@@ -182,35 +161,23 @@ public class UnsafeWrapper{
 
       try {
          offset = (Integer) (arrayBaseOffsetMethod.invoke(unsafe, _arrayClass));
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
 
-      return (offset);
+       return (offset);
    }
 
    public static int arrayIndexScale(Class<?> _arrayClass) {
       int scale = 0;
       try {
          scale = (Integer) (arrayIndexScaleMethod.invoke(unsafe, _arrayClass));
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      return scale;
+       return scale;
    }
 
    private static int intArrayBase = arrayBaseOffset(int[].class);
@@ -221,114 +188,72 @@ public class UnsafeWrapper{
       Object object = null;
       try {
          object = getObjectMethod.invoke(unsafe, _object, _offset);
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      return (object);
+       return (object);
    }
 
    public static int getInt(Object _object, long _offset) {
       int value = 0;
       try {
          value = (Integer) getIntMethod.invoke(unsafe, _object, _offset);
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      return value;
+       return value;
    }
 
    public static float getFloat(Object _object, long _offset) {
       float value = 0;
       try {
          value = (Float) getFloatMethod.invoke(unsafe, _object, _offset);
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      return value;
+       return value;
    }
 
    public static byte getByte(Object _object, long _offset) {
       byte value = 0;
       try {
          value = (Byte) getByteMethod.invoke(unsafe, _object, _offset);
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      return value;
+       return value;
    }
 
    public static boolean getBoolean(Object _object, long _offset) {
       boolean value = false;
       try {
          value = (Boolean) getBooleanMethod.invoke(unsafe, _object, _offset);
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      return value;
+       return value;
    }
 
    public static long getLong(Object _object, long _offset) {
       long value = 0;
       try {
          value = (Long) getLongMethod.invoke(unsafe, _object, _offset);
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      return value;
+       return value;
    }
 
    public static void putBoolean(Object _object, long _offset, boolean _boolean) {
       try {
          putBooleanMethod.invoke(unsafe, _object, _offset, _boolean);
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
@@ -337,13 +262,7 @@ public class UnsafeWrapper{
    public static void putFloat(Object _object, long _offset, float _float) {
       try {
          putFloatMethod.invoke(unsafe, _object, _offset, _float);
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
@@ -352,13 +271,7 @@ public class UnsafeWrapper{
    public static void putInt(Object _object, long _offset, int _int) {
       try {
          putIntMethod.invoke(unsafe, _object, _offset, _int);
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
@@ -367,13 +280,7 @@ public class UnsafeWrapper{
    public static void putDouble(Object _object, long _offset, double _double) {
       try {
          putDoubleMethod.invoke(unsafe, _object, _offset, _double);
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
@@ -382,13 +289,7 @@ public class UnsafeWrapper{
    public static void putByte(Object _object, long _offset, byte _byte) {
       try {
          putByteMethod.invoke(unsafe, _object, _offset, _byte);
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
@@ -397,32 +298,20 @@ public class UnsafeWrapper{
    public static void putLong(Object _object, long _offset, long _long) {
       try {
          putLongMethod.invoke(unsafe, _object, _offset, _long);
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
    }
 
    public static long objectFieldOffset(Field _field) {
-      long offset = 0l;
+      long offset = 0L;
       try {
          offset = (Long) objectFieldOffsetMethod.invoke(unsafe, _field);
-      } catch (final IllegalArgumentException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final InvocationTargetException e) {
+      } catch (final IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      return offset;
+       return offset;
    }
 }

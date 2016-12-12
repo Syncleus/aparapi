@@ -19,8 +19,8 @@ import com.aparapi.Kernel;
 
 public class PreferencesWrapper {
 
-  private Class<? extends Kernel> klass;
-  private KernelPreferences preferences;
+  private final Class<? extends Kernel> klass;
+  private final KernelPreferences preferences;
 
   public PreferencesWrapper(Class<? extends Kernel> klass, KernelPreferences preferences) {
     super();

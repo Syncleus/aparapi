@@ -15,9 +15,9 @@
  */
 package com.aparapi.internal.opencl;
 
-import java.util.List;
-
 import com.aparapi.internal.jni.OpenCLJNI;
+
+import java.util.List;
 
 public class OpenCLKernel extends OpenCLJNI{
 

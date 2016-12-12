@@ -52,47 +52,54 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.internal.model;
 
-import com.aparapi.*;
-import com.aparapi.internal.exception.*;
-import com.aparapi.internal.instruction.*;
+import com.aparapi.Config;
+import com.aparapi.Kernel;
+import com.aparapi.internal.exception.AparapiException;
+import com.aparapi.internal.exception.ClassParseException;
+import com.aparapi.internal.instruction.Instruction;
+import com.aparapi.internal.instruction.InstructionSet;
 import com.aparapi.internal.instruction.InstructionSet.*;
-import com.aparapi.internal.model.ClassModel.*;
-import com.aparapi.internal.model.ClassModel.ConstantPool.*;
-import com.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.*;
-import com.aparapi.internal.util.*;
+import com.aparapi.internal.model.ClassModel.ClassModelField;
+import com.aparapi.internal.model.ClassModel.ClassModelMethod;
+import com.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.Arg;
+import com.aparapi.internal.util.UnsafeWrapper;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Entrypoint implements Cloneable {
 
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
-   private final List<ClassModel.ClassModelField> referencedClassModelFields = new ArrayList<ClassModel.ClassModelField>();
+   private final List<ClassModel.ClassModelField> referencedClassModelFields = new ArrayList<>();
 
-   private final List<Field> referencedFields = new ArrayList<Field>();
+   private final List<Field> referencedFields = new ArrayList<>();
 
-   private ClassModel classModel;
+   private final ClassModel classModel;
 
    private Object kernelInstance = null;
 
-   private final Set<String> referencedFieldNames = new LinkedHashSet<String>();
+   private final Set<String> referencedFieldNames = new LinkedHashSet<>();
 
-   private final Set<String> arrayFieldAssignments = new LinkedHashSet<String>();
+   private final Set<String> arrayFieldAssignments = new LinkedHashSet<>();
 
-   private final Set<String> arrayFieldAccesses = new LinkedHashSet<String>();
+   private final Set<String> arrayFieldAccesses = new LinkedHashSet<>();
 
    // Classes of object array members
-   private final HashMap<String, ClassModel> objectArrayFieldsClasses = new HashMap<String, ClassModel>();
+   private final HashMap<String, ClassModel> objectArrayFieldsClasses = new HashMap<>();
 
    // Supporting classes of object array members like supers
-   private final HashMap<String, ClassModel> allFieldsClasses = new HashMap<String, ClassModel>();
+   private final HashMap<String, ClassModel> allFieldsClasses = new HashMap<>();
 
    // Keep track of arrays whose length is taken via foo.length
-   private final Set<String> arrayFieldArrayLengthUsed = new LinkedHashSet<String>();
+   private final Set<String> arrayFieldArrayLengthUsed = new LinkedHashSet<>();
 
-   private final List<MethodModel> calledMethods = new ArrayList<MethodModel>();
+   private final List<MethodModel> calledMethods = new ArrayList<>();
 
    private final MethodModel methodModel;
 
@@ -411,7 +418,7 @@ public class Entrypoint implements Cloneable {
          }
       }
 
-      ClassModelMethod m = classModel.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL) ? true : false);
+      ClassModelMethod m = classModel.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL));
 
       // Did not find method in this class or supers. Look for data member object arrays
       if (m == null && !isMapped) {
@@ -423,7 +430,7 @@ public class Entrypoint implements Cloneable {
          for (ClassModel c : allFieldsClasses.values()) {
             if (c.getClassWeAreModelling().getName()
                   .equals(methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.'))) {
-               m = c.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL) ? true : false);
+               m = c.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL));
                assert m != null;
                break;
             }
@@ -454,7 +461,7 @@ public class Entrypoint implements Cloneable {
       methodModel = _methodModel;
       kernelInstance = _k;
 
-      final Map<ClassModelMethod, MethodModel> methodMap = new LinkedHashMap<ClassModelMethod, MethodModel>();
+      final Map<ClassModelMethod, MethodModel> methodMap = new LinkedHashMap<>();
 
       boolean discovered = true;
 
@@ -489,7 +496,7 @@ public class Entrypoint implements Cloneable {
       // Walk the whole graph of called methods and add them to the methodMap
       while (discovered) {
          discovered = false;
-         for (final MethodModel mm : new ArrayList<MethodModel>(methodMap.values())) {
+         for (final MethodModel mm : new ArrayList<>(methodMap.values())) {
             for (final MethodCall methodCall : mm.getMethodCalls()) {
 
                ClassModelMethod m = resolveCalledMethod(methodCall, classModel);
@@ -521,13 +528,13 @@ public class Entrypoint implements Cloneable {
 
       calledMethods.addAll(methodMap.values());
       Collections.reverse(calledMethods);
-      final List<MethodModel> methods = new ArrayList<MethodModel>(calledMethods);
+      final List<MethodModel> methods = new ArrayList<>(calledMethods);
 
       // add method to the calledMethods so we can include in this list
       methods.add(methodModel);
-      final Set<String> fieldAssignments = new HashSet<String>();
+      final Set<String> fieldAssignments = new HashSet<>();
 
-      final Set<String> fieldAccesses = new HashSet<String>();
+      final Set<String> fieldAccesses = new HashSet<>();
 
       for (final MethodModel methodModel : methods) {
 

@@ -15,14 +15,6 @@
  */
 package com.aparapi.internal.kernel;
 
-import java.lang.reflect.Constructor;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-
 import com.aparapi.Config;
 import com.aparapi.Kernel;
 import com.aparapi.device.Device;
@@ -30,15 +22,18 @@ import com.aparapi.device.JavaDevice;
 import com.aparapi.device.OpenCLDevice;
 import com.aparapi.internal.util.Reflection;
 
+import java.lang.reflect.Constructor;
+import java.util.*;
+
 /**
  * Created by Barney on 24/08/2015.
  */
 public class KernelManager {
 
    private static KernelManager INSTANCE = new KernelManager();
-   private LinkedHashMap<Integer, PreferencesWrapper> preferences = new LinkedHashMap<>();
-   private LinkedHashMap<Class<? extends Kernel>, KernelProfile> profiles = new LinkedHashMap<>();
-   private LinkedHashMap<Class<? extends Kernel>, Kernel> sharedInstances = new LinkedHashMap<>();
+   private final LinkedHashMap<Integer, PreferencesWrapper> preferences = new LinkedHashMap<>();
+   private final LinkedHashMap<Class<? extends Kernel>, KernelProfile> profiles = new LinkedHashMap<>();
+   private final LinkedHashMap<Class<? extends Kernel>, Kernel> sharedInstances = new LinkedHashMap<>();
 
    private KernelPreferences defaultPreferences;
 
@@ -116,7 +111,7 @@ public class KernelManager {
             int row = 0;
             for (KernelDeviceProfile deviceProfile : profile.getDeviceProfiles()) {
                if (row == 0) {
-                  builder.append(deviceProfile.getTableHeader()).append("\n");
+                  builder.append(KernelDeviceProfile.getTableHeader()).append("\n");
                }
                builder.append(deviceProfile.getAverageAsTableRow()).append("\n");
                ++row;

@@ -51,13 +51,13 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 
  */
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.concurrent.TimeUnit;
-
 import com.aparapi.Kernel;
 import com.aparapi.internal.model.CacheEnabler;
 import com.aparapi.internal.model.Supplier;
+
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.concurrent.TimeUnit;
 
 public class ConvolutionLargeTest{
 
@@ -69,9 +69,9 @@ public class ConvolutionLargeTest{
 
    private int height;
 
-   private float _convMatrix3x3[];
+   private final float[] _convMatrix3x3;
 
-   public ConvolutionLargeTest(String[] _args) throws IOException {
+   public ConvolutionLargeTest(String[] _args) {
       //      final File _file = new File(_args.length == 1 ? _args[0] : "testcard.jpg");
 
       _convMatrix3x3 = new float[] {
@@ -124,7 +124,7 @@ public class ConvolutionLargeTest{
          System.out.println("-----------------------------");
          System.out.println();
          testWithSupplier(new ImageConvolutionCreationContext(){
-            private ImageConvolution convolution = new ImageConvolution();
+            private final ImageConvolution convolution = new ImageConvolution();
 
             @Override public Supplier<ImageConvolution> getSupplier() {
                return new Supplier<ImageConvolution>(){

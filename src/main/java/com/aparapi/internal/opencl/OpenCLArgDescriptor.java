@@ -54,7 +54,7 @@ public class OpenCLArgDescriptor{
 
    private final String name;
 
-   public long bits;
+   public final long bits;
 
    public OpenCLKernel kernel;
 

@@ -29,7 +29,7 @@ public abstract class MultiPassKernelSwingWorker extends SwingWorker<Void, Void>
 
    public static final int DEFAULT_POLL_INTERVAL = 50;
 
-   private Kernel kernel;
+   private final Kernel kernel;
    private Timer timer;
 
    protected MultiPassKernelSwingWorker(Kernel kernel) {

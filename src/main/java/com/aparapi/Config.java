@@ -52,11 +52,13 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
  */
 package com.aparapi;
 
-import com.aparapi.internal.instruction.*;
-import com.aparapi.internal.jni.*;
-import com.aparapi.internal.tool.*;
+import com.aparapi.internal.instruction.Instruction;
+import com.aparapi.internal.jni.ConfigJNI;
+import com.aparapi.internal.tool.InstructionViewer;
 
-import java.util.logging.*;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A central location for holding all runtime configurable properties as well as logging configuration.
@@ -69,10 +71,21 @@ import java.util.logging.*;
  */
 public class Config extends ConfigJNI{
 
-   // Logging setup
    private static final String logPropName = propPkgName + ".logLevel";
 
    private static final Logger logger = Logger.getLogger(Config.getLoggerName());
+
+
+   /** originally from Range.java: */
+   public static final int THREADS_PER_CORE = 16;
+
+   /** originally from Range.java: */
+   public static final int MAX_OPENCL_GROUP_SIZE = 256;
+
+   /** originally from Range.java: */
+   public static final int MAX_GROUP_SIZE =
+           Math.max(Runtime.getRuntime().availableProcessors() * THREADS_PER_CORE,
+                    MAX_OPENCL_GROUP_SIZE);
 
    /**
     * Allows the user to request to use a jvmti agent to 
@@ -167,11 +180,11 @@ public class Config extends ConfigJNI{
 
    public static final boolean enableSWITCH = Boolean.getBoolean(propPkgName + ".enable.SWITCH");
 
-   public static boolean enableShowFakeLocalVariableTable = Boolean.getBoolean(propPkgName + ".enableShowFakeLocalVariableTable");
+   public static final boolean enableShowFakeLocalVariableTable = Boolean.getBoolean(propPkgName + ".enableShowFakeLocalVariableTable");
 
    public static final boolean enableInstructionDecodeViewer = Boolean.getBoolean(propPkgName + ".enableInstructionDecodeViewer");
 
-   public static String instructionListenerClassName = System.getProperty(propPkgName + ".instructionListenerClass");
+   public static /* TODO final */ String instructionListenerClassName = System.getProperty(propPkgName + ".instructionListenerClass");
 
    public static InstructionListener instructionListener = null;
 
@@ -193,7 +206,7 @@ public class Config extends ConfigJNI{
          System.out.println("Exception " + e + " in Aparapi logging setup");
          e.printStackTrace();
       }
-   };
+   }
 
    static {
       if (enableInstructionDecodeViewer && ((instructionListenerClassName == null) || instructionListenerClassName.equals(""))) {
@@ -204,13 +217,7 @@ public class Config extends ConfigJNI{
          try {
             final Class<?> instructionListenerClass = Class.forName(instructionListenerClassName);
             instructionListener = (InstructionListener) instructionListenerClass.newInstance();
-         } catch (final ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         } catch (final InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         } catch (final IllegalAccessException e) {
+         } catch (final ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
          }

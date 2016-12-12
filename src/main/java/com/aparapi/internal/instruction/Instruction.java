@@ -52,14 +52,14 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.internal.instruction;
 
-import java.util.LinkedList;
-
 import com.aparapi.internal.instruction.InstructionSet.Branch;
 import com.aparapi.internal.instruction.InstructionSet.ByteCode;
 import com.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
 import com.aparapi.internal.instruction.InstructionSet.ConditionalBranch;
 import com.aparapi.internal.model.MethodModel;
 import com.aparapi.internal.reader.ByteReader;
+
+import java.util.LinkedList;
 
 /**
  * Initially represents a single Java bytecode instruction.
@@ -74,13 +74,13 @@ import com.aparapi.internal.reader.ByteReader;
  */
 public abstract class Instruction{
 
-   protected MethodModel method;
+   protected final MethodModel method;
 
    private final ByteCode byteCode;
 
    private int length;
 
-   protected int pc;
+   protected final int pc;
 
    abstract String getDescription();
 
@@ -316,24 +316,24 @@ public abstract class Instruction{
       if (_branch.isReverse()) {
          if (_branch.isConditional()) {
             if (reverseConditionalBranchTargets == null) {
-               reverseConditionalBranchTargets = new LinkedList<ConditionalBranch>();
+               reverseConditionalBranchTargets = new LinkedList<>();
             }
             reverseConditionalBranchTargets.add((ConditionalBranch) _branch);
          } else {
             if (reverseUnconditionalBranchTargets == null) {
-               reverseUnconditionalBranchTargets = new LinkedList<Branch>();
+               reverseUnconditionalBranchTargets = new LinkedList<>();
             }
             reverseUnconditionalBranchTargets.add(_branch);
          }
       } else {
          if (_branch.isConditional()) {
             if (forwardConditionalBranchTargets == null) {
-               forwardConditionalBranchTargets = new LinkedList<ConditionalBranch>();
+               forwardConditionalBranchTargets = new LinkedList<>();
             }
             forwardConditionalBranchTargets.add((ConditionalBranch) _branch);
          } else {
             if (forwardUnconditionalBranchTargets == null) {
-               forwardUnconditionalBranchTargets = new LinkedList<Branch>();
+               forwardUnconditionalBranchTargets = new LinkedList<>();
             }
             forwardUnconditionalBranchTargets.add(_branch);
          }

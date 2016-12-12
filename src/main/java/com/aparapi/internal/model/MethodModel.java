@@ -52,23 +52,27 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
  */
 package com.aparapi.internal.model;
 
-import com.aparapi.*;
-import com.aparapi.internal.exception.*;
+import com.aparapi.Config;
+import com.aparapi.Kernel;
+import com.aparapi.internal.exception.AparapiException;
+import com.aparapi.internal.exception.ClassParseException;
 import com.aparapi.internal.instruction.*;
-import com.aparapi.internal.instruction.InstructionPattern.*;
+import com.aparapi.internal.instruction.InstructionPattern.InstructionMatch;
 import com.aparapi.internal.instruction.InstructionSet.*;
 import com.aparapi.internal.model.ClassModel.*;
-import com.aparapi.internal.model.ClassModel.ConstantPool.*;
-import com.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.*;
-import com.aparapi.internal.reader.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.Arg;
+import com.aparapi.internal.reader.ByteReader;
 
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MethodModel{
 
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
    private ExpressionList expressionList;
 
@@ -125,7 +129,7 @@ public class MethodModel{
       return accessorVariableFieldEntry;
    }
 
-   private final Set<MethodModel> calledMethods = new HashSet<MethodModel>();
+   private final Set<MethodModel> calledMethods = new HashSet<>();
 
    public Set<MethodModel> getCalledMethods() {
       return calledMethods;
@@ -141,11 +145,9 @@ public class MethodModel{
       transitiveCalledMethods.add(this);
 
       // For each callee, send him a copy of the call chain up to this method
-      final Iterator<MethodModel> cmi = getCalledMethods().iterator();
-      while (cmi.hasNext()) {
-         final MethodModel next = cmi.next();
-         next.checkForRecursion(transitiveCalledMethods);
-      }
+       for (MethodModel next : getCalledMethods()) {
+           next.checkForRecursion(transitiveCalledMethods);
+       }
 
       // Done examining this call path, remove myself
       transitiveCalledMethods.remove(this);
@@ -202,7 +204,7 @@ public class MethodModel{
     * @return Map<Integer, Instruction> the returned pc to Instruction map
     */
    public Map<Integer, Instruction> createListOfInstructions() throws ClassParseException {
-      final Map<Integer, Instruction> pcMap = new LinkedHashMap<Integer, Instruction>();
+      final Map<Integer, Instruction> pcMap = new LinkedHashMap<>();
       final byte[] code = method.getCode();
 
       // We create a byteReader for reading the bytes from the code array
@@ -597,7 +599,7 @@ public class MethodModel{
       }
    }
 
-   InstructionTransformer[] transformers = new InstructionTransformer[] {
+   final InstructionTransformer[] transformers = new InstructionTransformer[] {
 
          new InstructionTransformer("long hand post increment of field"){
 
@@ -927,7 +929,7 @@ public class MethodModel{
                   final AssignToLocalVariable assign = (AssignToLocalVariable) i.getNextExpr();
 
                   final InlineAssignInstruction inlineAssign = new InlineAssignInstruction(MethodModel.this, assign, cast);
-                  _expressionList.replaceInclusive((Instruction) cast, (Instruction) assign, inlineAssign);
+                  _expressionList.replaceInclusive(cast, (Instruction) assign, inlineAssign);
                   return (inlineAssign);
 
                }
@@ -1524,7 +1526,7 @@ public class MethodModel{
          }
       }
 
-      List<LocalVariableInfo> list = new ArrayList<LocalVariableInfo>();
+      final List<LocalVariableInfo> list = new ArrayList<>();
 
       public FakeLocalVariableTableEntry(Map<Integer, Instruction> _pcMap, ClassModelMethod _method) {
          int numberOfSlots = _method.getCodeEntry().getMaxLocals();
@@ -1723,7 +1725,7 @@ public class MethodModel{
    }
 
    public List<MethodCall> getMethodCalls() {
-      final List<MethodCall> methodCalls = new ArrayList<MethodCall>();
+      final List<MethodCall> methodCalls = new ArrayList<>();
 
       for (Instruction i = getPCHead(); i != null; i = i.getNextPC()) {
          if (i instanceof MethodCall) {
