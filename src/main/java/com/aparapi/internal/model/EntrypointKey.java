@@ -20,9 +20,9 @@ final class EntrypointKey{
       return new EntrypointKey(entrypointName, descriptor);
    }
 
-   private String descriptor;
+   private final String descriptor;
 
-   private String entrypointName;
+   private final String entrypointName;
 
    private EntrypointKey(String entrypointName, String descriptor) {
       this.entrypointName = entrypointName;

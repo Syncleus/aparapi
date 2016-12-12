@@ -52,19 +52,22 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.internal.writer;
 
-import com.aparapi.*;
-import com.aparapi.internal.exception.*;
-import com.aparapi.internal.instruction.*;
+import com.aparapi.Config;
+import com.aparapi.internal.exception.CodeGenException;
+import com.aparapi.internal.instruction.BranchSet;
+import com.aparapi.internal.instruction.BranchSet.CompoundLogicalExpressionNode;
 import com.aparapi.internal.instruction.BranchSet.LogicalExpressionNode;
-import com.aparapi.internal.instruction.InstructionSet.AccessInstanceField;
-import com.aparapi.internal.instruction.BranchSet.*;
+import com.aparapi.internal.instruction.BranchSet.SimpleLogicalExpressionNode;
+import com.aparapi.internal.instruction.Instruction;
 import com.aparapi.internal.instruction.InstructionSet.*;
-import com.aparapi.internal.model.ClassModel.ConstantPool.*;
-import com.aparapi.internal.model.ClassModel.*;
-import com.aparapi.internal.model.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodEntry;
 import com.aparapi.internal.model.ClassModel.ConstantPool.NameAndTypeEntry;
+import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
+import com.aparapi.internal.model.Entrypoint;
+import com.aparapi.internal.model.MethodModel;
 
-import java.util.*;
+import java.util.Stack;
 
 /**
  * Base abstract class for converting <code>Aparapi</code> IR to text.<br/>
@@ -283,7 +286,7 @@ public abstract class BlockWriter{
          Instruction blockEnd = instruction.getLastChild();
          writeBlock(blockStart, blockEnd);
          write("while(");
-         writeConditional(((CompositeInstruction) instruction).getBranchSet(), true);
+         writeConditional(instruction.getBranchSet(), true);
          write(");");
          newLine();
       }
@@ -475,7 +478,7 @@ public abstract class BlockWriter{
          if (accessField instanceof AccessInstanceField) {
             Instruction accessInstanceField = ((AccessInstanceField) accessField).getInstance();
             if (accessInstanceField instanceof CloneInstruction) {
-               accessInstanceField = ((CloneInstruction) accessInstanceField).getReal();
+               accessInstanceField = accessInstanceField.getReal();
             }
             if (!(accessInstanceField instanceof I_ALOAD_0)) {
                writeInstruction(accessInstanceField);
@@ -650,7 +653,7 @@ public abstract class BlockWriter{
          AssignToLocalVariable from = (AssignToLocalVariable) multiAssignInstruction.getFrom();
          final AssignToLocalVariable last = (AssignToLocalVariable) multiAssignInstruction.getTo();
          final Instruction common = multiAssignInstruction.getCommon();
-         final Stack<AssignToLocalVariable> stack = new Stack<AssignToLocalVariable>();
+         final Stack<AssignToLocalVariable> stack = new Stack<>();
 
          while (from != last) {
             stack.push(from);

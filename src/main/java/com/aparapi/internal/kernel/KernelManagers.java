@@ -15,9 +15,10 @@
  */
 package com.aparapi.internal.kernel;
 
-import com.aparapi.device.*;
+import com.aparapi.device.Device;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * KernelManager instances useful for debugging.
@@ -26,7 +27,7 @@ public class KernelManagers {
 
    public static final KernelManager JTP_ONLY = new KernelManager() {
 
-      private List<Device.TYPE> types = Collections.singletonList(Device.TYPE.JTP);
+      private final List<Device.TYPE> types = Collections.singletonList(Device.TYPE.JTP);
 
       @Override
       protected List<Device.TYPE> getPreferredDeviceTypes() {

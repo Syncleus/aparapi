@@ -15,9 +15,9 @@
  */
 package com.aparapi.internal.jni;
 
-import com.aparapi.internal.annotation.*;
+import com.aparapi.internal.annotation.UsedByJNICode;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
 
 /**
  * This class is intended to be used as a 'proxy' or 'facade' object for Java code to interact with JNI

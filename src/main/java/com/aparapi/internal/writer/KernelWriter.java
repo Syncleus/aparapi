@@ -52,17 +52,27 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
  */
 package com.aparapi.internal.writer;
 
-import com.aparapi.*;
-import com.aparapi.internal.exception.*;
-import com.aparapi.internal.instruction.*;
+import com.aparapi.Config;
+import com.aparapi.Kernel;
+import com.aparapi.internal.exception.ClassParseException;
+import com.aparapi.internal.exception.CodeGenException;
+import com.aparapi.internal.instruction.Instruction;
 import com.aparapi.internal.instruction.InstructionSet.*;
-import com.aparapi.internal.model.*;
-import com.aparapi.internal.model.ClassModel.AttributePool.*;
-import com.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEntry.*;
-import com.aparapi.internal.model.ClassModel.*;
-import com.aparapi.internal.model.ClassModel.ConstantPool.*;
+import com.aparapi.internal.model.ClassModel;
+import com.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEntry;
+import com.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEntry.AnnotationInfo;
+import com.aparapi.internal.model.ClassModel.ClassModelField;
+import com.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodEntry;
+import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
+import com.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
+import com.aparapi.internal.model.Entrypoint;
+import com.aparapi.internal.model.MethodModel;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class KernelWriter extends BlockWriter{
 
@@ -97,8 +107,8 @@ public abstract class KernelWriter extends BlockWriter{
 
    private Entrypoint entryPoint = null;
 
-   public final static Map<String, String> javaToCLIdentifierMap = new HashMap<String, String>();
-   {
+   public final static Map<String, String> javaToCLIdentifierMap = new HashMap<>();
+   static {
       javaToCLIdentifierMap.put("getGlobalId()I", "get_global_id(0)");
       javaToCLIdentifierMap.put("getGlobalId(I)I", "get_global_id"); // no parenthesis if we are conveying args
       javaToCLIdentifierMap.put("getGlobalX()I", "get_global_id(0)");
@@ -152,28 +162,40 @@ public abstract class KernelWriter extends BlockWriter{
     * @return Suitably converted string, "char*", etc
     */
    @Override public String convertType(String _typeDesc, boolean useClassModel) {
-      if (_typeDesc.equals("Z") || _typeDesc.equals("boolean")) {
-         return (cvtBooleanToChar);
-      } else if (_typeDesc.equals("[Z") || _typeDesc.equals("boolean[]")) {
-         return (cvtBooleanArrayToCharStar);
-      } else if (_typeDesc.equals("B") || _typeDesc.equals("byte")) {
-         return (cvtByteToChar);
-      } else if (_typeDesc.equals("[B") || _typeDesc.equals("byte[]")) {
-         return (cvtByteArrayToCharStar);
-      } else if (_typeDesc.equals("C") || _typeDesc.equals("char")) {
-         return (cvtCharToShort);
-      } else if (_typeDesc.equals("[C") || _typeDesc.equals("char[]")) {
-         return (cvtCharArrayToShortStar);
-      } else if (_typeDesc.equals("[I") || _typeDesc.equals("int[]")) {
-         return (cvtIntArrayToIntStar);
-      } else if (_typeDesc.equals("[F") || _typeDesc.equals("float[]")) {
-         return (cvtFloatArrayToFloatStar);
-      } else if (_typeDesc.equals("[D") || _typeDesc.equals("double[]")) {
-         return (cvtDoubleArrayToDoubleStar);
-      } else if (_typeDesc.equals("[J") || _typeDesc.equals("long[]")) {
-         return (cvtLongArrayToLongStar);
-      } else if (_typeDesc.equals("[S") || _typeDesc.equals("short[]")) {
-         return (cvtShortArrayToShortStar);
+      switch (_typeDesc) {
+         case "Z":
+         case "boolean":
+            return (cvtBooleanToChar);
+         case "[Z":
+         case "boolean[]":
+            return (cvtBooleanArrayToCharStar);
+         case "B":
+         case "byte":
+            return (cvtByteToChar);
+         case "[B":
+         case "byte[]":
+            return (cvtByteArrayToCharStar);
+         case "C":
+         case "char":
+            return (cvtCharToShort);
+         case "[C":
+         case "char[]":
+            return (cvtCharArrayToShortStar);
+         case "[I":
+         case "int[]":
+            return (cvtIntArrayToIntStar);
+         case "[F":
+         case "float[]":
+            return (cvtFloatArrayToFloatStar);
+         case "[D":
+         case "double[]":
+            return (cvtDoubleArrayToDoubleStar);
+         case "[J":
+         case "long[]":
+            return (cvtLongArrayToLongStar);
+         case "[S":
+         case "short[]":
+            return (cvtShortArrayToShortStar);
       }
       // if we get this far, we haven't matched anything yet
       if (useClassModel) {
@@ -301,9 +323,9 @@ public abstract class KernelWriter extends BlockWriter{
          + ";";
 
    @Override public void write(Entrypoint _entryPoint) throws CodeGenException {
-      final List<String> thisStruct = new ArrayList<String>();
-      final List<String> argLines = new ArrayList<String>();
-      final List<String> assigns = new ArrayList<String>();
+      final List<String> thisStruct = new ArrayList<>();
+      final List<String> argLines = new ArrayList<>();
+      final List<String> assigns = new ArrayList<>();
 
       entryPoint = _entryPoint;
 
@@ -352,9 +374,9 @@ public abstract class KernelWriter extends BlockWriter{
          //if we have a multiple dimensional array we want to remember the number of dimensions
          while (signature.startsWith("[")) {
             if (isPointer == false) {
-               argLine.append(argType + " ");
+               argLine.append(argType).append(" ");
                if (!(type.equals(__private) && IMPLICIT_PRIVATE_FIELDS)) {
-                  thisStructLine.append(type + " ");
+                  thisStructLine.append(type).append(" ");
                }
             }
             isPointer = true;
@@ -417,14 +439,14 @@ public abstract class KernelWriter extends BlockWriter{
                String suffix = numDimensions == 1 ? "" : Integer.toString(i);
                String lenName = field.getName() + BlockWriter.arrayLengthMangleSuffix + suffix;
 
-               lenStructLine.append("int " + lenName);
+               lenStructLine.append("int ").append(lenName);
 
                lenAssignLine.append("this->");
                lenAssignLine.append(lenName);
                lenAssignLine.append(" = ");
                lenAssignLine.append(lenName);
 
-               lenArgLine.append("int " + lenName);
+               lenArgLine.append("int ").append(lenName);
 
                assigns.add(lenAssignLine.toString());
                argLines.add(lenArgLine.toString());
@@ -436,14 +458,14 @@ public abstract class KernelWriter extends BlockWriter{
                   final StringBuilder dimAssignLine = new StringBuilder();
                   String dimName = field.getName() + BlockWriter.arrayDimMangleSuffix + suffix;
 
-                  dimStructLine.append("int " + dimName);
+                  dimStructLine.append("int ").append(dimName);
 
                   dimAssignLine.append("this->");
                   dimAssignLine.append(dimName);
                   dimAssignLine.append(" = ");
                   dimAssignLine.append(dimName);
 
-                  dimArgLine.append("int " + dimName);
+                  dimArgLine.append("int ").append(dimName);
 
                   assigns.add(dimAssignLine.toString());
                   argLines.add(dimArgLine.toString());
@@ -509,11 +531,9 @@ public abstract class KernelWriter extends BlockWriter{
             int totalSize = 0;
             int alignTo = 0;
 
-            final Iterator<FieldEntry> it = fieldSet.iterator();
-            while (it.hasNext()) {
-               final FieldEntry field = it.next();
+            for (FieldEntry field : fieldSet) {
                final String fType = field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-               final int fSize = InstructionSet.TypeSpec.valueOf(fType.equals("Z") ? "B" : fType).getSize();
+               final int fSize = TypeSpec.valueOf(fType.equals("Z") ? "B" : fType).getSize();
 
                if (fSize > alignTo) {
                   alignTo = fSize;
@@ -723,13 +743,7 @@ public abstract class KernelWriter extends BlockWriter{
             openCLStringBuilder.append(_string);
          }
       };
-      try {
-         openCLWriter.write(_entrypoint);
-      } catch (final CodeGenException codeGenException) {
-         throw codeGenException;
-      }/* catch (final Throwable t) {
-         throw new CodeGenException(t);
-       }*/
+      openCLWriter.write(_entrypoint);
 
       return (openCLStringBuilder.toString());
    }

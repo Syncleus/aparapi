@@ -15,9 +15,9 @@
  */
 package com.aparapi.internal.util;
 
-import java.util.List;
-
 import com.aparapi.internal.opencl.OpenCLPlatform;
+
+import java.util.List;
 
 /**
  * This utility class encapsulates the necessary actions required to query underlying OpenCL information

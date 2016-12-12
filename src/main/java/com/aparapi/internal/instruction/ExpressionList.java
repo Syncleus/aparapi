@@ -52,26 +52,18 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.internal.instruction;
 
+import com.aparapi.Config;
+import com.aparapi.internal.exception.ClassParseException;
+import com.aparapi.internal.instruction.InstructionSet.*;
+import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
+import com.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
+import com.aparapi.internal.model.MethodModel;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.aparapi.Config;
-import com.aparapi.internal.exception.ClassParseException;
-import com.aparapi.internal.instruction.InstructionSet.AssignToLocalVariable;
-import com.aparapi.internal.instruction.InstructionSet.Branch;
-import com.aparapi.internal.instruction.InstructionSet.ByteCode;
-import com.aparapi.internal.instruction.InstructionSet.CompositeArbitraryScopeInstruction;
-import com.aparapi.internal.instruction.InstructionSet.CompositeInstruction;
-import com.aparapi.internal.instruction.InstructionSet.ConditionalBranch;
-import com.aparapi.internal.instruction.InstructionSet.FakeGoto;
-import com.aparapi.internal.instruction.InstructionSet.Return;
-import com.aparapi.internal.instruction.InstructionSet.UnconditionalBranch;
-import com.aparapi.internal.model.MethodModel;
-import com.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
-import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
 
 /**
  * Essentially a glorified linked list of Instructions plus some additional state to allow us to transform sequences.
@@ -83,7 +75,7 @@ import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
  */
 public class ExpressionList{
 
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
    private final MethodModel methodModel;
 
@@ -830,8 +822,6 @@ public class ExpressionList{
             Config.instructionListener.showAndTell("after folding", head, _instruction);
          }
 
-      } catch (final ClassParseException _classParseException) {
-         throw new ClassParseException(_classParseException);
       } catch (final Throwable t) {
          throw new ClassParseException(t);
 
@@ -861,7 +851,7 @@ public class ExpressionList{
     */
    public String dumpDiagram(Instruction _instruction) {
       final StringBuilder sb = new StringBuilder();
-      final List<Instruction> list = new ArrayList<Instruction>();
+      final List<Instruction> list = new ArrayList<>();
 
       for (Instruction i = head; i != null; i = i.getNextExpr()) {
          list.add(i);
@@ -874,7 +864,7 @@ public class ExpressionList{
       final Instruction[] array = list.toArray(new Instruction[0]);
       boolean lastWasCursor = false;
 
-      final List<Branch> branches = new ArrayList<Branch>();
+      final List<Branch> branches = new ArrayList<>();
       for (final Instruction i : list) {
          sb.append(String.format(" %3d", i.getStartPC()));
       }

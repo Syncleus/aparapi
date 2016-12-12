@@ -53,7 +53,14 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 package com.aparapi;
 
 import com.aparapi.annotation.Experimental;
+import com.aparapi.device.Device;
+import com.aparapi.device.JavaDevice;
+import com.aparapi.device.OpenCLDevice;
 import com.aparapi.exception.DeprecatedException;
+import com.aparapi.internal.kernel.KernelArg;
+import com.aparapi.internal.kernel.KernelManager;
+import com.aparapi.internal.kernel.KernelProfile;
+import com.aparapi.internal.kernel.KernelRunner;
 import com.aparapi.internal.model.CacheEnabler;
 import com.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry;
 import com.aparapi.internal.model.ClassModel.ConstantPool.NameAndTypeEntry;
@@ -61,35 +68,15 @@ import com.aparapi.internal.model.ValueCache;
 import com.aparapi.internal.model.ValueCache.ThrowingValueComputer;
 import com.aparapi.internal.model.ValueCache.ValueComputer;
 import com.aparapi.internal.opencl.OpenCLLoader;
+import com.aparapi.internal.util.Reflection;
+import com.aparapi.internal.util.UnsafeWrapper;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 import java.lang.reflect.Method;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.logging.Logger;
-
-import com.aparapi.device.Device;
-import com.aparapi.device.JavaDevice;
-import com.aparapi.device.OpenCLDevice;
-import com.aparapi.internal.kernel.KernelArg;
-import com.aparapi.internal.kernel.KernelManager;
-import com.aparapi.internal.kernel.KernelProfile;
-import com.aparapi.internal.kernel.KernelRunner;
-import com.aparapi.internal.util.Reflection;
-import com.aparapi.internal.util.UnsafeWrapper;
 
 /**
  * A <i>kernel</i> encapsulates a data parallel algorithm that will execute either on a GPU
@@ -179,7 +166,7 @@ import com.aparapi.internal.util.UnsafeWrapper;
  */
 public abstract class Kernel implements Cloneable {
 
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
    /**
     *  We can use this Annotation to 'tag' intended local buffers.
@@ -392,7 +379,7 @@ public abstract class Kernel implements Cloneable {
     * @version Alpha, 21/09/2010
     */
    @Deprecated
-   public static enum EXECUTION_MODE {
+   public enum EXECUTION_MODE {
       /**
        *
        */
@@ -435,7 +422,7 @@ public abstract class Kernel implements Cloneable {
        */
       @Deprecated
       static LinkedHashSet<EXECUTION_MODE> getDefaultExecutionModes() {
-         LinkedHashSet<EXECUTION_MODE> defaultExecutionModes = new LinkedHashSet<EXECUTION_MODE>();
+         LinkedHashSet<EXECUTION_MODE> defaultExecutionModes = new LinkedHashSet<>();
 
          if (OpenCLLoader.isOpenCLAvailable()) {
             defaultExecutionModes.add(GPU);
@@ -473,7 +460,7 @@ public abstract class Kernel implements Cloneable {
       }
 
       static LinkedHashSet<EXECUTION_MODE> getExecutionModeFromString(String executionMode) {
-         final LinkedHashSet<EXECUTION_MODE> executionModes = new LinkedHashSet<EXECUTION_MODE>();
+         final LinkedHashSet<EXECUTION_MODE> executionModes = new LinkedHashSet<>();
          for (final String mode : executionMode.split(",")) {
             executionModes.add(valueOf(mode.toUpperCase()));
          }
@@ -498,7 +485,7 @@ public abstract class Kernel implements Cloneable {
       public boolean isOpenCL() {
          return (this == GPU) || (this == ACC) || (this == CPU);
       }
-   };
+   }
 
    private KernelRunner kernelRunner = null;
 
@@ -663,10 +650,7 @@ public abstract class Kernel implements Cloneable {
          if (!localBarrierDisabled) {
             try {
                kernelState.getLocalBarrier().await();
-            } catch (final InterruptedException e) {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            } catch (final BrokenBarrierException e) {
+            } catch (final InterruptedException | BrokenBarrierException e) {
                // TODO Auto-generated catch block
                e.printStackTrace();
             }
@@ -2257,7 +2241,7 @@ public abstract class Kernel implements Cloneable {
       executionMode = EXECUTION_MODE.getFallbackExecutionMode();
    }
 
-   final static Map<String, String> typeToLetterMap = new HashMap<String, String>();
+   final static Map<String, String> typeToLetterMap = new HashMap<>();
 
    static {
       // only primitive types for now

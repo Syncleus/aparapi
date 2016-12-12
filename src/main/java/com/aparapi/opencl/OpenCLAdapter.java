@@ -16,6 +16,7 @@
 package com.aparapi.opencl;
 
 import com.aparapi.ProfileInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,7 +91,7 @@ public class OpenCLAdapter<T> implements OpenCL<T>{
    }
 
    public List<ProfileInfo> getProfileInfo(){
-       return(new ArrayList<ProfileInfo>());
+       return(new ArrayList<>());
    }
 
 }

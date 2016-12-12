@@ -52,13 +52,13 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.internal.instruction;
 
+import com.aparapi.internal.instruction.InstructionSet.Branch;
+import com.aparapi.internal.instruction.InstructionSet.ConditionalBranch;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
-import com.aparapi.internal.instruction.InstructionSet.Branch;
-import com.aparapi.internal.instruction.InstructionSet.ConditionalBranch;
 
 /**
  * Deals with the issue of recognizing that a sequence of bytecode branch instructions actually represent a single if/while with a logical expression.
@@ -300,7 +300,7 @@ public class BranchSet {
 
    }
 
-   private final List<ConditionalBranch> set = new ArrayList<ConditionalBranch>();
+   private final List<ConditionalBranch> set = new ArrayList<>();
 
    private final Instruction fallThrough;
 
@@ -323,7 +323,7 @@ public class BranchSet {
       target = _branch.getTarget();
       last = _branch;
 
-      final Set<Branch> expandedSet = new LinkedHashSet<Branch>();
+      final Set<Branch> expandedSet = new LinkedHashSet<>();
       final Instruction fallThroughRoot = last.getNextExpr();
       fallThrough = fallThroughRoot == null ? last.getNextPC() : fallThroughRoot.getStartInstruction();
       first = last;

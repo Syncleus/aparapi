@@ -58,7 +58,7 @@ public class ProfileInfo{
       R,
       X,
       W
-   }; // 0 = write, 1 = execute, 2 = read
+   } // 0 = write, 1 = execute, 2 = read
 
    private final TYPE type;
 

@@ -15,55 +15,6 @@
  */
 package com.aparapi.internal.tool;
 
-import java.awt.BasicStroke;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.CubicCurve2D;
-import java.awt.image.BufferedImage;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.SpringLayout;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import com.aparapi.Config;
 import com.aparapi.internal.exception.AparapiException;
 import com.aparapi.internal.exception.ClassParseException;
@@ -75,6 +26,20 @@ import com.aparapi.internal.model.MethodModel;
 import com.aparapi.internal.tool.InstructionViewer.Form.Check;
 import com.aparapi.internal.tool.InstructionViewer.Form.Template;
 import com.aparapi.internal.tool.InstructionViewer.Form.Toggle;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.CubicCurve2D;
+import java.awt.image.BufferedImage;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.List;
 
 public class InstructionViewer implements Config.InstructionListener{
 
@@ -109,17 +74,14 @@ public class InstructionViewer implements Config.InstructionListener{
 
       private final T template;
 
-      JPanel panel;
+      final JPanel panel;
 
       private final SpringLayout layout = new SpringLayout();
 
       void setBoolean(Field _field, boolean _value) {
          try {
             _field.setBoolean(template, _value);
-         } catch (final IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         } catch (final IllegalAccessException e) {
+         } catch (final IllegalArgumentException | IllegalAccessException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
          }
@@ -128,34 +90,28 @@ public class InstructionViewer implements Config.InstructionListener{
       boolean getBoolean(Field _field) {
          try {
             return (_field.getBoolean(template));
-         } catch (final IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         } catch (final IllegalAccessException e) {
+         } catch (final IllegalArgumentException | IllegalAccessException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
          }
-         return (false);
+          return (false);
       }
 
       Object get(Field _field) {
          try {
             return (_field.get(template));
-         } catch (final IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         } catch (final IllegalAccessException e) {
+         } catch (final IllegalArgumentException | IllegalAccessException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
          }
-         return (null);
+          return (null);
       }
 
       public Form(T _template) {
          template = _template;
          panel = new JPanel(layout);
          JComponent last = panel;
-         final Map<Field, JLabel> fieldToLabelMap = new LinkedHashMap<Field, JLabel>();
+         final Map<Field, JLabel> fieldToLabelMap = new LinkedHashMap<>();
          Field fieldWithWidestLabel = null;
          int fieldWithWidestLabelWidth = 0;
 
@@ -277,19 +233,19 @@ public class InstructionViewer implements Config.InstructionListener{
 
    public static class Options implements Template{
 
-      @Toggle(label = "Fold", on = "On", off = "Off") public boolean fold = true;
+      @Toggle(label = "Fold", on = "On", off = "Off") public final boolean fold = true;
 
-      @Check(label = "Fan Edges") public boolean edgeFan = true;
+      @Check(label = "Fan Edges") public final boolean edgeFan = true;
 
-      @Check(label = "Curves") public boolean edgeCurve = false;
+      @Check(label = "Curves") public final boolean edgeCurve = false;
 
-      @Check(label = "PC") public boolean showPc = true;
+      @Check(label = "PC") public final boolean showPc = true;
 
-      @Check(label = "Bytecode Labels") public boolean verboseBytecodeLabels = false;
+      @Check(label = "Bytecode Labels") public final boolean verboseBytecodeLabels = false;
 
-      @Check(label = "Collapse All") public boolean collapseAll = false;
+      @Check(label = "Collapse All") public final boolean collapseAll = false;
 
-      /* @Check(label = "Show expressions")*/public boolean showExpressions = false;
+      /* @Check(label = "Show expressions")*/public final boolean showExpressions = false;
 
    }
 
@@ -299,7 +255,8 @@ public class InstructionViewer implements Config.InstructionListener{
          y = _y;
       }
 
-      double x, y;
+      final double x;
+       final double y;
    }
 
    private static class View{
@@ -447,7 +404,7 @@ public class InstructionViewer implements Config.InstructionListener{
       _g.fill(_rectangle);
    }
 
-   public Options config = new Options();
+   public final Options config = new Options();
 
    final private Color unselectedColor = Color.WHITE;
 
@@ -459,7 +416,7 @@ public class InstructionViewer implements Config.InstructionListener{
 
    private final Stroke outlineStroke = new BasicStroke((float) 0.5);
 
-   public Polygon arrowHeadOut = new Polygon();
+   public final Polygon arrowHeadOut = new Polygon();
    {
       arrowHeadOut.addPoint(8, -4);
       arrowHeadOut.addPoint(0, 0);
@@ -467,7 +424,7 @@ public class InstructionViewer implements Config.InstructionListener{
       arrowHeadOut.addPoint(8, -4);
    }
 
-   Polygon arrowHeadIn = new Polygon();
+   final Polygon arrowHeadIn = new Polygon();
    {
       arrowHeadIn.addPoint(0, -4);
       arrowHeadIn.addPoint(8, 0);
@@ -495,7 +452,7 @@ public class InstructionViewer implements Config.InstructionListener{
 
    }
 
-   private final Map<Instruction, InstructionView> locationToInstructionViewMap = new HashMap<Instruction, InstructionView>();
+   private final Map<Instruction, InstructionView> locationToInstructionViewMap = new HashMap<>();
 
    InstructionView getInstructionView(Instruction _instruction) {
 
@@ -641,14 +598,11 @@ public class InstructionViewer implements Config.InstructionListener{
 
       try {
          classModel = ClassModel.createClassModel(Class.forName(_name));
-      } catch (final ClassParseException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final ClassNotFoundException e) {
+      } catch (final ClassParseException | ClassNotFoundException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      container = new JPanel(){
+       container = new JPanel(){
          /**
           * 
           */
@@ -879,7 +833,7 @@ public class InstructionViewer implements Config.InstructionListener{
          if (config.fold) {
             double y = 100;
             final Instruction firstRoot = first.getRootExpr();
-            final List<InstructionView> instructionViews = new ArrayList<InstructionView>();
+            final List<InstructionView> instructionViews = new ArrayList<>();
 
             Instruction lastInstruction = null;
             for (Instruction instruction = firstRoot; instruction != null; instruction = instruction.getNextExpr()) {
@@ -1039,7 +993,7 @@ public class InstructionViewer implements Config.InstructionListener{
 
    }
 
-   public static DoorBell doorbell = new DoorBell();
+   public static final DoorBell doorbell = new DoorBell();
 
    public static void main(String[] _args) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
          UnsupportedLookAndFeelException, AparapiException {
