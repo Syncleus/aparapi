@@ -3,7 +3,7 @@
 ## 1.3.2
 
 * Added Windows 64bit support.
-* The load method now throws an exception if a library can't be loaded rather than returning quietly.
+* Improved exception message when a native library can't be loaded.
 
 ## 1.3.1
 
