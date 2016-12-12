@@ -1,5 +1,10 @@
 # Aparapi Changelog
 
+## 1.3.2
+
+* Added Windows 64bit support.
+* The load method now throws an exception if a library can't be loaded rather than returning quietly.
+
 ## 1.3.1
 
 * Added full support for OSX.
