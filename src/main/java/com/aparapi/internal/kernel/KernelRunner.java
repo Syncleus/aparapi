@@ -108,7 +108,7 @@ import java.util.logging.Logger;
  */
 public class KernelRunner extends KernelRunnerJNI{
 
-   public static final boolean BINARY_CACHING_DISABLED = false;
+   private static boolean binaryCacheing = true;
 
    private static final int MINIMUM_ARRAY_SIZE = 1;
 
@@ -186,6 +186,14 @@ public class KernelRunner extends KernelRunnerJNI{
       outBufferRemoteInt = outBufferRemote.asIntBuffer();
 
       KernelManager.instance(); // ensures static initialization of KernelManager
+   }
+
+   public static boolean isBinaryCacheing() {
+      return binaryCacheing;
+   }
+
+   public static void setBinaryCacheing(boolean binaryCacheing) {
+      KernelRunner.binaryCacheing = binaryCacheing;
    }
 
    /**
@@ -1370,7 +1378,7 @@ public class KernelRunner extends KernelRunnerJNI{
 
                   // Send the string to OpenCL to compile it, or if the compiled binary is already cached on JNI side just empty string to use cached binary
                   long handle;
-                  if (BINARY_CACHING_DISABLED) {
+                  if (!isBinaryCacheing()) {
                      handle = buildProgramJNI(jniContextHandle, openCL, "");
                   } else {
                      synchronized (seenBinaryKeys) {

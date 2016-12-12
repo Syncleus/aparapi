@@ -1,5 +1,9 @@
 # Aparapi Changelog
 
+## 1.4.0
+
+* KernelRunner.BINARY_CACHEING_DISABLED is no longer availible, is/setter is to be used instead.
+
 ## 1.3.2
 
 * Added Windows 64bit support.
