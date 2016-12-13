@@ -2,6 +2,7 @@
 
 ## 2.0.0
 
+* Fixed OpenCL compilation which would throw null kernel or JNI linking exceptions.
 * work on config, mem override, mem align, sync with java-ucores
 * Java for UCores is meant to be an accelerator 'friendly' Java version based on OpenJDK and obuildfactory. Accelerator users should consider using Java for UCores in conjunction with Aparapi UCores as it will automatically allocate memory on boundaries that can enhance PCIE transfer speeds.
 * Added a a more flexible way of per-platform config through ConfigSettings.cpp
