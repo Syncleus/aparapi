@@ -15,11 +15,13 @@
  */
 package com.aparapi.internal.opencl;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.aparapi.Config;
 import com.aparapi.internal.jni.OpenCLJNI;
+import com.aparapi.natives.NativeLoader;
 
 /**
  * This class is intended to be a singleton which determines if OpenCL is available upon startup of Aparapi
@@ -37,51 +39,14 @@ public class OpenCLLoader extends OpenCLJNI{
          logger.fine("Using agent!");
          openCLAvailable = true;
       } else {
-         final String arch = System.getProperty("os.arch");
-         logger.fine("arch = " + arch);
-         String aparapiLibraryName = null;
-
-         if (arch.equals("amd64") || arch.equals("x86_64")) {
-            aparapiLibraryName = "aparapi_x86_64";
-         } else if (arch.equals("x86") || arch.equals("i386")) {
-            aparapiLibraryName = "aparapi_x86";
-         } else {
-            logger.warning("Expected property os.arch to contain amd64, x86_64, x86 or i386 but instead found " + arch
-                  + " as a result we don't know which aparapi to attempt to load.");
-         }
-
-/*
-         // !!! oren change - load mem overide lib
-         String memOverideLib = System.getProperty(Config.getPkgName() + ".MemOverideLib");
-         if (memOverideLib != null) {
-            logger.fine("attempting to load mem overide lib " + memOverideLib);
-         
          try {
-               // !!! note load needs complete path
-               Runtime.getRuntime().load(memOverideLib);
-               // alternatively load by lib name
-               // Runtime.getRuntime().loadLibrary(memOverideLib);
-            } catch (final UnsatisfiedLinkError e) {
-               logger.log(Level.SEVERE, "Check your environment. Failed to load memOverideLib native library " + memOverideLib);
-            }
-         }
-         else
-            logger.warning("Not loading mem overide lib!");
-
-         // !!! eof oren change
-*/
-
-         if (aparapiLibraryName != null) {
-            logger.fine("attempting to load aparapi shared lib " + aparapiLibraryName);
-
-            try {
-               Runtime.getRuntime().loadLibrary(aparapiLibraryName);
-               openCLAvailable = true;
-            } catch (final UnsatisfiedLinkError e) {
-               logger.log(Level.SEVERE, "Check your environment. Failed to load aparapi native library " + aparapiLibraryName
-                     + " or possibly failed to locate opencl native library (opencl.dll/opencl.so)."
-                     + " Ensure that both are in your PATH (windows) or in LD_LIBRARY_PATH (linux).");
-            }
+            NativeLoader.load();
+            logger.log(Level.INFO, "Aparapi JNI loaded successfully.");
+            openCLAvailable = true;
+         } catch (final IOException e) {
+            logger.log(Level.SEVERE, "Check your environment. Failed to load aparapi native library "
+                    + " or possibly failed to locate opencl native library (opencl.dll/opencl.so)."
+                    + " Ensure that OpenCL is in your PATH (windows) or in LD_LIBRARY_PATH (linux).");
          }
       }
    }

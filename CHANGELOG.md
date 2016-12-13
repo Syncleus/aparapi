@@ -1,4 +1,21 @@
-# Aparapi Change Log
+# Aparapi Changelog
+
+## 1.3.3
+
+* Fixed a bug where calling createProgram resulted in an exception. 
+
+## 1.3.2
+
+* Added Windows 64bit support.
+* Improved exception message when a native library can't be loaded.
+
+## 1.3.1
+
+* Added full support for OSX.
+
+## 1.3.0
+
+* No longer needs Aparapi JNI library to be installed manually, this is loaded dynmically now.
 
 ## 2.0.0
 

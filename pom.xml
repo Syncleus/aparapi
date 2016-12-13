@@ -65,6 +65,14 @@
         </developer>
     </developers>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.aparapi</groupId>
+            <artifactId>aparapi-jni</artifactId>
+            <version>1.1.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <defaultGoal>package</defaultGoal>
         <plugins>
