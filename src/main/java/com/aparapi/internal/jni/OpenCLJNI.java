@@ -32,7 +32,7 @@ public abstract class OpenCLJNI{
 
    protected native List<OpenCLPlatform> getPlatforms();
 
-   protected native OpenCLProgram createProgram(OpenCLDevice context, String openCLSource, String binaryKey);
+   protected native OpenCLProgram createProgram(OpenCLDevice context, String openCLSource);
 
    protected native OpenCLKernel createKernelJNI(OpenCLProgram program, String kernelName, OpenCLArgDescriptor[] args);
 
