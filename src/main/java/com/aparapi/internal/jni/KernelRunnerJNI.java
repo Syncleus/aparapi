@@ -343,7 +343,7 @@ public abstract class KernelRunnerJNI{
     *                   can be passed empty) andused the cached binary.
     *                   <p>By passing an empty String as the _binaryKey, the entire JNI-side binary caching apparatus can be disabled.
     */
-   protected native long buildProgramJNI(long _jniContextHandle, String _source, String _binaryKey, int _buildFlags);
+   protected native long buildProgramJNI(long _jniContextHandle, String _source, int _buildFlags);
 
    protected native int setArgsJNI(long _jniContextHandle, KernelArgJNI[] _args, int argc);
 

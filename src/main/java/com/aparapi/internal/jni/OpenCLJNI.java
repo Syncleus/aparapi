@@ -32,11 +32,6 @@ public abstract class OpenCLJNI{
 
    protected native List<OpenCLPlatform> getPlatforms();
 
-   public OpenCLProgram createProgram(OpenCLDevice context, String openCLSource)
-   {
-      return this.createProgram(context, openCLSource, null);
-   }
-
    protected native OpenCLProgram createProgram(OpenCLDevice context, String openCLSource, String binaryKey);
 
    protected native OpenCLKernel createKernelJNI(OpenCLProgram program, String kernelName, OpenCLArgDescriptor[] args);
