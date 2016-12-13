@@ -2,7 +2,8 @@
 
 ## 1.3.3
 
-* Fixed a bug where calling createProgram resulted in an exception. 
+* Fixed a bug where calling createProgram resulted in an exception.
+* Changed aparapi JNI load notification into a proper logger message instead of direct to system.out.
 
 ## 1.3.2
 
