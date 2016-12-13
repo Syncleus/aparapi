@@ -41,7 +41,7 @@ public class OpenCLLoader extends OpenCLJNI{
       } else {
             try {
                NativeLoader.load();
-               System.out.println("Aparapi JNI loaded successfully.");
+               logger.info("Aparapi JNI loaded successfully.");
                openCLAvailable = true;
             }
             catch (final IOException e) {
