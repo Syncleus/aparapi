@@ -1,22 +1,5 @@
 # Aparapi Changelog
 
-## 1.3.3
-
-* Fixed a bug where calling createProgram resulted in an exception. 
-
-## 1.3.2
-
-* Added Windows 64bit support.
-* Improved exception message when a native library can't be loaded.
-
-## 1.3.1
-
-* Added full support for OSX.
-
-## 1.3.0
-
-* No longer needs Aparapi JNI library to be installed manually, this is loaded dynmically now.
-
 ## 2.0.0
 
 * work on config, mem override, mem align, sync with java-ucores
@@ -31,6 +14,24 @@
 * Improved build system for Altera JNI
 * Aparapi Range.getFactors bug fix – fixed a bug in the original Aparapi distribution.
 * Altera ICD bug fix – only other accelerators were discovered
+
+## 1.3.3
+
+* Fixed a bug where calling createProgram resulted in an exception.
+* Changed aparapi JNI load notification into a proper logger message instead of direct to system.out.
+
+## 1.3.2
+
+* Added Windows 64bit support.
+* Improved exception message when a native library can't be loaded.
+
+## 1.3.1
+
+* Added full support for OSX.
+
+## 1.3.0
+
+* No longer needs Aparapi JNI library to be installed manually, this is loaded dynmically now.
 
 ## 1.2.0
 
