@@ -1,0 +1,10 @@
+# Generated file for hadoop/mahout env
+export JAVA_HOME=/usr/lib/jvm/jre-1.7.0-openjdk.x86_64/
+#export HADOOP_HOME=/usr/local/hadoop-1.2.0/
+export HADOOP_DIR=/usr/local/hadoop-1.2.0
+export HADOOP_PREFIX=$HADOOP_DIR/
+export HADOOP_CONF_DIR=HADOOP_DIR/conf
+export MAHOUT_HOME=/usr/local/mahout-0.9/
+export MAHOUT_VERSION=0.9-SNAPSHOT
+#export MAVEN_OPTS=-Xmx1024m
+

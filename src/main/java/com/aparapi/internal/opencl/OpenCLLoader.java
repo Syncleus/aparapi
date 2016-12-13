@@ -26,47 +26,46 @@ import com.aparapi.natives.NativeLoader;
 /**
  * This class is intended to be a singleton which determines if OpenCL is available upon startup of Aparapi
  */
-public class OpenCLLoader extends OpenCLJNI{
+public class OpenCLLoader extends OpenCLJNI {
 
-   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
+    private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
-   private static boolean openCLAvailable = false;
+    private static boolean openCLAvailable = false;
 
-   private static final OpenCLLoader instance = new OpenCLLoader();
+    private static final OpenCLLoader instance = new OpenCLLoader();
 
-   static {
-      if (Config.useAgent) {
-         logger.fine("Using agent!");
-         openCLAvailable = true;
-      } else {
+    static {
+        if (Config.useAgent) {
+            logger.fine("Using agent!");
+            openCLAvailable = true;
+        } else {
             try {
-               NativeLoader.load();
-               logger.info("Aparapi JNI loaded successfully.");
-               openCLAvailable = true;
+                NativeLoader.load();
+                logger.info("Aparapi JNI loaded successfully.");
+                openCLAvailable = true;
+            } catch (final IOException e) {
+                logger.log(Level.SEVERE, "Check your environment. Failed to load aparapi native library "
+                        + " or possibly failed to locate opencl native library (opencl.dll/opencl.so)."
+                        + " Ensure that OpenCL is in your PATH (windows) or in LD_LIBRARY_PATH (linux).");
             }
-            catch (final IOException e) {
-               logger.log(Level.SEVERE, "Check your environment. Failed to load aparapi native library "
-                     + " or possibly failed to locate opencl native library (opencl.dll/opencl.so)."
-                     + " Ensure that OpenCL is in your PATH (windows) or in LD_LIBRARY_PATH (linux).");
-            }
-      }
-   }
+        }
+    }
 
-   /**
-    * Retrieve a singleton instance of OpenCLLoader
-    * 
-    * @return A singleton instance of OpenCLLoader
-    */
-   protected static OpenCLLoader getInstance() {
-      return instance;
-   }
+    /**
+     * Retrieve a singleton instance of OpenCLLoader
+     *
+     * @return A singleton instance of OpenCLLoader
+     */
+    protected static OpenCLLoader getInstance() {
+        return instance;
+    }
 
-   /**
-    * Retrieve the status of whether OpenCL was successfully loaded
-    * 
-    * @return The status of whether OpenCL was successfully loaded
-    */
-   public static boolean isOpenCLAvailable() {
-      return openCLAvailable;
-   }
+    /**
+     * Retrieve the status of whether OpenCL was successfully loaded
+     *
+     * @return The status of whether OpenCL was successfully loaded
+     */
+    public static boolean isOpenCLAvailable() {
+        return openCLAvailable;
+    }
 }

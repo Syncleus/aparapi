@@ -304,6 +304,19 @@ public abstract class KernelRunnerJNI{
    @UsedByJNICode protected static final int JNI_FLAG_USE_ACC = 1 << 5;
 
 
+   /** !!! oren change ->
+    * These flags indicate that we want to build source/binary i.e. use source/binary flow.
+    * 
+    * Be careful changing final constants starting with JNI.<br/>
+    * 
+    * @see com.aparapi.internal.annotation.UsedByJNICode
+    * 
+    * @author oren
+    */
+   @UsedByJNICode public static final int JNI_FLAG_SOURCE_FLOW  = 1 << 0;
+   @UsedByJNICode public static final int JNI_FLAG_BINARY_FLOW  = 1 << 1;
+   @UsedByJNICode public static final int JNI_FLAG_DEFAULT_FLOW = 1 << 2;
+   
    /*
     * Native methods
     */
@@ -330,7 +343,7 @@ public abstract class KernelRunnerJNI{
     *                   can be passed empty) andused the cached binary.
     *                   <p>By passing an empty String as the _binaryKey, the entire JNI-side binary caching apparatus can be disabled.
     */
-   protected native long buildProgramJNI(long _jniContextHandle, String _source, String _binaryKey);
+   protected native long buildProgramJNI(long _jniContextHandle, String _source, int _buildFlags);
 
    protected native int setArgsJNI(long _jniContextHandle, KernelArgJNI[] _args, int argc);
 

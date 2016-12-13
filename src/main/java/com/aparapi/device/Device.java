@@ -15,168 +15,264 @@
  */
 package com.aparapi.device;
 
-import com.aparapi.*;
+import java.util.List;
+
 import com.aparapi.internal.kernel.*;
+import com.aparapi.Range;
+import com.aparapi.device.OpenCLDevice.DeviceComparitor;
+import com.aparapi.device.OpenCLDevice.DeviceSelector;
+import com.aparapi.internal.opencl.OpenCLPlatform;
 
 public abstract class Device{
 
-   public static enum TYPE {
-      UNKNOWN(Integer.MAX_VALUE),
-      GPU(2),
-      CPU(3),
-      JTP(5),
-      SEQ(6),
-      ACC(1),
-      ALT(4);
+    public static enum TYPE {
+        UNKNOWN(Integer.MAX_VALUE),
+        GPU(2),
+        CPU(3),
+        JTP(5),
+        SEQ(6),
+        ACC(1),
+        ALT(4);
 
-      /** Heuristic ranking of device types, lower is better. */
-      public final int rank;
+        /** Heuristic ranking of device types, lower is better. */
+        public final int rank;
 
-      TYPE(int rank) {
-         this.rank = rank;
-      }
-   };
+        TYPE(int rank) {
+            this.rank = rank;
+        }
+    };
 
-   /** @deprecated  use {@link KernelManager#bestDevice()}
-    *  @see com.aparapi.device
-    */
-   @Deprecated
-   public static Device best() {
-      return KernelManager.instance().bestDevice();
+    /** @deprecated  use {@link KernelManager#bestDevice()}
+     *  @see com.aparapi.device
+     */
+    @Deprecated
+    public static Device best() {
+        return KernelManager.instance().bestDevice();
+    }
+
+    /**
+     *  @see com.aparapi.device
+     */
+    @SuppressWarnings("deprecation")
+    @Deprecated
+    public static Device bestGPU() {
+        return firstGPU();
+    }
+
+    /**
+     *  @see com.aparapi.device
+     */
+    @Deprecated
+    public static Device first(final Device.TYPE _type) {
+        return KernelManager.DeprecatedMethods.firstDevice(_type);
+    }
+
+    /**
+     *  @see com.aparapi.device
+     */
+    @SuppressWarnings("deprecation")
+    @Deprecated
+    public static Device firstGPU() {
+        return KernelManager.DeprecatedMethods.firstDevice(TYPE.GPU);
+    }
+
+    /**
+     *  @see com.aparapi.device
+     */
+    @SuppressWarnings("deprecation")
+    @Deprecated
+    public static Device firstCPU() {
+        return KernelManager.DeprecatedMethods.firstDevice(TYPE.CPU);
+    }
+
+    /**
+     *  @see com.aparapi.device
+     */
+    @Deprecated
+    public static Device bestACC() {
+        throw new UnsupportedOperationException();
+    }
+
+    protected TYPE type = TYPE.UNKNOWN;
+
+    protected int maxWorkGroupSize;
+
+    protected int maxWorkItemDimensions;
+
+    protected int[] maxWorkItemSize = new int[] {
+            0,
+            0,
+            0
+    };
+
+    public abstract String getShortDescription();
+
+    public TYPE getType() {
+        return type;
+    }
+
+    public void setType(TYPE type) {
+        this.type = type;
+    }
+
+    public int getMaxWorkItemDimensions() {
+        return maxWorkItemDimensions;
+    }
+
+    public void setMaxWorkItemDimensions(int _maxWorkItemDimensions) {
+        maxWorkItemDimensions = _maxWorkItemDimensions;
+    }
+
+    public int getMaxWorkGroupSize() {
+        return maxWorkGroupSize;
+    }
+
+    public void setMaxWorkGroupSize(int _maxWorkGroupSize) {
+        maxWorkGroupSize = _maxWorkGroupSize;
+    }
+
+    public int[] getMaxWorkItemSize() {
+        return maxWorkItemSize;
+    }
+
+    public void setMaxWorkItemSize(int[] maxWorkItemSize) {
+        this.maxWorkItemSize = maxWorkItemSize;
+    }
+
+    public Range createRange(int _globalWidth) {
+        return (Range.create(this, _globalWidth));
+    }
+
+    public Range createRange(int _globalWidth, int _localWidth) {
+        return (Range.create(this, _globalWidth, _localWidth));
+    }
+
+    public Range createRange2D(int _globalWidth, int _globalHeight) {
+        return (Range.create2D(this, _globalWidth, _globalHeight));
+    }
+
+    public Range createRange2D(int _globalWidth, int _globalHeight, int _localWidth, int _localHeight) {
+        return (Range.create2D(this, _globalWidth, _globalHeight, _localWidth, _localHeight));
+    }
+
+    public Range createRange3D(int _globalWidth, int _globalHeight, int _globalDepth) {
+        return (Range.create3D(this, _globalWidth, _globalHeight, _globalDepth));
+    }
+
+    public Range createRange3D(int _globalWidth, int _globalHeight, int _globalDepth, int _localWidth, int _localHeight,
+                               int _localDepth) {
+        return (Range.create3D(this, _globalWidth, _globalHeight, _globalDepth, _localWidth, _localHeight, _localDepth));
+    }
+
+    public abstract long getDeviceId();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Device)) {
+            return false;
+        }
+
+        Device device = (Device) o;
+
+        return getDeviceId() == device.getDeviceId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.valueOf(getDeviceId()).hashCode();
+    }
+   
+   // !!! oren change -> get device using the tuple (platform, deviceType, id)
+   
+   public static Device getDevice(String platformName, Device.TYPE deviceType, int deviceId)
+   {
+	   return getDevice(platformName,deviceType.name(),deviceId);
    }
 
-   /**
-    *  @see com.aparapi.device
-    */
-   @SuppressWarnings("deprecation")
-   @Deprecated
-   public static Device bestGPU() {
-      return firstGPU();
+   // get first available device
+
+   public static Device getDevice(String platformName, Device.TYPE deviceType)
+   {
+	   return getDevice(platformName,deviceType.name(),0);
    }
 
-   /**
-    *  @see com.aparapi.device
-    */
-   @Deprecated
-   public static Device first(final Device.TYPE _type) {
-      return KernelManager.DeprecatedMethods.firstDevice(_type);
+   public static Device getDevice(String platformName, String deviceTypeName)
+   {
+	   return getDevice(platformName,deviceTypeName,0);
    }
 
-   /**
-    *  @see com.aparapi.device
-    */
-   @SuppressWarnings("deprecation")
-   @Deprecated
-   public static Device firstGPU() {
-      return KernelManager.DeprecatedMethods.firstDevice(TYPE.GPU);
-   }
+   public static Device getDevice(String platformName, String deviceTypeName, int deviceId)
+   {
+      List<OpenCLPlatform> platforms = (new OpenCLPlatform()).getOpenCLPlatformsFilteredBy(platformName); //getOpenCLPlatforms();
 
-   /**
-    *  @see com.aparapi.device
-    */
-   @SuppressWarnings("deprecation")
-   @Deprecated
-   public static Device firstCPU() {
-      return KernelManager.DeprecatedMethods.firstDevice(TYPE.CPU);
-   }
+      int platformc = 0;
+      for (OpenCLPlatform platform : platforms) 
+      {
+         //if(platform.getName().contains(platformName))
+         //{
 
-   /**
-    *  @see com.aparapi.device
-    */
-   @Deprecated
-   public static Device bestACC() {
-      throw new UnsupportedOperationException();
-   }
+           System.out.println("Platform " + platformc + "{");
 
-   protected TYPE type = TYPE.UNKNOWN;
+           System.out.println("   Name    : \"" + platform.getName() + "\"");
 
-   protected int maxWorkGroupSize;
+           System.out.println("   Vendor  : \"" + platform.getVendor() + "\"");
 
-   protected int maxWorkItemDimensions;
+           System.out.println("   Version : \"" + platform.getVersion() + "\"");
 
-   protected int[] maxWorkItemSize = new int[] {
-         0,
-         0,
-         0
-   };
+           List<OpenCLDevice> devices = platform.getOpenCLDevices();
 
-   public abstract String getShortDescription();
+           System.out.println("   Platform contains " + devices.size() + " OpenCL devices");
 
-   public TYPE getType() {
-      return type;
-   }
+           int devicec = 0;
 
-   public void setType(TYPE type) {
-      this.type = type;
-   }
+           for (OpenCLDevice device : devices) 
+           {
+             if( device.getType().name().equalsIgnoreCase(deviceTypeName))
+             {
 
-   public int getMaxWorkItemDimensions() {
-      return maxWorkItemDimensions;
-   }
+               System.out.println("   Device " + devicec + "{");
 
-   public void setMaxWorkItemDimensions(int _maxWorkItemDimensions) {
-      maxWorkItemDimensions = _maxWorkItemDimensions;
-   }
+               System.out.println("       Type                  : " + device.getType());
 
-   public int getMaxWorkGroupSize() {
-      return maxWorkGroupSize;
-   }
+               System.out.println("       GlobalMemSize         : " + device.getGlobalMemSize());
 
-   public void setMaxWorkGroupSize(int _maxWorkGroupSize) {
-      maxWorkGroupSize = _maxWorkGroupSize;
-   }
+               System.out.println("       LocalMemSize          : " + device.getLocalMemSize());
 
-   public int[] getMaxWorkItemSize() {
-      return maxWorkItemSize;
-   }
+               System.out.println("       MaxComputeUnits       : " + device.getMaxComputeUnits());
 
-   public void setMaxWorkItemSize(int[] maxWorkItemSize) {
-      this.maxWorkItemSize = maxWorkItemSize;
-   }
+               System.out.println("       MaxWorkGroupSizes     : " + device.getMaxWorkGroupSize());
 
-   public Range createRange(int _globalWidth) {
-      return (Range.create(this, _globalWidth));
-   }
+               System.out.println("       MaxWorkItemDimensions : " + device.getMaxWorkItemDimensions());
 
-   public Range createRange(int _globalWidth, int _localWidth) {
-      return (Range.create(this, _globalWidth, _localWidth));
-   }
+               System.out.println("   }");
+               
+               if(deviceId>0 && (devicec!=deviceId))
+               {
+            	   System.out.println("!!! devicec!=deviceId(" + deviceId + ") => continue search !!!");
+            	   continue;
+               }
+            	   
+               // close platform bracket
+               System.out.println("}");
 
-   public Range createRange2D(int _globalWidth, int _globalHeight) {
-      return (Range.create2D(this, _globalWidth, _globalHeight));
-   }
+               return device; 
+             }
 
-   public Range createRange2D(int _globalWidth, int _globalHeight, int _localWidth, int _localHeight) {
-      return (Range.create2D(this, _globalWidth, _globalHeight, _localWidth, _localHeight));
-   }
+             devicec++;
+           }
+           System.out.println("Device type/id combination not found");
 
-   public Range createRange3D(int _globalWidth, int _globalHeight, int _globalDepth) {
-      return (Range.create3D(this, _globalWidth, _globalHeight, _globalDepth));
-   }
+           System.out.println("}");
 
-   public Range createRange3D(int _globalWidth, int _globalHeight, int _globalDepth, int _localWidth, int _localHeight,
-         int _localDepth) {
-      return (Range.create3D(this, _globalWidth, _globalHeight, _globalDepth, _localWidth, _localHeight, _localDepth));
-   }
+           platformc++;
 
-   public abstract long getDeviceId();
+       }
 
-   @Override
-   public boolean equals(Object o) {
-      if (this == o) {
-         return true;
-      }
-      if (!(o instanceof Device)) {
-         return false;
-      }
-
-      Device device = (Device) o;
-
-      return getDeviceId() == device.getDeviceId();
-   }
-
-   @Override
-   public int hashCode() {
-      return Long.valueOf(getDeviceId()).hashCode();
+     //}
+     // return not found !!!
+     return null;
    }
 }

@@ -170,6 +170,16 @@ public class KernelRunner extends KernelRunnerJNI{
       KernelManager.instance(); // ensures static initialization of KernelManager
    }
 
+   public void init(KernelRunner kernelRunner) {
+      //this = super.clone();
+      jniContextHandle = kernelRunner.jniContextHandle;
+      entryPoint = kernelRunner.entryPoint;
+      argc = kernelRunner.argc;
+      args = kernelRunner.args;
+      //puts = kernelRunner.puts;
+      capabilitiesSet = kernelRunner.capabilitiesSet;
+   }
+
    /**
     * @see Kernel#cleanUpArrays().
     */
@@ -1356,28 +1366,11 @@ public class KernelRunner extends KernelRunnerJNI{
 
                   // Send the string to OpenCL to compile it, or if the compiled binary is already cached on JNI side just empty string to use cached binary
                   long handle;
-                  if (BINARY_CACHING_DISABLED) {
-                     handle = buildProgramJNI(jniContextHandle, openCL, "");
-                  } else {
-                     synchronized (seenBinaryKeys) {
-                        String binaryKey = kernel.getClass().getName() + ":" + device.getDeviceId();
-                        if (seenBinaryKeys.contains(binaryKey)) {
-                           // use cached binary
-                           logger.log(Level.INFO, "reusing cached binary for " + binaryKey);
-                           handle = buildProgramJNI(jniContextHandle, "", binaryKey);
-                        }
-                        else {
-                           // create and cache binary
-                           logger.log(Level.INFO, "compiling new binary for " + binaryKey);
-                           handle = buildProgramJNI(jniContextHandle, openCL, binaryKey);
-                           seenBinaryKeys.add(binaryKey);
-                        }
-                     }
-                  }
-                  _settings.profile.onEvent(ProfilingEvent.OPENCL_COMPILED);
-                  if (handle == 0) {
+                  int buildFlags = kernel.getFlowType().getValue();
+                  if (buildProgramJNI(jniContextHandle, openCL,buildFlags) == 0) {
                      return fallBackToNextDevice(_settings, "OpenCL compile failed");
                   }
+                  _settings.profile.onEvent(ProfilingEvent.OPENCL_COMPILED);
 
                   args = new KernelArg[entryPoint.getReferencedFields().size()];
                   int i = 0;

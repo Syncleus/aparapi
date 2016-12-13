@@ -174,7 +174,10 @@ public class Entrypoint implements Cloneable {
       try {
          field = _clazz.getDeclaredField(_name);
          final Class<?> type = field.getType();
-         if (type.isPrimitive() || type.isArray()) {
+         // !!! oren test - for alternative memory types
+         //if (type.isPrimitive() || type.isArray()) 
+         if (type.isPrimitive() || type.isArray() || type.getName().contains("java.nio")) 
+         {
             return field;
          }
          if (field.getAnnotation(Kernel.NoCL.class) != null) {

@@ -470,7 +470,10 @@ public class OpenCLDevice extends Device{
       OpenCLDevice device = null;
       final OpenCLPlatform platform = new OpenCLPlatform(0, null, null, null);
 
-      for (final OpenCLPlatform p : platform.getOpenCLPlatforms()) {
+      //!!! oren change 2.15.15 -> allow choosing a platform when multiple platforms are available
+      // Currently aparapi does not offer a way to choose a platform
+      //for (final OpenCLPlatform p : platform.getOpenCLPlatforms()) {
+      for (final OpenCLPlatform p : platform.getOpenCLPlatformsFilteredByConfig()) {
          for (final OpenCLDevice d : p.getOpenCLDevices()) {
             device = _deviceSelector.select(d);
             if (device != null) {
@@ -508,7 +511,10 @@ public class OpenCLDevice extends Device{
       OpenCLDevice device = null;
       final OpenCLPlatform platform = new OpenCLPlatform(0, null, null, null);
 
-      for (final OpenCLPlatform p : platform.getOpenCLPlatforms()) {
+      //!!! oren change 2.15.15 -> allow choosing a platform when multiple platforms are available
+      // Currently aparapi does not offer a way to choose a platform
+      //for (final OpenCLPlatform p : platform.getOpenCLPlatforms()) {
+       for (final OpenCLPlatform p : platform.getOpenCLPlatformsFilteredByConfig()) {
          for (final OpenCLDevice d : p.getOpenCLDevices()) {
             if (d.getType() != _type) continue;
             if (device == null) {

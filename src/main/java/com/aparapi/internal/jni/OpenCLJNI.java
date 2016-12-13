@@ -15,9 +15,9 @@
  */
 package com.aparapi.internal.jni;
 
-import com.aparapi.ProfileInfo;
 import java.util.List;
 
+import com.aparapi.ProfileInfo;
 import com.aparapi.device.OpenCLDevice;
 import com.aparapi.internal.opencl.OpenCLArgDescriptor;
 import com.aparapi.internal.opencl.OpenCLKernel;
@@ -32,12 +32,7 @@ public abstract class OpenCLJNI{
 
    protected native List<OpenCLPlatform> getPlatforms();
 
-   public OpenCLProgram createProgram(OpenCLDevice context, String openCLSource)
-   {
-      return this.createProgram(context, openCLSource, null);
-   }
-
-   protected native OpenCLProgram createProgram(OpenCLDevice context, String openCLSource, String binaryKey);
+   protected native OpenCLProgram createProgram(OpenCLDevice context, String openCLSource);
 
    protected native OpenCLKernel createKernelJNI(OpenCLProgram program, String kernelName, OpenCLArgDescriptor[] args);
 

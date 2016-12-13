@@ -373,17 +373,10 @@ public abstract class Kernel implements Cloneable {
     *     kernel.execute(values.length);
     * </pre></blockquote>
     * <p>
-<<<<<<< HEAD:src/main/java/com/aparapi/Kernel.java
     * Alternatively, the property <code>com.aparapi.executionMode</code> can be set to one of <code>JTP,GPU,ACC,CPU,SEQ</code>
     * when an application is launched. 
     * <p><blockquote><pre>
     *    java -classpath ....;aparapi.jar -Dcom.aparapi.executionMode=GPU MyApplication
-=======
-    * Alternatively, the property <code>com.amd.aparapi.executionMode</code> can be set to one of <code>JTP,GPU,ACC,CPU,SEQ</code>
-    * when an application is launched.
-    * <p><blockquote><pre>
-    *    java -classpath ....;aparapi.jar -Dcom.amd.aparapi.executionMode=GPU MyApplication
->>>>>>> b118aad... added method to set execution mode without any fallback:com.amd.aparapi/src/java/com/amd/aparapi/Kernel.java
     * </pre></blockquote><p>
     * Generally setting the execution mode is not recommended (it is best to let Aparapi decide automatically) but the option
     * provides a way to compare a kernel's performance under multiple execution modes.
@@ -500,6 +493,80 @@ public abstract class Kernel implements Cloneable {
       }
    };
 
+   ////////////////////
+   // !!! oren change -> add source/binary flow support to kernel 
+   ////////////////////
+   public static enum FlowType
+   {
+	   // flow type list
+	   SOURCE(com.aparapi.internal.jni.KernelRunnerJNI.JNI_FLAG_SOURCE_FLOW),
+	   BINARY(com.aparapi.internal.jni.KernelRunnerJNI.JNI_FLAG_BINARY_FLOW),
+	   DEFAULT(com.aparapi.internal.jni.KernelRunnerJNI.JNI_FLAG_DEFAULT_FLOW);
+
+	   // data store
+	   int flowType;
+
+	   FlowType(int flowType)
+	   {
+		   setValue(flowType);
+	   }
+
+	   FlowType(String flowTypeStr)
+	   {
+		   this.flowType = strToFlowType(flowTypeStr).getValue();
+	   }
+
+	   public int getValue()
+	   {
+		   return this.flowType;
+	   }
+
+	   private void setValue(int flowType)
+	   {
+		   this.flowType = flowType;
+	   }
+
+	   public static FlowType getDefaultFlowType() 
+	   {
+		   // if set by user try get value else set to default 
+		   FlowType flowType = (Config.flowType==null) ? DEFAULT : strToFlowType(Config.flowType);
+		   return flowType;
+	   }
+
+	   public static FlowType strToFlowType(final String flowTypeStr)
+	   {
+		   try 
+		   {
+			   FlowType flowType = valueOf(flowTypeStr.toUpperCase());
+			   return flowType;
+		   }
+		   catch (Exception e)
+		   {
+			   logger.info("!!! bad flow type => (" + flowTypeStr + ") => reverting to default platform flow!");
+			   throw e;
+		   }
+	   }
+
+   }
+   
+   public FlowType getFlowType() {
+		return kernelFlowType;
+	}
+
+
+	public void setFlowType(FlowType kernelFlowType) {
+		this.kernelFlowType = kernelFlowType;
+	}
+
+	public void setFlowType(String flowTypeStr) {
+		this.kernelFlowType = FlowType.strToFlowType(flowTypeStr);
+	}
+   
+   private FlowType kernelFlowType = FlowType.getDefaultFlowType();
+   
+     
+   ////////////////////
+   
    private KernelRunner kernelRunner = null;
 
    private boolean autoCleanUpArrays = false;
@@ -719,7 +786,8 @@ public abstract class Kernel implements Cloneable {
       return getGlobalId(0);
    }
 
-   @OpenCLDelegate
+
+@OpenCLDelegate
    protected final int getGlobalId(int _dim) {
       return kernelState.getGlobalIds()[_dim];
    }
@@ -1074,7 +1142,23 @@ public abstract class Kernel implements Cloneable {
       }
    }
 
+   
    /**
+    * Init a kernel from an existing one. used in caching mechanisems to improve startup time (ex. SparkCL). 
+    *  
+    */
+   public void init(Kernel kernel) {
+
+	 // create and init a copy of the kernel runner
+	 kernelRunner = new KernelRunner(this);
+         if(kernel.kernelRunner!=null)
+	   kernelRunner.init(kernel.kernelRunner);
+         // We need to be careful to also clone the KernelState
+         kernelState = new KernelState(kernel.kernelState); // Qualified copy constructor
+   }
+
+
+/**
     * Delegates to either {@link java.lang.Math#acos(double)} (Java) or <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/acos.html">acos(float)</a></code> (OpenCL).
      *
      * User should note the differences in precision between Java and OpenCL's implementation of arithmetic functions to determine whether the difference in precision is acceptable.
