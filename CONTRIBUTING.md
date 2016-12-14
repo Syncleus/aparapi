@@ -9,16 +9,38 @@ making a change. This could potentially save a lot of wasted hours.
 
 Please note we have a code of conduct, please follow it in all your interactions with the project.
 
-## Pull Request Process
+## Development
 
-1. Ensure any install or build dependencies are removed before the end of the layer when doing a 
-   build.
-2. Update the README.md with details of changes to the interface, this includes new environment 
-   variables, exposed ports, useful file locations and container parameters.
-3. Increase the version numbers in any examples files and the README.md to the new version that this
-   Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
-4. You may merge the Pull Request in once you have the sign-off of two other developers, or if you 
-   do not have permission to do that, you may request the second reviewer to merge it for you.
+### Commit Message Format
+
+Starting version 1.3.3 and later all commits on the Syncleus Aparapi repository follow the
+[Conventional Changelog standard](https://github.com/conventional-changelog/conventional-changelog-eslint/blob/master/convention.md).
+It is a very simple format so you can still write commit messages by hand. However it is
+highly recommended developers install [Commitizen](https://commitizen.github.io/cz-cli/),
+it extends the git command and will make writing commit messages a breeze. All the Aparapi
+repositories are configured with local Commitizen configuration scripts.
+
+Below is an example of a properly formated commit message.
+
+```
+chore(Commitizen): Made repository Commitizen friendly.
+
+Added standard Commitizen configuration files to the repo along with all the custom rules.
+
+ISSUES CLOSED: #31
+```
+
+### Pull Request Process
+
+1. Ensure that install or build dependencies do not appear in any commits in your code branch. 
+2. Ensure all commit messages follow the [Conventional Changelog](https://github.com/conventional-changelog/conventional-changelog-eslint/blob/master/convention.md)
+   explained earlier.
+3. Update the CONTRIBUTORS.md file to add your name if it doesn't already exist (one entyr
+   per person).
+4. Adjust the project version to th new version that this Pull Request would represent. The
+   versioning scheme we use is [Semantic Versioning](http://semver.org/).
+5. You're pull request will either be approved or feedback will be given on what needs to be
+   fixed to get approval. We always review and comment on Pull Requests within 48 hours.
 
 ## Code of Conduct
 
