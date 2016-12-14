@@ -20,6 +20,12 @@ highly recommended developers install [Commitizen](https://commitizen.github.io/
 it extends the git command and will make writing commit messages a breeze. All the Aparapi
 repositories are configured with local Commitizen configuration scripts.
 
+Below is an example of Commitizen in action. It replaces your usual `git commit` command
+with `git cz` instead. The new command takes all the same arguments however it leads you
+through an interactive process to generate the commit message.
+
+![Commitizen friendly](http://aparapi.com/images/commitizen.gif)
+
 Commit messages are used to automatically generate our changelogs, and to ensure
 commits are searchable in a useful way. So please use the Commitizen tool and adhere to
 the commit message standard or else we cannot accept Pull Requests without editing
