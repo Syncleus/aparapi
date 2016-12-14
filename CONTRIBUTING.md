@@ -45,13 +45,13 @@ ISSUES CLOSED: #31
 
 1. Ensure that install or build dependencies do not appear in any commits in your code branch. 
 2. Ensure all commit messages follow the [Conventional Changelog](https://github.com/conventional-changelog/conventional-changelog-eslint/blob/master/convention.md)
-   explained earlier.
-3. Update the CONTRIBUTORS.md file to add your name if it doesn't already exist (one entyr
+   standard explained earlier.
+3. Update the CONTRIBUTORS.md file to add your name to it if it isn't already there (one entry
    per person).
-4. Adjust the project version to th new version that this Pull Request would represent. The
+4. Adjust the project version to the new version that this Pull Request would represent. The
    versioning scheme we use is [Semantic Versioning](http://semver.org/).
-5. You're pull request will either be approved or feedback will be given on what needs to be
-   fixed to get approval. We always review and comment on Pull Requests within 48 hours.
+5. Your pull request will either be approved or feedback will be given on what needs to be
+   fixed to get approval. We usually review and comment on Pull Requests within 48 hours.
 
 ## Code of Conduct
 
