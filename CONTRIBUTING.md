@@ -20,6 +20,15 @@ highly recommended developers install [Commitizen](https://commitizen.github.io/
 it extends the git command and will make writing commit messages a breeze. All the Aparapi
 repositories are configured with local Commitizen configuration scripts.
 
+Getting Commitizen installed is usually trivial, just install it via npm. You will also
+need to install the cz-customizable adapter which the Aparapi repository is configured
+to use.
+
+```bash
+
+npm i -g commitizen cz-customizable
+```
+
 Below is an example of Commitizen in action. It replaces your usual `git commit` command
 with `git cz` instead. The new command takes all the same arguments however it leads you
 through an interactive process to generate the commit message.
