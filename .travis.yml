@@ -24,4 +24,6 @@ cache:
         - ${AMDAPPSDKROOT}
 
 before_install:
+    - sudo apt-get update
+    - sudo apt-get install fglrx opencl-headers
     - . .travis/install_amd_sdk.sh;
