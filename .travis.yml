@@ -1,18 +1,16 @@
 sudo: required
 dist: trusty
-language: cpp
+language: java
+jdk:
+  - oraclejdk8
+
 compiler:
     - gcc
     - clang
 
 env:
   global:
-      - BOOST_BASENAME=boost_1_62_0
       - AMDAPPSDKROOT=${HOME}/AMDAPPSDK
-      - secure: "A5GuWMfy2tamED4Xq/h1hXSAX18qemLuhaX3mLD77VMv6Hx2ZPAPXXDuRwg+Htoqccz3DQ3ezA5tf/D2PXffbOvkQeXMKkOBqHLy4aReZm9L+UajPETrQVW2bWBAuVJXMJbJEqdOv+QAEXf82Eml25zGp2r7L0J+FO5nrPtSeqE="
-  matrix:
-      - VEXCL_BACKEND=OpenCL
-      - VEXCL_BACKEND=JIT
 
 addons:
   apt:
@@ -20,7 +18,6 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - opencl-headers
-      - lcov
 
 cache:
     directories:
