@@ -3,6 +3,8 @@
 * Jeffrey Phillips Freeman <jeffrey.freeman@syncleus.com>
 * Florian Roesler <florian.roesler@wooga.net>
 * Denis Demidov <dennis.demidov@gmail.com>
+* Jakub Szuppe <j.szuppe@gmail.com>
+* Kyle Lutz <kyle.r.lutz@gmail.com>
 * George Vinokhodov
 * Witold Bolt 
 * Kenneth Skovhede
