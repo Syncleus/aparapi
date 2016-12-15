@@ -1,6 +1,14 @@
+#language: java
+#jdk:
+#  - oraclejdk8
+## dist: trusty
+#
+#install:
+#  - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test # needed for 12.04
+#  - sudo apt-get update
+#  - sudo apt-get install libstdc++6 fglrx opencl-headers #ocl-icd-opencl-dev #amd-libopencl1 amd-opencl-icd
+
 language: java
-jdk:
-  - oraclejdk8
 
 env:
   global:
@@ -37,85 +45,85 @@ matrix:
     # POCL builds (OpenCL 1.0, 1.1)
     ############################################################################
 
-    # Trusty, OpenCL 1.0
-    - os: linux
-      dist: trusty
-      sudo: required
-      compiler: clang
-      addons:
-        apt:
-          packages: &trusty_pocl_packages
-            - g++-4.8
-            # clang and llvm 3.7 for POCL (llvm-toolchain-trusty-3.7 is not whitelisted)
-            # - clang-3.7
-            # - llvm-3.7
-            # - llvm-3.7-dev (...)
-            # POCL
-            - libltdl-dev
-            - libhwloc-dev
-            - pkg-config
-            - libedit-dev
-            # Boost
-            - libboost-chrono1.55-dev
-            - libboost-date-time1.55-dev
-            - libboost-test1.55-dev
-            - libboost-system1.55-dev
-            - libboost-filesystem1.55-dev
-            - libboost-timer1.55-dev
-            - libboost-program-options1.55-dev
-            - libboost-thread1.55-dev
-            # Misc
-            - python-yaml
-            - lcov
-            - libopencv-dev
-          sources: &trusty_pocl_sources
-            - ubuntu-toolchain-r-test
-            # - llvm-toolchain-trusty-3.7 (not whitelisted yet https://github.com/travis-ci/apt-source-whitelist/issues/199)
-      env:
-       - LINUX_DIST=trusty
-       - OPENCL_LIB=pocl
-       - OPENCL_VERSION="10"
-       - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/pocl/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
-    - os: linux
-      dist: trusty
-      sudo: required
-      compiler: gcc
-      addons:
-        apt:
-          packages: *trusty_pocl_packages
-          sources: *trusty_pocl_sources
-      env:
-       - LINUX_DIST=trusty
-       - OPENCL_LIB=pocl
-       - OPENCL_VERSION="10"
-       - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/pocl/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
-    # Trusty, OpenCL 1.1
-    - os: linux
-      dist: trusty
-      sudo: required
-      compiler: clang
-      addons:
-        apt:
-          packages: *trusty_pocl_packages
-          sources: *trusty_pocl_sources
-      env:
-       - LINUX_DIST=trusty
-       - OPENCL_LIB=pocl
-       - OPENCL_VERSION="11"
-       - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/pocl/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
-    - os: linux
-      dist: trusty
-      sudo: required
-      compiler: gcc
-      addons:
-        apt:
-          packages: *trusty_pocl_packages
-          sources: *trusty_pocl_sources
-      env:
-       - LINUX_DIST=trusty
-       - OPENCL_LIB=pocl
-       - OPENCL_VERSION="11"
-       - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/pocl/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
+#    # Trusty, OpenCL 1.0
+#    - os: linux
+#      dist: trusty
+#      sudo: required
+#      compiler: clang
+#      addons:
+#        apt:
+#          packages: &trusty_pocl_packages
+#            - g++-4.8
+#            # clang and llvm 3.7 for POCL (llvm-toolchain-trusty-3.7 is not whitelisted)
+#            # - clang-3.7
+#            # - llvm-3.7
+#            # - llvm-3.7-dev (...)
+#            # POCL
+#            - libltdl-dev
+#            - libhwloc-dev
+#            - pkg-config
+#            - libedit-dev
+#            # Boost
+#            - libboost-chrono1.55-dev
+#            - libboost-date-time1.55-dev
+#            - libboost-test1.55-dev
+#            - libboost-system1.55-dev
+#            - libboost-filesystem1.55-dev
+#            - libboost-timer1.55-dev
+#            - libboost-program-options1.55-dev
+#            - libboost-thread1.55-dev
+#            # Misc
+#            - python-yaml
+#            - lcov
+#            - libopencv-dev
+#          sources: &trusty_pocl_sources
+#            - ubuntu-toolchain-r-test
+#            # - llvm-toolchain-trusty-3.7 (not whitelisted yet https://github.com/travis-ci/apt-source-whitelist/issues/199)
+#      env:
+#       - LINUX_DIST=trusty
+#       - OPENCL_LIB=pocl
+#       - OPENCL_VERSION="10"
+#       - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/pocl/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
+#    - os: linux
+#      dist: trusty
+#      sudo: required
+#      compiler: gcc
+#      addons:
+#        apt:
+#          packages: *trusty_pocl_packages
+#          sources: *trusty_pocl_sources
+#      env:
+#       - LINUX_DIST=trusty
+#       - OPENCL_LIB=pocl
+#       - OPENCL_VERSION="10"
+#       - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/pocl/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
+#    # Trusty, OpenCL 1.1
+#    - os: linux
+#      dist: trusty
+#      sudo: required
+#      compiler: clang
+#      addons:
+#        apt:
+#          packages: *trusty_pocl_packages
+#          sources: *trusty_pocl_sources
+#      env:
+#       - LINUX_DIST=trusty
+#       - OPENCL_LIB=pocl
+#       - OPENCL_VERSION="11"
+#       - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/pocl/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
+#    - os: linux
+#      dist: trusty
+#      sudo: required
+#      compiler: gcc
+#      addons:
+#        apt:
+#          packages: *trusty_pocl_packages
+#          sources: *trusty_pocl_sources
+#      env:
+#       - LINUX_DIST=trusty
+#       - OPENCL_LIB=pocl
+#       - OPENCL_VERSION="11"
+#       - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/pocl/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
 
     ############################################################################
     # Khronos ICD builds (without running tests) (OpenCL 1.2, 2.0)
@@ -194,34 +202,34 @@ matrix:
     ############################################################################
 
     # Precise, AMD APP SDK v2.9.1, Travis CI container-based infrastructure
-    - os: linux
-      sudo: false
-      compiler: clang
-      addons:
-       apt:
-         packages: &precise_amdappsdk_packages
-           - g++-4.8
-           # Boost
-           - libboost-chrono1.55-dev
-           - libboost-date-time1.55-dev
-           - libboost-test1.55-dev
-           - libboost-system1.55-dev
-           - libboost-filesystem1.55-dev
-           - libboost-timer1.55-dev
-           - libboost-program-options1.55-dev
-           - libboost-thread1.55-dev
-           # Misc
-           - python-yaml
-           - lcov
-           - libopencv-dev
-         sources: &precise_amdappsdk_sources
-           - ubuntu-toolchain-r-test
-           - boost-latest
-      env:
-        - OPENCL_LIB=amdappsdk
-        - OPENCL_VERSION="12"
-        - AMDAPPSDK_VERSION=291 # OpenCL 1.2
-        - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
+#    - os: linux
+#      sudo: false
+#      compiler: clang
+#      addons:
+#       apt:
+#         packages: &precise_amdappsdk_packages
+#           - g++-4.8
+#           # Boost
+#           - libboost-chrono1.55-dev
+#           - libboost-date-time1.55-dev
+#           - libboost-test1.55-dev
+#           - libboost-system1.55-dev
+#           - libboost-filesystem1.55-dev
+#           - libboost-timer1.55-dev
+#           - libboost-program-options1.55-dev
+#           - libboost-thread1.55-dev
+#           # Misc
+#           - python-yaml
+#           - lcov
+#           - libopencv-dev
+#         sources: &precise_amdappsdk_sources
+#           - ubuntu-toolchain-r-test
+#           - boost-latest
+#      env:
+#        - OPENCL_LIB=amdappsdk
+#        - OPENCL_VERSION="12"
+#        - AMDAPPSDK_VERSION=291 # OpenCL 1.2
+#        - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
     # Build is disabled as it's reduntant with the Coveralls build (see below)
     # - os: linux
     #   sudo: false
@@ -236,41 +244,40 @@ matrix:
     #     - AMDAPPSDK_VERSION=291 # OpenCL 1.2
     #     - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
     # Precise, AMD APP SDK v3.0, OpenCL 2.0, Travis CI container-based infrastructure
-    - os: linux
-      sudo: false
-      compiler: clang
-      addons:
-        apt:
-          packages: *precise_amdappsdk_packages
-          sources: *precise_amdappsdk_sources
-      env:
-        - OPENCL_LIB=amdappsdk
-        - OPENCL_VERSION="20"
-        - AMDAPPSDK_VERSION=300 # OpenCL 2.0
-        - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
-    - os: linux
-      sudo: false
-      compiler: gcc
-      addons:
-        apt:
-          packages: *precise_amdappsdk_packages
-          sources: *precise_amdappsdk_sources
-      env:
-        - OPENCL_LIB=amdappsdk
-        - OPENCL_VERSION="20"
-        - AMDAPPSDK_VERSION=300 # OpenCL 2.0
-        - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
+#    - os: linux
+#      sudo: false
+#      compiler: clang
+#      addons:
+#        apt:
+#          packages: *precise_amdappsdk_packages
+#          sources: *precise_amdappsdk_sources
+#      env:
+#        - OPENCL_LIB=amdappsdk
+#        - OPENCL_VERSION="20"
+#        - AMDAPPSDK_VERSION=300 # OpenCL 2.0
+#        - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
+#    - os: linux
+#      sudo: false
+#      compiler: gcc
+#      addons:
+#        apt:
+#          packages: *precise_amdappsdk_packages
+#          sources: *precise_amdappsdk_sources
+#      env:
+#        - OPENCL_LIB=amdappsdk
+#        - OPENCL_VERSION="20"
+#        - AMDAPPSDK_VERSION=300 # OpenCL 2.0
+#        - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
 
-    # Coveralls build (-DBOOST_COMPUTE_ENABLE_COVERAGE=ON)
-    # Trusty, AMD APP SDK v2.9.1, OpenCL 1.2
     - os: linux
-      dist: trusty
       sudo: required
+      dist: jessie
       compiler: gcc
       addons:
         apt:
           packages: &trusty_amdappsdk_packages
             - g++-4.8
+            - libstdc++6
             # Boost
             - libboost-chrono1.55-dev
             - libboost-date-time1.55-dev
@@ -284,70 +291,103 @@ matrix:
             - python-yaml
             - lcov
             - libopencv-dev
-          sources: &trusty_amdappsdk_sources
-            - ubuntu-toolchain-r-test
+#          sources: &trusty_amdappsdk_sources
+#            - ubuntu-toolchain-r-test
       env:
         - LINUX_DIST=trusty
         - OPENCL_LIB=amdappsdk
-        - OPENCL_VERSION="12"
-        - AMDAPPSDK_VERSION=291 # OpenCL 1.2
-        - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include -DBOOST_COMPUTE_ENABLE_COVERAGE=ON"
-        - COVERAGE=true
-
-    # Latest Boost library builds (currently 1.61)
-    # Precise, AMD APP SDK v2.9.1, Travis CI container-based infrastructure
-    - os: linux
-      sudo: false
-      compiler: clang
-      cache:
-        ccache: true
-        directories:
-          - ${DEPS_DIR}/boost
-      addons:
-       apt:
-         packages: &precise_latest_boost_packages
-           - g++-4.8
-           # Misc
-           - python-yaml
-           - lcov
-           - libopencv-dev
-         sources: &precise_latest_boost_sources
-           - ubuntu-toolchain-r-test
-      env:
-        - OPENCL_LIB=amdappsdk
-        - OPENCL_VERSION="12"
-        - AMDAPPSDK_VERSION=291 # OpenCL 1.2
-        - BOOST_VERSION="1_61_0" # Boost 1.61
-        - BOOST_URL="http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.gz"
-        - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
-    - os: linux
-      sudo: false
-      compiler: gcc
-      cache:
-        ccache: true
-        directories:
-          - ${DEPS_DIR}/boost
-      addons:
-        apt:
-          packages: *precise_latest_boost_packages
-          sources: *precise_latest_boost_sources
-      env:
-        - OPENCL_LIB=amdappsdk
-        - OPENCL_VERSION="12"
-        - AMDAPPSDK_VERSION=291 # OpenCL 1.2
-        - BOOST_VERSION="1_61_0" # Boost 1.61
-        - BOOST_URL="http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.gz"
+        - OPENCL_VERSION="20"
+        - AMDAPPSDK_VERSION=300 # OpenCL 2.0
         - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
 
-    ############################################################################
-    # OSX
-    ############################################################################
 
-    # OSX build
-    - os: osx
-      compiler: clang
-      env:
-        - ENV_CXX_FLAGS="-Wno-c99-extensions"
+#    # Coveralls build (-DBOOST_COMPUTE_ENABLE_COVERAGE=ON)
+#    # Trusty, AMD APP SDK v2.9.1, OpenCL 1.2
+#    - os: linux
+#      dist: trusty
+#      sudo: required
+#      compiler: gcc
+#      addons:
+#        apt:
+#          packages: &trusty_amdappsdk_packages
+#            - g++-4.8
+#            # Boost
+#            - libboost-chrono1.55-dev
+#            - libboost-date-time1.55-dev
+#            - libboost-test1.55-dev
+#            - libboost-system1.55-dev
+#            - libboost-filesystem1.55-dev
+#            - libboost-timer1.55-dev
+#            - libboost-program-options1.55-dev
+#            - libboost-thread1.55-dev
+#            # Misc
+#            - python-yaml
+#            - lcov
+#            - libopencv-dev
+#          sources: &trusty_amdappsdk_sources
+#            - ubuntu-toolchain-r-test
+#      env:
+#        - LINUX_DIST=trusty
+#        - OPENCL_LIB=amdappsdk
+#        - OPENCL_VERSION="12"
+#        - AMDAPPSDK_VERSION=291 # OpenCL 1.2
+#        - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include -DBOOST_COMPUTE_ENABLE_COVERAGE=ON"
+#        - COVERAGE=true
+#
+#    # Latest Boost library builds (currently 1.61)
+#    # Precise, AMD APP SDK v2.9.1, Travis CI container-based infrastructure
+#    - os: linux
+#      sudo: false
+#      compiler: clang
+#      cache:
+#        ccache: true
+#        directories:
+#          - ${DEPS_DIR}/boost
+#      addons:
+#       apt:
+#         packages: &precise_latest_boost_packages
+#           - g++-4.8
+#           # Misc
+#           - python-yaml
+#           - lcov
+#           - libopencv-dev
+#         sources: &precise_latest_boost_sources
+#           - ubuntu-toolchain-r-test
+#      env:
+#        - OPENCL_LIB=amdappsdk
+#        - OPENCL_VERSION="12"
+#        - AMDAPPSDK_VERSION=291 # OpenCL 1.2
+#        - BOOST_VERSION="1_61_0" # Boost 1.61
+#        - BOOST_URL="http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.gz"
+#        - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
+#    - os: linux
+#      sudo: false
+#      compiler: gcc
+#      cache:
+#        ccache: true
+#        directories:
+#          - ${DEPS_DIR}/boost
+#      addons:
+#        apt:
+#          packages: *precise_latest_boost_packages
+#          sources: *precise_latest_boost_sources
+#      env:
+#        - OPENCL_LIB=amdappsdk
+#        - OPENCL_VERSION="12"
+#        - AMDAPPSDK_VERSION=291 # OpenCL 1.2
+#        - BOOST_VERSION="1_61_0" # Boost 1.61
+#        - BOOST_URL="http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.gz"
+#        - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
+
+#    ############################################################################
+#    # OSX
+#    ############################################################################
+#
+#    # OSX build
+#    - os: osx
+#      compiler: clang
+#      env:
+#        - ENV_CXX_FLAGS="-Wno-c99-extensions"
 
 before_install:
     # Install dependencies
