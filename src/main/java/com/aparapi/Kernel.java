@@ -2009,41 +2009,137 @@ public abstract class Kernel implements Cloneable {
         return (float)(Math.nextAfter(start, direction));
     }
 
+    /**
+     * Delegates to either {@link java.lang.Math#sinh(double)} (Java) or <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/sin.html">sinh(double)</a></code> (OpenCL).
+     *
+     * User should note the differences in precision between Java and OpenCL's implementation of arithmetic functions to determine whether the difference in precision is acceptable.
+     *
+     * @param x value to delegate to {@link java.lang.Math#sinh(double)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/sin.html">sinh(double)</a></code>
+     * @return {@link java.lang.Math#sinh(double)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/sin.html">sinh(double)</a></code>
+     *
+     * @see java.lang.Math#sinh(double)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/sin.html">sinh(double)</a></code>
+     */
     @OpenCLMapping(mapTo = "sinh")
     protected final double sinh(final double x) {
         return Math.sinh(x);
     }
 
+    /**
+     * Delegates to either {@link java.lang.Math#sinh(double)} (Java) or <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/sin.html">sinh(float)</a></code> (OpenCL).
+     *
+     * User should note the differences in precision between Java and OpenCL's implementation of arithmetic functions to determine whether the difference in precision is acceptable.
+     *
+     * @param x value to delegate to {@link java.lang.Math#sinh(double)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/sin.html">sinh(float)</a></code>
+     * @return {@link java.lang.Math#sinh(double)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/sin.html">sinh(float)</a></code>
+     *
+     * @see java.lang.Math#sinh(double)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/sin.html">sinh(float)</a></code>
+     */
     @OpenCLMapping(mapTo = "sinh")
     protected final float sinh(final float x) {
         return (float)(Math.sinh(x));
     }
 
+    /**
+     * Backed by either {@link java.lang.Math#sin(double)} (Java) or <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">sinpi(double)</a></code> (OpenCL).
+     *
+     * This method is equivelant to <code>Math.sin(a * Math.PI)</code>
+     *
+     * User should note the differences in precision between Java and OpenCL's implementation of arithmetic functions to determine whether the difference in precision is acceptable.
+     *
+     * @param a value to delegate to <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">sinpi(double)</a></code> or java equivelant
+     * @return <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">sinpi(double)</a></code> or java equivelant
+     *
+     * @see java.lang.Math#sin(double)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">sinpi(double)</a></code>
+     */
     @OpenCLMapping(mapTo = "sinpi")
     protected final double sinpi(final double a) {
         return Math.sin(a * Math.PI);
     }
 
+    /**
+     * Backed by either {@link java.lang.Math#sin(double)} (Java) or <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">sinpi(float)</a></code> (OpenCL).
+     *
+     * This method is equivelant to <code>Math.sin(a * Math.PI)</code>
+     *
+     * User should note the differences in precision between Java and OpenCL's implementation of arithmetic functions to determine whether the difference in precision is acceptable.
+     *
+     * @param a value to delegate to <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">sinpi(float)</a></code> or java equivelant
+     * @return <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">sinpi(float)</a></code> or java equivelant
+     *
+     * @see java.lang.Math#sin(double)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">sinpi(float)</a></code>
+     */
     @OpenCLMapping(mapTo = "sinpi")
     protected final float sinpi(final float a) {
         return (float)(Math.sin(a * Math.PI));
     }
 
+    /**
+     * Delegates to either {@link java.lang.Math#tanh(double)} (Java) or <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanh(double)</a></code> (OpenCL).
+     *
+     * User should note the differences in precision between Java and OpenCL's implementation of arithmetic functions to determine whether the difference in precision is acceptable.
+     *
+     * @param x value to delegate to {@link java.lang.Math#tanh(double)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanh(double)</a></code>
+     * @return {@link java.lang.Math#tanh(double)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanh(double)</a></code>
+     *
+     * @see java.lang.Math#tanh(double)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanh(double)</a></code>
+     */
     @OpenCLMapping(mapTo = "tanh")
     protected final double tanh(final double x) {
         return Math.tanh(x);
     }
 
+    /**
+     * Delegates to either {@link java.lang.Math#tanh(float)} (Java) or <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanh(float)</a></code> (OpenCL).
+     *
+     * User should note the differences in precision between Java and OpenCL's implementation of arithmetic functions to determine whether the difference in precision is acceptable.
+     *
+     * @param x value to delegate to {@link java.lang.Math#tanh(float)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanh(float)</a></code>
+     * @return {@link java.lang.Math#tanh(float)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanh(float)</a></code>
+     *
+     * @see java.lang.Math#tanh(float)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanh(float)</a></code>
+     */
     @OpenCLMapping(mapTo = "tanh")
     protected final float tanh(final float x) {
         return (float)(Math.tanh(x));
     }
 
+    /**
+     * Backed by either {@link java.lang.Math#tan(double)} (Java) or <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanpi(double)</a></code> (OpenCL).
+     *
+     * This method is equivelant to <code>Math.tan(a * Math.PI)</code>
+     *
+     * User should note the differences in precision between Java and OpenCL's implementation of arithmetic functions to determine whether the difference in precision is acceptable.
+     *
+     * @param a value to delegate to <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanpi(double)</a></code> or java equivelant
+     * @return <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanpi(double)</a></code> or java equivelant
+     *
+     * @see java.lang.Math#tan(double)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanpi(double)</a></code>
+     */
     @OpenCLMapping(mapTo = "tanpi")
     protected final double tanpi(final double a) {
         return Math.tan(a * Math.PI);
     }
 
+    /**
+     * Backed by either {@link java.lang.Math#tan(double)} (Java) or <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanpi(float)</a></code> (OpenCL).
+     *
+     * This method is equivelant to <code>Math.tan(a * Math.PI)</code>
+     *
+     * User should note the differences in precision between Java and OpenCL's implementation of arithmetic functions to determine whether the difference in precision is acceptable.
+     *
+     * @param a value to delegate to <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanpi(float)</a></code> or java equivelant
+     * @return <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanpi(float)</a></code> or java equivelant
+     *
+     * @see java.lang.Math#tan(double)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/tan.html">tanpi(float)</a></code>
+     */
     @OpenCLMapping(mapTo = "tanpi")
     protected final float tanpi(final float a) {
         return (float)(Math.tan(a * Math.PI));
