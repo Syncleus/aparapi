@@ -40,7 +40,7 @@ module.exports = {
     ],
     docs: [
       {name: 'Javadocs'},
-      {name: 'Repository'},
+      {name: 'repo'},
       {name: 'Maven'}
     ]
   },
