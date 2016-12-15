@@ -31,3 +31,7 @@ hs_err_pid*
 /.libs/
 /findbugs/
 /target/
+
+#intellij
+.idea/
+*.iml
