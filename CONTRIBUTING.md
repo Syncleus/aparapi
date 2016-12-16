@@ -78,16 +78,19 @@ First ensure the package is prepared for the release process:
 
 Next lets take a few steps to do the actual release:
 
-1. Update everything listed above. Do **not** drop the package version's `-SNAPSHOT` suffix in master.
-2. Create a release branch, but make sure never to push this branch to the server: `git checkout -b release`.
-3. Drop the `-SNAPSHOT` suffix from the package version.
-4. Commit the current changes using a generic commit message such as `build(release): version 1.2.3`.
-5. Fully test the software before deploying, run all tests and install locally to test against the examples package.
-   You can install the package locally with `mvn clean install`.
-6. Once satisfied the package is stable deploy it to maven central by executing `mvn -P sign clean package deploy`.
-7. If deployment was successful then create a new tag for the current version with the following command:
-   `git tag -a v1.2.3 -m "Version 1.2.3"`.
-8. Push the newly created tags to the server: `git push origin v1.2.3:v1.2.3`.
+1.  Update everything listed above. Do **not** drop the package version's `-SNAPSHOT` suffix in master.
+2.  Create a release branch, but make sure never to push this branch to the server: `git checkout -b release`.
+3.  Drop the `-SNAPSHOT` suffix from the package version.
+4.  Commit the current changes using a generic commit message such as `build(release): version 1.2.3`.
+5.  Fully test the software before deploying, run all tests and install locally to test against the examples package.
+    You can install the package locally with `mvn clean install`.
+6.  Once satisfied the package is stable deploy it to maven central by executing `mvn -P sign clean package deploy`.
+7.  If deployment was successful then create a new tag for the current version with the following command:
+    `git tag -a v1.2.3 -m "Version 1.2.3"`.
+8.  Push the newly created tags to the server: `git push origin v1.2.3:v1.2.3`.
+9.  Checkout master again and then delete the release branch: `git branch -D release`.
+10. Bump the snapshot version of the package to the next expected version, commiting the changes and pushing.
+11. Deploy the new snapshot to the snapshot repository (no need to sign): `mvn clean deploy`.
 
 ## Code of Conduct
 
