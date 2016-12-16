@@ -91,6 +91,7 @@ matrix:
     # Build is disabled as it's reduntant with the Coveralls build (see below)
     - os: linux
       sudo: false
+      dist: trusty
       compiler: gcc
       addons:
         apt:
