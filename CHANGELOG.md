@@ -2,6 +2,7 @@
 
 ## 1.3.3
 
+* Fixed "`CXXABI_1.3.8' not found " error encountered on some older systems.
 * Fixed a bug where calling createProgram resulted in an exception.
 * Changed aparapi JNI load notification into a proper logger message instead of direct to system.out.
 
