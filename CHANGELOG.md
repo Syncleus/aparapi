@@ -2,6 +2,8 @@
 
 ## 1.3.3
 
+* Added several missing math functions that are part of the OpenCL standard: acospi, asinpi, atanpi, atan2pi, cbrt,
+  cosh, cospi, exp2, exp10, expm1, log2, log10, log1p, mad, nextafter, sinh, sinpi, tanh, tanpi.
 * Fixed "`CXXABI_1.3.8' not found " error encountered on some older systems.
 * Fixed a bug where calling createProgram resulted in an exception.
 * Changed aparapi JNI load notification into a proper logger message instead of direct to system.out.
