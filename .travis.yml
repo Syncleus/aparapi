@@ -1,12 +1,17 @@
-#language: java
-#jdk:
-#  - oraclejdk8
-## dist: trusty
+#    Copyright (c) 2016 - 2017 Syncleus, Inc.
 #
-#install:
-#  - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test # needed for 12.04
-#  - sudo apt-get update
-#  - sudo apt-get install libstdc++6 fglrx opencl-headers #ocl-icd-opencl-dev #amd-libopencl1 amd-opencl-icd
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
 
 language: java
 
@@ -460,29 +465,6 @@ install:
         travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C ${DEPS_DIR}/cmake
         export PATH=${DEPS_DIR}/cmake/bin:${PATH}
       fi
-
-#    # Download and install Boost
-#    - |
-#      if [[ ${TRAVIS_OS_NAME} == "linux" && ${BOOST_VERSION} != "default" ]]; then
-#        if [ ! -f "${DEPS_DIR}/boost/${BOOST_VERSION}_cached" ]; then
-#          # create dirs for source and install
-#          mkdir -p ${DEPS_DIR}/boost${BOOST_VERSION}
-#          mkdir -p ${DEPS_DIR}/boost
-#          rm -rf ${DEPS_DIR}/boost/*
-#          # download
-#          travis_retry wget --no-check-certificate --quiet -O - ${BOOST_URL} | tar --strip-components=1 -xz -C ${DEPS_DIR}/boost${BOOST_VERSION}
-#          pushd ${DEPS_DIR}/boost${BOOST_VERSION}
-#          # configure and install
-#          echo "using gcc : 4.8 : g++-4.8 ;" > $HOME/user-config.jam
-#          ./bootstrap.sh --prefix=${DEPS_DIR}/boost/ --with-libraries=program_options,filesystem,system,thread,test,timer,chrono
-#          ./b2 -d0 install
-#          popd
-#          touch ${DEPS_DIR}/boost/${BOOST_VERSION}_cached
-#        else
-#          echo 'Using cached Boost ${BOOST_VERSION} libraries.'
-#        fi
-#        export CMAKE_OPTIONS=${CMAKE_OPTIONS}" -DBOOST_ROOT=${DEPS_DIR}/boost"
-#      fi
 
     ############################################################################
     # Download OpenCL headers (and cl.hpp)
