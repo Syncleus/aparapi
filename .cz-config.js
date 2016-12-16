@@ -37,6 +37,11 @@ module.exports = {
       {name: 'Commitizen'},
       {name: 'editorconfig'},
       {name: 'GIT'}
+    ],
+    docs: [
+      {name: 'Javadocs'},
+      {name: 'repo'},
+      {name: 'Maven'}
     ]
   },
 
