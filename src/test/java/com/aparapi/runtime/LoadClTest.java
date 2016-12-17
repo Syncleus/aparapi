@@ -62,7 +62,7 @@ public class LoadClTest {
         }
     }
 
-    @Resource("com/aparapi/test/runtime/squarer.cl")
+    @Resource("com/aparapi/codegen/test/runtime/squarer.cl")
     interface Squarer extends OpenCL<Squarer> {
         public Squarer square(//
                               Range _range,//

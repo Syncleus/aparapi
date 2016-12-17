@@ -60,7 +60,7 @@ public abstract class KernelArgJNI{
    @UsedByJNICode protected Object javaArray;
 
    /**
-    * If this field represents an aparapi buffer then the instance will be captured here
+    * If this field represents an codegen buffer then the instance will be captured here
     */
    @UsedByJNICode protected Object javaBuffer;
 

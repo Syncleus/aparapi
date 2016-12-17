@@ -45,7 +45,7 @@ public class OpenCLLoader extends OpenCLJNI{
                openCLAvailable = true;
             }
             catch (final IOException e) {
-               logger.log(Level.SEVERE, "Check your environment. Failed to load aparapi native library "
+               logger.log(Level.SEVERE, "Check your environment. Failed to load codegen native library "
                      + " or possibly failed to locate opencl native library (opencl.dll/opencl.so)."
                      + " Ensure that OpenCL is in your PATH (windows) or in LD_LIBRARY_PATH (linux).");
             }

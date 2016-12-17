@@ -373,17 +373,17 @@ public abstract class Kernel implements Cloneable {
     *     kernel.execute(values.length);
     * </pre></blockquote>
     * <p>
-<<<<<<< HEAD:src/main/java/com/aparapi/Kernel.java
-    * Alternatively, the property <code>com.aparapi.executionMode</code> can be set to one of <code>JTP,GPU,ACC,CPU,SEQ</code>
+<<<<<<< HEAD:src/main/java/com/codegen/Kernel.java
+    * Alternatively, the property <code>com.codegen.executionMode</code> can be set to one of <code>JTP,GPU,ACC,CPU,SEQ</code>
     * when an application is launched. 
     * <p><blockquote><pre>
-    *    java -classpath ....;aparapi.jar -Dcom.aparapi.executionMode=GPU MyApplication
+    *    java -classpath ....;codegen.jar -Dcom.codegen.executionMode=GPU MyApplication
 =======
-    * Alternatively, the property <code>com.amd.aparapi.executionMode</code> can be set to one of <code>JTP,GPU,ACC,CPU,SEQ</code>
+    * Alternatively, the property <code>com.amd.codegen.executionMode</code> can be set to one of <code>JTP,GPU,ACC,CPU,SEQ</code>
     * when an application is launched.
     * <p><blockquote><pre>
-    *    java -classpath ....;aparapi.jar -Dcom.amd.aparapi.executionMode=GPU MyApplication
->>>>>>> b118aad... added method to set execution mode without any fallback:com.amd.aparapi/src/java/com/amd/aparapi/Kernel.java
+    *    java -classpath ....;codegen.jar -Dcom.amd.codegen.executionMode=GPU MyApplication
+>>>>>>> b118aad... added method to set execution mode without any fallback:com.amd.codegen/src/java/com/amd/codegen/Kernel.java
     * </pre></blockquote><p>
     * Generally setting the execution mode is not recommended (it is best to let Aparapi decide automatically) but the option
     * provides a way to compare a kernel's performance under multiple execution modes.

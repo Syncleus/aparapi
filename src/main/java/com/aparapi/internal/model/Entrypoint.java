@@ -602,7 +602,7 @@ public class Entrypoint implements Cloneable {
 
                // Add the class model for the referenced obj array
                if (signature.startsWith("[L")) {
-                  // Turn [Lcom/aparapi/javalabs/opencl/demo/DummyOOA; into com.aparapi.javalabs.opencl.demo.DummyOOA for example
+                  // Turn [Lcom/codegen/javalabs/opencl/demo/DummyOOA; into com.codegen.javalabs.opencl.demo.DummyOOA for example
                   final String className = (signature.substring(2, signature.length() - 1)).replace('/', '.');
                   final ClassModel arrayFieldModel = getOrUpdateAllClassAccesses(className);
                   if (arrayFieldModel != null) {

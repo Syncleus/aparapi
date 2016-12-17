@@ -1648,7 +1648,7 @@ public class MethodModel{
             logger.warning("Method "
                   + method.getName()
                   + method.getDescriptor()
-                  + " does not contain a LocalVariableTable entry (source not compiled with -g) aparapi will attempt to create a synthetic table based on bytecode. This is experimental!!");
+                  + " does not contain a LocalVariableTable entry (source not compiled with -g) codegen will attempt to create a synthetic table based on bytecode. This is experimental!!");
          }
 
          // pass #2 build branch graph

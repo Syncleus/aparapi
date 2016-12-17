@@ -24,14 +24,14 @@ import com.aparapi.internal.annotation.UsedByJNICode;
 public abstract class ConfigJNI{
 
    /**
-    * Value defaults to com.aparapi.config if not overridden by extending classes
+    * Value defaults to com.codegen.config if not overridden by extending classes
     */
    protected static final String propPkgName = Config.class.getPackage().getName();
 
    /**
     * Allows the user to turn on OpenCL profiling for the JNI/OpenCL layer.
     * 
-    * Usage -Dcom.aparapi.enableProfiling={true|false}
+    * Usage -Dcom.codegen.enableProfiling={true|false}
     * 
     */
    @UsedByJNICode public static final boolean enableProfiling = Boolean.getBoolean(propPkgName + ".enableProfiling");
@@ -39,7 +39,7 @@ public abstract class ConfigJNI{
    /**
     * Allows the user to turn on OpenCL profiling for the JNI/OpenCL layer, this information will be written to CSV file
     * 
-    * Usage -Dcom.aparapi.enableProfiling={true|false}
+    * Usage -Dcom.codegen.enableProfiling={true|false}
     * 
     */
    @UsedByJNICode public static final boolean enableProfilingCSV = Boolean.getBoolean(propPkgName + ".enableProfilingCSV");
@@ -47,7 +47,7 @@ public abstract class ConfigJNI{
    /**
     * Allows the user to request that verbose JNI messages be dumped to stderr.
     * 
-    * Usage -Dcom.aparapi.enableVerboseJNI={true|false}
+    * Usage -Dcom.codegen.enableVerboseJNI={true|false}
     * 
     */
    @UsedByJNICode public static final boolean enableVerboseJNI = Boolean.getBoolean(propPkgName + ".enableVerboseJNI");
@@ -57,7 +57,7 @@ public abstract class ConfigJNI{
     * 
     * This is really a debugging option to help locate leaking OpenCL resources, this will be dumped to stderr.
     * 
-    * Usage -Dcom.aparapi.enableOpenCLResourceTracking={true|false}
+    * Usage -Dcom.codegen.enableOpenCLResourceTracking={true|false}
     * 
     */
    @UsedByJNICode public static final boolean enableVerboseJNIOpenCLResourceTracking = Boolean.getBoolean(propPkgName
