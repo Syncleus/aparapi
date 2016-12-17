@@ -16,47 +16,17 @@
 package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
+import org.junit.Ignore;
+import org.junit.Test;
 
-abstract class ArrayAccess {
-    private final int offset;
-    private final int length;
-
-    protected ArrayAccess(int offset, int length) {
-        this.offset = offset;
-        this.length = length;
-    }
-
-    public abstract int[] getIntData();
-
-    public int getOffset() {
-        return offset;
-    }
-
-    public int getLength() {
-        return length;
-    }
-}
-
-class IntMemoryArrayAccess extends ArrayAccess {
-    private final int[] data;
-
-    public IntMemoryArrayAccess(int[] data, int offset, int length) {
-        super(offset, length);
-        this.data = data;
-    }
-
-    @Override
-    public int[] getIntData() {
-        return data;
-    }
-}
-
-public class Issue68 {
-    public static void main(String[] args) {
+public class Issue68Test {
+    @Ignore("Ported over but not working yet")
+    @Test
+    public void test() {
         final int SQRT_LENGTH = 1024;
         final int LENGTH = SQRT_LENGTH * SQRT_LENGTH;
         final ArrayAccess arrayAccess = new IntMemoryArrayAccess(new int[LENGTH], 0, LENGTH);
-        new Issue68().transformColumns(SQRT_LENGTH, SQRT_LENGTH, false, arrayAccess, new int[SQRT_LENGTH], null);
+        new Issue68Test().transformColumns(SQRT_LENGTH, SQRT_LENGTH, false, arrayAccess, new int[SQRT_LENGTH], null);
     }
 
     private void transformColumns(final int length, final int count, final boolean isInverse, final ArrayAccess arrayAccess,
@@ -229,6 +199,40 @@ public class Issue68 {
         private void setModulus(int modulus) {
             inverseModulus = 1.0f / (modulus + 0.5f); // Round down
             this.modulus = modulus;
+        }
+    }
+
+    static class IntMemoryArrayAccess extends ArrayAccess {
+        private final int[] data;
+
+        public IntMemoryArrayAccess(int[] data, int offset, int length) {
+            super(offset, length);
+            this.data = data;
+        }
+
+        @Override
+        public int[] getIntData() {
+            return data;
+        }
+    }
+
+    abstract static class ArrayAccess {
+        private final int offset;
+        private final int length;
+
+        protected ArrayAccess(int offset, int length) {
+            this.offset = offset;
+            this.length = length;
+        }
+
+        public abstract int[] getIntData();
+
+        public int getOffset() {
+            return offset;
+        }
+
+        public int getLength() {
+            return length;
         }
     }
 }

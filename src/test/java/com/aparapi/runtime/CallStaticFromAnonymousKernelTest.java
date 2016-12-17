@@ -21,13 +21,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-class AnotherClass {
-    static public int foo(int i) {
-        return i + 42;
-    }
-};
-
-public class CallStaticFromAnonymousKernel {
+public class CallStaticFromAnonymousKernelTest {
 
     static final int size = 256;
 
@@ -38,7 +32,7 @@ public class CallStaticFromAnonymousKernel {
     }
 
     public static void main(String args[]) {
-        CallStaticFromAnonymousKernel k = new CallStaticFromAnonymousKernel();
+        CallStaticFromAnonymousKernelTest k = new CallStaticFromAnonymousKernelTest();
         k.test();
     }
 
@@ -62,7 +56,7 @@ public class CallStaticFromAnonymousKernel {
                 int gid = getGlobalId();
                 // Call a static in the containing class and call a kernel method
                 // that calls a static in another class
-                results[gid] = CallStaticFromAnonymousKernel.fooBar(values[gid]) + doodoo(gid);
+                results[gid] = CallStaticFromAnonymousKernelTest.fooBar(values[gid]) + doodoo(gid);
             }
         };
         kernel.execute(size);
@@ -70,6 +64,12 @@ public class CallStaticFromAnonymousKernel {
 
         for (int i = 0; i < size; i++) {
             assertTrue("results == fooBar", results[i] == (fooBar(values[i]) + AnotherClass.foo(i)));
+        }
+    }
+
+    static class AnotherClass {
+        static public int foo(int i) {
+            return i + 42;
         }
     }
 }

@@ -21,41 +21,43 @@ import org.junit.Test;
 import static org.junit.Assert.assertArrayEquals;
 
 
-public class Issue103 extends Kernel {
-    static final int size = 32;
-
-    static int[] source = new int[size];
-    static int[] target = new int[size];
-
-    public Issue103() {
-        for (int i = 0; i < size; ++i) {
-            source[i] = 7;
-            target[i] = 99;
-        }
-    }
-
-    public static void main(String[] args) {
-        Issue103 b = new Issue103();
+public class Issue103Test {
+    @Test
+    public void test() {
+        Issue103Kernel b = new Issue103Kernel();
         b.test();
     }
 
-    @Override
-    public void run() {
-        int id = getGlobalId();
-        target[id] = source[id];
-    }
+    public static class Issue103Kernel extends Kernel {
+        static final int size = 32;
 
-    void validate() {
-        assertArrayEquals("target == source", target, source);
+        static int[] source = new int[size];
+        static int[] target = new int[size];
+
+        public Issue103Kernel() {
+            for (int i = 0; i < size; ++i) {
+                source[i] = 7;
+                target[i] = 99;
+            }
+        }
+
+        @Override
+        public void run() {
+            int id = getGlobalId();
+            target[id] = source[id];
+        }
+
+        void validate() {
+            assertArrayEquals("target == source", target, source);
 //      for (int i = 0; i < size; i++) {
 //         System.out.println(target[i] + " ... " + source[i]);
 //         assertTrue("target == source", target[i] == source[i]);
 //      }
-    }
+        }
 
-    @Test
-    public void test() {
-        execute(size);
-        validate();
+        public void test() {
+            execute(size);
+            validate();
+        }
     }
 }

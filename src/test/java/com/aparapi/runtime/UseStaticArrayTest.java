@@ -22,40 +22,43 @@ import org.junit.Test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
-public class UseStaticArray extends Kernel {
-
-    static final int size = 256;
-
-    static final int[] values = new int[size];
-
-    static final int[] results = new int[size];
-
-    public static void main(String args[]) {
-        UseStaticArray k = new UseStaticArray();
+public class UseStaticArrayTest {
+    @Test
+    public void test() {
+        UseStaticArrayKernel k = new UseStaticArrayKernel();
         k.test();
     }
 
-    @Override
-    public void run() {
-        int gid = getGlobalId();
-        results[gid] = values[gid];
-    }
+    protected static class UseStaticArrayKernel extends Kernel {
 
-    @Test
-    public void test() {
+        static final int size = 256;
 
-        for (int i = 0; i < size; i++) {
-            values[i] = i;
-            results[i] = 0;
+        static final int[] values = new int[size];
+
+        static final int[] results = new int[size];
+
+        @Override
+        public void run() {
+            int gid = getGlobalId();
+            results[gid] = values[gid];
         }
 
-        execute(size);
+        @Test
+        public void test() {
 
-        assertTrue("ran on GPU", getTargetDevice().getType() == Device.TYPE.GPU);
+            for (int i = 0; i < size; i++) {
+                values[i] = i;
+                results[i] = 0;
+            }
 
-        assertArrayEquals("results == fooBar", results, values);
+            execute(size);
+
+            assertTrue("ran on GPU", getTargetDevice().getType() == Device.TYPE.GPU);
+
+            assertArrayEquals("results == fooBar", results, values);
 //      for (int i = 0; i < size; i++) {
 //         assertTrue("results == fooBar", results[i] == values[i]);
 //      }
+        }
     }
 }

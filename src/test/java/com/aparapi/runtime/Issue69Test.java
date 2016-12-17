@@ -17,10 +17,12 @@ package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
 import com.aparapi.Range;
+import org.junit.Test;
 
-public class Issue69 {
+public class Issue69Test {
 
-    public static void main(String[] args) {
+    @Test
+    public void test() {
         final int globalArray[] = new int[512];
         Kernel kernel = new Kernel() {
             @Override

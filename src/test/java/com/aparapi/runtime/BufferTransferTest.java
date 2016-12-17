@@ -28,7 +28,7 @@ import java.util.Arrays;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class BufferTransfer {
+public class BufferTransferTest {
 
     static OpenCLDevice openCLDevice = null;
 

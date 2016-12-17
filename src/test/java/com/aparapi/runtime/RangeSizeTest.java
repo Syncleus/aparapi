@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-public class RangeSize {
+public class RangeSizeTest {
 
     @Test
     public void test384x384() {
