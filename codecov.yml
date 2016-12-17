@@ -1,0 +1,31 @@
+codecov:
+  notify:
+    require_ci_to_pass: true
+comment:
+  behavior: default
+  layout: header, diff
+  require_changes: false
+coverage:
+  precision: 2
+  range:
+  - 0.0
+  - 70.0
+  round: down
+  status:
+    changes: false
+    patch: true
+    project: true
+  notify:
+    gitter:
+      default:
+        url: "https://webhooks.gitter.im/e/361b21c7d531bd2e122c"
+        threshold: 1%
+parsers:
+  gcov:
+    branch_detection:
+      conditional: true
+      loop: true
+      macro: false
+      method: false
+  javascript:
+    enable_partials: false
