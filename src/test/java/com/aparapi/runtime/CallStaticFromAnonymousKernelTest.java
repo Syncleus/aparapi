@@ -60,7 +60,6 @@ public class CallStaticFromAnonymousKernelTest {
             }
         };
         kernel.execute(size);
-        assertTrue("ran on GPU", kernel.getTargetDevice().getType() == Device.TYPE.GPU);
 
         for (int i = 0; i < size; i++) {
             assertTrue("results == fooBar", results[i] == (fooBar(values[i]) + AnotherClass.foo(i)));

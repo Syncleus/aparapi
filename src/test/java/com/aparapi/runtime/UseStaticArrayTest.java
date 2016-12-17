@@ -53,8 +53,6 @@ public class UseStaticArrayTest {
 
             execute(size);
 
-            assertTrue("ran on GPU", getTargetDevice().getType() == Device.TYPE.GPU);
-
             assertArrayEquals("results == fooBar", results, values);
 //      for (int i = 0; i < size; i++) {
 //         assertTrue("results == fooBar", results[i] == values[i]);
