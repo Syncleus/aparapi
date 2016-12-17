@@ -17,10 +17,10 @@ module.exports = {
   ],
 
   scopes: [
-    {name: 'JNI Interface'},
+    {name: 'jni'},
     {name: 'internal'},
-    {name: 'Swing Utility'},    
-    {name: 'OpenCL'}
+    {name: 'swing'},    
+    {name: 'opencl'}
   ],
 
   scopeOverrides: {
@@ -31,17 +31,17 @@ module.exports = {
       {name: 'build plugin'}
     ],
     ci: [
-      {name: 'Travis'}
+      {name: 'travis'}
     ],
     chore: [
-      {name: 'Commitizen'},
+      {name: 'commitizen'},
       {name: 'editorconfig'},
-      {name: 'GIT'}
+      {name: 'git'}
     ],
     docs: [
-      {name: 'Javadocs'},
+      {name: 'javadocs'},
       {name: 'repo'},
-      {name: 'Maven'}
+      {name: 'maven'}
     ]
   },
 
