@@ -37,8 +37,8 @@ public class ConvolutionLargeTest {
         0f,
     };
     private static final int TEST_ROUNDS = 1;
-    private static final int SECONDS_PER_TEST = 10;
-    private static final int SECONDS_PER_WARMUP = 2;
+    private static final int SECONDS_PER_TEST = 2;
+    private static final int SECONDS_PER_WARMUP = 1;
 
     @Test
     public void testConvolutionLarge() {
