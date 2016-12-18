@@ -1,6 +1,7 @@
 # Contributors
 
 * Jeffrey Phillips Freeman <jeffrey.freeman@syncleus.com>
+* Automenta - https://github.com/automenta
 * Joergen Lundgren <joergen_lundgren@hotmail.com>
 * Florian Roesler <florian.roesler@wooga.net>
 * Denis Demidov <dennis.demidov@gmail.com>
