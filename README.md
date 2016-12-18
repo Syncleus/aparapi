@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/Syncleus/aparapi.svg?branch=master)](https://travis-ci.org/Syncleus/aparapi)
 [![codecov](https://codecov.io/gh/Syncleus/aparapi/branch/master/graph/badge.svg)](https://codecov.io/gh/Syncleus/aparapi)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8c0efbe275f44369d9959b5ded14bfd)](https://www.codacy.com/app/freemo/aparapi?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Syncleus/aparapi&amp;utm_campaign=badger)
+[![Dependency Status](https://www.versioneye.com/user/projects/5855deafad9aa2003738a08b/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/5855deafad9aa2003738a08b)
 [![Javadocs](http://www.javadoc.io/badge/com.aparapi/aparapi.svg)](http://www.javadoc.io/doc/com.aparapi/aparapi)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.aparapi/aparapi/badge.png?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.aparapi/aparapi/)
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
