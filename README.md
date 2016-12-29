@@ -51,7 +51,7 @@ This particular repository only represents the core Java library. There are seve
 
 Aparapi will run as-is on the CPU, however in order to access the GPU it requires OpenCL to be installed on the local system. If OpenCL isnt found then the library will just fallback to CPU mode. Aparapi supports, and has been tested on, both OpenCL 1.2 and OpenCL 2.0.
 
-**Aparapi runs on all operating systems and platforms, however GPU acceleration support is currently provided for the following platforms: Windows 64bit, Mac OSX 64bit, Linux 64bit, and Linux 32bit.**
+**Aparapi runs on all operating systems and platforms, however GPU acceleration support is currently provided for the following platforms: Windows 64bit, Windows 32bit, Mac OSX 64bit, Linux 64bit, and Linux 32bit.**
 
 Note: It is no longer required to manually install the [Aparapi JNI native interface](https://github.com/Syncleus/aparapi-native), this is now done automatically through maven as a dependency on Aparapi.
 
