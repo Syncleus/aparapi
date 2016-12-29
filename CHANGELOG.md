@@ -1,5 +1,9 @@
 # Aparapi Changelog
 
+## 1.3.4
+
+* Updated to aparapi-jni 1.1.2 thus fixing `UnsatisfiedLinkError` which occured only on Windows.
+
 ## 1.3.3
 
 * Added several missing math functions that are part of the OpenCL standard: acospi, asinpi, atanpi, atan2pi, cbrt,
