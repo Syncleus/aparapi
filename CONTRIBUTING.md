@@ -80,8 +80,8 @@ First ensure the package is prepared for the release process:
 Next lets take a few steps to do the actual release:
 
 1.  Update everything listed above. Do **not** drop the package version's `-SNAPSHOT` suffix in master.
-2.  Update the README.md again to ensure travis badge and javadoc badge point to static tag and not latest.
-3.  Create a release branch, but make sure never to push this branch to the server: `git checkout -b release`.
+2.  Create a release branch, but make sure never to push this branch to the server: `git checkout -b release`.
+3.  Update the README.md again to ensure travis badge and javadoc badge point to static tag and not latest.
 4.  Drop the `-SNAPSHOT` suffix from the package version.
 5.  Commit the current changes using a generic commit message such as `build(release): version 1.2.3`.
 6.  Fully test the software before deploying, run all tests and install locally to test against the examples package.
@@ -90,7 +90,9 @@ Next lets take a few steps to do the actual release:
 8.  If deployment was successful then create a new tag for the current version with the following command:
     `git tag -a v1.2.3 -m "Version 1.2.3"`.
 9.  Push the newly created tags to the server: `git push origin v1.2.3:v1.2.3`.
-10.  Checkout master again and then delete the release branch: `git branch -D release`.
+10. Go to Github and go to the release. Update the description with the changelog for the version and upload
+    all the artifacts in the target folder.
+10. Checkout master again and then delete the release branch: `git branch -D release`.
 11. Bump the snapshot version of the package to the next expected version, commiting the changes and pushing.
 12. Deploy the new snapshot to the snapshot repository (no need to sign): `mvn clean deploy`.
 
