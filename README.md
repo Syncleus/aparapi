@@ -6,7 +6,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.aparapi/aparapi/badge.png?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.aparapi/aparapi/)
 [![Gitter](https://badges.gitter.im/Syncleus/aparapi.svg)](https://gitter.im/Syncleus/aparapi?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build Status](https://travis-ci.org/Syncleus/aparapi.svg?branch=master)](https://travis-ci.org/Syncleus/aparapi)
+[![Build Status](https://travis-ci.org/Syncleus/aparapi.svg?branch=v1.3.4)](https://travis-ci.org/Syncleus/aparapi)
 [![codecov](https://codecov.io/gh/Syncleus/aparapi/branch/master/graph/badge.svg)](https://codecov.io/gh/Syncleus/aparapi)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8c0efbe275f44369d9959b5ded14bfd)](https://www.codacy.com/app/freemo/aparapi?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Syncleus/aparapi&amp;utm_campaign=badger)
 [![Dependency Status](https://www.versioneye.com/user/projects/5855deafad9aa2003738a08b/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/5855deafad9aa2003738a08b)
