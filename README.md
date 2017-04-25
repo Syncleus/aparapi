@@ -90,7 +90,7 @@ assert (inA.length == inB.length);
 final float result = new float[inA.length];
 
 for (int i = 0; i < array.length; i++) {
-    result[i] = intA[i] + inB[i];
+    result[i] = inA[i] + inB[i];
 }
 ```
 
@@ -102,7 +102,7 @@ Kernel kernel = new Kernel() {
     @Override
     public void run() {
         int i = getGlobalId();
-        result[i] = intA[i] + inB[i];
+        result[i] = inA[i] + inB[i];
     }
 };
 
