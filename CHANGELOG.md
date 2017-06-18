@@ -1,5 +1,9 @@
 # Aparapi Changelog
 
+## 1.3.5
+
+* Updated nexus stagin plugin: 1.6.7 -> 1.6.8
+
 ## 1.3.4
 
 * Updated to aparapi-jni 1.1.2 thus fixing `UnsatisfiedLinkError` which occured only on Windows.
