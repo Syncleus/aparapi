@@ -1999,6 +1999,40 @@ public abstract class Kernel implements Cloneable {
         return a * b + c;
     }
 
+    /**
+     * Delegates to either {code}a*b+c{code} (Java) or <code><a href="http://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/fma.html">fma(float, float, float)</a></code> (OpenCL).
+      *
+      * User should note the differences in precision between Java and OpenCL's implementation of arithmetic functions to determine whether the difference in precision is acceptable.
+      *
+      * @param a value to delegate to first argument of <code><a href="http://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/fma.html">fma(float, float, float)</a></code>
+      * @param b value to delegate to second argument of <code><a href="http://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/fma.html">fma(float, float, float)</a></code>
+      * @param c value to delegate to third argument of <code><a href="http://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/fma.html">fma(float, float, float)</a></code>
+      * @return a * b + c / <code><a href="http://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/fma.html">fma(float, float, float)</a></code>
+      *
+      * @see <code><a href="http://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/fma.html">fma(float, float, float)</a></code>
+      */
+    @OpenCLMapping(mapTo = "fma")
+    protected float fma(final float a, final float b, final float c) {
+       return a * b + c;
+    }
+
+    /**
+     * Delegates to either {code}a*b+c{code} (Java) or <code><a href="http://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/fma.html">fma(double, double, double)</a></code> (OpenCL).
+      *
+      * User should note the differences in precision between Java and OpenCL's implementation of arithmetic functions to determine whether the difference in precision is acceptable.
+      *
+      * @param a value to delegate to first argument of <code><a href="http://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/fma.html">fma(double, double, double)</a></code>
+      * @param b value to delegate to second argument of <code><a href="http://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/fma.html">fma(double, double, double)</a></code>
+      * @param c value to delegate to third argument of <code><a href="http://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/fma.html">fma(double, double, double)</a></code>
+      * @return a * b + c / <code><a href="http://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/fma.html">fma(double, double, double)</a></code>
+      *
+      * @see <code><a href="http://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/fma.html">fma(double, double, double)</a></code>
+      */
+    @OpenCLMapping(mapTo = "fma")
+    protected double fma(final double a, final double b, final double c) {
+       return a * b + c;
+    }
+
     @OpenCLMapping(mapTo = "nextafter")
     protected final double nextAfter(final double start, final double direction) {
         return Math.nextAfter(start, direction);
