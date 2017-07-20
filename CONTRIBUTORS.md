@@ -15,6 +15,7 @@
 * Steven Libby
 * Paul Miner
 * Lorenzo Gallucci
+* Fernando Marino`
 * AMD Corporation
 
 # Details
