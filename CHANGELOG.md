@@ -1,8 +1,11 @@
 # Aparapi Changelog
 
-## 1.3.5
+## 1.4.0
 
 * Updated nexus stagin plugin: 1.6.7 -> 1.6.8
+* Added Fused Multiply Add support.
+* Fixed a bug whereby the library failed to load if OpenCL implementation isnt present, system now loads and falls back to native Java.
+* Fixed several mistakes and typos in the various examples.
 
 ## 1.3.4
 
