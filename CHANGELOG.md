@@ -1,5 +1,7 @@
 # Aparapi Changelog
 
+## 1.4.1
+
 ## 1.4.0
 
 * Updated nexus stagin plugin: 1.6.7 -> 1.6.8
