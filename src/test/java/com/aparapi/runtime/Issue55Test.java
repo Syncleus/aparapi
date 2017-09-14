@@ -35,6 +35,9 @@ public class Issue55Test {
 	public void setUp() {
 		testKernel = new Kernel() {
 
+			/**
+			 * This kernel does nothing.
+			 */
 			@Override
 			public void run() {
 			}
@@ -53,7 +56,7 @@ public class Issue55Test {
 	}
 
 	@Test
-	public void testUseJTP_ONLY() {
+	public void testUseJtpOnly() {
 		KernelManager.setKernelManager(KernelManagers.JTP_ONLY);
 		
 		Device device = KernelManager.instance().getDefaultPreferences().getPreferredDevice(testKernel);
@@ -62,7 +65,7 @@ public class Issue55Test {
 	}
 
 	@Test
-	public void testUseSEQUENTIAL_ONLY() {
+	public void testUseSequentialOnly() {
 		KernelManager.setKernelManager(KernelManagers.SEQUENTIAL_ONLY);
 
 		Device device = KernelManager.instance().getDefaultPreferences().getPreferredDevice(testKernel);
