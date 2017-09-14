@@ -17,6 +17,7 @@
 * Lorenzo Gallucci
 * Fernando Marino`
 * AMD Corporation
+* Nicholas Wright - https://github.com/seeker
 
 # Details
 
