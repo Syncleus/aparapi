@@ -2353,7 +2353,12 @@ public class ClassModel {
                // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.14
                entry = new LocalVariableTypeTableEntry(_byteReader, attributeNameIndex, length);
             } else {
-               logger.warning("Found unexpected Attribute (name = " + attributeName + ")");
+               // If org.netbeans.SourceLevelAnnotations, lower the logging level to info (refs #7)
+               if ("org.netbeans.SourceLevelAnnotations".equals(attributeName)) {
+                  logger.info("Found unexpected Attribute (name = " + attributeName + ")");
+               } else {
+                  logger.warning("Found unexpected Attribute (name = " + attributeName + ")");
+               }
                entry = new OtherEntry(_byteReader, attributeNameIndex, length);
             }
             attributePoolEntries.add(entry);
