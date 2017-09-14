@@ -40,6 +40,7 @@ public class Issue55Test {
 			 */
 			@Override
 			public void run() {
+				// this block was intentionally left empty, as the kernel should do nothing
 			}
 		};
 	}
