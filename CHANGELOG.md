@@ -4,6 +4,7 @@
 
 * Fixed NullPointerException when using KernelManger from the KernelManagers class 
 * Now requires maven 3.0.4 or later.
+* Bumped parent pom version to 4.
 * Removed explicit versions from several plugins in the pom as these are defined in the parent.
 
 ## 1.4.0
