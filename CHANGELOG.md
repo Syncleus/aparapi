@@ -1,5 +1,7 @@
 # Aparapi Changelog
 
+## 1.4.2
+
 ## 1.4.1
 
 * Fixed NullPointerException when using KernelManger from the KernelManagers class 
