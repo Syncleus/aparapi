@@ -18,16 +18,44 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class ObjectArrayMemberAccessTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = {""};
+    private static final String[] expectedOpenCL = {
+        "typedef struct com_amd_aparapi_test_ObjectArrayMemberAccess$DummyOOA_s{\n" +
+" int  mem;\n" +
+" float  floatField;\n" +
+"\n" +
+" } com_amd_aparapi_test_ObjectArrayMemberAccess$DummyOOA;\n" +
+"\n" +
+" typedef struct This_s{\n" +
+" __global com_amd_aparapi_test_ObjectArrayMemberAccess$DummyOOA *dummy;\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+"\n" +
+" __kernel void run(\n" +
+" __global com_amd_aparapi_test_ObjectArrayMemberAccess$DummyOOA *dummy,\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->dummy = dummy;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" int myId = get_global_id(0);\n" +
+" this->dummy[myId].mem=this->dummy[myId].mem + 2;\n" +
+" this->dummy[myId].floatField=this->dummy[myId].floatField + 2.0f;\n" +
+" return;\n" +
+" }\n" +
+" }\n" +
+" "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void ObjectArrayMemberAccessTest() {
         test(com.aparapi.codegen.test.ObjectArrayMemberAccess.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void ObjectArrayMemberAccessTestWorksWithCaching() {
         test(com.aparapi.codegen.test.ObjectArrayMemberAccess.class, expectedException, expectedOpenCL);

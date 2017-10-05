@@ -18,16 +18,39 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class FloatParamsTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+    "typedef struct This_s{\n" +
+"\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+"\n" +
+" int com_amd_aparapi_test_FloatParams__addEmUp(This *this, float y, float z){\n" +
+" return(((int)y + (int)z));\n" +
+" }\n" +
+" __kernel void run(\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" int y = 2;\n" +
+" float x = 0.0f;\n" +
+" com_amd_aparapi_test_FloatParams__addEmUp(this, x=(float)y, x);\n" +
+" return;\n" +
+" }\n" +
+" }\n" +
+" "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void FloatParamsTest() {
         test(com.aparapi.codegen.test.FloatParams.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void FloatParamsTestWorksWithCaching() {
         test(com.aparapi.codegen.test.FloatParams.class, expectedException, expectedOpenCL);

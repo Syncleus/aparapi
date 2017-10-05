@@ -18,16 +18,49 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class MultiContinueTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+    "typedef struct This_s{\n" +
+"\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+"\n" +
+" __kernel void run(\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" char pass = 0;\n" +
+" for (int i = 0; i<10; i++){\n" +
+" if (i==5){\n" +
+" } else {\n" +
+" if (i==2){\n" +
+" } else {\n" +
+" if (i==1){\n" +
+" } else {\n" +
+" if (i==10){\n" +
+" } else {\n" +
+" pass = 1;\n" +
+" }\n" +
+" }\n" +
+" }\n" +
+" }\n" +
+" }\n" +
+" return;\n" +
+" }\n" +
+" }\n" +
+" "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void MultiContinueTest() {
         test(com.aparapi.codegen.test.MultiContinue.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void MultiContinueTestWorksWithCaching() {
         test(com.aparapi.codegen.test.MultiContinue.class, expectedException, expectedOpenCL);

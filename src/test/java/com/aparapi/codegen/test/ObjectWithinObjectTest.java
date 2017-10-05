@@ -15,19 +15,20 @@
  */
 package com.aparapi.codegen.test;
 
+import com.aparapi.internal.exception.ClassParseException;
 import org.junit.Test;
 
 public class ObjectWithinObjectTest extends com.aparapi.codegen.CodeGenJUnitBase {
     private static final String[] expectedOpenCL = null;
-    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
+    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = ClassParseException.class;
 
-    @org.junit.Ignore
+    
     @Test
     public void ObjectWithinObjectTest() {
         test(com.aparapi.codegen.test.ObjectWithinObject.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
+    
     @Test
     public void ObjectWithinObjectTestWorksWithCaching() {
         test(com.aparapi.codegen.test.ObjectWithinObject.class, expectedException, expectedOpenCL);

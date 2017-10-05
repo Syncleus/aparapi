@@ -15,19 +15,18 @@
  */
 package com.aparapi.codegen.test;
 
+import com.aparapi.internal.exception.ClassParseException;
 import org.junit.Test;
 
 public class ObjectArrayCallHierarchyTest extends com.aparapi.codegen.CodeGenJUnitBase {
     private static final String[] expectedOpenCL = null;
-    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
+    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = ClassParseException.class;
 
-    @org.junit.Ignore
     @Test
     public void ObjectArrayCallHierarchyTest() {
         test(com.aparapi.codegen.test.ObjectArrayCallHierarchy.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void ObjectArrayCallHierarchyTestWorksWithCaching() {
         test(com.aparapi.codegen.test.ObjectArrayCallHierarchy.class, expectedException, expectedOpenCL);

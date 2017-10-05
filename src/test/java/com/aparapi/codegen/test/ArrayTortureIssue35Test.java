@@ -18,16 +18,38 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class ArrayTortureIssue35Test extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n" +
+" __global int *a;\n" +
+" __global int *b;\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+"\n" +
+" __kernel void run(\n" +
+" __global int *a,\n" +
+" __global int *b,\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->a = a;\n" +
+" this->b = b;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" this->a[this->b[0]++] = 1;\n" +
+" return;\n" +
+" }\n" +
+" }"};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void ArrayTortureIssue35Test() {
         test(com.aparapi.codegen.test.ArrayTortureIssue35.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void ArrayTortureIssue35TestWorksWithCaching() {
         test(com.aparapi.codegen.test.ArrayTortureIssue35.class, expectedException, expectedOpenCL);

@@ -18,16 +18,48 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class MathMinTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+    "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n" +
+"\n" +
+" typedef struct This_s{\n" +
+"\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+"\n" +
+" __kernel void run(\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" double d1 = -1.0;\n" +
+" double d2 = 1.0;\n" +
+" float f1 = -1.0f;\n" +
+" float f2 = 1.0f;\n" +
+" int i1 = -1;\n" +
+" int i2 = 1;\n" +
+" long n1 = -1L;\n" +
+" long n2 = 1L;\n" +
+" char pass = 1;\n" +
+" if (fmin(d1, d2)!=1.0 || fmin(f1, f2)!=1.0f || min(i1, i2)!=1 || (min(n1, n2) - 1L)!=0){\n" +
+" pass = 0;\n" +
+" }\n" +
+" return;\n" +
+" }\n" +
+" }\n" +
+"\n" +
+" "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void MathMinTest() {
         test(com.aparapi.codegen.test.MathMin.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void MathMinTestWorksWithCaching() {
         test(com.aparapi.codegen.test.MathMin.class, expectedException, expectedOpenCL);

@@ -15,19 +15,19 @@
  */
 package com.aparapi.codegen.test;
 
+import com.aparapi.internal.exception.ClassParseException;
 import org.junit.Test;
 
 public class ReturnFloatArrayNewTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
-    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
+    private static final String[] expectedOpenCL = null;
+    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = ClassParseException.class;
+
     @Test
     public void ReturnFloatArrayNewTest() {
         test(com.aparapi.codegen.test.ReturnFloatArrayNew.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void ReturnFloatArrayNewTestWorksWithCaching() {
         test(com.aparapi.codegen.test.ReturnFloatArrayNew.class, expectedException, expectedOpenCL);

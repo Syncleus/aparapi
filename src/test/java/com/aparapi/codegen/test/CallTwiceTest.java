@@ -18,16 +18,38 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class CallTwiceTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+" typedef struct This_s{\n" +
+" __global int *out;\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+" int com_amd_aparapi_test_CallTwice__getOne(This *this){\n" +
+" return(1);\n" +
+" }\n" +
+" __kernel void run(\n" +
+" __global int *out,\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->out = out;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" this->out[0]  = com_amd_aparapi_test_CallTwice__getOne(this) + com_amd_aparapi_test_CallTwice__getOne(this);\n" +
+" return;\n" +
+" }\n" +
+" }\n" +
+" "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void CallTwiceTest() {
         test(com.aparapi.codegen.test.CallTwice.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void CallTwiceTestWorksWithCaching() {
         test(com.aparapi.codegen.test.CallTwice.class, expectedException, expectedOpenCL);

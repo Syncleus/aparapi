@@ -18,16 +18,109 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class CompositeArbitraryScopeTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n" +
+"\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+"\n" +
+" void com_amd_aparapi_test_CompositeArbitraryScope__t5(This *this){\n" +
+" int gid = get_global_id(0);\n" +
+" int numRemaining = 1;\n" +
+" int thisCount = 0;\n" +
+" for (; numRemaining>0 && gid>0; numRemaining++){\n" +
+" numRemaining++;\n" +
+" thisCount = min(numRemaining, gid);\n" +
+" numRemaining = numRemaining - thisCount;\n" +
+" }\n" +
+" gid = gid - thisCount;\n" +
+" return;\n" +
+" }\n" +
+" void com_amd_aparapi_test_CompositeArbitraryScope__t4(This *this){\n" +
+" int gid = get_global_id(0);\n" +
+" int numRemaining = 1;\n" +
+" while (numRemaining>0 && gid>0){\n" +
+" numRemaining++;\n" +
+" {\n" +
+" int thisCount = min(numRemaining, gid);\n" +
+" numRemaining = numRemaining - thisCount;\n" +
+" numRemaining++;\n" +
+" gid--;\n" +
+" }\n" +
+" }\n" +
+" return;\n" +
+" }\n" +
+" void com_amd_aparapi_test_CompositeArbitraryScope__t3(This *this){\n" +
+" int gid = get_global_id(0);\n" +
+" int numRemaining = 1;\n" +
+" while (numRemaining>0){\n" +
+" numRemaining++;\n" +
+" {\n" +
+" int thisCount = min(numRemaining, gid);\n" +
+" numRemaining = numRemaining - thisCount;\n" +
+" numRemaining++;\n" +
+" }\n" +
+" }\n" +
+" return;\n" +
+" }\n" +
+" void com_amd_aparapi_test_CompositeArbitraryScope__t2(This *this){\n" +
+" int gid = get_global_id(0);\n" +
+" int numRemaining = 1;\n" +
+" for (; numRemaining>0; numRemaining){\n" +
+" {\n" +
+" int thisCount = min(numRemaining, gid);\n" +
+" numRemaining = numRemaining - thisCount;\n" +
+" }\n" +
+" }\n" +
+" return;\n" +
+" }\n" +
+" void com_amd_aparapi_test_CompositeArbitraryScope__t1(This *this){\n" +
+" int gid = get_global_id(0);\n" +
+" int numRemaining = 1;\n" +
+" while (numRemaining>0){\n" +
+" numRemaining++;\n" +
+" {\n" +
+" int thisCount = min(numRemaining, gid);\n" +
+" numRemaining = numRemaining - thisCount;\n" +
+" }\n" +
+" }\n" +
+" return;\n" +
+" }\n" +
+" __kernel void run(\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" int gid = get_global_id(0);\n" +
+" int numRemaining = 1;\n" +
+" com_amd_aparapi_test_CompositeArbitraryScope__t1(this);\n" +
+" com_amd_aparapi_test_CompositeArbitraryScope__t2(this);\n" +
+" com_amd_aparapi_test_CompositeArbitraryScope__t3(this);\n" +
+" com_amd_aparapi_test_CompositeArbitraryScope__t4(this);\n" +
+" com_amd_aparapi_test_CompositeArbitraryScope__t5(this);\n" +
+" while (numRemaining>0){\n" +
+" numRemaining++;\n" +
+" {\n" +
+" int thisCount = min(numRemaining, gid);\n" +
+" numRemaining = numRemaining - thisCount;\n" +
+" }\n" +
+" }\n" +
+" return;\n" +
+" }\n" +
+" }\n" +
+" "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void CompositeArbitraryScopeTest() {
         test(com.aparapi.codegen.test.CompositeArbitraryScope.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void CompositeArbitraryScopeTestWorksWithCaching() {
         test(com.aparapi.codegen.test.CompositeArbitraryScope.class, expectedException, expectedOpenCL);

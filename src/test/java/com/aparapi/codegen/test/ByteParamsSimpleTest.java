@@ -18,16 +18,37 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class ByteParamsSimpleTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+        " typedef struct This_s{\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+" void com_amd_aparapi_test_ByteParamsSimple__addEmUp2(This *this, char x, char y){\n" +
+" return;\n" +
+" }\n" +
+" __kernel void run(\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" char bb = 0;\n" +
+" char cc = 7;\n" +
+" com_amd_aparapi_test_ByteParamsSimple__addEmUp2(this, bb, cc);\n" +
+" return;\n" +
+" }\n" +
+" }\n" +
+" "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void ByteParamsSimpleTest() {
         test(com.aparapi.codegen.test.ByteParamsSimple.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void ByteParamsSimpleTestWorksWithCaching() {
         test(com.aparapi.codegen.test.ByteParamsSimple.class, expectedException, expectedOpenCL);

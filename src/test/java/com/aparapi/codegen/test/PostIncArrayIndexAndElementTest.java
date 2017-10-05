@@ -18,16 +18,38 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class PostIncArrayIndexAndElementTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n"
+        + " __global int *array;\n"
+        + " int passid;\n"
+        + " }This;\n"
+        + " int get_pass_id(This *this){\n"
+        + " return this->passid;\n"
+        + " }\n"
+        + "\n"
+        + " __kernel void run(\n"
+        + " __global int *array,\n"
+        + " int passid\n"
+        + " ){\n"
+        + " This thisStruct;\n"
+        + " This* this=&thisStruct;\n"
+        + " this->array = array;\n"
+        + " this->passid = passid;\n"
+        + " {\n"
+        + " int i = 0;\n"
+        + " this->array[i++]  = this->array[i] + 1;\n"
+        + " return;\n"
+        + " }\n"
+        + " }\n"
+        + " "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void PostIncArrayIndexAndElementTest() {
         test(com.aparapi.codegen.test.PostIncArrayIndexAndElement.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void PostIncArrayIndexAndElementTestWorksWithCaching() {
         test(com.aparapi.codegen.test.PostIncArrayIndexAndElement.class, expectedException, expectedOpenCL);

@@ -18,16 +18,41 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class FremTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+    "typedef struct This_s{\n" +
+" __global float *out;\n" +
+" float m;\n" +
+" float n;\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+" __kernel void run(\n" +
+" __global float *out,\n" +
+" float m,\n" +
+" float n,\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->out = out;\n" +
+" this->m = m;\n" +
+" this->n = n;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" this->out[0]  = this->m % this->n;\n" +
+" return;\n" +
+" }\n" +
+" }\n" +
+" "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void FremTest() {
         test(com.aparapi.codegen.test.Frem.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void FremTestWorksWithCaching() {
         test(com.aparapi.codegen.test.Frem.class, expectedException, expectedOpenCL);

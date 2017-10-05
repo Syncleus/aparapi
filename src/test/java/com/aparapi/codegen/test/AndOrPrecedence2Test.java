@@ -18,16 +18,37 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class AndOrPrecedence2Test extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+"typedef struct This_s{\n" +
+"   int passid;\n" +
+"}This;\n" +
+"int get_pass_id(This *this){\n" +
+"   return this->passid;\n" +
+"}\n" +
+"__kernel void run(\n" +
+"   int passid\n" +
+"){\n" +
+"   This thisStruct;\n" +
+"   This* this=&thisStruct;\n" +
+"   this->passid = passid;\n" +
+"   {\n" +
+"      char a = 0;\n" +
+"      char b = 0;\n" +
+"      char d = 0;\n" +
+"      char pass = 0;\n" +
+"      if (a!=0 && (b==0 || d==0)){\n" +
+"         pass = 1;\n" +
+"      }\n" +
+"      return;\n" +
+"   }\n" +
+"}"};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void AndOrPrecedence2Test() {
         test(com.aparapi.codegen.test.AndOrPrecedence2.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void AndOrPrecedence2TestWorksWithCaching() {
         test(com.aparapi.codegen.test.AndOrPrecedence2.class, expectedException, expectedOpenCL);
