@@ -18,16 +18,48 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class UnrelatedIfsWithCommonEndByteTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n"
+        + "\n"
+        + " int passid;\n"
+        + " }This;\n"
+        + " int get_pass_id(This *this){\n"
+        + " return this->passid;\n"
+        + " }\n"
+        + "\n"
+        + " __kernel void run(\n"
+        + " int passid\n"
+        + " ){\n"
+        + " This thisStruct;\n"
+        + " This* this=&thisStruct;\n"
+        + " this->passid = passid;\n"
+        + " {\n"
+        + " char a1 = 1;\n"
+        + " char a2 = 1;\n"
+        + " char b = 0;\n"
+        + " char c = 1;\n"
+        + " char outer = 1;\n"
+        + " char result = 0;\n"
+        + " if (outer!=0 && a1!=0 && a2==0){\n"
+        + " if (b!=0){\n"
+        + " result = 1;\n"
+        + " }\n"
+        + " if (c!=0){\n"
+        + " result = 1;\n"
+        + " }\n"
+        + " }\n"
+        + " return;\n"
+        + " }\n"
+        + " }\n"
+        + " "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void UnrelatedIfsWithCommonEndByteTest() {
         test(com.aparapi.codegen.test.UnrelatedIfsWithCommonEndByte.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void UnrelatedIfsWithCommonEndByteTestWorksWithCaching() {
         test(com.aparapi.codegen.test.UnrelatedIfsWithCommonEndByte.class, expectedException, expectedOpenCL);
