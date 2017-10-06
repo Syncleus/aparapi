@@ -20,7 +20,7 @@ import org.junit.Test;
 public class TernaryOrTest extends com.aparapi.codegen.CodeGenJUnitBase {
 
     private static final String[] expectedOpenCL = {
-        "ypedef struct This_s{\n"
+        "typedef struct This_s{\n"
         + "\n"
         + " int passid;\n"
         + " }This;\n"
