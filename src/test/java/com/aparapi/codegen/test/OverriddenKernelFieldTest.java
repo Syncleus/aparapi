@@ -26,12 +26,12 @@ public class OverriddenKernelFieldTest extends com.aparapi.codegen.CodeGenJUnitB
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-" int com_amd_aparapi_test_OverriddenKernelFieldParent__foo(This *this, int n){\n" +
+" int com_aparapi_codegen_test_OverriddenKernelFieldParent__foo(This *this, int n){\n" +
 " this->out[0]  = n + 1;\n" +
 " return(this->out[0]);\n" +
 " }\n" +
-" int com_amd_aparapi_test_OverriddenKernelField__foo(This *this, int n){\n" +
-" return(com_amd_aparapi_test_OverriddenKernelFieldParent__foo(this, (n + 1)));\n" +
+" int com_aparapi_codegen_test_OverriddenKernelField__foo(This *this, int n){\n" +
+" return(com_aparapi_codegen_test_OverriddenKernelFieldParent__foo(this, (n + 1)));\n" +
 " }\n" +
 " __kernel void run(\n" +
 " __global int *out,\n" +
@@ -42,7 +42,7 @@ public class OverriddenKernelFieldTest extends com.aparapi.codegen.CodeGenJUnitB
 " this->out = out;\n" +
 " this->passid = passid;\n" +
 " {\n" +
-" this->out[0]  = com_amd_aparapi_test_OverriddenKernelField__foo(this, 2);\n" +
+" this->out[0]  = com_aparapi_codegen_test_OverriddenKernelField__foo(this, 2);\n" +
 " return;\n" +
 " }\n" +
 " }\n" +

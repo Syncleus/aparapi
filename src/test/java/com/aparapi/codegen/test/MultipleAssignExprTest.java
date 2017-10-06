@@ -27,7 +27,7 @@ public class MultipleAssignExprTest extends com.aparapi.codegen.CodeGenJUnitBase
 " return this->passid;\n" +
 " }\n" +
 "\n" +
-" int com_amd_aparapi_test_MultipleAssignExpr__sum(This *this, int lhs, int rhs){\n" +
+" int com_aparapi_codegen_test_MultipleAssignExpr__sum(This *this, int lhs, int rhs){\n" +
 " return((lhs + rhs));\n" +
 " }\n" +
 " __kernel void run(\n" +
@@ -40,7 +40,7 @@ public class MultipleAssignExprTest extends com.aparapi.codegen.CodeGenJUnitBase
 " int a = 0;\n" +
 " int b = 0;\n" +
 " int c = 0;\n" +
-" a = b = c = com_amd_aparapi_test_MultipleAssignExpr__sum(this, 1, 2);\n" +
+" a = b = c = com_aparapi_codegen_test_MultipleAssignExpr__sum(this, 1, 2);\n" +
 " return;\n" +
 " }\n" +
 " }\n" +

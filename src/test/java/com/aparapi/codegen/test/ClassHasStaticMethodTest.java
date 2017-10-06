@@ -26,7 +26,7 @@ public class ClassHasStaticMethodTest extends com.aparapi.codegen.CodeGenJUnitBa
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-" int com_amd_aparapi_test_ClassHasStaticMethod__getIntAndReturnIt(int a){\n" +
+" int com_aparapi_codegen_test_ClassHasStaticMethod__getIntAndReturnIt(int a){\n" +
 " return((1 - a));\n" +
 " }\n" +
 " __kernel void run(\n" +
@@ -43,7 +43,7 @@ public class ClassHasStaticMethodTest extends com.aparapi.codegen.CodeGenJUnitBa
 " if ((i % 2)==0){\n" +
 " this->ints[i] = foo;\n" +
 " } else {\n" +
-" this->ints[i] = com_amd_aparapi_test_ClassHasStaticMethod__getIntAndReturnIt(foo);\n" +
+" this->ints[i] = com_aparapi_codegen_test_ClassHasStaticMethod__getIntAndReturnIt(foo);\n" +
 " }\n" +
 " }\n" +
 " return;\n" +

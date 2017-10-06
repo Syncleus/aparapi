@@ -25,7 +25,7 @@ public class ByteParamsSimpleTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-" void com_amd_aparapi_test_ByteParamsSimple__addEmUp2(This *this, char x, char y){\n" +
+" void com_aparapi_codegen_test_ByteParamsSimple__addEmUp2(This *this, char x, char y){\n" +
 " return;\n" +
 " }\n" +
 " __kernel void run(\n" +
@@ -37,7 +37,7 @@ public class ByteParamsSimpleTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " {\n" +
 " char bb = 0;\n" +
 " char cc = 7;\n" +
-" com_amd_aparapi_test_ByteParamsSimple__addEmUp2(this, bb, cc);\n" +
+" com_aparapi_codegen_test_ByteParamsSimple__addEmUp2(this, bb, cc);\n" +
 " return;\n" +
 " }\n" +
 " }\n" +

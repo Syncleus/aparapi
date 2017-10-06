@@ -26,7 +26,7 @@ public class CallTwiceTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-" int com_amd_aparapi_test_CallTwice__getOne(This *this){\n" +
+" int com_aparapi_codegen_test_CallTwice__getOne(This *this){\n" +
 " return(1);\n" +
 " }\n" +
 " __kernel void run(\n" +
@@ -38,7 +38,7 @@ public class CallTwiceTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " this->out = out;\n" +
 " this->passid = passid;\n" +
 " {\n" +
-" this->out[0]  = com_amd_aparapi_test_CallTwice__getOne(this) + com_amd_aparapi_test_CallTwice__getOne(this);\n" +
+" this->out[0]  = com_aparapi_codegen_test_CallTwice__getOne(this) + com_aparapi_codegen_test_CallTwice__getOne(this);\n" +
 " return;\n" +
 " }\n" +
 " }\n" +

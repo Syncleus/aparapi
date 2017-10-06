@@ -27,11 +27,11 @@ public class CallSuperTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " return this->passid;\n" +
 " }\n" +
 "\n" +
-" int com_amd_aparapi_test_CallSuperBase__foo(This *this, int n){\n" +
+" int com_aparapi_codegen_test_CallSuperBase__foo(This *this, int n){\n" +
 " return((n * 2));\n" +
 " }\n" +
-" int com_amd_aparapi_test_CallSuper__foo(This *this, int n){\n" +
-" return((1 + com_amd_aparapi_test_CallSuperBase__foo(this, n)));\n" +
+" int com_aparapi_codegen_test_CallSuper__foo(This *this, int n){\n" +
+" return((1 + com_aparapi_codegen_test_CallSuperBase__foo(this, n)));\n" +
 " }\n" +
 " __kernel void run(\n" +
 " __global int *out,\n" +
@@ -42,7 +42,7 @@ public class CallSuperTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " this->out = out;\n" +
 " this->passid = passid;\n" +
 " {\n" +
-" this->out[0]  = com_amd_aparapi_test_CallSuper__foo(this, 2);\n" +
+" this->out[0]  = com_aparapi_codegen_test_CallSuper__foo(this, 2);\n" +
 " return;\n" +
 " }\n" +
 " }\n" +

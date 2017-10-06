@@ -25,7 +25,7 @@ public class CharAsParameterTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-" unsigned short com_amd_aparapi_test_CharAsParameter__doIt(This *this, unsigned short x){\n" +
+" unsigned short com_aparapi_codegen_test_CharAsParameter__doIt(This *this, unsigned short x){\n" +
 " return(x);\n" +
 " }\n" +
 " __kernel void run(\n" +
@@ -36,8 +36,8 @@ public class CharAsParameterTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " this->passid = passid;\n" +
 " {\n" +
 " char b = 1;\n" +
-" com_amd_aparapi_test_CharAsParameter__doIt(this, 65);\n" +
-" com_amd_aparapi_test_CharAsParameter__doIt(this, (unsigned short )b);\n" +
+" com_aparapi_codegen_test_CharAsParameter__doIt(this, 65);\n" +
+" com_aparapi_codegen_test_CharAsParameter__doIt(this, (unsigned short )b);\n" +
 " return;\n" +
 " }\n" +
 " }\n" +

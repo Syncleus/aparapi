@@ -26,7 +26,7 @@ public class CallRunSuperTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " return this->passid;\n" +
 " }\n" +
 "\n" +
-" void com_amd_aparapi_test_CallRunSuperBase__run(This *this){\n" +
+" void com_aparapi_codegen_test_CallRunSuperBase__run(This *this){\n" +
 " this->out[0]  = 2;\n" +
 " return;\n" +
 " }\n" +
@@ -39,7 +39,7 @@ public class CallRunSuperTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " this->out = out;\n" +
 " this->passid = passid;\n" +
 " {\n" +
-" com_amd_aparapi_test_CallRunSuperBase__run(this);\n" +
+" com_aparapi_codegen_test_CallRunSuperBase__run(this);\n" +
 " this->out[1]  = 3;\n" +
 " return;\n" +
 " }\n" +

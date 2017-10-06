@@ -25,7 +25,7 @@ public class ClassHasStaticMethodSimpleTest extends com.aparapi.codegen.CodeGenJ
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-" void com_amd_aparapi_test_ClassHasStaticMethodSimple__staticMethod(){\n" +
+" void com_aparapi_codegen_test_ClassHasStaticMethodSimple__staticMethod(){\n" +
 " return;\n" +
 " }\n" +
 " __kernel void run(\n" +
@@ -35,7 +35,7 @@ public class ClassHasStaticMethodSimpleTest extends com.aparapi.codegen.CodeGenJ
 " This* this=&thisStruct;\n" +
 " this->passid = passid;\n" +
 " {\n" +
-" com_amd_aparapi_test_ClassHasStaticMethodSimple__staticMethod();\n" +
+" com_aparapi_codegen_test_ClassHasStaticMethodSimple__staticMethod();\n" +
 " return;\n" +
 " }\n" +
 " }\n" +

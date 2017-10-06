@@ -19,14 +19,14 @@ import org.junit.Test;
 
 public class ObjectArrayMemberAccessTest extends com.aparapi.codegen.CodeGenJUnitBase {
     private static final String[] expectedOpenCL = {
-        "typedef struct com_amd_aparapi_test_ObjectArrayMemberAccess$DummyOOA_s{\n" +
+        "typedef struct com_aparapi_codegen_test_ObjectArrayMemberAccess$DummyOOA_s{\n" +
 " int  mem;\n" +
 " float  floatField;\n" +
 "\n" +
-" } com_amd_aparapi_test_ObjectArrayMemberAccess$DummyOOA;\n" +
+" } com_aparapi_codegen_test_ObjectArrayMemberAccess$DummyOOA;\n" +
 "\n" +
 " typedef struct This_s{\n" +
-" __global com_amd_aparapi_test_ObjectArrayMemberAccess$DummyOOA *dummy;\n" +
+" __global com_aparapi_codegen_test_ObjectArrayMemberAccess$DummyOOA *dummy;\n" +
 " int passid;\n" +
 " }This;\n" +
 " int get_pass_id(This *this){\n" +
@@ -34,7 +34,7 @@ public class ObjectArrayMemberAccessTest extends com.aparapi.codegen.CodeGenJUni
 " }\n" +
 "\n" +
 " __kernel void run(\n" +
-" __global com_amd_aparapi_test_ObjectArrayMemberAccess$DummyOOA *dummy,\n" +
+" __global com_aparapi_codegen_test_ObjectArrayMemberAccess$DummyOOA *dummy,\n" +
 " int passid\n" +
 " ){\n" +
 " This thisStruct;\n" +

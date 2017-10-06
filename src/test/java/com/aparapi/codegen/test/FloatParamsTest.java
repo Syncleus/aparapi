@@ -27,7 +27,7 @@ public class FloatParamsTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " return this->passid;\n" +
 " }\n" +
 "\n" +
-" int com_amd_aparapi_test_FloatParams__addEmUp(This *this, float y, float z){\n" +
+" int com_aparapi_codegen_test_FloatParams__addEmUp(This *this, float y, float z){\n" +
 " return(((int)y + (int)z));\n" +
 " }\n" +
 " __kernel void run(\n" +
@@ -39,7 +39,7 @@ public class FloatParamsTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " {\n" +
 " int y = 2;\n" +
 " float x = 0.0f;\n" +
-" com_amd_aparapi_test_FloatParams__addEmUp(this, x=(float)y, x);\n" +
+" com_aparapi_codegen_test_FloatParams__addEmUp(this, x=(float)y, x);\n" +
 " return;\n" +
 " }\n" +
 " }\n" +

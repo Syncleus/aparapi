@@ -22,7 +22,7 @@ public class UseObjectArrayLengthTest extends com.aparapi.codegen.CodeGenJUnitBa
     private static final String[] expectedOpenCL = {
         "typedef struct This_s{\n"
         + " __global int *out;\n"
-        + " __global com_amd_aparapi_test_UseObjectArrayLength$Dummy *dummy;\n"
+        + " __global com_aparapi_codegen_test_UseObjectArrayLength$Dummy *dummy;\n"
         + " int dummy__javaArrayLength;\n"
         + " int passid;\n"
         + " }This;\n"
@@ -32,7 +32,7 @@ public class UseObjectArrayLengthTest extends com.aparapi.codegen.CodeGenJUnitBa
         + "\n"
         + " __kernel void run(\n"
         + " __global int *out,\n"
-        + " __global com_amd_aparapi_test_UseObjectArrayLength$Dummy *dummy,\n"
+        + " __global com_aparapi_codegen_test_UseObjectArrayLength$Dummy *dummy,\n"
         + " int dummy__javaArrayLength,\n"
         + " int passid\n"
         + " ){\n"

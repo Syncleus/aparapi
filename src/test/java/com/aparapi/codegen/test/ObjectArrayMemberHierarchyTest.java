@@ -19,34 +19,34 @@ import org.junit.Test;
 
 public class ObjectArrayMemberHierarchyTest extends com.aparapi.codegen.CodeGenJUnitBase {
     private static final String[] expectedOpenCL = {
-    "typedef struct com_amd_aparapi_test_ObjectArrayMemberHierarchy$DummyOOA_s{\n" +
+    "typedef struct com_aparapi_codegen_test_ObjectArrayMemberHierarchy$DummyOOA_s{\n" +
 " float  floatField;\n" +
 " int  intField;\n" +
 "\n" +
-" } com_amd_aparapi_test_ObjectArrayMemberHierarchy$DummyOOA;\n" +
+" } com_aparapi_codegen_test_ObjectArrayMemberHierarchy$DummyOOA;\n" +
 "\n" +
 " typedef struct This_s{\n" +
 " int something;\n" +
-" __global com_amd_aparapi_test_ObjectArrayMemberHierarchy$DummyOOA *dummy;\n" +
+" __global com_aparapi_codegen_test_ObjectArrayMemberHierarchy$DummyOOA *dummy;\n" +
 " int passid;\n" +
 " }This;\n" +
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
 "\n" +
-" void com_amd_aparapi_test_ObjectArrayMemberHierarchy$DummyOOA__setFloatField( __global com_amd_aparapi_test_ObjectArrayMemberHierarchy$DummyOOA *this, float x){\n" +
+" void com_aparapi_codegen_test_ObjectArrayMemberHierarchy$DummyOOA__setFloatField( __global com_aparapi_codegen_test_ObjectArrayMemberHierarchy$DummyOOA *this, float x){\n" +
 " this->floatField=x;\n" +
 " return;\n" +
 " }\n" +
-" int com_amd_aparapi_test_ObjectArrayMemberHierarchy__getSomething(This *this){\n" +
+" int com_aparapi_codegen_test_ObjectArrayMemberHierarchy__getSomething(This *this){\n" +
 " return(this->something);\n" +
 " }\n" +
-" int com_amd_aparapi_test_ObjectArrayMemberHierarchy$DummyParent__getIntField( __global com_amd_aparapi_test_ObjectArrayMemberHierarchy$DummyOOA *this){\n" +
+" int com_aparapi_codegen_test_ObjectArrayMemberHierarchy$DummyParent__getIntField( __global com_aparapi_codegen_test_ObjectArrayMemberHierarchy$DummyOOA *this){\n" +
 " return(this->intField);\n" +
 " }\n" +
 " __kernel void run(\n" +
 " int something,\n" +
-" __global com_amd_aparapi_test_ObjectArrayMemberHierarchy$DummyOOA *dummy,\n" +
+" __global com_aparapi_codegen_test_ObjectArrayMemberHierarchy$DummyOOA *dummy,\n" +
 " int passid\n" +
 " ){\n" +
 " This thisStruct;\n" +
@@ -56,8 +56,8 @@ public class ObjectArrayMemberHierarchyTest extends com.aparapi.codegen.CodeGenJ
 " this->passid = passid;\n" +
 " {\n" +
 " int myId = get_global_id(0);\n" +
-" this->dummy[myId].intField=(com_amd_aparapi_test_ObjectArrayMemberHierarchy$DummyParent__getIntField( &(this->dummy[myId])) + 2) + com_amd_aparapi_test_ObjectArrayMemberHierarchy__getSomething(this);\n" +
-" com_amd_aparapi_test_ObjectArrayMemberHierarchy$DummyOOA__setFloatField( &(this->dummy[myId]), (this->dummy[myId].floatField + 2.0f));\n" +
+" this->dummy[myId].intField=(com_aparapi_codegen_test_ObjectArrayMemberHierarchy$DummyParent__getIntField( &(this->dummy[myId])) + 2) + com_aparapi_codegen_test_ObjectArrayMemberHierarchy__getSomething(this);\n" +
+" com_aparapi_codegen_test_ObjectArrayMemberHierarchy$DummyOOA__setFloatField( &(this->dummy[myId]), (this->dummy[myId].floatField + 2.0f));\n" +
 " return;\n" +
 " }\n" +
 " }\n" +

@@ -27,7 +27,7 @@ public class ConstantAssignInExpressionTest extends com.aparapi.codegen.CodeGenJ
 " return this->passid;\n" +
 " }\n" +
 "\n" +
-" void com_amd_aparapi_test_ConstantAssignInExpression__func(This *this, int _arg){\n" +
+" void com_aparapi_codegen_test_ConstantAssignInExpression__func(This *this, int _arg){\n" +
 " return;\n" +
 " }\n" +
 " __kernel void run(\n" +
@@ -38,7 +38,7 @@ public class ConstantAssignInExpressionTest extends com.aparapi.codegen.CodeGenJ
 " this->passid = passid;\n" +
 " {\n" +
 " int result = 1;\n" +
-" com_amd_aparapi_test_ConstantAssignInExpression__func(this, result=0);\n" +
+" com_aparapi_codegen_test_ConstantAssignInExpression__func(this, result=0);\n" +
 " return;\n" +
 " }\n" +
 " }\n" +

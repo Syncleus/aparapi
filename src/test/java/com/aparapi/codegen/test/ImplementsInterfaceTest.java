@@ -28,7 +28,7 @@ public class ImplementsInterfaceTest extends com.aparapi.codegen.CodeGenJUnitBas
 " return this->passid;\n" +
 " }\n" +
 "\n" +
-" int com_amd_aparapi_test_ImplementsInterface__bar(This *this, int n){\n" +
+" int com_aparapi_codegen_test_ImplementsInterface__bar(This *this, int n){\n" +
 " return((n + this->ival));\n" +
 " }\n" +
 " __kernel void run(\n" +
@@ -42,7 +42,7 @@ public class ImplementsInterfaceTest extends com.aparapi.codegen.CodeGenJUnitBas
 " this->out = out;\n" +
 " this->passid = passid;\n" +
 " {\n" +
-" this->out[0]  = com_amd_aparapi_test_ImplementsInterface__bar(this, 1);\n" +
+" this->out[0]  = com_aparapi_codegen_test_ImplementsInterface__bar(this, 1);\n" +
 " char pass = 0;\n" +
 " return;\n" +
 " }\n" +

@@ -26,11 +26,11 @@ public class CallStaticInAnotherClassTest extends com.aparapi.codegen.CodeGenJUn
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-" int com_amd_aparapi_test_AnotherClass__foo(){\n" +
+" int com_aparapi_codegen_test_AnotherClass__foo(){\n" +
 " return(42);\n" +
 " }\n" +
-" int com_amd_aparapi_test_CallStaticInAnotherClass__doodoo(This *this){\n" +
-" return(com_amd_aparapi_test_AnotherClass__foo());\n" +
+" int com_aparapi_codegen_test_CallStaticInAnotherClass__doodoo(This *this){\n" +
+" return(com_aparapi_codegen_test_AnotherClass__foo());\n" +
 " }\n" +
 " __kernel void run(\n" +
 " __global int *out,\n" +
@@ -41,7 +41,7 @@ public class CallStaticInAnotherClassTest extends com.aparapi.codegen.CodeGenJUn
 " this->out = out;\n" +
 " this->passid = passid;\n" +
 " {\n" +
-" this->out[0]  = com_amd_aparapi_test_AnotherClass__foo() + com_amd_aparapi_test_CallStaticInAnotherClass__doodoo(this);\n" +
+" this->out[0]  = com_aparapi_codegen_test_AnotherClass__foo() + com_aparapi_codegen_test_CallStaticInAnotherClass__doodoo(this);\n" +
 " return;\n" +
 " }\n" +
 " }\n" +

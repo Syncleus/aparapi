@@ -25,7 +25,7 @@ public class CallObjectStaticTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-" int com_amd_aparapi_test_CallObjectStatic$Dummy__foo(){\n" +
+" int com_aparapi_codegen_test_CallObjectStatic$Dummy__foo(){\n" +
 " return(42);\n" +
 " }\n" +
 " __kernel void run(\n" +
@@ -37,7 +37,7 @@ public class CallObjectStaticTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " this->out = out;\n" +
 " this->passid = passid;\n" +
 " {\n" +
-" this->out[0]  = com_amd_aparapi_test_CallObjectStatic$Dummy__foo();\n" +
+" this->out[0]  = com_aparapi_codegen_test_CallObjectStatic$Dummy__foo();\n" +
 " return;\n" +
 " }\n" +
 " }\n" +
