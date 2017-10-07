@@ -1,6 +1,8 @@
 # Contributors
 
 * Jeffrey Phillips Freeman <jeffrey.freeman@syncleus.com>
+* Nicholas Wright - https://github.com/seeker
+* Veselin Yordanov <vesko935@gmail.com>
 * Automenta - https://github.com/automenta
 * Joergen Lundgren <joergen_lundgren@hotmail.com>
 * Florian Roesler <florian.roesler@wooga.net>
@@ -17,8 +19,6 @@
 * Lorenzo Gallucci
 * Fernando Marino`
 * AMD Corporation
-* Nicholas Wright - https://github.com/seeker
-* Veselin Yordanov <vesko935@gmail.com>
 
 # Details
 
