@@ -15,6 +15,7 @@
  */
 package com.aparapi.codegen.test;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class FirstAssignInExpressionTest extends com.aparapi.codegen.CodeGenJUnitBase {
@@ -45,11 +46,13 @@ public class FirstAssignInExpressionTest extends com.aparapi.codegen.CodeGenJUni
 " "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
+    @Ignore
     @Test
     public void FirstAssignInExpressionTest() {
         test(com.aparapi.codegen.test.FirstAssignInExpression.class, expectedException, expectedOpenCL);
     }
 
+    @Ignore
     @Test
     public void FirstAssignInExpressionTestWorksWithCaching() {
         test(com.aparapi.codegen.test.FirstAssignInExpression.class, expectedException, expectedOpenCL);

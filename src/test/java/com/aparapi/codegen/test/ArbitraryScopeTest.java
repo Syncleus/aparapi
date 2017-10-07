@@ -15,6 +15,7 @@
  */
 package com.aparapi.codegen.test;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ArbitraryScopeTest extends com.aparapi.codegen.CodeGenJUnitBase {
@@ -76,11 +77,13 @@ public class ArbitraryScopeTest extends com.aparapi.codegen.CodeGenJUnitBase {
         + " "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
+    @Ignore
     @Test
     public void ArbitraryScopeTest() {
         test(com.aparapi.codegen.test.ArbitraryScope.class, expectedException, expectedOpenCL);
     }
 
+    @Ignore
     @Test
     public void ArbitraryScopeTestWorksWithCaching() {
         test(com.aparapi.codegen.test.ArbitraryScope.class, expectedException, expectedOpenCL);

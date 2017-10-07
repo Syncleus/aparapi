@@ -16,6 +16,7 @@
 package com.aparapi.codegen.test;
 
 import com.aparapi.internal.exception.ClassParseException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class Assign2DIntArrayTest extends com.aparapi.codegen.CodeGenJUnitBase {
@@ -23,11 +24,13 @@ public class Assign2DIntArrayTest extends com.aparapi.codegen.CodeGenJUnitBase {
     private static final String[] expectedOpenCL = null;
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = ClassParseException.class;
 
+    @Ignore
     @Test
     public void Assign2DIntArrayTest() {
         test(com.aparapi.codegen.test.Assign2DIntArray.class, expectedException, expectedOpenCL);
     }
 
+    @Ignore
     @Test
     public void Assign2DIntArrayTestWorksWithCaching() {
         test(com.aparapi.codegen.test.Assign2DIntArray.class, expectedException, expectedOpenCL);

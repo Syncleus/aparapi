@@ -15,6 +15,7 @@
  */
 package com.aparapi.codegen.test;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class NonNullCheckTest extends com.aparapi.codegen.CodeGenJUnitBase {
@@ -46,11 +47,13 @@ public class NonNullCheckTest extends com.aparapi.codegen.CodeGenJUnitBase {
         + " "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
+    @Ignore
     @Test
     public void NonNullCheckTest() {
         test(com.aparapi.codegen.test.NonNullCheck.class, expectedException, expectedOpenCL);
     }
 
+    @Ignore
     @Test
     public void NonNullCheckTestWorksWithCaching() {
         test(com.aparapi.codegen.test.NonNullCheck.class, expectedException, expectedOpenCL);
