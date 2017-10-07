@@ -15,19 +15,19 @@
  */
 package com.aparapi.codegen.test;
 
+import com.aparapi.internal.exception.ClassParseException;
 import org.junit.Test;
 
 public class UseObjectTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
-    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
+    private static final String[] expectedOpenCL = null;
+    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = ClassParseException.class;
+
     @Test
     public void UseObjectTest() {
         test(com.aparapi.codegen.test.UseObject.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void UseObjectTestWorksWithCaching() {
         test(com.aparapi.codegen.test.UseObject.class, expectedException, expectedOpenCL);

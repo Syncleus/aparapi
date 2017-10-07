@@ -18,16 +18,37 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class ReturnPreIncIntTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n"
+        + " int passid;\n"
+        + " }This;\n"
+        + " int get_pass_id(This *this){\n"
+        + " return this->passid;\n"
+        + " }\n"
+        + " int com_aparapi_codegen_test_ReturnPreIncInt__returnPreIncInt(This *this, int value){\n"
+        + " value++;\n"
+        + " return(value);\n"
+        + " }\n"
+        + " __kernel void run(\n"
+        + " int passid\n"
+        + " ){\n"
+        + " This thisStruct;\n"
+        + " This* this=&thisStruct;\n"
+        + " this->passid = passid;\n"
+        + " {\n"
+        + " com_aparapi_codegen_test_ReturnPreIncInt__returnPreIncInt(this, 3);\n"
+        + " return;\n"
+        + " }\n"
+        + " }\n"
+        + " "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void ReturnPreIncIntTest() {
         test(com.aparapi.codegen.test.ReturnPreIncInt.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void ReturnPreIncIntTestWorksWithCaching() {
         test(com.aparapi.codegen.test.ReturnPreIncInt.class, expectedException, expectedOpenCL);

@@ -18,16 +18,38 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class PreIncByteTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n"
+        + " int passid;\n"
+        + " }This;\n"
+        + " int get_pass_id(This *this){\n"
+        + " return this->passid;\n"
+        + " }\n"
+        + " char com_aparapi_codegen_test_PreIncByte__preIncByte(This *this, char a){\n"
+        + " a = (char )(a + 1);\n"
+        + " return(a);\n"
+        + " }\n"
+        + " __kernel void run(\n"
+        + " int passid\n"
+        + " ){\n"
+        + " This thisStruct;\n"
+        + " This* this=&thisStruct;\n"
+        + " this->passid = passid;\n"
+        + " {\n"
+        + " char initValue = 0;\n"
+        + " char result = com_aparapi_codegen_test_PreIncByte__preIncByte(this, ++initValue);\n"
+        + " return;\n"
+        + " }\n"
+        + " }\n"
+        + " "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void PreIncByteTest() {
         test(com.aparapi.codegen.test.PreIncByte.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void PreIncByteTestWorksWithCaching() {
         test(com.aparapi.codegen.test.PreIncByte.class, expectedException, expectedOpenCL);

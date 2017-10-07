@@ -18,16 +18,43 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class Atomic32PragmaTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+    "#pragma OPENCL EXTENSION cl_khr_global_int32_base_atomics : enable\n" +
+" #pragma OPENCL EXTENSION cl_khr_global_int32_extended_atomics : enable\n" +
+" #pragma OPENCL EXTENSION cl_khr_local_int32_base_atomics : enable\n" +
+" #pragma OPENCL EXTENSION cl_khr_local_int32_extended_atomics : enable\n" +
+" int atomicAdd(__global int *_arr, int _index, int _delta){\n" +
+" return atomic_add(&_arr[_index], _delta);\n" +
+" }\n" +
+" typedef struct This_s{\n" +
+" __global int *values;\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+"\n" +
+" __kernel void run(\n" +
+" __global int *values,\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->values = values;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" atomicAdd(this->values, 1, 1);\n" +
+" return;\n" +
+" }\n" +
+" }\n" +
+" "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void Atomic32PragmaTest() {
         test(com.aparapi.codegen.test.Atomic32Pragma.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void Atomic32PragmaTestWorksWithCaching() {
         test(com.aparapi.codegen.test.Atomic32Pragma.class, expectedException, expectedOpenCL);

@@ -18,16 +18,43 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class UseObjectArrayLengthTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n"
+        + " __global int *out;\n"
+        + " __global com_aparapi_codegen_test_UseObjectArrayLength$Dummy *dummy;\n"
+        + " int dummy__javaArrayLength;\n"
+        + " int passid;\n"
+        + " }This;\n"
+        + " int get_pass_id(This *this){\n"
+        + " return this->passid;\n"
+        + " }\n"
+        + "\n"
+        + " __kernel void run(\n"
+        + " __global int *out,\n"
+        + " __global com_aparapi_codegen_test_UseObjectArrayLength$Dummy *dummy,\n"
+        + " int dummy__javaArrayLength,\n"
+        + " int passid\n"
+        + " ){\n"
+        + " This thisStruct;\n"
+        + " This* this=&thisStruct;\n"
+        + " this->out = out;\n"
+        + " this->dummy = dummy;\n"
+        + " this->dummy__javaArrayLength = dummy__javaArrayLength;\n"
+        + " this->passid = passid;\n"
+        + " {\n"
+        + " this->out[0]  = this->dummy__javaArrayLength;\n"
+        + " return;\n"
+        + " }\n"
+        + " }\n"
+        + " "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void UseObjectArrayLengthTest() {
         test(com.aparapi.codegen.test.UseObjectArrayLength.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void UseObjectArrayLengthTestWorksWithCaching() {
         test(com.aparapi.codegen.test.UseObjectArrayLength.class, expectedException, expectedOpenCL);

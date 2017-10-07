@@ -18,16 +18,33 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class SequenceTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n"
+        + " int passid;\n"
+        + " }This;\n"
+        + " int get_pass_id(This *this){\n"
+        + " return this->passid;\n"
+        + " }\n"
+        + " __kernel void run(\n"
+        + " int passid\n"
+        + " ){\n"
+        + " This thisStruct;\n"
+        + " This* this=&thisStruct;\n"
+        + " this->passid = passid;\n"
+        + " {\n"
+        + " char pass = 0;\n"
+        + " return;\n"
+        + " }\n"
+        + " }\n"
+        + " "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void SequenceTest() {
         test(com.aparapi.codegen.test.Sequence.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void SequenceTestWorksWithCaching() {
         test(com.aparapi.codegen.test.Sequence.class, expectedException, expectedOpenCL);

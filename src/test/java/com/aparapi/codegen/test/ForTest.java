@@ -18,16 +18,35 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class ForTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+    "typedef struct This_s{\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+" __kernel void run(\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" char pass = 0;\n" +
+" for (int i = 0; i<10; i++){\n" +
+" pass = 1;\n" +
+" }\n" +
+" return;\n" +
+" }\n" +
+" }\n" +
+" "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void ForTest() {
         test(com.aparapi.codegen.test.For.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void ForTestWorksWithCaching() {
         test(com.aparapi.codegen.test.For.class, expectedException, expectedOpenCL);

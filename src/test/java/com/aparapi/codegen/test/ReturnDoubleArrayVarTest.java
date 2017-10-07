@@ -15,19 +15,19 @@
  */
 package com.aparapi.codegen.test;
 
+import com.aparapi.internal.exception.ClassParseException;
 import org.junit.Test;
 
 public class ReturnDoubleArrayVarTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
-    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
+    private static final String[] expectedOpenCL = null;
+    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = ClassParseException.class;
+
     @Test
     public void ReturnDoubleArrayVarTest() {
         test(com.aparapi.codegen.test.ReturnDoubleArrayVar.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void ReturnDoubleArrayVarTestWorksWithCaching() {
         test(com.aparapi.codegen.test.ReturnDoubleArrayVar.class, expectedException, expectedOpenCL);

@@ -18,16 +18,37 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class PostDecPostIncTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n"
+        + "\n"
+        + " int passid;\n"
+        + " }This;\n"
+        + " int get_pass_id(This *this){\n"
+        + " return this->passid;\n"
+        + " }\n"
+        + "\n"
+        + " __kernel void run(\n"
+        + " int passid\n"
+        + " ){\n"
+        + " This thisStruct;\n"
+        + " This* this=&thisStruct;\n"
+        + " this->passid = passid;\n"
+        + " {\n"
+        + " int i = 0;\n"
+        + " int result = 0;\n"
+        + " result = i-- + i++;\n"
+        + " return;\n"
+        + " }\n"
+        + " }\n"
+        + " "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void PostDecPostIncTest() {
         test(com.aparapi.codegen.test.PostDecPostInc.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void PostDecPostIncTestWorksWithCaching() {
         test(com.aparapi.codegen.test.PostDecPostInc.class, expectedException, expectedOpenCL);

@@ -18,16 +18,35 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class TernaryNestedTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n"
+        + "   int passid;\n"
+        + "}This;\n"
+        + "int get_pass_id(This *this){\n"
+        + "   return this->passid;\n"
+        + "}\n"
+        + "__kernel void run(\n"
+        + "   int passid\n"
+        + "){\n"
+        + "   This thisStruct;\n"
+        + "   This* this=&thisStruct;\n"
+        + "   this->passid = passid;\n"
+        + "   {\n"
+        + "      char a = 0;\n"
+        + "      char b = 0;\n"
+        + "      char c = 0;\n"
+        + "      int count = (a!=0)?((b!=0)?1:2):((c!=0)?3:4);\n"
+        + "      return;\n"
+        + "   }\n"
+        + "}"};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void TernaryNestedTest() {
         test(com.aparapi.codegen.test.TernaryNested.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void TernaryNestedTestWorksWithCaching() {
         test(com.aparapi.codegen.test.TernaryNested.class, expectedException, expectedOpenCL);

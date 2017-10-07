@@ -18,16 +18,37 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class CharAsParameterTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+" unsigned short com_aparapi_codegen_test_CharAsParameter__doIt(This *this, unsigned short x){\n" +
+" return(x);\n" +
+" }\n" +
+" __kernel void run(\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" char b = 1;\n" +
+" com_aparapi_codegen_test_CharAsParameter__doIt(this, 65);\n" +
+" com_aparapi_codegen_test_CharAsParameter__doIt(this, (unsigned short )b);\n" +
+" return;\n" +
+" }\n" +
+" }\n" +
+" "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void CharAsParameterTest() {
         test(com.aparapi.codegen.test.CharAsParameter.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void CharAsParameterTestWorksWithCaching() {
         test(com.aparapi.codegen.test.CharAsParameter.class, expectedException, expectedOpenCL);

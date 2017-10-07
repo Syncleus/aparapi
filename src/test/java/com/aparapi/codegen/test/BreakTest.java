@@ -15,19 +15,18 @@
  */
 package com.aparapi.codegen.test;
 
+import com.aparapi.internal.exception.ClassParseException;
 import org.junit.Test;
 
 public class BreakTest extends com.aparapi.codegen.CodeGenJUnitBase {
     private static final String[] expectedOpenCL = null;
-    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
+    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = ClassParseException.class;
 
-    @org.junit.Ignore
     @Test
     public void BreakTest() {
         test(com.aparapi.codegen.test.Break.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void BreakTestWorksWithCaching() {
         test(com.aparapi.codegen.test.Break.class, expectedException, expectedOpenCL);

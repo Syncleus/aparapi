@@ -15,19 +15,49 @@
  */
 package com.aparapi.codegen.test;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class FirstAssignInExpression2Test extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n"
+        + "\n"
+        + " int passid;\n"
+        + " }This;\n"
+        + " int get_pass_id(This *this){\n"
+        + " return this->passid;\n"
+        + " }\n"
+        + " __kernel void run(\n"
+        + " int passid\n"
+        + " ){\n"
+        + " This thisStruct;\n"
+        + " This* this=&thisStruct;\n"
+        + " this->passid = passid;\n"
+        + " {\n"
+        + " int value = 1;\n"
+        + " int result=0;\n"
+        + " int assignMe=0;\n"
+        + " if (true){\n"
+        + " result = assignMe = value;\n"
+        + " }else{\n"
+        + " assignMe =1;\n"
+        + " result=2;\n"
+        + " }\n"
+        + " result++;\n"
+        + " return;\n"
+        + " }\n"
+        + " }\n"
+        + " "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
+    @Ignore
     @Test
     public void FirstAssignInExpression2Test() {
         test(com.aparapi.codegen.test.FirstAssignInExpression2.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
+    @Ignore
     @Test
     public void FirstAssignInExpression2TestWorksWithCaching() {
         test(com.aparapi.codegen.test.FirstAssignInExpression2.class, expectedException, expectedOpenCL);

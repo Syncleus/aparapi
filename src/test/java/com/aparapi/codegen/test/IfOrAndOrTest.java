@@ -18,16 +18,39 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class IfOrAndOrTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n"
+        + "\n"
+        + " int passid;\n"
+        + " }This;\n"
+        + " int get_pass_id(This *this){\n"
+        + " return this->passid;\n"
+        + " }\n"
+        + "\n"
+        + " __kernel void run(\n"
+        + " int passid\n"
+        + " ){\n"
+        + " This thisStruct;\n"
+        + " This* this=&thisStruct;\n"
+        + " this->passid = passid;\n"
+        + " {\n"
+        + " int testValue = 10;\n"
+        + " char pass = 0;\n"
+        + " if ((testValue % 2)==0 || testValue<=0 && testValue>=100 || (testValue % 4)==0){\n"
+        + " pass = 1;\n"
+        + " }\n"
+        + " return;\n"
+        + " }\n"
+        + " }\n"
+        + " "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void IfOrAndOrTest() {
         test(com.aparapi.codegen.test.IfOrAndOr.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void IfOrAndOrTestWorksWithCaching() {
         test(com.aparapi.codegen.test.IfOrAndOr.class, expectedException, expectedOpenCL);

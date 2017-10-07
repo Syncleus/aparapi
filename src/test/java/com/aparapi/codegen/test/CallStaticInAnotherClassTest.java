@@ -18,16 +18,42 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class CallStaticInAnotherClassTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+"typedef struct This_s{\n" +
+" __global int *out;\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+" int com_aparapi_codegen_test_AnotherClass__foo(){\n" +
+" return(42);\n" +
+" }\n" +
+" int com_aparapi_codegen_test_CallStaticInAnotherClass__doodoo(This *this){\n" +
+" return(com_aparapi_codegen_test_AnotherClass__foo());\n" +
+" }\n" +
+" __kernel void run(\n" +
+" __global int *out,\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->out = out;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" this->out[0]  = com_aparapi_codegen_test_AnotherClass__foo() + com_aparapi_codegen_test_CallStaticInAnotherClass__doodoo(this);\n" +
+" return;\n" +
+" }\n" +
+" }\n" +
+"\n" +
+" "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void CallStaticInAnotherClassTest() {
         test(com.aparapi.codegen.test.CallStaticInAnotherClass.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void CallStaticInAnotherClassTestWorksWithCaching() {
         test(com.aparapi.codegen.test.CallStaticInAnotherClass.class, expectedException, expectedOpenCL);

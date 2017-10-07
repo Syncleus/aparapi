@@ -18,16 +18,42 @@ package com.aparapi.codegen.test;
 import org.junit.Test;
 
 public class ArbitraryScopeSimpleTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
+    private static final String[] expectedOpenCL = {
+        "typedef struct This_s{\n" +
+"\n" +
+" int passid;\n" +
+" }This;\n" +
+" int get_pass_id(This *this){\n" +
+" return this->passid;\n" +
+" }\n" +
+"\n" +
+" __kernel void run(\n" +
+" int passid\n" +
+" ){\n" +
+" This thisStruct;\n" +
+" This* this=&thisStruct;\n" +
+" this->passid = passid;\n" +
+" {\n" +
+" int value = 10;\n" +
+" {\n" +
+" int count = 10;\n" +
+" float f = 10.0f;\n" +
+" value = (int)((float)count * f);\n" +
+" }\n" +
+" int result = 0;\n" +
+" int count = 0;\n" +
+" result = value + count;\n" +
+" return;\n" +
+" }\n" +
+" }\n" +
+""};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @org.junit.Ignore
     @Test
     public void ArbitraryScopeSimpleTest() {
         test(com.aparapi.codegen.test.ArbitraryScopeSimple.class, expectedException, expectedOpenCL);
     }
 
-    @org.junit.Ignore
     @Test
     public void ArbitraryScopeSimpleTestWorksWithCaching() {
         test(com.aparapi.codegen.test.ArbitraryScopeSimple.class, expectedException, expectedOpenCL);
