@@ -18,6 +18,7 @@
 * Fernando Marino`
 * AMD Corporation
 * Nicholas Wright - https://github.com/seeker
+* Veselin Yordanov <vesko935@gmail.com>
 
 # Details
 
