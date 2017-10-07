@@ -42,7 +42,8 @@ env:
     - BOOST_VERSION=default
     # Misc
     - RUN_TESTS=true
-    - COVERAGE=false
+    - COVERAGE=true
+    - CODACY_PROJECT_TOKEN=e7f8ea58858a4c48b8df6b5443202255
 
 matrix:
   include:
@@ -419,6 +420,8 @@ matrix:
 
 before_install:
     # Install dependencies
+    - sudo apt-get install jq
+    - wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r .assets[0].browser_download_url)
     - |
       # POCL dependencies for Trusty
       # llvm-toolchain-trusty-3.7 is not whitelisted yet https://github.com/travis-ci/apt-source-whitelist/issues/199
@@ -540,6 +543,8 @@ install:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+  - mvn site
+  - java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r target/site/jacoco/jacoco.xml
 
 notifications:
   webhooks:
