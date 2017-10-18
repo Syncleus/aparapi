@@ -74,6 +74,8 @@ import com.aparapi.internal.instruction.Instruction;
       ATHROW("We don't support athrow instructions"), //
       SYNCHRONIZE("We don't support monitorenter or monitorexit instructions"), //
       NEW("We don't support new instructions"), //
+      NEWARRAY("We don't support new array instructions"), //
+      NEWMULTIARRAY("We don't support new multi array instructions"), //
       ARRAYALIAS("We don't support copying refs in kernels"), //
       SWITCH("We don't support lookupswitch or tableswitch instructions"), //
       METHODARRAYARG("We don't support passing arrays as method args"), //

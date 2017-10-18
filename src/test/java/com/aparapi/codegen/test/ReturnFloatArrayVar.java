@@ -27,4 +27,27 @@ public class ReturnFloatArrayVar {
         returnFloatArrayVar();
     }
 }
-/**{Throws{ClassParseException}Throws}**/
+/**{OpenCL{
+ typedef struct This_s{
+ int passid;
+ }This;
+ int get_pass_id(This *this){
+ return this->passid;
+ }
+ __global float* com_aparapi_codegen_test_ReturnFloatArrayVar__returnFloatArrayVar(This *this){
+ float floats[1024];
+ return(floats);
+ }
+ __kernel void run(
+ int passid
+ ){
+ This thisStruct;
+ This* this=&thisStruct;
+ this->passid = passid;
+ {
+ com_aparapi_codegen_test_ReturnFloatArrayVar__returnFloatArrayVar(this);
+ return;
+ }
+ }
+
+ }OpenCL}**/

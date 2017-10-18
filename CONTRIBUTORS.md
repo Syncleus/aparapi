@@ -19,6 +19,7 @@
 * Lorenzo Gallucci
 * Fernando Marino`
 * AMD Corporation
+* Dmitriy Shabanov <shabanovd@gmail.com>
 
 # Details
 
@@ -37,3 +38,4 @@ Below are some of the specific details of various contributions.
 * Paul Miner issue #61 and #115 (JTP Speed up and fixes to explicit puts) June 13th 2013
 * lgalluci for his fix for issue #121 (incorrect toString for 3D ranges) July 6th 2013
 * George Vinokhodov submited a fix for a bug regarding forward references.
+* Dmitriy Shabanov submited PR for inline array feature.

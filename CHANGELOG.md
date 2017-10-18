@@ -1,7 +1,8 @@
 # Aparapi Changelog
 
-## 1.4.2
+## 1.5.0
 
+* Support inline array creation in the kernel, which is implemented in the GPU in private memory.
 * Updated parent pon to v6.
 * createProgram had the wrong signature producing a unsatisfied link exception that is now fixed.
 * Build now requires version 3.5.0 of maven due to changes in surefire plugin.

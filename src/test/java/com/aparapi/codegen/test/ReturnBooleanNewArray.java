@@ -26,4 +26,4 @@ public class ReturnBooleanNewArray {
         returnBooleanNewArray();
     }
 }
-/**{Throws{ClassParseException}Throws}**/
+/**{Throws{CodeGenException}Throws}**/

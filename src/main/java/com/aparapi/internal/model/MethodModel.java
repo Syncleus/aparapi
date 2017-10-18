@@ -54,6 +54,7 @@ package com.aparapi.internal.model;
 
 import com.aparapi.*;
 import com.aparapi.internal.exception.*;
+import com.aparapi.internal.exception.ClassParseException.TYPE;
 import com.aparapi.internal.instruction.*;
 import com.aparapi.internal.instruction.InstructionPattern.*;
 import com.aparapi.internal.instruction.InstructionSet.*;
@@ -243,12 +244,16 @@ public class MethodModel{
             throw new ClassParseException(instruction, ClassParseException.TYPE.SYNCHRONIZE);
          }
 
-         if ((!Config.enableNEW) && (instruction instanceof New)) {
-            throw new ClassParseException(instruction, ClassParseException.TYPE.NEW);
-         }
-
-         if (instruction instanceof I_AASTORE) {
-            throw new ClassParseException(instruction, ClassParseException.TYPE.ARRAYALIAS);
+         if (instruction instanceof New) {
+             if ((instruction instanceof I_NEWARRAY)) {
+                 if (!Config.enableARRAY) {
+                     throw new ClassParseException(instruction, TYPE.NEWARRAY);
+                 }
+             } else if ((instruction instanceof I_MULTIANEWARRAY)) {
+                 throw new ClassParseException(instruction, ClassParseException.TYPE.NEWMULTIARRAY);
+             } else if (!Config.enableNEW) {
+                 throw new ClassParseException(instruction, ClassParseException.TYPE.NEW);
+             }
          }
 
          if ((!Config.enableSWITCH) && ((instruction instanceof I_LOOKUPSWITCH) || (instruction instanceof I_TABLESWITCH))) {
@@ -444,7 +449,7 @@ public class MethodModel{
          }
 
          _expressionList.add(new CloneInstruction(this, e));
-         System.out.println("clone of " + e);
+         //System.out.println("clone of " + e);
       } else if (_instruction instanceof I_DUP2) {
          Instruction e = _expressionList.getTail();
          while (!e.producesStack()) {

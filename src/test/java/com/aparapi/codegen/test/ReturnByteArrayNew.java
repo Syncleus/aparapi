@@ -25,4 +25,4 @@ public class ReturnByteArrayNew {
         returnByteArrayNew();
     }
 }
-/**{Throws{ClassParseException}Throws}**/
+/**{Throws{CodeGenException}Throws}**/

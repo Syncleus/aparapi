@@ -27,4 +27,6 @@ public class ReturnLongArrayVar {
         returnLongArrayVar();
     }
 }
-/**{Throws{ClassParseException}Throws}**/
+/**{OpenCL{
+
+ }OpenCL}**/

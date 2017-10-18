@@ -27,4 +27,27 @@ public class ReturnIntArrayVar {
         returnIntArrayVar();
     }
 }
-/**{Throws{ClassParseException}Throws}**/
+/**{OpenCL{
+ typedef struct This_s{
+ int passid;
+ }This;
+ int get_pass_id(This *this){
+ return this->passid;
+ }
+ __global int* com_aparapi_codegen_test_ReturnIntArrayVar__returnIntArrayVar(This *this){
+ int ints[1024];
+ return(ints);
+ }
+ __kernel void run(
+ int passid
+ ){
+ This thisStruct;
+ This* this=&thisStruct;
+ this->passid = passid;
+ {
+ com_aparapi_codegen_test_ReturnIntArrayVar__returnIntArrayVar(this);
+ return;
+ }
+ }
+
+ }OpenCL}**/

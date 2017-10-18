@@ -27,4 +27,26 @@ public class ReturnShortArrayVar {
         returnShortArrayVar();
     }
 }
-/**{Throws{ClassParseException}Throws}**/
+/**{OpenCL{
+ typedef struct This_s{
+ int passid;
+ }This;
+ int get_pass_id(This *this){
+ return this->passid;
+ }
+ __global short* com_aparapi_codegen_test_ReturnShortArrayVar__returnShortArrayVar(This *this){
+ short shorts[1024];
+ return(shorts);
+ }
+ __kernel void run(
+ int passid
+ ){
+ This thisStruct;
+ This* this=&thisStruct;
+ this->passid = passid;
+ {
+ com_aparapi_codegen_test_ReturnShortArrayVar__returnShortArrayVar(this);
+ return;
+ }
+ }
+}OpenCL}**/

@@ -157,6 +157,8 @@ public class Config extends ConfigJNI{
 
    public static final boolean enableMONITOR = Boolean.getBoolean(propPkgName + ".enable.MONITOR");
 
+   public static final boolean enableARRAY = !Boolean.getBoolean(propPkgName + ".disable.ARRAY");
+
    public static final boolean enableNEW = Boolean.getBoolean(propPkgName + ".enable.NEW");
 
    public static final boolean enableATHROW = Boolean.getBoolean(propPkgName + ".enable.ATHROW");

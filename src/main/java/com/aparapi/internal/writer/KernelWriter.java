@@ -52,6 +52,8 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
  */
 package com.aparapi.internal.writer;
 
+import static com.aparapi.Kernel.PRIVATE_SUFFIX;
+
 import com.aparapi.*;
 import com.aparapi.internal.exception.*;
 import com.aparapi.internal.instruction.*;
@@ -70,23 +72,39 @@ public abstract class KernelWriter extends BlockWriter{
 
    private final String cvtBooleanArrayToCharStar = "char* ";
 
+   private final String cvtBooleanArrayToChar = "char ";
+
    private final String cvtByteToChar = "char ";
 
    private final String cvtByteArrayToCharStar = "char* ";
+
+   private final String cvtByteArrayToChar = "char ";
 
    private final String cvtCharToShort = "unsigned short ";
 
    private final String cvtCharArrayToShortStar = "unsigned short* ";
 
+   private final String cvtCharArrayToShort = "unsigned short ";
+
    private final String cvtIntArrayToIntStar = "int* ";
+
+   private final String cvtIntArrayToInt = "int ";
 
    private final String cvtFloatArrayToFloatStar = "float* ";
 
+   private final String cvtFloatArrayToFloat = "float ";
+
    private final String cvtDoubleArrayToDoubleStar = "double* ";
+
+   private final String cvtDoubleArrayToDouble = "double ";
 
    private final String cvtLongArrayToLongStar = "long* ";
 
+   private final String cvtLongArrayToLong = "long ";
+
    private final String cvtShortArrayToShortStar = "short* ";
+
+   private final String cvtShortArrayToShort = "short ";
 
    /** When declaring a __private struct pointer field, we always omit the "__private" qualifier. This is because the NVidia OpenCL compiler, at time of writing
     * erroneously complains about explicitly qualifying pointers with __private ("error: field may not be qualified with an address space").
@@ -151,29 +169,29 @@ public abstract class KernelWriter extends BlockWriter{
     *          String in the Java JNI notation, [I, etc
     * @return Suitably converted string, "char*", etc
     */
-   @Override public String convertType(String _typeDesc, boolean useClassModel) {
+   @Override public String convertType(String _typeDesc, boolean useClassModel, boolean isLocal) {
       if (_typeDesc.equals("Z") || _typeDesc.equals("boolean")) {
          return (cvtBooleanToChar);
       } else if (_typeDesc.equals("[Z") || _typeDesc.equals("boolean[]")) {
-         return (cvtBooleanArrayToCharStar);
+         return isLocal ? (cvtBooleanArrayToChar) : (cvtBooleanArrayToCharStar);
       } else if (_typeDesc.equals("B") || _typeDesc.equals("byte")) {
          return (cvtByteToChar);
       } else if (_typeDesc.equals("[B") || _typeDesc.equals("byte[]")) {
-         return (cvtByteArrayToCharStar);
+         return isLocal ? (cvtByteArrayToChar) : (cvtByteArrayToCharStar);
       } else if (_typeDesc.equals("C") || _typeDesc.equals("char")) {
          return (cvtCharToShort);
       } else if (_typeDesc.equals("[C") || _typeDesc.equals("char[]")) {
-         return (cvtCharArrayToShortStar);
+         return isLocal ? (cvtCharArrayToShort) : (cvtCharArrayToShortStar);
       } else if (_typeDesc.equals("[I") || _typeDesc.equals("int[]")) {
-         return (cvtIntArrayToIntStar);
+         return isLocal ? (cvtIntArrayToInt) : (cvtIntArrayToIntStar);
       } else if (_typeDesc.equals("[F") || _typeDesc.equals("float[]")) {
-         return (cvtFloatArrayToFloatStar);
+         return isLocal ? (cvtFloatArrayToFloat) : (cvtFloatArrayToFloatStar);
       } else if (_typeDesc.equals("[D") || _typeDesc.equals("double[]")) {
-         return (cvtDoubleArrayToDoubleStar);
+         return isLocal ? (cvtDoubleArrayToDouble) : (cvtDoubleArrayToDoubleStar);
       } else if (_typeDesc.equals("[J") || _typeDesc.equals("long[]")) {
-         return (cvtLongArrayToLongStar);
+         return isLocal ? (cvtLongArrayToLong) : (cvtLongArrayToLongStar);
       } else if (_typeDesc.equals("[S") || _typeDesc.equals("short[]")) {
-         return (cvtShortArrayToShortStar);
+         return isLocal ? (cvtShortArrayToShort) : (cvtShortArrayToShortStar);
       }
       // if we get this far, we haven't matched anything yet
       if (useClassModel) {
@@ -373,8 +391,8 @@ public abstract class KernelWriter extends BlockWriter{
             argLine.append(className);
             thisStructLine.append(className);
          } else {
-            argLine.append(convertType(ClassModel.typeName(signature.charAt(0)), false));
-            thisStructLine.append(convertType(ClassModel.typeName(signature.charAt(0)), false));
+            argLine.append(convertType(ClassModel.typeName(signature.charAt(0)), false, false));
+            thisStructLine.append(convertType(ClassModel.typeName(signature.charAt(0)), false, false));
          }
 
          argLine.append(" ");
@@ -520,7 +538,7 @@ public abstract class KernelWriter extends BlockWriter{
                }
                totalSize += fSize;
 
-               final String cType = convertType(field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8(), true);
+               final String cType = convertType(field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8(), true, false);
                assert cType != null : "could not find type for " + field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
                writeln(cType + " " + field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8() + ";");
             }
@@ -585,7 +603,7 @@ public abstract class KernelWriter extends BlockWriter{
          if (returnType.startsWith("[")) {
             write(" __global ");
          }
-         write(convertType(returnType, true));
+         write(convertType(returnType, true, false));
 
          write(mm.getName() + "(");
 
@@ -618,12 +636,11 @@ public abstract class KernelWriter extends BlockWriter{
                   write(", ");
                }
 
-               // Arrays always map to __global arrays
-               if (descriptor.startsWith("[")) {
+               if (descriptor.startsWith("[") && !lvi.getVariableName().endsWith(PRIVATE_SUFFIX)) {
                   write(" __global ");
                }
 
-               write(convertType(descriptor, true));
+               write(convertType(descriptor, true, false));
                write(lvi.getVariableName());
                alreadyHasFirstArg = true;
             }

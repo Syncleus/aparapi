@@ -25,4 +25,4 @@ public class ReturnLongArrayNew {
         returnLongArrayNew();
     }
 }
-/**{Throws{ClassParseException}Throws}**/
+/**{Throws{CodeGenException}Throws}**/

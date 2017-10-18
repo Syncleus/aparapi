@@ -366,14 +366,14 @@ public abstract class BlockWriter{
       }
    }
 
-   public String convertType(String _typeDesc, boolean useClassModel) {
+   public String convertType(String _typeDesc, boolean useClassModel, boolean isLocal) {
       return (_typeDesc);
    }
 
    public String convertCast(String _cast) {
       // Strip parens off cast
       //System.out.println("cast = " + _cast);
-      final String raw = convertType(_cast.substring(1, _cast.length() - 1), false);
+      final String raw = convertType(_cast.substring(1, _cast.length() - 1), false, false);
       return ("(" + raw + ")");
    }
 
@@ -393,24 +393,46 @@ public abstract class BlockWriter{
              write(")");
          }
       } else if (_instruction instanceof CompositeInstruction) {
-         writeComposite((CompositeInstruction) _instruction);
+          writeComposite((CompositeInstruction) _instruction);
+
+      } else if (_instruction instanceof I_NEWARRAY) {
+          if (_instruction.getParentExpr() instanceof Return) {
+              throw new CodeGenException("'newarray' is not allowed after 'return'");
+          }
+
+          for (Instruction operand = _instruction.getFirstChild(); operand != null; operand = operand.getNextExpr()) {
+              write("[");
+              writeInstruction(operand);
+              write("]");
+          }
 
       } else if (_instruction instanceof AssignToLocalVariable) {
          final AssignToLocalVariable assignToLocalVariable = (AssignToLocalVariable) _instruction;
 
          final LocalVariableInfo localVariableInfo = assignToLocalVariable.getLocalVariableInfo();
-         if (assignToLocalVariable.isDeclaration()) {
-            final String descriptor = localVariableInfo.getVariableDescriptor();
-            // Arrays always map to __global arrays
-            if (descriptor.startsWith("[")) {
-               write(" __global ");
-            }
-            write(convertType(descriptor, true));
-         }
-         if (localVariableInfo == null) {
-            throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
+
+         if ((_instruction.getFirstChild() instanceof I_NEWARRAY)) {
+             if (localVariableInfo == null) {
+                 throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
+             } else {
+                 final String descriptor = localVariableInfo.getVariableDescriptor();
+                 write(convertType(descriptor, true, true));
+                 write(localVariableInfo.getVariableName());
+             }
          } else {
-            write(localVariableInfo.getVariableName() + " = ");
+             if (assignToLocalVariable.isDeclaration()) {
+                 final String descriptor = localVariableInfo.getVariableDescriptor();
+                 // Arrays always map to __global arrays
+                 if (descriptor.startsWith("[")) {
+                     write(" __global ");
+                 }
+                 write(convertType(descriptor, true, false));
+             }
+             if (localVariableInfo == null) {
+                 throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
+             } else {
+                 write(localVariableInfo.getVariableName() + " = ");
+             }
          }
 
          for (Instruction operand = _instruction.getFirstChild(); operand != null; operand = operand.getNextExpr()) {
@@ -457,7 +479,7 @@ public abstract class BlockWriter{
                dim++;
             }
 
-            NameAndTypeEntry nameAndTypeEntry = ((AccessInstanceField) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
+            NameAndTypeEntry nameAndTypeEntry = ((AccessField) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
             if (isMultiDimensionalArray(nameAndTypeEntry)) {
                String arrayName = nameAndTypeEntry.getNameUTF8Entry().getUTF8();
                write(" * this->" + arrayName + arrayDimMangleSuffix + dim);
@@ -661,7 +683,7 @@ public abstract class BlockWriter{
 
             final LocalVariableInfo localVariableInfo = alv.getLocalVariableInfo();
             if (alv.isDeclaration()) {
-               write(convertType(localVariableInfo.getVariableDescriptor(), true));
+               write(convertType(localVariableInfo.getVariableDescriptor(), true, false));
             }
             if (localVariableInfo == null) {
                throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
@@ -678,7 +700,7 @@ public abstract class BlockWriter{
          final LocalVariableInfo localVariableInfo = assignToLocalVariable.getLocalVariableInfo();
          if (assignToLocalVariable.isDeclaration()) {
             // this is bad! we need a general way to hoist up a required declaration
-            throw new CodeGenException("/* we can't declare this " + convertType(localVariableInfo.getVariableDescriptor(), true)
+            throw new CodeGenException("/* we can't declare this " + convertType(localVariableInfo.getVariableDescriptor(), true, false)
                   + " here */");
          }
          write(localVariableInfo.getVariableName());
@@ -766,22 +788,22 @@ public abstract class BlockWriter{
    }
 
    private boolean isMultiDimensionalArray(final AccessArrayElement arrayLoadInstruction) {
-      AccessInstanceField accessInstanceField = getUltimateInstanceFieldAccess(arrayLoadInstruction);
+       AccessField accessInstanceField = getUltimateInstanceFieldAccess(arrayLoadInstruction);
       return isMultiDimensionalArray(accessInstanceField.getConstantPoolFieldEntry().getNameAndTypeEntry());
    }
 
    private boolean isObjectArray(final AccessArrayElement arrayLoadInstruction) {
-      AccessInstanceField accessInstanceField = getUltimateInstanceFieldAccess(arrayLoadInstruction);
+       AccessField accessInstanceField = getUltimateInstanceFieldAccess(arrayLoadInstruction);
       return isObjectArray(accessInstanceField.getConstantPoolFieldEntry().getNameAndTypeEntry());
    }
 
-   private AccessInstanceField getUltimateInstanceFieldAccess(final AccessArrayElement arrayLoadInstruction) {
+   private AccessField getUltimateInstanceFieldAccess(final AccessArrayElement arrayLoadInstruction) {
       Instruction load = arrayLoadInstruction.getArrayRef();
       while (load instanceof I_AALOAD) {
          load = load.getFirstChild();
       }
 
-      return (AccessInstanceField) load;
+      return (AccessField) load;
    }
 
    public void writeMethod(MethodCall _methodCall, MethodEntry _methodEntry) throws CodeGenException {

@@ -25,4 +25,4 @@ public class ReturnIntArrayNew {
         returnIntArrayNew();
     }
 }
-/**{Throws{ClassParseException}Throws}**/
+/**{Throws{CodeGenException}Throws}**/

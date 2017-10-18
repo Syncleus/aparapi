@@ -25,4 +25,4 @@ public class ReturnDoubleArrayNew {
         returnDoubleArrayNew();
     }
 }
-/**{Throws{ClassParseException}Throws}**/
+/**{Throws{CodeGenException}Throws}**/

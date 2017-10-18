@@ -25,4 +25,4 @@ public class ReturnFloatArrayNew {
         returnFloatArrayNew();
     }
 }
-/**{Throws{ClassParseException}Throws}**/
+/**{Throws{CodeGenException}Throws}**/

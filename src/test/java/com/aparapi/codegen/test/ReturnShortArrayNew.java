@@ -25,4 +25,4 @@ public class ReturnShortArrayNew {
         returnShortArrayNew();
     }
 }
-/**{Throws{ClassParseException}Throws}**/
+/**{Throws{CodeGenException}Throws}**/
