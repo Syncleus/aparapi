@@ -2,6 +2,8 @@
 
 ## 1.4.2
 
+* Updated parent pon to v6.
+
 ## 1.4.1
 
 * Fixed NullPointerException when using KernelManger from the KernelManagers class 
