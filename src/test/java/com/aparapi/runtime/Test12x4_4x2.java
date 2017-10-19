@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,9 +18,12 @@ package com.aparapi.runtime;
 import com.aparapi.Kernel;
 import com.aparapi.Range;
 import com.aparapi.device.Device;
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
 public class Test12x4_4x2 {
+    private static final Logger LOGGER = Logger.getLogger(Test12x4_4x2.class);
+
     @SuppressWarnings("deprecation")
     @Test
     public void test() {
@@ -478,36 +481,36 @@ public class Test12x4_4x2 {
                 int h = getGlobalSize(1);
                 int globalThreadId = getGlobalId(1) * getGlobalSize(0) + getGlobalId(0);
                 int threadId = getLocalId(1) * getLocalSize(0) + getLocalId(0);
-                synchronized (test) {
+                synchronized(test) {
                     boolean show = false;
                     if (globalThreadId != test[globalThreadId][0]) {
-                        System.out.println("bad globalThreadId");
+                        LOGGER.info("bad globalThreadId");
                         show = true;
                     }
                     if (threadId != test[globalThreadId][1]) {
-                        System.out.println("bad threadId");
+                        LOGGER.info("bad threadId");
                         show = true;
                     }
                     if (x != test[globalThreadId][2]) {
-                        System.out.println("bad globalx");
+                        LOGGER.info("bad globalx");
                         show = true;
                     }
                     if (y != test[globalThreadId][3]) {
-                        System.out.println("bad globaly");
+                        LOGGER.info("bad globaly");
                         show = true;
                     }
                     if (lx != test[globalThreadId][4]) {
-                        System.out.println("bad localx");
+                        LOGGER.info("bad localx");
                         show = true;
                     }
                     if (ly != test[globalThreadId][5]) {
-                        System.out.println("bad localy");
+                        LOGGER.info("bad localy");
                         show = true;
                     }
                     if (show) {
-                        System.out.println("derived =>" + globalThreadId + " " + threadId + " " + x + "," + y + " " + lx + "," + ly + " "
+                        LOGGER.info("derived =>" + globalThreadId + " " + threadId + " " + x + "," + y + " " + lx + "," + ly + " "
                             + w + "," + h);
-                        System.out.println("data    =>" + test[globalThreadId][0] + " " + test[globalThreadId][1] + " "
+                        LOGGER.info("data    =>" + test[globalThreadId][0] + " " + test[globalThreadId][1] + " "
                             + test[globalThreadId][2] + "," + test[globalThreadId][3] + " " + test[globalThreadId][4] + ","
                             + test[globalThreadId][5] + " " + w + "," + h);
                     }

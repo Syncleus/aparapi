@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ import com.aparapi.Range;
 import com.aparapi.device.Device;
 import com.aparapi.device.OpenCLDevice;
 import com.aparapi.internal.kernel.KernelManager;
+import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -29,6 +30,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class BufferTransferTest {
+    private static final Logger LOGGER = Logger.getLogger(BufferTransferTest.class);
 
     static OpenCLDevice openCLDevice = null;
 
@@ -188,6 +190,7 @@ public class BufferTransferTest {
     }
 
     public static class InOutKernel extends Kernel {
+        private static final Logger LOGGER = Logger.getLogger(InOutKernel.class);
 
         int[] in;
 
@@ -203,6 +206,7 @@ public class BufferTransferTest {
     }
 
     public static class AddKernel extends Kernel {
+        private static final Logger LOGGER = Logger.getLogger(AddKernel.class);
 
         int[] values;
 
@@ -247,13 +251,15 @@ public class BufferTransferTest {
             put(neuronOutputs);
             for (simStep[0] = 0; simStep[0] < simSteps; simStep[0]++) {
                 put(simStep).execute(neuronOutputs.length).get(neuronOutputs);
-                for (int n = 0; n < neuronOutputs.length; n++)
+                for (int n = 0; n < neuronOutputs.length; n++) {
                     log[n][simStep[0]] = neuronOutputs[n];
+                }
             }
-            System.out.println(getTargetDevice().getShortDescription() + (isExplicit() ? ", explicit" : ", auto"));
+            LOGGER.info(getTargetDevice().getShortDescription() + (isExplicit() ? ", explicit" : ", auto"));
 
-            for (int n = 0; n < neuronOutputs.length; n++)
-                System.out.println(Arrays.toString(log[n]));
+            for (int n = 0; n < neuronOutputs.length; n++) {
+                LOGGER.info(Arrays.toString(log[n]));
+            }
 
             assertTrue("log[2] == expected", Util.same(log[2], expected));
         }

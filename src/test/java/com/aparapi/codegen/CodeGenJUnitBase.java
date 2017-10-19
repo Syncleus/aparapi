@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,86 +52,88 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.codegen;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-
 import com.aparapi.Kernel;
 import com.aparapi.internal.exception.AparapiException;
 import com.aparapi.internal.model.ClassModel;
 import com.aparapi.internal.model.Entrypoint;
 import com.aparapi.internal.writer.KernelWriter;
+import org.apache.log4j.Logger;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class CodeGenJUnitBase {
+    private static final Logger LOGGER = Logger.getLogger(CodeGenJUnitBase.class);
 
-   protected void test(Class<?> _class, Class<? extends AparapiException> _expectedExceptionType, String[] expectedOpenCL) {
-      try {
-         // Source source = new Source(_class, new File("src/java"));
-         // System.out.println("opencl\n"+source.getOpenCL());
+    protected void test(Class<?> _class, Class<? extends AparapiException> _expectedExceptionType, String[] expectedOpenCL) {
+        try{
+            // Source source = new Source(_class, new File("src/java"));
+            // LOGGER.info("opencl\n"+source.getOpenCL());
 
-         //  String expected = source.getOpenCLString();
+            //  String expected = source.getOpenCLString();
 
-         ClassModel classModel = ClassModel.createClassModel(_class);
+            ClassModel classModel = ClassModel.createClassModel(_class);
 
-         // construct an artficial instance of our class here
-         // we assume the specified class will have a null constructor
-         Object kernelInstance = _class.getConstructor((Class<?>[]) null).newInstance();
+            // construct an artficial instance of our class here
+            // we assume the specified class will have a null constructor
+            Object kernelInstance = _class.getConstructor((Class<?>[]) null).newInstance();
 
-         Entrypoint entrypoint = classModel.getEntrypoint("run", kernelInstance instanceof Kernel ? kernelInstance : null);
-         String actual = KernelWriter.writeToString(entrypoint);
+            Entrypoint entrypoint = classModel.getEntrypoint("run", kernelInstance instanceof Kernel ? kernelInstance : null);
+            String actual = KernelWriter.writeToString(entrypoint);
 
-         if (_expectedExceptionType == null) {
-            int matched = 0;
-            if( expectedOpenCL != null ) {
-                for (String expected : expectedOpenCL) {
-                    if (Diff.same(actual, expected)) {
-                        break;
+            if (_expectedExceptionType == null) {
+                int matched = 0;
+                if (expectedOpenCL != null) {
+                    for (String expected : expectedOpenCL) {
+                        if (Diff.same(actual, expected)) {
+                            break;
+                        }
+                        matched++;
                     }
-                    matched++;
                 }
+                boolean same = (matched < (expectedOpenCL != null ? expectedOpenCL.length : 0));
+
+                if (!same) {
+                    LOGGER.info("---" + _class.getName()
+                        + "------------------------------------------------------------------------------");
+                    boolean first = true;
+                    if (expectedOpenCL != null) {
+                        for (String expected : expectedOpenCL) {
+                            if (first) {
+                                first = false;
+                            } else {
+                                LOGGER.info("}");
+                            }
+                            LOGGER.info("Expected {\n" + expected);
+                        }
+                    }
+                    LOGGER.info("}Actual\n{" + actual);
+                    System.out
+                        .println("}\n------------------------------------------------------------------------------------------------------");
+
+                }
+                if (!same) {
+                    assertEquals(_class.getSimpleName(), Arrays.toString(expectedOpenCL), actual);
+                }
+            } else {
+                assertTrue("Expected exception " + _expectedExceptionType + " Instead we got {\n" + actual + "\n}", false);
             }
-            boolean same = (matched < ( expectedOpenCL != null ? expectedOpenCL.length : 0));
 
-            if (!same) {
-               System.out.println("---" + _class.getName()
-                     + "------------------------------------------------------------------------------");
-               boolean first = true;
-               if( expectedOpenCL != null ) {
-                   for (String expected : expectedOpenCL) {
-                       if (first) {
-                           first = false;
-                       } else {
-                           System.out.println("}");
-                       }
-                       System.out.println("Expected {\n" + expected);
-                   }
-               }
-               System.out.println("}Actual\n{" + actual);
-               System.out
-                     .println("}\n------------------------------------------------------------------------------------------------------");
-
+        } catch (AssertionError e) {
+            throw e;
+        } catch (Throwable t) {
+            if (_expectedExceptionType == null || !t.getClass().isAssignableFrom(_expectedExceptionType)) {
+                t.printStackTrace();
+                throw new AssertionError("Unexpected exception " + t, t);
             }
-            if (!same) {
-               assertEquals(_class.getSimpleName(), Arrays.toString(expectedOpenCL), actual);
-            }
-         } else {
-            assertTrue("Expected exception " + _expectedExceptionType + " Instead we got {\n" + actual + "\n}", false);
-         }
+        }
+    }
 
-      } catch (AssertionError e) {
-         throw e;
-      } catch (Throwable t) {
-         if (_expectedExceptionType == null || !t.getClass().isAssignableFrom(_expectedExceptionType)) {
-            t.printStackTrace();
-            throw new AssertionError("Unexpected exception " + t, t);
-         }
-      }
-   }
+    protected void test(Class<?> _class, String[] expectedOpenCL) {
+        test(_class, null, expectedOpenCL);
 
-   protected void test(Class<?> _class, String[] expectedOpenCL) {
-      test(_class, null, expectedOpenCL);
-
-   }
+    }
 
 }

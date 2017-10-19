@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,15 +15,16 @@
  */
 package com.aparapi;
 
+import com.aparapi.internal.model.CacheEnabler;
+import com.aparapi.internal.model.Supplier;
+import org.apache.log4j.Logger;
+import org.junit.Test;
+
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
-import com.aparapi.Kernel;
-import com.aparapi.internal.model.CacheEnabler;
-import com.aparapi.internal.model.Supplier;
-import org.junit.Test;
-
 public class ConvolutionLargeTest {
+    private static final Logger LOGGER = Logger.getLogger(ConvolutionLargeTest.class);
 
     private static final float CONVOLUTION_MATRIX[] = new float[]{
         0f,
@@ -44,9 +45,9 @@ public class ConvolutionLargeTest {
     public void testConvolutionLarge() {
         boolean testWithoutCaches = true;
         for (int i = 1; i <= TEST_ROUNDS; i++) {
-            System.out.println("-----------------------------");
+            LOGGER.info("-----------------------------");
             int pixels = (1_000 * 1_000 * (1 << (i - 1))) & ~(1 << 10 - 1);
-            System.out.println(MessageFormat.format("Round #{0}/{1} ({2} pixels)", i, TEST_ROUNDS, pixels));
+            LOGGER.info(MessageFormat.format("Round #{0}/{1} ({2} pixels)", i, TEST_ROUNDS, pixels));
 
             //prepare the size
             int side = (int) Math.sqrt(pixels);
@@ -55,8 +56,7 @@ public class ConvolutionLargeTest {
             byte[] inBytes = new byte[width * height * 3];
             byte[] outBytes = new byte[width * height * 3];
 
-            System.out.println("-----------------------------");
-            System.out.println();
+            LOGGER.info("-----------------------------");
             testWithSupplier(new ImageConvolutionCreationContext() {
                 private ImageConvolution convolution = new ImageConvolution();
 
@@ -125,7 +125,7 @@ public class ConvolutionLargeTest {
     }
 
     private void testWithSupplier(ImageConvolutionCreationContext imageConvolutionCreationContext, int seconds, boolean testWithoutCaches, byte[] inBytes, byte[] outBytes, int width, int height) {
-        System.out.println("Test context: " + imageConvolutionCreationContext.getName());
+        LOGGER.info("Test context: " + imageConvolutionCreationContext.getName());
         CacheEnabler.setCachesEnabled(!testWithoutCaches);
         // Warmup
         doTest("Warmup (caches " + (testWithoutCaches ? "not " : "") + "enabled)", SECONDS_PER_WARMUP, imageConvolutionCreationContext, inBytes, outBytes, width, height);
@@ -133,7 +133,7 @@ public class ConvolutionLargeTest {
             long timeWithoutCaches = doTest("Without caches", seconds, imageConvolutionCreationContext, inBytes, outBytes, width, height);
             CacheEnabler.setCachesEnabled(true);
             long timeWithCaches = doTest("With    caches", seconds, imageConvolutionCreationContext, inBytes, outBytes, width, height);
-            System.out.println(MessageFormat.format("\tSpeedup: {0} %", 100d * (timeWithoutCaches - timeWithCaches)
+            LOGGER.info(MessageFormat.format("\tSpeedup: {0} %", 100d * (timeWithoutCaches - timeWithCaches)
                 / timeWithoutCaches));
         } else {
             doTest("With    caches", seconds, imageConvolutionCreationContext, inBytes, outBytes, width, height);
@@ -166,10 +166,11 @@ public class ConvolutionLargeTest {
         long maxElapsedNs = TimeUnit.SECONDS.toNanos(seconds);
         for (; ; ) {
             long start = System.nanoTime();
-            if (start - initialTime > maxElapsedNs)
+            if (start - initialTime > maxElapsedNs) {
                 break;
+            }
             ImageConvolution imageConvolution = imageConvolutionSupplier.get();
-            try {
+            try{
                 imageConvolution.applyConvolution(CONVOLUTION_MATRIX, inBytes, outBytes, width, height);
             } finally {
                 disposer.accept(imageConvolution);
@@ -184,14 +185,13 @@ public class ConvolutionLargeTest {
             calls++;
         }
         imageConvolutionCreationContext.shutdown();
-        System.out.println();
-        System.out.println(MessageFormat.format("\tFinished in {0} s ({1} ms/call, {2} calls)", totalTime / 1e9d,
+        LOGGER.info(MessageFormat.format("\tFinished in {0} s ({1} ms/call, {2} calls)", totalTime / 1e9d,
             (totalTime / (calls * 1e6d)), calls));
-        System.out.println();
         return totalTime / calls;
     }
 
     final static class ImageConvolution extends Kernel {
+        private static final Logger LOGGER = Logger.getLogger(ImageConvolution.class);
 
         private float convMatrix3x3[];
 

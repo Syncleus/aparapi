@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,6 +52,7 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.codegen;
 
+import org.apache.log4j.Logger;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -60,6 +61,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CreateJUnitTest {
+    private static final Logger LOGGER = Logger.getLogger(CreateJUnitTest.class);
+
     @Ignore("We will probably never use this, it just generates test. We probably want to do this by hand.")
     @Test
     public void test() throws ClassNotFoundException, FileNotFoundException, IOException {
@@ -68,9 +71,9 @@ public class CreateJUnitTest {
         String rootPackageName = CreateJUnitTest.class.getPackage().getName();
         String testPackageName = rootPackageName + ".test";
         File sourceDir = new File(rootDir, "src/test/java");
-        System.out.println(sourceDir.getCanonicalPath());
+        LOGGER.info(sourceDir.getCanonicalPath());
         File testDir = new File(sourceDir, testPackageName.replace(".", "/"));
-        System.out.println(testDir.getCanonicalPath());
+        LOGGER.info(testDir.getCanonicalPath());
 
         List<String> classNames = new ArrayList<String>();
         for (File sourceFile : testDir.listFiles(new FilenameFilter() {
@@ -110,7 +113,7 @@ public class CreateJUnitTest {
             appendTest(testPackageName, testName, "", sb);
             appendTest(testPackageName, testName, "WorksWithCaching", sb);
             sb.append("}\n");
-            //  System.out.println(sb.toString());
+            //  LOGGER.info(sb.toString());
 
             File generatedFile = new File(codeGenDir, testName + ".java");
             PrintStream out = new PrintStream(generatedFile);

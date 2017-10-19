@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,62 +15,64 @@
  */
 package com.aparapi.runtime;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
+import com.aparapi.Kernel;
+import com.aparapi.device.Device;
+import com.aparapi.internal.kernel.KernelManager;
+import com.aparapi.internal.kernel.KernelManagers;
+import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.aparapi.Kernel;
-import com.aparapi.device.Device;
-import com.aparapi.internal.kernel.KernelManager;
-import com.aparapi.internal.kernel.KernelManagers;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 public class Issue55Test {
-	private Kernel testKernel;
+    private static final Logger LOGGER = Logger.getLogger(Issue55Test.class);
+    private Kernel testKernel;
 
-	@Before
-	public void setUp() {
-		testKernel = new Kernel() {
+    @Before
+    public void setUp() {
+        testKernel = new Kernel() {
 
-			/**
-			 * This kernel does nothing.
-			 */
-			@Override
-			public void run() {
-				// this block was intentionally left empty, as the kernel should do nothing
-			}
-		};
-	}
+            /**
+             * This kernel does nothing.
+             */
+            @Override
+            public void run() {
+                // this block was intentionally left empty, as the kernel should do nothing
+            }
+        };
+    }
 
-	@After
-	public void tearDown() {
-		testKernel.dispose();
-	}
+    @After
+    public void tearDown() {
+        testKernel.dispose();
+    }
 
-	@AfterClass
-	public static void tearDownClass() {
-		// reset the KernelManager after we are done, as some tests expect a openCL device
-		KernelManager.setKernelManager(new KernelManager() {});
-	}
+    @AfterClass
+    public static void tearDownClass() {
+        // reset the KernelManager after we are done, as some tests expect a openCL device
+        KernelManager.setKernelManager(new KernelManager() {
+        });
+    }
 
-	@Test
-	public void testUseJtpOnly() {
-		KernelManager.setKernelManager(KernelManagers.JTP_ONLY);
-		
-		Device device = KernelManager.instance().getDefaultPreferences().getPreferredDevice(testKernel);
+    @Test
+    public void testUseJtpOnly() {
+        KernelManager.setKernelManager(KernelManagers.JTP_ONLY);
 
-		assertThat(device.getType(), is(Device.TYPE.JTP));
-	}
+        Device device = KernelManager.instance().getDefaultPreferences().getPreferredDevice(testKernel);
 
-	@Test
-	public void testUseSequentialOnly() {
-		KernelManager.setKernelManager(KernelManagers.SEQUENTIAL_ONLY);
+        assertThat(device.getType(), is(Device.TYPE.JTP));
+    }
 
-		Device device = KernelManager.instance().getDefaultPreferences().getPreferredDevice(testKernel);
+    @Test
+    public void testUseSequentialOnly() {
+        KernelManager.setKernelManager(KernelManagers.SEQUENTIAL_ONLY);
 
-		assertThat(device.getType(), is(Device.TYPE.SEQ));
-	}
+        Device device = KernelManager.instance().getDefaultPreferences().getPreferredDevice(testKernel);
+
+        assertThat(device.getType(), is(Device.TYPE.SEQ));
+    }
 }

@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,12 +16,14 @@
 package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
 
-
 public class Issue103Test {
+    private static final Logger LOGGER = Logger.getLogger(Issue103Test.class);
+
     @Test
     public void test() {
         Issue103Kernel b = new Issue103Kernel();
@@ -29,6 +31,7 @@ public class Issue103Test {
     }
 
     public static class Issue103Kernel extends Kernel {
+        private static final Logger LOGGER = Logger.getLogger(Issue103Kernel.class);
         static final int size = 32;
 
         static int[] source = new int[size];
@@ -50,7 +53,7 @@ public class Issue103Test {
         void validate() {
             assertArrayEquals("target == source", target, source);
 //      for (int i = 0; i < size; i++) {
-//         System.out.println(target[i] + " ... " + source[i]);
+//         LOGGER.info(target[i] + " ... " + source[i]);
 //         assertTrue("target == source", target[i] == source[i]);
 //      }
         }

@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,27 +16,29 @@
 package com.aparapi.runtime;
 
 import com.aparapi.Range;
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
 public class RangeSizeTest {
+    private static final Logger LOGGER = Logger.getLogger(RangeSizeTest.class);
 
     @Test
     public void test384x384() {
         Range range = Range.create2D(384, 384);
-        System.out.println("local[0] " + range.getLocalSize(0));
-        System.out.println("local[1] " + range.getLocalSize(1));
-        System.out.println("workGroupSize " + range.getWorkGroupSize());
+        LOGGER.info("local[0] " + range.getLocalSize(0));
+        LOGGER.info("local[1] " + range.getLocalSize(1));
+        LOGGER.info("workGroupSize " + range.getWorkGroupSize());
         assertTrue("Range > max work size", range.getLocalSize(0) * range.getLocalSize(1) <= range.getWorkGroupSize());
     }
 
     @Test
     public void test384x320() {
         Range range = Range.create2D(384, 320);
-        System.out.println("local[0] " + range.getLocalSize(0));
-        System.out.println("local[1] " + range.getLocalSize(1));
-        System.out.println("workGroupSize " + range.getWorkGroupSize());
+        LOGGER.info("local[0] " + range.getLocalSize(0));
+        LOGGER.info("local[1] " + range.getLocalSize(1));
+        LOGGER.info("workGroupSize " + range.getWorkGroupSize());
         assertTrue("Range > max work size", range.getLocalSize(0) * range.getLocalSize(1) <= range.getWorkGroupSize());
     }
 

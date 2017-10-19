@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,12 +16,13 @@
 package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-
 public class Issue102Test {
+    private static final Logger LOGGER = Logger.getLogger(Issue102Test.class);
 
     @Test
     public void test() {
@@ -30,6 +31,7 @@ public class Issue102Test {
     }
 
     protected static class Issue102Kernel extends Kernel {
+        private static final Logger LOGGER = Logger.getLogger(Issue102Kernel.class);
         private static final int SIZE = 32;
 
         private static BugDataObject[] objects = new BugDataObject[SIZE];
@@ -50,7 +52,7 @@ public class Issue102Test {
 
         void validate() {
             for (int i = 0; i < SIZE; i++) {
-                System.out.println(target[i] + " ... " + objects[i].getValue());
+                LOGGER.info(target[i] + " ... " + objects[i].getValue());
                 assertTrue("target == objects", target[i] == objects[i].getValue());
             }
         }
@@ -61,6 +63,7 @@ public class Issue102Test {
         }
 
         static final class BugDataObject {
+            private static final Logger LOGGER = Logger.getLogger(BugDataObject.class);
             int value = 7;
 
             public int getValue() {

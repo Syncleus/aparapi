@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,10 +16,13 @@
 package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
+import org.apache.log4j.Logger;
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class Issue68Test {
+    private static final Logger LOGGER = Logger.getLogger(Issue68Test.class);
+
     @Ignore("Ported over but not working yet")
     @Test
     public void test() {
@@ -203,6 +206,7 @@ public class Issue68Test {
     }
 
     static class IntMemoryArrayAccess extends ArrayAccess {
+        private static final Logger LOGGER = Logger.getLogger(IntMemoryArrayAccess.class);
         private final int[] data;
 
         public IntMemoryArrayAccess(int[] data, int offset, int length) {
@@ -217,6 +221,7 @@ public class Issue68Test {
     }
 
     abstract static class ArrayAccess {
+        private static final Logger LOGGER = Logger.getLogger(ArrayAccess.class);
         private final int offset;
         private final int length;
 

@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,9 +15,11 @@
  */
 package com.aparapi.codegen.test;
 
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
 public class FusedMultiplyAddTest extends com.aparapi.codegen.CodeGenJUnitBase {
+    private static final Logger LOGGER = Logger.getLogger(FusedMultiplyAddTest.class);
     private static final String[] expectedOpenCL = {"#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n" +
         "typedef struct This_s{\n" +
         " int passid;\n" +
@@ -58,31 +60,31 @@ public class FusedMultiplyAddTest extends com.aparapi.codegen.CodeGenJUnitBase {
     }
 }
 /**{OpenCL{
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+ #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-typedef struct This_s{
-   int passid;
-}This;
-int get_pass_id(This *this){
-   return this->passid;
-}
-__kernel void run(
-   int passid
-){
-   This thisStruct;
-   This* this=&thisStruct;
-   this->passid = passid;
-   {
-      double d1 = 123.0;
-      double d2 = 0.456;
-      double d3 = 789.0;
-      float f1 = 123.0f;
-      float f2 = 0.456f;
-      float f3 = 789.0f;
-      char pass = 1;
-      if (fma(d1, d2, d3)!=845.088 || fma(f1, f2, f3)!=845.088f){
-         pass = 0;
-      }
-      return;
-   }
-}OpenCL}**/
+ typedef struct This_s{
+ int passid;
+ }This;
+ int get_pass_id(This *this){
+ return this->passid;
+ }
+ __kernel void run(
+ int passid
+ ){
+ This thisStruct;
+ This* this=&thisStruct;
+ this->passid = passid;
+ {
+ double d1 = 123.0;
+ double d2 = 0.456;
+ double d3 = 789.0;
+ float f1 = 123.0f;
+ float f2 = 0.456f;
+ float f3 = 789.0f;
+ char pass = 1;
+ if (fma(d1, d2, d3)!=845.088 || fma(f1, f2, f3)!=845.088f){
+ pass = 0;
+ }
+ return;
+ }
+ }OpenCL}**/

@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,150 +52,147 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.codegen;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Source{
-   enum STATE {
-      NONE,
-      JAVA,
-      OPENCL,
-      DOC
-   };
+public class Source {
+    enum STATE {
+        NONE,
+        JAVA,
+        OPENCL,
+        DOC
+    }
 
-   static final String OpenCLStart = "/**{OpenCL{";
+    ;
 
-   static final String OpenCLEnd = "}OpenCL}**/";
+    static final String OpenCLStart = "/**{OpenCL{";
 
-   static final String ThrowsStart = "/**{Throws{";
+    static final String OpenCLEnd = "}OpenCL}**/";
 
-   static final String ThrowsEnd = "}Throws}**/";
+    static final String ThrowsStart = "/**{Throws{";
 
-   static final String DocStart = "/**";
+    static final String ThrowsEnd = "}Throws}**/";
 
-   static final String DocEnd = "*/";
+    static final String DocStart = "/**";
 
-   Class<?> clazz;
+    static final String DocEnd = "*/";
 
-   File file;
+    Class<?> clazz;
 
-   Source.STATE state = STATE.NONE;
+    File file;
 
-   List<String> all = new ArrayList<String>();
+    Source.STATE state = STATE.NONE;
 
-   List<List<String>> opencl = new ArrayList<List<String>>();
+    List<String> all = new ArrayList<String>();
 
-   List<String> doc = new ArrayList<String>();
+    List<List<String>> opencl = new ArrayList<List<String>>();
 
-   List<String> java = new ArrayList<String>();
+    List<String> doc = new ArrayList<String>();
 
-   List<String> exceptions = new ArrayList<String>();
+    List<String> java = new ArrayList<String>();
 
-   public Source(Class<?> _clazz, File _rootDir) {
-      clazz = _clazz;
-      String srcName = clazz.getPackage().getName().replace(".", "/") + "/" + clazz + ".java";
-      file = new File(_rootDir, srcName);
-      try {
-         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+    List<String> exceptions = new ArrayList<String>();
 
-         state = STATE.JAVA;
-         List<String> openclSection = null;
-         for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-            all.add(line);
-            String trimmedLine = line.trim();
-            switch (state) {
-               case JAVA:
-                  if (trimmedLine.equals(OpenCLStart)) {
-                     state = STATE.OPENCL;
-                     openclSection = new ArrayList<String>();
-                     opencl.add(openclSection);
+    public Source(Class<?> _clazz, File _rootDir) {
+        clazz = _clazz;
+        String srcName = clazz.getPackage().getName().replace(".", "/") + "/" + clazz + ".java";
+        file = new File(_rootDir, srcName);
+        try{
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 
-                  } else if (trimmedLine.startsWith(ThrowsStart) && trimmedLine.endsWith(ThrowsEnd)) {
-                     exceptions.add(trimmedLine.substring(ThrowsStart.length(), trimmedLine.length() - ThrowsEnd.length()));
-                  } else if (trimmedLine.equals(DocStart)) {
-                     state = STATE.DOC;
-                  } else {
-                     java.add(line);
-                  }
-                  break;
-               case OPENCL:
-                  if (trimmedLine.equals(OpenCLEnd)) {
-                     state = STATE.JAVA;
-                  } else {
-                     openclSection.add(line);
-                  }
-                  break;
-               case DOC:
-                  if (trimmedLine.equals(DocEnd)) {
-                     state = STATE.JAVA;
-                  } else {
-                     doc.add(line);
-                  }
-                  break;
+            state = STATE.JAVA;
+            List<String> openclSection = null;
+            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                all.add(line);
+                String trimmedLine = line.trim();
+                switch (state) {
+                    case JAVA:
+                        if (trimmedLine.equals(OpenCLStart)) {
+                            state = STATE.OPENCL;
+                            openclSection = new ArrayList<String>();
+                            opencl.add(openclSection);
 
+                        } else if (trimmedLine.startsWith(ThrowsStart) && trimmedLine.endsWith(ThrowsEnd)) {
+                            exceptions.add(trimmedLine.substring(ThrowsStart.length(), trimmedLine.length() - ThrowsEnd.length()));
+                        } else if (trimmedLine.equals(DocStart)) {
+                            state = STATE.DOC;
+                        } else {
+                            java.add(line);
+                        }
+                        break;
+                    case OPENCL:
+                        if (trimmedLine.equals(OpenCLEnd)) {
+                            state = STATE.JAVA;
+                        } else {
+                            openclSection.add(line);
+                        }
+                        break;
+                    case DOC:
+                        if (trimmedLine.equals(DocEnd)) {
+                            state = STATE.JAVA;
+                        } else {
+                            doc.add(line);
+                        }
+                        break;
+
+                }
             }
-         }
-      } catch (FileNotFoundException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (IOException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      }
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-   }
+    }
 
-   private String listToString(List<String> list) {
-      StringBuilder stringBuilder = new StringBuilder();
-      for (String line : list) {
-         stringBuilder.append(line).append("\n");
-      }
-      return (stringBuilder.toString().trim());
-   }
+    private String listToString(List<String> list) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String line : list) {
+            stringBuilder.append(line).append("\n");
+        }
+        return (stringBuilder.toString().trim());
+    }
 
-   public String getOpenCLString(int _index) {
-      return (listToString(opencl.get(_index)));
-   }
+    public String getOpenCLString(int _index) {
+        return (listToString(opencl.get(_index)));
+    }
 
-   public List<List<String>> getOpenCL() {
-      return (opencl);
-   }
+    public List<List<String>> getOpenCL() {
+        return (opencl);
+    }
 
-   public String getJavaString() {
-      return (listToString(java));
-   }
+    public String getJavaString() {
+        return (listToString(java));
+    }
 
-   public List<String> getJava() {
-      return (java);
-   }
+    public List<String> getJava() {
+        return (java);
+    }
 
-   public File getFile() {
-      return (file);
-   }
+    public File getFile() {
+        return (file);
+    }
 
-   public String getExceptionsString() {
-      return (listToString(exceptions));
-   }
+    public String getExceptionsString() {
+        return (listToString(exceptions));
+    }
 
-   public List<String> getExceptions() {
-      return (exceptions);
-   }
+    public List<String> getExceptions() {
+        return (exceptions);
+    }
 
-   public String getDocString() {
-      return (listToString(doc));
-   }
+    public String getDocString() {
+        return (listToString(doc));
+    }
 
-   public List<String> getDoc() {
-      return (doc);
-   }
+    public List<String> getDoc() {
+        return (doc);
+    }
 
-   public int getOpenCLSectionCount() {
-      return (opencl.size());
-   }
+    public int getOpenCLSectionCount() {
+        return (opencl.size());
+    }
 }

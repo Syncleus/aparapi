@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,231 +52,237 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.codegen;
 
-import java.awt.Point;
+import org.apache.log4j.Logger;
+
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Diff{
+public class Diff {
+    private static final Logger LOGGER = Logger.getLogger(Diff.class);
 
-   static int[] hash(String[] lines) {
-      int[] val = new int[lines.length];
-      for (int i = 0; i < lines.length; i++) {
-         val[i] = lines[i].hashCode();
-      }
-      return (val);
-   }
+    static int[] hash(String[] lines) {
+        int[] val = new int[lines.length];
+        for (int i = 0; i < lines.length; i++) {
+            val[i] = lines[i].hashCode();
+        }
+        return (val);
+    }
 
-   static void costDiag(List<Point>[][] flags, int x, int y) {
-      if (x == 0 || y == 0 || flags[x - 1][y - 1] == null) {
-         if (x < (flags.length - 2) && y < (flags[0].length - 2)) {
-            flags[x][y] = new ArrayList<Point>();
-            flags[x][y].add(new Point(x, y));
-         }
-      } else {
-         flags[x - 1][y - 1].add(new Point(x, y));
-         flags[x][y] = flags[x - 1][y - 1];
-      }
-   }
+    static void costDiag(List<Point>[][] flags, int x, int y) {
+        if (x == 0 || y == 0 || flags[x - 1][y - 1] == null) {
+            if (x < (flags.length - 2) && y < (flags[0].length - 2)) {
+                flags[x][y] = new ArrayList<Point>();
+                flags[x][y].add(new Point(x, y));
+            }
+        } else {
+            flags[x - 1][y - 1].add(new Point(x, y));
+            flags[x][y] = flags[x - 1][y - 1];
+        }
+    }
 
-   static void cleanIslands(List<Point>[][] flags, int x, int y) {
-      flags[x][y] = null;
-      if (x > 0 && y > 0 && flags[x - 1][y - 1] != null && flags[x - 1][y - 1].size() == 1) {
-         flags[x - 1][y - 1] = null;
-      }
-   }
+    static void cleanIslands(List<Point>[][] flags, int x, int y) {
+        flags[x][y] = null;
+        if (x > 0 && y > 0 && flags[x - 1][y - 1] != null && flags[x - 1][y - 1].size() == 1) {
+            flags[x - 1][y - 1] = null;
+        }
+    }
 
-   public static class DiffResult{
+    public static class DiffResult {
 
-      public static enum TYPE {
-         SAME,
-         LEFT,
-         RIGHT
-      };
+        public static enum TYPE {
+            SAME,
+            LEFT,
+            RIGHT
+        }
 
-      public static class Block{
-         int lhsFrom;
+        ;
 
-         int rhsFrom;
+        public static class Block {
+            int lhsFrom;
 
-         int lhsTo;
+            int rhsFrom;
 
-         int rhsTo;
+            int lhsTo;
 
-         TYPE type;
+            int rhsTo;
 
-         public Block(TYPE _type, int _lhsFrom, int _rhsFrom) {
-            lhsFrom = lhsTo = _lhsFrom;
-            rhsFrom = rhsTo = _rhsFrom;
-            type = _type;
-         }
+            TYPE type;
 
-         public void extend(int _lhsTo, int _rhsTo) {
-            lhsTo = _lhsTo;
-            rhsTo = _rhsTo;
-         }
+            public Block(TYPE _type, int _lhsFrom, int _rhsFrom) {
+                lhsFrom = lhsTo = _lhsFrom;
+                rhsFrom = rhsTo = _rhsFrom;
+                type = _type;
+            }
 
-         public String toString(String[] _lhs, String[] _rhs) {
+            public void extend(int _lhsTo, int _rhsTo) {
+                lhsTo = _lhsTo;
+                rhsTo = _rhsTo;
+            }
+
+            public String toString(String[] _lhs, String[] _rhs) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(type).append("\n");
+
+                switch (type) {
+                    case SAME:
+                        for (int i = lhsFrom; i <= lhsTo; i++) {
+                            sb.append("  ==" + _lhs[i]).append("\n");
+                        }
+                        break;
+                    case LEFT:
+                        for (int i = lhsFrom; i <= lhsTo; i++) {
+                            sb.append("  <" + _lhs[i]).append("\n");
+                        }
+                        break;
+                    case RIGHT:
+                        for (int i = rhsFrom; i <= rhsTo; i++) {
+                            sb.append("  >" + _rhs[i]).append("\n");
+                        }
+                        break;
+                }
+                return (sb.toString());
+            }
+
+        }
+
+        List<Block> blocks = new ArrayList<Block>();
+
+        private String[] rhs;
+
+        private String[] lhs;
+
+        public void add(TYPE _type, int lhs, int rhs) {
+            if (false) {
+                if (blocks.size() > 0) {
+                    Block lastBlock = blocks.get(blocks.size() - 1);
+                    if (lastBlock.type == _type) {
+                        lastBlock.extend(lhs, rhs);
+                    } else {
+                        blocks.add(new Block(_type, lhs, rhs));
+                    }
+                } else {
+                    blocks.add(new Block(_type, lhs, rhs));
+                }
+            }
+            blocks.add(new Block(_type, lhs, rhs));
+        }
+
+        DiffResult(String[] _lhs, String[] _rhs) {
+            lhs = _lhs;
+            rhs = _rhs;
+        }
+
+        public String[] getLhs() {
+            return lhs;
+        }
+
+        public String[] getRhs() {
+            return rhs;
+        }
+
+        public String toString() {
             StringBuilder sb = new StringBuilder();
-            sb.append(type).append("\n");
-
-            switch (type) {
-               case SAME:
-                  for (int i = lhsFrom; i <= lhsTo; i++) {
-                     sb.append("  ==" + _lhs[i]).append("\n");
-                  }
-                  break;
-               case LEFT:
-                  for (int i = lhsFrom; i <= lhsTo; i++) {
-                     sb.append("  <" + _lhs[i]).append("\n");
-                  }
-                  break;
-               case RIGHT:
-                  for (int i = rhsFrom; i <= rhsTo; i++) {
-                     sb.append("  >" + _rhs[i]).append("\n");
-                  }
-                  break;
+            for (Block block : blocks) {
+                sb.append(block.toString(lhs, rhs)).append("\n");
             }
             return (sb.toString());
-         }
+        }
+    }
 
-      }
+    @SuppressWarnings("unchecked")
+    public static DiffResult diff(String[] lhsString, String[] rhsString) {
+        DiffResult diffResult = new DiffResult(lhsString, rhsString);
+        int[] lhsHash = hash(lhsString);
+        int[] rhsHash = hash(rhsString);
+        int lhsLength = lhsHash.length; // number of lines of first file
+        int rhsLength = rhsHash.length; // number of lines of second file
 
-      List<Block> blocks = new ArrayList<Block>();
+        // opt[i][j] = length of LCS of x[i..M] and y[j..N]
+        int[][] opt = new int[lhsLength + 1][rhsLength + 1];
+        List<Point>[][] flags = new ArrayList[lhsLength + 1][rhsLength + 1];
 
-      private String[] rhs;
-
-      private String[] lhs;
-
-      public void add(TYPE _type, int lhs, int rhs) {
-         if (false) {
-            if (blocks.size() > 0) {
-               Block lastBlock = blocks.get(blocks.size() - 1);
-               if (lastBlock.type == _type) {
-                  lastBlock.extend(lhs, rhs);
-               } else {
-                  blocks.add(new Block(_type, lhs, rhs));
-               }
-            } else {
-               blocks.add(new Block(_type, lhs, rhs));
+        // compute length of LCS and all subproblems via dynamic programming
+        for (int i = 0; i < lhsLength; i++) {
+            for (int j = 0; j < rhsLength; j++) {
+                if (lhsHash[i] == rhsHash[j]) {
+                    // We are the same so continue the diagonal is intact
+                    if (i == 0 || j == 0) {
+                        opt[i][j] = 0;
+                    } else {
+                        opt[i][j] = opt[i - 1][j - 1] + 1;
+                    }
+                    costDiag(flags, i, j);
+                } else {
+                    cleanIslands(flags, i, j);
+                    if (i == 0 || j == 0) {
+                        opt[i][j] = 0;
+                    } else {
+                        opt[i][j] = Math.max(opt[i - 1][j], opt[i][j - 1]);
+                    }
+                }
             }
-         }
-         blocks.add(new Block(_type, lhs, rhs));
-      }
+        }
 
-      DiffResult(String[] _lhs, String[] _rhs) {
-         lhs = _lhs;
-         rhs = _rhs;
-      }
-
-      public String[] getLhs() {
-         return lhs;
-      }
-
-      public String[] getRhs() {
-         return rhs;
-      }
-
-      public String toString() {
-         StringBuilder sb = new StringBuilder();
-         for (Block block : blocks) {
-            sb.append(block.toString(lhs, rhs)).append("\n");
-         }
-         return (sb.toString());
-      }
-   }
-
-   @SuppressWarnings("unchecked") public static DiffResult diff(String[] lhsString, String[] rhsString) {
-      DiffResult diffResult = new DiffResult(lhsString, rhsString);
-      int[] lhsHash = hash(lhsString);
-      int[] rhsHash = hash(rhsString);
-      int lhsLength = lhsHash.length; // number of lines of first file
-      int rhsLength = rhsHash.length; // number of lines of second file
-
-      // opt[i][j] = length of LCS of x[i..M] and y[j..N]
-      int[][] opt = new int[lhsLength + 1][rhsLength + 1];
-      List<Point>[][] flags = new ArrayList[lhsLength + 1][rhsLength + 1];
-
-      // compute length of LCS and all subproblems via dynamic programming
-      for (int i = 0; i < lhsLength; i++) {
-         for (int j = 0; j < rhsLength; j++) {
+        // recover LCS itself and print out non-matching lines to standard output
+        int i = 0, j = 0;
+        while (i < lhsLength && j < rhsLength) {
+            // if the diagonal is in tact walk it
             if (lhsHash[i] == rhsHash[j]) {
-               // We are the same so continue the diagonal is intact
-               if (i == 0 || j == 0) {
-                  opt[i][j] = 0;
-               } else {
-                  opt[i][j] = opt[i - 1][j - 1] + 1;
-               }
-               costDiag(flags, i, j);
-            } else {
-               cleanIslands(flags, i, j);
-               if (i == 0 || j == 0) {
-                  opt[i][j] = 0;
-               } else {
-                  opt[i][j] = Math.max(opt[i - 1][j], opt[i][j - 1]);
-               }
+                diffResult.add(DiffResult.TYPE.SAME, i, j);
+                i++;
+                j++;
             }
-         }
-      }
+            // otherwise walk along the xx or y axis which is the longer
+            // this is not always the best approach.
+            // we need to find the shortest path between {i,j} and the {i+ii,j+jj} which
+            // connects us to the next diagonal run
+            else if (opt[i + 1][j] >= opt[i][j + 1]) {
+                diffResult.add(DiffResult.TYPE.LEFT, i, j);
+                LOGGER.info("lhs:" + i + "< " + lhsString[i++]);
+            } else {
+                diffResult.add(DiffResult.TYPE.RIGHT, i, j);
+                LOGGER.info("rhs:" + j + "> " + rhsString[j++]);
+            }
+        }
 
-      // recover LCS itself and print out non-matching lines to standard output
-      int i = 0, j = 0;
-      while (i < lhsLength && j < rhsLength) {
-         // if the diagonal is in tact walk it
-         if (lhsHash[i] == rhsHash[j]) {
-            diffResult.add(DiffResult.TYPE.SAME, i, j);
-            i++;
-            j++;
-         }
-         // otherwise walk along the xx or y axis which is the longer
-         // this is not always the best approach. 
-         // we need to find the shortest path between {i,j} and the {i+ii,j+jj} which 
-         // connects us to the next diagonal run
-         else if (opt[i + 1][j] >= opt[i][j + 1]) {
-            diffResult.add(DiffResult.TYPE.LEFT, i, j);
-            System.out.println("lhs:" + i + "< " + lhsString[i++]);
-         } else {
-            diffResult.add(DiffResult.TYPE.RIGHT, i, j);
-            System.out.println("rhs:" + j + "> " + rhsString[j++]);
-         }
-      }
+        // dump out one remainder of one string if the other is exhausted
+        while (i < lhsLength || j < rhsLength) {
+            if (i == lhsLength) {
+                diffResult.add(DiffResult.TYPE.RIGHT, i, j);
+                LOGGER.info("lhs:" + i + "> " + rhsString[j++]);
+            } else if (j == rhsLength) {
+                diffResult.add(DiffResult.TYPE.LEFT, i, j);
+                LOGGER.info("rhs:" + j + "< " + lhsString[i++]);
+            }
+        }
+        return (diffResult);
+    }
 
-      // dump out one remainder of one string if the other is exhausted
-      while (i < lhsLength || j < rhsLength) {
-         if (i == lhsLength) {
-            diffResult.add(DiffResult.TYPE.RIGHT, i, j);
-            System.out.println("lhs:" + i + "> " + rhsString[j++]);
-         } else if (j == rhsLength) {
-            diffResult.add(DiffResult.TYPE.LEFT, i, j);
-            System.out.println("rhs:" + j + "< " + lhsString[i++]);
-         }
-      }
-      return (diffResult);
-   }
+    public static boolean same(String left, String right) {
+        StringBuilder leftAll = new StringBuilder();
 
-   public static boolean same(String left, String right) {
-      StringBuilder leftAll = new StringBuilder();
+        for (String s : left.replace("\n", "").split("  *")) {
+            leftAll.append(s);
+        }
 
-      for (String s : left.replace("\n", "").split("  *")) {
-         leftAll.append(s);
-      }
-
-      StringBuilder rightAll = new StringBuilder();
-      for (String s : right.replace("\n", " ").split("  *")) {
-         rightAll.append(s);
-      }
-      boolean same = leftAll.toString().equals(rightAll.toString());
-      if (!same) {
-         String[] lhs = left.split("\n");
-         for (int i = 0; i < lhs.length; i++) {
-            lhs[i] = lhs[i].trim();
-         }
-         String[] rhs = right.split("\n");
-         for (int i = 0; i < rhs.length; i++) {
-            rhs[i] = rhs[i].trim();
-         }
-         diff(lhs, rhs);
-      }
-      return (same);
-   }
+        StringBuilder rightAll = new StringBuilder();
+        for (String s : right.replace("\n", " ").split("  *")) {
+            rightAll.append(s);
+        }
+        boolean same = leftAll.toString().equals(rightAll.toString());
+        if (!same) {
+            String[] lhs = left.split("\n");
+            for (int i = 0; i < lhs.length; i++) {
+                lhs[i] = lhs[i].trim();
+            }
+            String[] rhs = right.split("\n");
+            for (int i = 0; i < rhs.length; i++) {
+                rhs[i] = rhs[i].trim();
+            }
+            diff(lhs, rhs);
+        }
+        return (same);
+    }
 
 }
