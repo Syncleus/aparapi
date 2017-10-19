@@ -3,6 +3,7 @@
 ## 1.4.2
 
 * Updated parent pon to v6.
+* createProgram had the wrong signature producing a unsatisfied link exception that is now fixed.
 
 ## 1.4.1
 
