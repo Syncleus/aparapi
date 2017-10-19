@@ -419,6 +419,11 @@ matrix:
 #        - ENV_CXX_FLAGS="-Wno-c99-extensions"
 
 before_install:
+    #install maven 3.5.0
+    - export M2_HOME=$HOME/apache-maven-3.5.0
+    - if [ ! -d $M2_HOME/bin ]; then curl https://archive.apache.org/dist/maven/maven-3/3.5.0/binaries/apache-maven-3.5.0-bin.tar.gz | tar zxf - -C $HOME; fi
+    - export PATH=$M2_HOME/bin:$PATH
+
     # Install dependencies
     - sudo apt-get install jq
     - wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r .assets[0].browser_download_url)
