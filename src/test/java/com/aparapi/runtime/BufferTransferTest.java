@@ -27,6 +27,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 public class BufferTransferTest {
 
@@ -36,9 +37,7 @@ public class BufferTransferTest {
     public static void setUpBeforeClass() throws Exception {
 
         Device device = KernelManager.instance().bestDevice();
-        if (device == null || !(device instanceof OpenCLDevice)) {
-            fail("no opencl device!");
-        }
+        assumeTrue (device != null && device instanceof OpenCLDevice);
         openCLDevice = (OpenCLDevice) device;
     }
 
