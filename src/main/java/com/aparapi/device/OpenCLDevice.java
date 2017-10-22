@@ -49,8 +49,6 @@ public class OpenCLDevice extends Device{
 
    private final OpenCLPlatform platform;
 
-   private final long deviceId;
-
    private int maxComputeUnits;
 
    private long localMemSize;
@@ -71,8 +69,8 @@ public class OpenCLDevice extends Device{
     * @param _type
     */
    public OpenCLDevice(OpenCLPlatform _platform, long _deviceId, TYPE _type) {
+      super(_deviceId);
       platform = _platform;
-      deviceId = _deviceId;
       type = _type;
    }
 
@@ -123,11 +121,6 @@ public class OpenCLDevice extends Device{
   public void setName(String name) {
     this.name = name;
   }
-
-  @Override
-  public long getDeviceId() {
-      return (deviceId);
-   }
 
    @Override
    public String getShortDescription() {

@@ -71,7 +71,7 @@ public class Range extends RangeJNI{
    public static final int MAX_GROUP_SIZE = Math.max(Runtime.getRuntime().availableProcessors() * THREADS_PER_CORE,
          MAX_OPENCL_GROUP_SIZE);
 
-   private OpenCLDevice device = null;
+   public final Device device;
 
    private int maxWorkGroupSize;
 
@@ -88,7 +88,7 @@ public class Range extends RangeJNI{
     * @param _dims
     */
    public Range(Device _device, int _dims) {
-      device = !(_device instanceof OpenCLDevice) ? null : (OpenCLDevice) _device;
+      device = _device; //!(_device instanceof OpenCLDevice) ? null : (OpenCLDevice) _device;
       dims = _dims;
 
       if (device != null) {
@@ -191,9 +191,7 @@ public class Range extends RangeJNI{
    }
 
    public static Range create(int _globalWidth) {
-      final Range range = create(null, _globalWidth);
-
-      return (range);
+      return create(null, _globalWidth);
    }
 
    /** 

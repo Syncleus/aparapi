@@ -19,6 +19,8 @@ import com.aparapi.Kernel;
 import com.aparapi.Range;
 import org.junit.Test;
 
+import static org.junit.Assert.fail;
+
 public class Issue69Test {
 
     @Test
@@ -35,8 +37,9 @@ public class Issue69Test {
             System.out.printf("%3d free = %10d\n", loop, Runtime.getRuntime().freeMemory());
             kernel.execute(Range.create(512, 64), 1);
             for (int i = 0; i < globalArray.length; ++i) {
-                if (globalArray[i] != i)
-                    System.err.println("Wrong!");
+                if (globalArray[i] != i) {
+                    fail("Wrong: " + globalArray[i] + " != " + i);
+                }
             }
         }
         for (int loop = 0; loop < 100; loop++) {
@@ -45,7 +48,7 @@ public class Issue69Test {
             kernel.execute(Range.create(512, 64), 2);
             for (int i = 0; i < globalArray.length; ++i) {
                 if (globalArray[i] != i)
-                    System.err.println("Wrong!");
+                    fail("Wrong: " + globalArray[i] + " != " + i);
             }
         }
     }
