@@ -1252,8 +1252,8 @@ public class KernelRunner extends KernelRunnerJNI {
                     }
 
                     if ((entryPoint != null)) {
-                        synchronized (Kernel.class) { // This seems to be needed because of a race condition uncovered with issue #68 http://code.google.com/p/aparapi/issues/detail?id=68
-                        //synchronized (kernel) {
+                        //synchronized (Kernel.class) { // This seems to be needed because of a race condition uncovered with issue #68 http://code.google.com/p/aparapi/issues/detail?id=68
+                        synchronized (kernel) {
 
                             //  jniFlags |= (Config.enableProfiling ? JNI_FLAG_ENABLE_PROFILING : 0);
                             //  jniFlags |= (Config.enableProfilingCSV ? JNI_FLAG_ENABLE_PROFILING_CSV | JNI_FLAG_ENABLE_PROFILING : 0);
@@ -1263,8 +1263,8 @@ public class KernelRunner extends KernelRunnerJNI {
                             // Init the device to check capabilities before emitting the
                             // code that requires the capabilities.
                             jniContextHandle = initJNI(kernel, openCLDevice, _settings.jniFlags); // openCLDevice will not be null here
-                            profiler.on(ProfilingEvent.INIT_JNI);
                         } // end of synchronized! issue 68
+                        profiler.on(ProfilingEvent.INIT_JNI);
 
                         if (jniContextHandle == 0) {
                             return fallBackToNextDevice(_settings, "initJNI failed to return a valid handle");
