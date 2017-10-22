@@ -1182,15 +1182,23 @@ public class KernelRunner extends KernelRunnerJNI {
     public Kernel execute(String _entrypoint, final Range _range, final int _passes) {
         executing = true;
         try {
+
             clearCancelMultiPass();
-            KernelProfile profile = KernelManager.instance().getProfile(kernel.getClass());
-            KernelPreferences preferences = KernelManager.instance().getPreferences(kernel);
+
+            KernelManager kernels = KernelManager.instance();
+
+            KernelProfile profile = kernels.getProfile(kernel.getClass());
+
+            KernelPreferences preferences = kernels.getPreferences(kernel);
+
             boolean legacyExecutionMode = kernel.getExecutionMode() != Kernel.EXECUTION_MODE.AUTO;
 
-            ExecutionSettings settings = new ExecutionSettings(preferences, profile, _entrypoint, _range, _passes, legacyExecutionMode);
-            // Two Kernels of the same class share the same KernelPreferences object, and since failure (fallback) generally mutates
-            // the preferences object, we must lock it. Note this prevents two Kernels of the same class executing simultaneously.
-            return executeInternalOuter(settings);
+            //synchronized (preferences) {
+                ExecutionSettings settings = new ExecutionSettings(preferences, profile, _entrypoint, _range, _passes, legacyExecutionMode);
+                // Two Kernels of the same class share the same KernelPreferences object, and since failure (fallback) generally mutates
+                // the preferences object, we must lock it. Note this prevents two Kernels of the same class executing simultaneously.
+                return executeInternalOuter(settings);
+            //}
 
         } finally {
             executing = false;
@@ -1244,8 +1252,8 @@ public class KernelRunner extends KernelRunnerJNI {
                     }
 
                     if ((entryPoint != null)) {
-                        //synchronized (Kernel.class) { // This seems to be needed because of a race condition uncovered with issue #68 http://code.google.com/p/aparapi/issues/detail?id=68
-                        synchronized (kernel) {
+                        synchronized (Kernel.class) { // This seems to be needed because of a race condition uncovered with issue #68 http://code.google.com/p/aparapi/issues/detail?id=68
+                        //synchronized (kernel) {
 
                             //  jniFlags |= (Config.enableProfiling ? JNI_FLAG_ENABLE_PROFILING : 0);
                             //  jniFlags |= (Config.enableProfilingCSV ? JNI_FLAG_ENABLE_PROFILING_CSV | JNI_FLAG_ENABLE_PROFILING : 0);
@@ -1255,7 +1263,7 @@ public class KernelRunner extends KernelRunnerJNI {
                             // Init the device to check capabilities before emitting the
                             // code that requires the capabilities.
                             jniContextHandle = initJNI(kernel, openCLDevice, _settings.jniFlags); // openCLDevice will not be null here
-                            _settings.profile.profiler(_settings.device()).on(ProfilingEvent.INIT_JNI);
+                            profiler.on(ProfilingEvent.INIT_JNI);
                         } // end of synchronized! issue 68
 
                         if (jniContextHandle == 0) {

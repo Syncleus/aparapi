@@ -20,10 +20,11 @@ public class MultithreadTest {
     public void test() throws InterruptedException {
 
         final int N = 10;
-        final int E = 1000;
+        final int E = 10000;
         final int THREADS =
-                2;
-                //Runtime.getRuntime().availableProcessors() - 1;
+                //1;
+                //2;
+                Runtime.getRuntime().availableProcessors() - 1;
 
         final List<ABCCKernel> kernels = new ArrayList(N);
         for (int i = 0; i < N; i++) {
