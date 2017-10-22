@@ -34,7 +34,7 @@ public abstract class OpenCLJNI{
 
    public OpenCLProgram createProgram(OpenCLDevice context, String openCLSource)
    {
-      return this.createProgram(context, openCLSource, null);
+      return this.createProgram(context, openCLSource, "");
    }
 
    protected native OpenCLProgram createProgram(OpenCLDevice context, String openCLSource, String binaryKey);
