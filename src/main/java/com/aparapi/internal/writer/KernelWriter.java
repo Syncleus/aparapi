@@ -64,6 +64,7 @@ import com.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEnt
 import com.aparapi.internal.model.ClassModel.*;
 import com.aparapi.internal.model.ClassModel.ConstantPool.*;
 
+import com.aparapi.internal.tool.InstructionHelper.StringWriter;
 import java.util.*;
 
 public abstract class KernelWriter extends BlockWriter{
@@ -160,7 +161,13 @@ public abstract class KernelWriter extends BlockWriter{
       javaToCLIdentifierMap.put("globalBarrier()V", "barrier(CLK_GLOBAL_MEM_FENCE)");
    }
 
-   /**
+   private final static Map<String, String> mapping = new HashMap<>();
+   static {
+       mapping.put("Lcom/aparapi/opencl/vector/Float2;", "float2");
+   }
+
+
+    /**
     * These three convert functions are here to perform
     * any type conversion that may be required between
     * Java and OpenCL.
@@ -170,6 +177,11 @@ public abstract class KernelWriter extends BlockWriter{
     * @return Suitably converted string, "char*", etc
     */
    @Override public String convertType(String _typeDesc, boolean useClassModel, boolean isLocal) {
+      String mapTo = mapping.get(_typeDesc);
+      if (mapTo != null) {
+          return mapTo + " ";
+      }
+
       if (_typeDesc.equals("Z") || _typeDesc.equals("boolean")) {
          return (cvtBooleanToChar);
       } else if (_typeDesc.equals("[Z") || _typeDesc.equals("boolean[]")) {
@@ -226,6 +238,26 @@ public abstract class KernelWriter extends BlockWriter{
             write(barrierAndGetterMappings);
          }
       } else {
+         final String pattern = Kernel.getMethodMappedPattern(_methodEntry);
+         if (pattern != null) {
+             //System.out.println(pattern);
+
+             String[] params = new String[argc];
+
+             for (int arg = 0; arg < argc; arg++) {
+
+                 StringWriter sw = new StringWriter();
+
+                 sw.writeInstruction(_methodCall.getArg(arg));
+
+                 params[arg] = sw.toString();
+             }
+
+             write(String.format(pattern, params));
+
+             return;
+         }
+
          final boolean isSpecial = _methodCall instanceof I_INVOKESPECIAL;
          MethodModel m = entryPoint.getCallTarget(_methodEntry, isSpecial);
 
@@ -381,15 +413,20 @@ public abstract class KernelWriter extends BlockWriter{
          }
 
          // If it is a converted array of objects, emit the struct param
-         String className = null;
          if (signature.startsWith("L")) {
-            // Turn Lcom/codegen/javalabs/opencl/demo/DummyOOA; into com_amd_javalabs_opencl_demo_DummyOOA for example
-            className = (signature.substring(1, signature.length() - 1)).replace('/', '_');
-            // if (logger.isLoggable(Level.FINE)) {
-            // logger.fine("Examining object parameter: " + signature + " new: " + className);
-            // }
-            argLine.append(className);
-            thisStructLine.append(className);
+            String mapTo = mapping.get(signature);
+            if (mapTo != null) {
+                argLine.append(mapTo);
+                thisStructLine.append(mapTo);
+            } else {
+                // Turn Lcom/codegen/javalabs/opencl/demo/DummyOOA; into com_amd_javalabs_opencl_demo_DummyOOA for example
+                String className = (signature.substring(1, signature.length() - 1)).replace('/', '_');
+                // if (logger.isLoggable(Level.FINE)) {
+                // logger.fine("Examining object parameter: " + signature + " new: " + className);
+                // }
+                argLine.append(className);
+                thisStructLine.append(className);
+            }
          } else {
             argLine.append(convertType(ClassModel.typeName(signature.charAt(0)), false, false));
             thisStructLine.append(convertType(ClassModel.typeName(signature.charAt(0)), false, false));

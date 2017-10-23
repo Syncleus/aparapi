@@ -477,7 +477,7 @@ public class Entrypoint implements Cloneable {
       for (final MethodCall methodCall : methodModel.getMethodCalls()) {
 
          ClassModelMethod m = resolveCalledMethod(methodCall, classModel);
-         if ((m != null) && !methodMap.keySet().contains(m) && !noCL(m)) {
+         if ((m != null) && !methodMap.keySet().contains(m) && !noCL(m) && !isInternal(m)) {
             final MethodModel target = new MethodModel(m, this);
             methodMap.put(m, target);
             methodModel.getCalledMethods().add(target);
@@ -805,9 +805,13 @@ public class Entrypoint implements Cloneable {
    }
 
    private boolean noCL(ClassModelMethod m) {
-      boolean found = m.getClassModel().getNoCLMethods().contains(m.getName());
-      return found;
+       return m.getClassModel().getNoCLMethods().contains(m.getName());
    }
+
+    private boolean isInternal(ClassModelMethod m) {
+       //TODO: use mapped cache
+       return m.getOwnerClassModel().getClassWeAreModelling().getName().startsWith("com.aparapi.opencl.vector");
+    }
 
    private FieldEntry getSimpleGetterField(MethodModel method) {
       return method.getAccessorVariableFieldEntry();
