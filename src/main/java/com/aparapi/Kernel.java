@@ -163,7 +163,7 @@ import java.util.logging.Logger;
  */
 public abstract class Kernel implements Cloneable {
 
-    private static Logger logger = Logger.getLogger(Config.getLoggerName());
+    private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
     public Kernel clone(Range range) {
         Kernel k = clone();
@@ -300,7 +300,7 @@ public abstract class Kernel implements Cloneable {
      * This annotation is for internal use only
      */
     @Retention(RetentionPolicy.RUNTIME)
-    protected @interface OpenCLDelegate {
+    private @interface OpenCLDelegate {
 
     }
 
@@ -308,7 +308,7 @@ public abstract class Kernel implements Cloneable {
      * This annotation is for internal use only
      */
     @Retention(RetentionPolicy.RUNTIME)
-    protected @interface OpenCLMapping {
+    @interface OpenCLMapping {
         String mapTo() default "";
 
         boolean atomic32() default false;
@@ -378,7 +378,7 @@ public abstract class Kernel implements Cloneable {
      * provides a way to compare a kernel's performance under multiple execution modes.
      */
     @Deprecated
-    public static enum EXECUTION_MODE {
+    public enum EXECUTION_MODE {
         /**
          *
          */
@@ -421,7 +421,7 @@ public abstract class Kernel implements Cloneable {
          */
         @Deprecated
         static LinkedHashSet<EXECUTION_MODE> getDefaultExecutionModes() {
-            LinkedHashSet<EXECUTION_MODE> defaultExecutionModes = new LinkedHashSet<EXECUTION_MODE>();
+            LinkedHashSet<EXECUTION_MODE> defaultExecutionModes = new LinkedHashSet<>();
 
             if (OpenCLLoader.isOpenCLAvailable()) {
                 defaultExecutionModes.add(GPU);
@@ -459,7 +459,7 @@ public abstract class Kernel implements Cloneable {
         }
 
         static LinkedHashSet<EXECUTION_MODE> getExecutionModeFromString(String executionMode) {
-            final LinkedHashSet<EXECUTION_MODE> executionModes = new LinkedHashSet<EXECUTION_MODE>();
+            final LinkedHashSet<EXECUTION_MODE> executionModes = new LinkedHashSet<>();
             for (final String mode : executionMode.split(",")) {
                 executionModes.add(valueOf(mode.toUpperCase()));
             }
@@ -485,8 +485,6 @@ public abstract class Kernel implements Cloneable {
             return (this == GPU) || (this == ACC) || (this == CPU);
         }
     }
-
-    ;
 
 
     private boolean autoCleanUpArrays = false;
@@ -516,14 +514,14 @@ public abstract class Kernel implements Cloneable {
         /**
          * Default constructor
          */
-        protected KernelState() {
+        KernelState() {
 
         }
 
         /**
          * Copy constructor
          */
-        protected KernelState(KernelState kernelState) {
+        KernelState(KernelState kernelState) {
             globalIds = kernelState.getGlobalIds();
             localIds = kernelState.getLocalIds();
             groupIds = kernelState.getGroupIds();
@@ -535,14 +533,14 @@ public abstract class Kernel implements Cloneable {
         /**
          * @return the globalIds
          */
-        public int[] getGlobalIds() {
+        int[] getGlobalIds() {
             return globalIds;
         }
 
         /**
          * @param globalIds the globalIds to set
          */
-        public void setGlobalIds(int[] globalIds) {
+        void setGlobalIds(int[] globalIds) {
             this.globalIds = globalIds;
         }
 
@@ -566,7 +564,7 @@ public abstract class Kernel implements Cloneable {
         /**
          * @param localIds the localIds to set
          */
-        public void setLocalIds(int[] localIds) {
+        void setLocalIds(int[] localIds) {
             this.localIds = localIds;
         }
 
@@ -583,14 +581,14 @@ public abstract class Kernel implements Cloneable {
         /**
          * @return the groupIds
          */
-        public int[] getGroupIds() {
+        int[] getGroupIds() {
             return groupIds;
         }
 
         /**
          * @param groupIds the groupIds to set
          */
-        public void setGroupIds(int[] groupIds) {
+        void setGroupIds(int[] groupIds) {
             this.groupIds = groupIds;
         }
 
@@ -607,7 +605,7 @@ public abstract class Kernel implements Cloneable {
         /**
          * @return the range
          */
-        public Range getRange() {
+        Range getRange() {
             return range;
         }
 
@@ -621,7 +619,7 @@ public abstract class Kernel implements Cloneable {
         /**
          * @return the passId
          */
-        public int getPassId() {
+        int getPassId() {
             return passId;
         }
 
@@ -635,7 +633,7 @@ public abstract class Kernel implements Cloneable {
         /**
          * @return the localBarrier
          */
-        public CyclicBarrier getLocalBarrier() {
+        CyclicBarrier getLocalBarrier() {
             return localBarrier;
         }
 
@@ -646,14 +644,11 @@ public abstract class Kernel implements Cloneable {
             this.localBarrier = localBarrier;
         }
 
-        public void awaitOnLocalBarrier() {
+        void awaitOnLocalBarrier() {
             if (!localBarrierDisabled) {
                 try {
                     kernelState.getLocalBarrier().await();
-                } catch (final InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (final BrokenBarrierException e) {
+                } catch (final InterruptedException | BrokenBarrierException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
@@ -761,7 +756,7 @@ public abstract class Kernel implements Cloneable {
     }
 
     @OpenCLDelegate
-    protected final int getGroupId(int _dim) {
+    private int getGroupId(int _dim) {
         return kernelState.getGroupIds()[_dim];
     }
 
@@ -1979,7 +1974,7 @@ public abstract class Kernel implements Cloneable {
 
     @OpenCLMapping(mapTo = "nextafter")
     protected final float nextAfter(final float start, final float direction) {
-        return (float) (Math.nextAfter(start, direction));
+        return Math.nextAfter(start, direction);
     }
 
     /**
@@ -2229,7 +2224,7 @@ public abstract class Kernel implements Cloneable {
     }
 
     //final static ThreadLocal<KernelRunner> runners = new ThreadLocal();
-    final Map<Thread,KernelRunner> runners = Collections.synchronizedMap(
+    private final Map<Thread,KernelRunner> runners = Collections.synchronizedMap(
             new WeakHashMap<Thread,KernelRunner>(Runtime.getRuntime().availableProcessors()*2, 0.95f)
     );
 
@@ -2339,7 +2334,7 @@ public abstract class Kernel implements Cloneable {
     }
 
     @SuppressWarnings("deprecation")
-    protected Range createRange(int _range) {
+    private Range createRange(int _range) {
         if (executionMode.equals(EXECUTION_MODE.AUTO)) {
             Device device = getTargetDevice();
             Range range = Range.create(device, _range);
@@ -2402,7 +2397,7 @@ public abstract class Kernel implements Cloneable {
      * @param _entrypoint is the name of the method we wish to use as the entrypoint to the kernel
      * @return The Kernel instance (this) so we can chain calls to put(arr).execute(range).get(arr)
      */
-    public Kernel execute(String _entrypoint, Range _range, int _passes) {
+    private Kernel execute(String _entrypoint, Range _range, int _passes) {
         return runner().execute(_entrypoint, _range, _passes);
     }
 
@@ -2512,7 +2507,7 @@ public abstract class Kernel implements Cloneable {
         executionMode = EXECUTION_MODE.getFallbackExecutionMode();
     }
 
-    final static Map<String, String> typeToLetterMap = new HashMap<String, String>();
+    private final static Map<String, String> typeToLetterMap = new HashMap<>();
 
     static {
         // only primitive types for now
@@ -3247,7 +3242,7 @@ public abstract class Kernel implements Cloneable {
         });
     }
 
-    static String toSignature(Method method) {
+    private static String toSignature(Method method) {
         return method.getName() + getArgumentsLetters(method) + getReturnTypeLetter(method);
     }
 

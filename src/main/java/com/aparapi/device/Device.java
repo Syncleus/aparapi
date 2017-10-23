@@ -45,8 +45,6 @@ public abstract class Device {
         }
     }
 
-    ;
-
     /**
      * @see com.aparapi.device
      * @deprecated use {@link KernelManager#bestDevice()}

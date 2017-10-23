@@ -115,8 +115,8 @@ public abstract class KernelWriter extends BlockWriter{
 
    private Entrypoint entryPoint = null;
 
-   public final static Map<String, String> javaToCLIdentifierMap = new HashMap<String, String>();
-   {
+   private final static Map<String, String> javaToCLIdentifierMap = new HashMap<>();
+   static {
       javaToCLIdentifierMap.put("getGlobalId()I", "get_global_id(0)");
       javaToCLIdentifierMap.put("getGlobalId(I)I", "get_global_id"); // no parenthesis if we are conveying args
       javaToCLIdentifierMap.put("getGlobalX()I", "get_global_id(0)");
@@ -300,28 +300,28 @@ public abstract class KernelWriter extends BlockWriter{
       return instruction instanceof I_ALOAD_0;
    }
 
-   public void writePragma(String _name, boolean _enable) {
+   private void writePragma(String _name, boolean _enable) {
       write("#pragma OPENCL EXTENSION " + _name + " : " + (_enable ? "en" : "dis") + "able");
       newLine();
    }
 
-   public final static String __local = "__local";
+   private final static String __local = "__local";
 
-   public final static String __global = "__global";
+   private final static String __global = "__global";
 
-   public final static String __constant = "__constant";
+   private final static String __constant = "__constant";
 
-   public final static String __private = "__private";
+   private final static String __private = "__private";
 
-   public final static String LOCAL_ANNOTATION_NAME = "L" + com.aparapi.Kernel.Local.class.getName().replace('.', '/') + ";";
+   private final static String LOCAL_ANNOTATION_NAME = "L" + com.aparapi.Kernel.Local.class.getName().replace('.', '/') + ";";
 
-   public final static String CONSTANT_ANNOTATION_NAME = "L" + com.aparapi.Kernel.Constant.class.getName().replace('.', '/')
+   private final static String CONSTANT_ANNOTATION_NAME = "L" + com.aparapi.Kernel.Constant.class.getName().replace('.', '/')
          + ";";
 
    @Override public void write(Entrypoint _entryPoint) throws CodeGenException {
-      final List<String> thisStruct = new ArrayList<String>();
-      final List<String> argLines = new ArrayList<String>();
-      final List<String> assigns = new ArrayList<String>();
+      final List<String> thisStruct = new ArrayList<>();
+      final List<String> argLines = new ArrayList<>();
+      final List<String> assigns = new ArrayList<>();
 
       entryPoint = _entryPoint;
 
@@ -370,9 +370,9 @@ public abstract class KernelWriter extends BlockWriter{
          //if we have a multiple dimensional array we want to remember the number of dimensions
          while (signature.startsWith("[")) {
             if (isPointer == false) {
-               argLine.append(argType + " ");
+               argLine.append(argType).append(" ");
                if (!(type.equals(__private) && IMPLICIT_PRIVATE_FIELDS)) {
-                  thisStructLine.append(type + " ");
+                  thisStructLine.append(type).append(" ");
                }
             }
             isPointer = true;
@@ -435,14 +435,14 @@ public abstract class KernelWriter extends BlockWriter{
                String suffix = numDimensions == 1 ? "" : Integer.toString(i);
                String lenName = field.getName() + BlockWriter.arrayLengthMangleSuffix + suffix;
 
-               lenStructLine.append("int " + lenName);
+               lenStructLine.append("int ").append(lenName);
 
                lenAssignLine.append("this->");
                lenAssignLine.append(lenName);
                lenAssignLine.append(" = ");
                lenAssignLine.append(lenName);
 
-               lenArgLine.append("int " + lenName);
+               lenArgLine.append("int ").append(lenName);
 
                assigns.add(lenAssignLine.toString());
                argLines.add(lenArgLine.toString());
@@ -454,14 +454,14 @@ public abstract class KernelWriter extends BlockWriter{
                   final StringBuilder dimAssignLine = new StringBuilder();
                   String dimName = field.getName() + BlockWriter.arrayDimMangleSuffix + suffix;
 
-                  dimStructLine.append("int " + dimName);
+                  dimStructLine.append("int ").append(dimName);
 
                   dimAssignLine.append("this->");
                   dimAssignLine.append(dimName);
                   dimAssignLine.append(" = ");
                   dimAssignLine.append(dimName);
 
-                  dimArgLine.append("int " + dimName);
+                  dimArgLine.append("int ").append(dimName);
 
                   assigns.add(dimAssignLine.toString());
                   argLines.add(dimArgLine.toString());
@@ -527,11 +527,9 @@ public abstract class KernelWriter extends BlockWriter{
             int totalSize = 0;
             int alignTo = 0;
 
-            final Iterator<FieldEntry> it = fieldSet.iterator();
-            while (it.hasNext()) {
-               final FieldEntry field = it.next();
+            for (FieldEntry field : fieldSet) {
                final String fType = field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-               final int fSize = InstructionSet.TypeSpec.valueOf(fType.equals("Z") ? "B" : fType).getSize();
+               final int fSize = TypeSpec.valueOf(fType.equals("Z") ? "B" : fType).getSize();
 
                if (fSize > alignTo) {
                   alignTo = fSize;

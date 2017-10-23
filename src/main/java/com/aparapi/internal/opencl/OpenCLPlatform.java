@@ -32,7 +32,7 @@ public class OpenCLPlatform extends OpenCLJNI{
 
    private final String name;
 
-   private final List<OpenCLDevice> devices = new ArrayList<OpenCLDevice>();
+   private final List<OpenCLDevice> devices = new ArrayList<>();
 
    private static List<OpenCLPlatform> platforms;
 

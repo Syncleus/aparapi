@@ -22,7 +22,7 @@ import com.aparapi.internal.opencl.OpenCLPlatform;
 /**
  * This utility class encapsulates the necessary actions required to query underlying OpenCL information
  */
-public class OpenCLUtil{
+class OpenCLUtil{
 
    /**
     * Retrieve a list of available OpenCL Platforms

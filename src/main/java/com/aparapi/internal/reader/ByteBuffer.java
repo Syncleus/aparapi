@@ -68,7 +68,7 @@ import java.io.InputStream;
  * @author gfrost
  *
  */
-public class ByteBuffer{
+class ByteBuffer{
 
    private byte[] bytes;
 
@@ -233,7 +233,7 @@ public class ByteBuffer{
       return (returnString);
    }
 
-   byte b(int _offset) {
+   private byte b(int _offset) {
       return bytes[_offset];
    }
 

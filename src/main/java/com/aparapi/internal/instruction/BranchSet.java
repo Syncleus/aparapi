@@ -127,19 +127,19 @@ public class BranchSet {
 
       private LogicalExpressionNode parent = null;
 
-      public void setParent(LogicalExpressionNode _parent) {
+      void setParent(LogicalExpressionNode _parent) {
          parent = _parent;
       }
 
-      public abstract int getTarget();
+      protected abstract int getTarget();
 
-      public abstract int getFallThrough();
+      protected abstract int getFallThrough();
 
-      public abstract void invert();
+      protected abstract void invert();
 
       public abstract LogicalExpressionNode cloneInverted();
 
-      public LogicalExpressionNode getRoot() {
+      LogicalExpressionNode getRoot() {
          if (parent != null) {
             return (parent);
          } else {
@@ -147,11 +147,11 @@ public class BranchSet {
          }
       }
 
-      public LogicalExpressionNode getNext() {
+      LogicalExpressionNode getNext() {
          return (next == null ? next : next.getRoot());
       }
 
-      public void setNext(LogicalExpressionNode _next) {
+      void setNext(LogicalExpressionNode _next) {
          next = _next == null ? _next : _next.getRoot();
       }
 
@@ -176,7 +176,7 @@ public class BranchSet {
 
       private boolean invert;
 
-      public SimpleLogicalExpressionNode(ConditionalBranch _branch) {
+      SimpleLogicalExpressionNode(ConditionalBranch _branch) {
          this(_branch, false);
       }
 
@@ -253,7 +253,7 @@ public class BranchSet {
          lhs.setParent(this);
       }
 
-      public CompoundLogicalExpressionNode(boolean _and, LogicalExpressionNode _lhs, LogicalExpressionNode _rhs) {
+      CompoundLogicalExpressionNode(boolean _and, LogicalExpressionNode _lhs, LogicalExpressionNode _rhs) {
          this(_and, _lhs, _rhs, true);
       }
 
@@ -300,7 +300,7 @@ public class BranchSet {
 
    }
 
-   private final List<ConditionalBranch> set = new ArrayList<ConditionalBranch>();
+   private final List<ConditionalBranch> set = new ArrayList<>();
 
    private final Instruction fallThrough;
 
@@ -323,7 +323,7 @@ public class BranchSet {
       target = _branch.getTarget();
       last = _branch;
 
-      final Set<Branch> expandedSet = new LinkedHashSet<Branch>();
+      final Set<Branch> expandedSet = new LinkedHashSet<>();
       final Instruction fallThroughRoot = last.getNextExpr();
       fallThrough = fallThroughRoot == null ? last.getNextPC() : fallThroughRoot.getStartInstruction();
       first = last;

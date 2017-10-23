@@ -20,7 +20,6 @@ import com.aparapi.device.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.*;
 
 /**
  * Collects profiling information per kernel class per device. Not thread safe, it is necessary for client code to correctly synchronize on

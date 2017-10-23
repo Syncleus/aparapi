@@ -17,10 +17,10 @@ package com.aparapi.internal.kernel;
 
 import com.aparapi.Kernel;
 
-public class PreferencesWrapper {
+class PreferencesWrapper {
 
-  private Class<? extends Kernel> klass;
-  private KernelPreferences preferences;
+  private final Class<? extends Kernel> klass;
+  private final KernelPreferences preferences;
 
   public PreferencesWrapper(Class<? extends Kernel> klass, KernelPreferences preferences) {
     super();

@@ -19,8 +19,9 @@ import static org.junit.Assert.assertArrayEquals;
 
 import com.aparapi.Kernel;
 import java.util.Arrays;
-import org.junit.Test;
 
+import org.junit.Ignore;
+import org.junit.Test;
 
 public class ArrayTest {
     @Test

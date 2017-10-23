@@ -22,7 +22,7 @@ interface Optional<E> {
    final class Some<E> implements Optional<E>{
       private final E value;
 
-      static final <E> Optional<E> of(E value) {
+      static <E> Optional<E> of(E value) {
          return new Some<>(value);
       }
 
@@ -65,7 +65,7 @@ interface Optional<E> {
 }
 
 public interface Memoizer<T> extends Supplier<T> {
-   public final class Impl<T> implements Memoizer<T>{
+   final class Impl<T> implements Memoizer<T>{
       private final Supplier<T> supplier;
 
       private final AtomicReference<Optional<T>> valueRef = new AtomicReference<>(Optional.None.<T> none());

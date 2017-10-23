@@ -36,9 +36,9 @@ import com.aparapi.internal.util.Reflection;
 public class KernelManager {
 
    private static KernelManager INSTANCE = new KernelManager();
-   private LinkedHashMap<Integer, PreferencesWrapper> preferences = new LinkedHashMap<>();
-   private LinkedHashMap<Class<? extends Kernel>, KernelProfile> profiles = new LinkedHashMap<>();
-   private LinkedHashMap<Class<? extends Kernel>, Kernel> sharedInstances = new LinkedHashMap<>();
+   private final LinkedHashMap<Integer, PreferencesWrapper> preferences = new LinkedHashMap<>();
+   private final LinkedHashMap<Class<? extends Kernel>, KernelProfile> profiles = new LinkedHashMap<>();
+   private final LinkedHashMap<Class<? extends Kernel>, Kernel> sharedInstances = new LinkedHashMap<>();
 
    private KernelPreferences defaultPreferences;
 
@@ -116,7 +116,7 @@ public class KernelManager {
             int row = 0;
             for (KernelDeviceProfile deviceProfile : profile.getDeviceProfiles()) {
                if (row == 0) {
-                  builder.append(deviceProfile.getTableHeader()).append("\n");
+                  builder.append(KernelDeviceProfile.getTableHeader()).append("\n");
                }
                builder.append(deviceProfile.getAverageAsTableRow()).append("\n");
                ++row;
@@ -126,7 +126,7 @@ public class KernelManager {
       }
    }
 
-   public void reportProfilingSummary(StringBuilder builder) {
+   private void reportProfilingSummary(StringBuilder builder) {
       builder.append("\nProfiles by Kernel Subclass (mean elapsed times in milliseconds)\n\n");
       builder.append(KernelDeviceProfile.getTableHeader()).append("\n");
       for (Class<? extends Kernel> kernelClass : profiles.keySet()) {
@@ -173,7 +173,7 @@ public class KernelManager {
       defaultPreferences.setPreferredDevices(_devices);
    }
 
-   protected KernelPreferences createDefaultPreferences() {
+   private KernelPreferences createDefaultPreferences() {
       KernelPreferences preferences = new KernelPreferences(this, null);
       preferences.setPreferredDevices(createDefaultPreferredDevices());
       return preferences;
@@ -197,7 +197,7 @@ public class KernelManager {
       }
    }
 
-   protected LinkedHashSet<Device> createDefaultPreferredDevices() {
+   private LinkedHashSet<Device> createDefaultPreferredDevices() {
       LinkedHashSet<Device> devices = new LinkedHashSet<>();
 
       List<OpenCLDevice> accelerators = OpenCLDevice.listDevices(Device.TYPE.ACC);
@@ -237,12 +237,12 @@ public class KernelManager {
       return devices;
    }
 
-   protected List<Device.TYPE> getPreferredDeviceTypes() {
+   List<Device.TYPE> getPreferredDeviceTypes() {
       return Arrays.asList(Device.TYPE.ACC, Device.TYPE.GPU, Device.TYPE.CPU, Device.TYPE.ALT, Device.TYPE.JTP);
    }
 
    /** NB, returns -ve for the better device. */
-   protected Comparator<OpenCLDevice> getDefaultAcceleratorComparator() {
+   private Comparator<OpenCLDevice> getDefaultAcceleratorComparator() {
       return new Comparator<OpenCLDevice>() {
          @Override
          public int compare(OpenCLDevice left, OpenCLDevice right) {
@@ -252,7 +252,7 @@ public class KernelManager {
    }
 
    /** NB, returns -ve for the better device. */
-   protected Comparator<OpenCLDevice> getDefaultGPUComparator() {
+   private Comparator<OpenCLDevice> getDefaultGPUComparator() {
       return new Comparator<OpenCLDevice>() {
          @Override
          public int compare(OpenCLDevice left, OpenCLDevice right) {
@@ -265,7 +265,7 @@ public class KernelManager {
       return getDefaultPreferences().getPreferredDevice(null);
    }
 
-    protected static boolean selectLhs(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs) {
+    private static boolean selectLhs(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs) {
        boolean nvidiaLhs = _deviceLhs.getOpenCLPlatform().getVendor().toLowerCase().contains("nvidia");
        boolean nvidiaRhs = _deviceRhs.getOpenCLPlatform().getVendor().toLowerCase().contains("nvidia");
        if (nvidiaLhs || nvidiaRhs) {
@@ -279,7 +279,7 @@ public class KernelManager {
      *
      * <p>Therefore when comparing an NVidia device we use different criteria.</p>
      */
-    protected static boolean selectLhsIfCUDA(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs) {
+    private static boolean selectLhsIfCUDA(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs) {
        if (_deviceLhs.getType() != _deviceRhs.getType()) {
           return selectLhsByType(_deviceLhs.getType(), _deviceRhs.getType());
        }

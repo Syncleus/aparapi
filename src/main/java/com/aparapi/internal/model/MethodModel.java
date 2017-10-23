@@ -69,7 +69,7 @@ import java.util.logging.*;
 
 public class MethodModel{
 
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
    private ExpressionList expressionList;
 
@@ -126,7 +126,7 @@ public class MethodModel{
       return accessorVariableFieldEntry;
    }
 
-   private final Set<MethodModel> calledMethods = new HashSet<MethodModel>();
+   private final Set<MethodModel> calledMethods = new HashSet<>();
 
    public Set<MethodModel> getCalledMethods() {
       return calledMethods;
@@ -142,9 +142,7 @@ public class MethodModel{
       transitiveCalledMethods.add(this);
 
       // For each callee, send him a copy of the call chain up to this method
-      final Iterator<MethodModel> cmi = getCalledMethods().iterator();
-      while (cmi.hasNext()) {
-         final MethodModel next = cmi.next();
+      for (MethodModel next : getCalledMethods()) {
          next.checkForRecursion(transitiveCalledMethods);
       }
 
@@ -165,7 +163,7 @@ public class MethodModel{
     * require pragmas to be used in the OpenCL source
     * 
     */
-   public void setRequiredPragmas(Instruction instruction) {
+   private void setRequiredPragmas(Instruction instruction) {
       final boolean setDouble = instruction.getByteCode().usesDouble();
       if (setDouble) {
          usesDoubles = true;
@@ -202,8 +200,8 @@ public class MethodModel{
     * 
     * @return Map<Integer, Instruction> the returned pc to Instruction map
     */
-   public Map<Integer, Instruction> createListOfInstructions() throws ClassParseException {
-      final Map<Integer, Instruction> pcMap = new LinkedHashMap<Integer, Instruction>();
+   private Map<Integer, Instruction> createListOfInstructions() throws ClassParseException {
+      final Map<Integer, Instruction> pcMap = new LinkedHashMap<>();
       final byte[] code = method.getCode();
 
       // We create a byteReader for reading the bytes from the code array
@@ -312,7 +310,7 @@ public class MethodModel{
     * 
     * @see InstructionSet.Branch#getTarget()
     */
-   public void buildBranchGraphs(Map<Integer, Instruction> pcMap) {
+   private void buildBranchGraphs(Map<Integer, Instruction> pcMap) {
       for (Instruction instruction = pcHead; instruction != null; instruction = instruction.getNextPC()) {
          if (instruction.isBranch()) {
             final Branch branch = instruction.asBranch();
@@ -334,7 +332,7 @@ public class MethodModel{
     * 
     * 
     */
-   public void deoptimizeReverseBranches() {
+   private void deoptimizeReverseBranches() {
 
       for (Instruction instruction = pcHead; instruction != null; instruction = instruction.getNextPC()) {
          if (instruction.isBranch()) {
@@ -441,7 +439,7 @@ public class MethodModel{
     * @param _instruction
     * @throws ClassParseException
     */
-   public void txFormDups(ExpressionList _expressionList, final Instruction _instruction) throws ClassParseException {
+   private void txFormDups(ExpressionList _expressionList, final Instruction _instruction) throws ClassParseException {
       if (_instruction instanceof I_DUP) {
          Instruction e = _expressionList.getTail();
          while (!e.producesStack()) {
@@ -541,7 +539,7 @@ public class MethodModel{
     * @throws ClassParseException
     */
 
-   void foldExpressions() throws ClassParseException {
+   private void foldExpressions() throws ClassParseException {
 
       // we also populate a second list of expressions held between headTail.head and headTail.tail
 
@@ -602,7 +600,7 @@ public class MethodModel{
       }
    }
 
-   InstructionTransformer[] transformers = new InstructionTransformer[] {
+   private final InstructionTransformer[] transformers = new InstructionTransformer[] {
 
          new InstructionTransformer("long hand post increment of field"){
 
@@ -932,7 +930,7 @@ public class MethodModel{
                   final AssignToLocalVariable assign = (AssignToLocalVariable) i.getNextExpr();
 
                   final InlineAssignInstruction inlineAssign = new InlineAssignInstruction(MethodModel.this, assign, cast);
-                  _expressionList.replaceInclusive((Instruction) cast, (Instruction) assign, inlineAssign);
+                  _expressionList.replaceInclusive(cast, (Instruction) assign, inlineAssign);
                   return (inlineAssign);
 
                }
@@ -1243,7 +1241,7 @@ public class MethodModel{
 
    };
 
-   void applyTransformations(ExpressionList _expressionList, final Instruction _instruction, final Instruction _operandStart)
+   private void applyTransformations(ExpressionList _expressionList, final Instruction _instruction, final Instruction _operandStart)
          throws ClassParseException {
 
       if (logger.isLoggable(Level.FINE)) {
@@ -1309,7 +1307,7 @@ public class MethodModel{
    /**
     * Determine if this method is a getter and record the accessed field if so
     */
-   void checkForGetter(Map<Integer, Instruction> pcMap) throws ClassParseException {
+   private void checkForGetter(Map<Integer, Instruction> pcMap) throws ClassParseException {
       final String methodName = getMethod().getName();
       String rawVarNameCandidate = null;
       boolean mightBeGetter = true;
@@ -1395,7 +1393,7 @@ public class MethodModel{
    /**
     * Determine if this method is a setter and record the accessed field if so
     */
-   void checkForSetter(Map<Integer, Instruction> pcMap) throws ClassParseException {
+   private void checkForSetter(Map<Integer, Instruction> pcMap) throws ClassParseException {
       final String methodName = getMethod().getName();
       if (methodName.startsWith("set")) {
          final String rawVarNameCandidate = methodName.substring(3);
@@ -1448,7 +1446,7 @@ public class MethodModel{
    }
 
    // The entrypoint is used to make checks on object accessors
-   Entrypoint entrypoint = null;
+   private Entrypoint entrypoint = null;
 
    MethodModel(ClassModelMethod _method, Entrypoint _entrypoint) throws AparapiException {
       entrypoint = _entrypoint;
@@ -1529,9 +1527,9 @@ public class MethodModel{
          }
       }
 
-      List<LocalVariableInfo> list = new ArrayList<LocalVariableInfo>();
+      final List<LocalVariableInfo> list = new ArrayList<>();
 
-      public FakeLocalVariableTableEntry(Map<Integer, Instruction> _pcMap, ClassModelMethod _method) {
+      FakeLocalVariableTableEntry(Map<Integer, Instruction> _pcMap, ClassModelMethod _method) {
          int numberOfSlots = _method.getCodeEntry().getMaxLocals();
 
          MethodDescription description = ClassModel.getMethodDescription(_method.getDescriptor());
@@ -1728,7 +1726,7 @@ public class MethodModel{
    }
 
    public List<MethodCall> getMethodCalls() {
-      final List<MethodCall> methodCalls = new ArrayList<MethodCall>();
+      final List<MethodCall> methodCalls = new ArrayList<>();
 
       for (Instruction i = getPCHead(); i != null; i = i.getNextPC()) {
          if (i instanceof MethodCall) {

@@ -67,32 +67,32 @@ import java.util.logging.*;
 
 public class Entrypoint implements Cloneable {
 
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
-   private final List<ClassModel.ClassModelField> referencedClassModelFields = new ArrayList<ClassModel.ClassModelField>();
+   private final List<ClassModel.ClassModelField> referencedClassModelFields = new ArrayList<>();
 
-   private final List<Field> referencedFields = new ArrayList<Field>();
+   private final List<Field> referencedFields = new ArrayList<>();
 
-   private ClassModel classModel;
+   private final ClassModel classModel;
 
    private Object kernelInstance = null;
 
-   private final Set<String> referencedFieldNames = new LinkedHashSet<String>();
+   private final Set<String> referencedFieldNames = new LinkedHashSet<>();
 
-   private final Set<String> arrayFieldAssignments = new LinkedHashSet<String>();
+   private final Set<String> arrayFieldAssignments = new LinkedHashSet<>();
 
-   private final Set<String> arrayFieldAccesses = new LinkedHashSet<String>();
+   private final Set<String> arrayFieldAccesses = new LinkedHashSet<>();
 
    // Classes of object array members
-   private final HashMap<String, ClassModel> objectArrayFieldsClasses = new HashMap<String, ClassModel>();
+   private final HashMap<String, ClassModel> objectArrayFieldsClasses = new HashMap<>();
 
    // Supporting classes of object array members like supers
-   private final HashMap<String, ClassModel> allFieldsClasses = new HashMap<String, ClassModel>();
+   private final HashMap<String, ClassModel> allFieldsClasses = new HashMap<>();
 
    // Keep track of arrays whose length is taken via foo.length
-   private final Set<String> arrayFieldArrayLengthUsed = new LinkedHashSet<String>();
+   private final Set<String> arrayFieldArrayLengthUsed = new LinkedHashSet<>();
 
-   private final List<MethodModel> calledMethods = new ArrayList<MethodModel>();
+   private final List<MethodModel> calledMethods = new ArrayList<>();
 
    private final MethodModel methodModel;
 
@@ -122,7 +122,7 @@ public class Entrypoint implements Cloneable {
    }
 
    /* Atomics are detected in Entrypoint */
-   public void setRequiresAtomics32Pragma(boolean newVal) {
+   private void setRequiresAtomics32Pragma(boolean newVal) {
       usesAtomic32 = newVal;
    }
 
@@ -150,7 +150,7 @@ public class Entrypoint implements Cloneable {
       return objectArrayFieldsClasses;
    }
 
-   public static Field getFieldFromClassHierarchy(Class<?> _clazz, String _name) throws AparapiException {
+   private static Field getFieldFromClassHierarchy(Class<?> _clazz, String _name) throws AparapiException {
 
       // look in self
       // if found, done
@@ -232,7 +232,7 @@ public class Entrypoint implements Cloneable {
     * It is important to have only one ClassModel for each class used in the kernel
     * and only one MethodModel per method, so comparison operations work properly.
     */
-   public ClassModel getOrUpdateAllClassAccesses(String className) throws AparapiException {
+   private ClassModel getOrUpdateAllClassAccesses(String className) throws AparapiException {
       ClassModel memberClassModel = allFieldsClasses.get(className);
       if (memberClassModel == null) {
          try {
@@ -275,7 +275,7 @@ public class Entrypoint implements Cloneable {
       return memberClassModel;
    }
 
-   public ClassModelMethod resolveAccessorCandidate(MethodCall _methodCall, MethodEntry _methodEntry) throws AparapiException {
+   private ClassModelMethod resolveAccessorCandidate(MethodCall _methodCall, MethodEntry _methodEntry) throws AparapiException {
       final String methodsActualClassName = (_methodEntry.getClassEntry().getNameUTF8Entry().getUTF8()).replace('/', '.');
 
       if (_methodCall instanceof VirtualMethodCall) {
@@ -303,7 +303,7 @@ public class Entrypoint implements Cloneable {
     * Update accessor structures when there is a direct access to an 
     * obect array element's data members
     */
-   public void updateObjectMemberFieldAccesses(String className, FieldEntry field) throws AparapiException {
+   private void updateObjectMemberFieldAccesses(String className, FieldEntry field) throws AparapiException {
       final String accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
 
       // Quickly bail if it is a ref
@@ -397,7 +397,7 @@ public class Entrypoint implements Cloneable {
    /*
     * Find a suitable call target in the kernel class, supers, object members or static calls
     */
-   ClassModelMethod resolveCalledMethod(MethodCall methodCall, ClassModel classModel) throws AparapiException {
+   private ClassModelMethod resolveCalledMethod(MethodCall methodCall, ClassModel classModel) throws AparapiException {
       MethodEntry methodEntry = methodCall.getConstantPoolMethodEntry();
       int thisClassIndex = classModel.getThisClassConstantPoolIndex();//arf
       boolean isMapped = (thisClassIndex != methodEntry.getClassIndex()) && Kernel.isMappedMethod(methodEntry);
@@ -411,7 +411,7 @@ public class Entrypoint implements Cloneable {
          }
       }
 
-      ClassModelMethod m = classModel.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL) ? true : false);
+      ClassModelMethod m = classModel.getMethod(methodEntry, methodCall instanceof I_INVOKESPECIAL);
 
       // Did not find method in this class or supers. Look for data member object arrays
       if (m == null && !isMapped) {
@@ -423,7 +423,7 @@ public class Entrypoint implements Cloneable {
          for (ClassModel c : allFieldsClasses.values()) {
             if (c.getClassWeAreModelling().getName()
                   .equals(methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.'))) {
-               m = c.getMethod(methodEntry, (methodCall instanceof I_INVOKESPECIAL) ? true : false);
+               m = c.getMethod(methodEntry, methodCall instanceof I_INVOKESPECIAL);
                assert m != null;
                break;
             }
@@ -454,7 +454,7 @@ public class Entrypoint implements Cloneable {
       methodModel = _methodModel;
       kernelInstance = _k;
 
-      final Map<ClassModelMethod, MethodModel> methodMap = new LinkedHashMap<ClassModelMethod, MethodModel>();
+      final Map<ClassModelMethod, MethodModel> methodMap = new LinkedHashMap<>();
 
       boolean discovered = true;
 
@@ -489,7 +489,7 @@ public class Entrypoint implements Cloneable {
       // Walk the whole graph of called methods and add them to the methodMap
       while (discovered) {
          discovered = false;
-         for (final MethodModel mm : new ArrayList<MethodModel>(methodMap.values())) {
+         for (final MethodModel mm : new ArrayList<>(methodMap.values())) {
             for (final MethodCall methodCall : mm.getMethodCalls()) {
 
                ClassModelMethod m = resolveCalledMethod(methodCall, classModel);
@@ -521,13 +521,13 @@ public class Entrypoint implements Cloneable {
 
       calledMethods.addAll(methodMap.values());
       Collections.reverse(calledMethods);
-      final List<MethodModel> methods = new ArrayList<MethodModel>(calledMethods);
+      final List<MethodModel> methods = new ArrayList<>(calledMethods);
 
       // add method to the calledMethods so we can include in this list
       methods.add(methodModel);
-      final Set<String> fieldAssignments = new HashSet<String>();
+      final Set<String> fieldAssignments = new HashSet<>();
 
-      final Set<String> fieldAccesses = new HashSet<String>();
+      final Set<String> fieldAccesses = new HashSet<>();
 
       for (final MethodModel methodModel : methods) {
 

@@ -141,7 +141,7 @@ public class Config extends ConfigJNI{
    // Debugging related flags
    public static final boolean verboseComparitor = Boolean.getBoolean(propPkgName + ".verboseComparitor");
 
-   public static final boolean dumpFlags = Boolean.getBoolean(propPkgName + ".dumpFlags");
+   private static final boolean dumpFlags = Boolean.getBoolean(propPkgName + ".dumpFlags");
 
    // Individual bytecode support related flags
    public static final boolean enablePUTFIELD = Boolean.getBoolean(propPkgName + ".enable.PUTFIELD");
@@ -169,11 +169,11 @@ public class Config extends ConfigJNI{
 
    public static final boolean enableSWITCH = Boolean.getBoolean(propPkgName + ".enable.SWITCH");
 
-   public static boolean enableShowFakeLocalVariableTable = Boolean.getBoolean(propPkgName + ".enableShowFakeLocalVariableTable");
+   public static final boolean enableShowFakeLocalVariableTable = Boolean.getBoolean(propPkgName + ".enableShowFakeLocalVariableTable");
 
-   public static final boolean enableInstructionDecodeViewer = Boolean.getBoolean(propPkgName + ".enableInstructionDecodeViewer");
+   private static final boolean enableInstructionDecodeViewer = Boolean.getBoolean(propPkgName + ".enableInstructionDecodeViewer");
 
-   public static String instructionListenerClassName = System.getProperty(propPkgName + ".instructionListenerClass");
+   private static String instructionListenerClassName = System.getProperty(propPkgName + ".instructionListenerClass");
 
    public static InstructionListener instructionListener = null;
 
@@ -195,9 +195,9 @@ public class Config extends ConfigJNI{
          System.out.println("Exception " + e + " in Aparapi logging setup");
          e.printStackTrace();
       }
-   };
+   }
 
-   static {
+    static {
       if (enableInstructionDecodeViewer && ((instructionListenerClassName == null) || instructionListenerClassName.equals(""))) {
          instructionListenerClassName = InstructionViewer.class.getName();
       }
@@ -206,13 +206,7 @@ public class Config extends ConfigJNI{
          try {
             final Class<?> instructionListenerClass = Class.forName(instructionListenerClassName);
             instructionListener = (InstructionListener) instructionListenerClass.newInstance();
-         } catch (final ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         } catch (final InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         } catch (final IllegalAccessException e) {
+         } catch (final ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
          }

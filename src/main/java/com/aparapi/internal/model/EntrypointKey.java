@@ -20,9 +20,9 @@ final class EntrypointKey{
       return new EntrypointKey(entrypointName, descriptor);
    }
 
-   private String descriptor;
+   private final String descriptor;
 
-   private String entrypointName;
+   private final String entrypointName;
 
    private EntrypointKey(String entrypointName, String descriptor) {
       this.entrypointName = entrypointName;
@@ -63,10 +63,7 @@ final class EntrypointKey{
       } else if (!descriptor.equals(other.descriptor))
          return false;
       if (entrypointName == null) {
-         if (other.entrypointName != null)
-            return false;
-      } else if (!entrypointName.equals(other.entrypointName))
-         return false;
-      return true;
+          return other.entrypointName == null;
+      } else return entrypointName.equals(other.entrypointName);
    }
 }

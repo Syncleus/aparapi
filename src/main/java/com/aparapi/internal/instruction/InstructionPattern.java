@@ -91,15 +91,15 @@ public class InstructionPattern{
    public static class InstructionMatch{
       public final boolean ok;
 
-      public static final InstructionMatch TRUE = new InstructionMatch(true);
+      static final InstructionMatch TRUE = new InstructionMatch(true);
 
-      public static final InstructionMatch FALSE = new InstructionMatch(false);
+      static final InstructionMatch FALSE = new InstructionMatch(false);
 
-      public InstructionMatch(boolean _ok) {
+      InstructionMatch(boolean _ok) {
          ok = _ok;
       }
 
-      public static InstructionMatch test(boolean _condition) {
+      static InstructionMatch test(boolean _condition) {
          return (_condition ? TRUE : FALSE);
       }
    }
@@ -120,7 +120,7 @@ public class InstructionPattern{
          return (InstructionMatch.FALSE);
       }
 
-      public InstructionMatcher(String _description) {
+      InstructionMatcher(String _description) {
          description = _description;
       }
 
@@ -129,7 +129,7 @@ public class InstructionPattern{
       }
    }
 
-   public class AssignableInstructionMatcher extends InstructionMatcher{
+   class AssignableInstructionMatcher extends InstructionMatcher{
       private final Class<?>[] classes;
 
       public AssignableInstructionMatcher(Class<?>... _classes) {

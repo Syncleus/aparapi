@@ -83,7 +83,7 @@ import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
  */
 public class ExpressionList{
 
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
    private final MethodModel methodModel;
 
@@ -124,7 +124,7 @@ public class ExpressionList{
     * @param _extent
     * @return
     */
-   public boolean doesNotContainContinueOrBreak(Instruction _start, Instruction _extent) {
+   private boolean doesNotContainContinueOrBreak(Instruction _start, Instruction _extent) {
       boolean ok = true;
       boolean breakOrContinue = false;
       for (Instruction i = _start; i != null; i = i.getNextExpr()) {
@@ -149,7 +149,7 @@ public class ExpressionList{
       return (ok);
    }
 
-   public boolean doesNotContainCompositeOrBranch(Instruction _start, Instruction _exclusiveEnd) {
+   private boolean doesNotContainCompositeOrBranch(Instruction _start, Instruction _exclusiveEnd) {
       boolean ok = true;
       for (Instruction i = _start; (i != null) && (i != _exclusiveEnd); i = i.getNextExpr()) {
          if (!(i instanceof CompositeInstruction) && (i.isBranch())) {
@@ -160,7 +160,7 @@ public class ExpressionList{
       return (ok);
    }
 
-   public void unwind() {
+   private void unwind() {
       if (parent != null) {
          if (instruction != null) {
             tail.setNextExpr(instruction);
@@ -830,8 +830,6 @@ public class ExpressionList{
             Config.instructionListener.showAndTell("after folding", head, _instruction);
          }
 
-      } catch (final ClassParseException _classParseException) {
-         throw new ClassParseException(_classParseException);
       } catch (final Throwable t) {
          throw new ClassParseException(t);
 
@@ -861,7 +859,7 @@ public class ExpressionList{
     */
    public String dumpDiagram(Instruction _instruction) {
       final StringBuilder sb = new StringBuilder();
-      final List<Instruction> list = new ArrayList<Instruction>();
+      final List<Instruction> list = new ArrayList<>();
 
       for (Instruction i = head; i != null; i = i.getNextExpr()) {
          list.add(i);
@@ -874,7 +872,7 @@ public class ExpressionList{
       final Instruction[] array = list.toArray(new Instruction[0]);
       boolean lastWasCursor = false;
 
-      final List<Branch> branches = new ArrayList<Branch>();
+      final List<Branch> branches = new ArrayList<>();
       for (final Instruction i : list) {
          sb.append(String.format(" %3d", i.getStartPC()));
       }

@@ -134,18 +134,18 @@ public class OpenCLDevice extends Device{
       return shortDescription;
    }
 
-   public static class OpenCLInvocationHandler<T extends OpenCL<T>> implements InvocationHandler{
+   static class OpenCLInvocationHandler<T extends OpenCL<T>> implements InvocationHandler{
       private final Map<String, OpenCLKernel> map;
 
       private final OpenCLProgram program;
       private boolean disposed = false;
-      public OpenCLInvocationHandler(OpenCLProgram _program, Map<String, OpenCLKernel> _map) {
+      OpenCLInvocationHandler(OpenCLProgram _program, Map<String, OpenCLKernel> _map) {
          program = _program;
          map = _map;
          disposed = false;
       }
 
-      @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+      @Override public Object invoke(Object proxy, Method method, Object[] args) {
          if (disposed){
             throw new IllegalStateException("bound interface already disposed");
          }
@@ -222,8 +222,8 @@ public class OpenCLDevice extends Device{
       }
    }
 
-   public List<OpenCLArgDescriptor> getArgs(Method m) {
-      final List<OpenCLArgDescriptor> args = new ArrayList<OpenCLArgDescriptor>();
+   private List<OpenCLArgDescriptor> getArgs(Method m) {
+      final List<OpenCLArgDescriptor> args = new ArrayList<>();
       final Annotation[][] parameterAnnotations = m.getParameterAnnotations();
       final Class<?>[] parameterTypes = m.getParameterTypes();
 
@@ -415,7 +415,7 @@ public class OpenCLDevice extends Device{
 
       final OpenCLProgram program = new OpenCLProgram(this, _source).createProgram(this);
 
-      final Map<String, OpenCLKernel> map = new HashMap<String, OpenCLKernel>();
+      final Map<String, OpenCLKernel> map = new HashMap<>();
       for (final String name : kernelNameToArgsMap.keySet()) {
          final OpenCLKernel kernel = OpenCLKernel.createKernel(program, name, kernelNameToArgsMap.get(name));
          //final OpenCLKernel kernel = new OpenCLKernel(program, name, kernelNameToArgsMap.get(name));
@@ -426,7 +426,7 @@ public class OpenCLDevice extends Device{
          map.put(name, kernel);
       }
 
-      final OpenCLInvocationHandler<T> invocationHandler = new OpenCLInvocationHandler<T>(program, map);
+      final OpenCLInvocationHandler<T> invocationHandler = new OpenCLInvocationHandler<>(program, map);
       final T instance = (T) Proxy.newProxyInstance(OpenCLDevice.class.getClassLoader(), new Class[] {
             _interface,
             OpenCL.class

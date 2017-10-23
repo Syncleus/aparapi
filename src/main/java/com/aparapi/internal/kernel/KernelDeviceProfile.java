@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class KernelDeviceProfile {
 
-    private static Logger logger = Logger.getLogger(Config.getLoggerName());
+    private static final Logger logger = Logger.getLogger(Config.getLoggerName());
     private static final double MILLION = 1000 * 1000;
     private static final int TABLE_COLUMN_HEADER_WIDTH = 21;
     private static final int TABLE_COLUMN_COUNT_WIDTH = 8;
@@ -44,7 +44,7 @@ public class KernelDeviceProfile {
     private final Device device;
     private final DecimalFormat format;
 
-    final static int NUM_EVENTS = ProfilingEvent.values().length;
+    private final static int NUM_EVENTS = ProfilingEvent.values().length;
 
     private class Accumulator {
         private final long[] currentTimes = new long[NUM_EVENTS];
@@ -102,9 +102,9 @@ public class KernelDeviceProfile {
         }
     }
 
-    final Accumulator combined = new Accumulator();
+    private final Accumulator combined = new Accumulator();
 
-    final Map<Thread,Accumulator> acc = Collections.synchronizedMap(
+    private final Map<Thread,Accumulator> acc = Collections.synchronizedMap(
             new WeakHashMap<Thread,Accumulator>(Runtime.getRuntime().availableProcessors()*2, 0.95f)
     );
 

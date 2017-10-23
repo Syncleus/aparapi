@@ -50,11 +50,8 @@ final class MethodKey{
       } else if (!getName().equals(other.getName()))
          return false;
       if (getSignature() == null) {
-         if (other.getSignature() != null)
-            return false;
-      } else if (!getSignature().equals(other.getSignature()))
-         return false;
-      return true;
+          return other.getSignature() == null;
+      } else return getSignature().equals(other.getSignature());
    }
 
    private MethodKey(String name, String signature) {

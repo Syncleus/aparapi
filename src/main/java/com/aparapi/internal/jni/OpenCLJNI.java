@@ -32,7 +32,7 @@ public abstract class OpenCLJNI{
 
    protected native List<OpenCLPlatform> getPlatforms();
 
-   public OpenCLProgram createProgram(OpenCLDevice context, String openCLSource)
+   protected OpenCLProgram createProgram(OpenCLDevice context, String openCLSource)
    {
       return this.createProgram(context, openCLSource, "");
    }

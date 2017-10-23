@@ -124,7 +124,7 @@ public class KernelRunner extends KernelRunnerJNI {
     public static final int CANCEL_STATUS_TRUE = 1;
     private static final String CODE_GEN_ERROR_MARKER = CodeGenException.class.getName();
 
-    private static Logger logger = Logger.getLogger(Config.getLoggerName());
+    private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
     private long jniContextHandle = 0;
 
@@ -137,8 +137,8 @@ public class KernelRunner extends KernelRunnerJNI {
     // may be read by a thread other than the control thread, hence volatile
     private volatile boolean executing;
 
-    // may be read by a thread other than the control thread, hence volatile
-    private volatile int passId = PASS_ID_PREPARING_EXECUTION;
+//    // may be read by a thread other than the control thread, hence volatile
+//    private volatile int passId = PASS_ID_PREPARING_EXECUTION;
 
     /**
      * A direct ByteBuffer used for asynchronous intercommunication between java and JNI C code.
@@ -170,8 +170,8 @@ public class KernelRunner extends KernelRunnerJNI {
 
     private static final ForkJoinPool threadPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors(),
             lowPriorityThreadFactory, null, false);
-    private static HashMap<Class<? extends Kernel>, String> openCLCache = new HashMap<>();
-    private static LinkedHashSet<String> seenBinaryKeys = new LinkedHashSet<>();
+    private static final HashMap<Class<? extends Kernel>, String> openCLCache = new HashMap<>();
+    private static final LinkedHashSet<String> seenBinaryKeys = new LinkedHashSet<>();
 
     /**
      * Create a KernelRunner for a specific Kernel instance.
@@ -380,7 +380,7 @@ public class KernelRunner extends KernelRunnerJNI {
         }
         boolean legacySequentialMode = kernel.getExecutionMode() == Kernel.EXECUTION_MODE.SEQ;
 
-        passId = PASS_ID_PREPARING_EXECUTION;
+        int passId = PASS_ID_PREPARING_EXECUTION;
         _settings.profile.profiler(device).on(ProfilingEvent.PREPARE_EXECUTE);
 
         try {
@@ -698,10 +698,7 @@ public class KernelRunner extends KernelRunnerJNI {
     private static void await(CyclicBarrier _barrier) {
         try {
             _barrier.await();
-        } catch (final InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final BrokenBarrierException e) {
+        } catch (final InterruptedException | BrokenBarrierException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -1051,9 +1048,7 @@ public class KernelRunner extends KernelRunnerJNI {
                     arg.setSizeInBytes(totalElements * primitiveSize);
                     arg.setArray(buffer);
                 }
-            } catch (final IllegalArgumentException e) {
-                e.printStackTrace();
-            } catch (final IllegalAccessException e) {
+            } catch (final IllegalArgumentException | IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
@@ -1271,7 +1266,7 @@ public class KernelRunner extends KernelRunnerJNI {
                         }
 
                         final String extensions = getExtensionsJNI(jniContextHandle);
-                        capabilitiesSet = new HashSet<String>();
+                        capabilitiesSet = new HashSet<>();
 
                         final StringTokenizer strTok = new StringTokenizer(extensions);
                         while (strTok.hasMoreTokens()) {
@@ -1574,27 +1569,27 @@ public class KernelRunner extends KernelRunnerJNI {
         inBufferRemoteInt.put(0, CANCEL_STATUS_FALSE);
     }
 
-    /**
-     * Returns the index of the current pass, or one of two special constants with negative values to indicate special progress states. Those constants are
-     * {@link #PASS_ID_PREPARING_EXECUTION} to indicate that the Kernel has started executing but not reached the initial pass, or
-     * {@link #PASS_ID_COMPLETED_EXECUTION} to indicate that execution is complete (possibly due to early termination via {@link #cancelMultiPass()}), i.e. the Kernel
-     * is idle. {@link #PASS_ID_COMPLETED_EXECUTION} is also returned before the first execution has been invoked.
-     *
-     * <p>This can be used, for instance, to update a visual progress bar.
-     *
-     * @see #execute(String, Range, int)
-     */
-    public int getCurrentPass() {
-        if (!executing) {
-            return PASS_ID_COMPLETED_EXECUTION;
-        }
-
-        if (kernel.isRunningCL()) {
-            return getCurrentPassRemote();
-        } else {
-            return getCurrentPassLocal();
-        }
-    }
+//    /**
+//     * Returns the index of the current pass, or one of two special constants with negative values to indicate special progress states. Those constants are
+//     * {@link #PASS_ID_PREPARING_EXECUTION} to indicate that the Kernel has started executing but not reached the initial pass, or
+//     * {@link #PASS_ID_COMPLETED_EXECUTION} to indicate that execution is complete (possibly due to early termination via {@link #cancelMultiPass()}), i.e. the Kernel
+//     * is idle. {@link #PASS_ID_COMPLETED_EXECUTION} is also returned before the first execution has been invoked.
+//     *
+//     * <p>This can be used, for instance, to update a visual progress bar.
+//     *
+//     * @see #execute(String, Range, int)
+//     */
+//    public int getCurrentPass() {
+//        if (!executing) {
+//            return PASS_ID_COMPLETED_EXECUTION;
+//        }
+//
+//        if (kernel.isRunningCL()) {
+//            return getCurrentPassRemote();
+//        } else {
+//            return getCurrentPassLocal();
+//        }
+//    }
 
     /**
      * True while any of the {@code execute()} methods are in progress.
@@ -1607,9 +1602,9 @@ public class KernelRunner extends KernelRunnerJNI {
         return outBufferRemoteInt.get(0);
     }
 
-    private int getCurrentPassLocal() {
-        return passId;
-    }
+//    private int getCurrentPassLocal() {
+//        return passId;
+//    }
 
     private int getPrimitiveSize(int type) {
         if ((type & ARG_FLOAT) != 0) {
@@ -1670,7 +1665,7 @@ public class KernelRunner extends KernelRunnerJNI {
         }
     }
 
-    private final Set<Object> puts = new HashSet<Object>();
+    private final Set<Object> puts = new HashSet<>();
 
     /**
      * Enqueue a request to return this array from the GPU. This method blocks until the array is available.
