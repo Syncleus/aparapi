@@ -40,7 +40,7 @@ public class ReturnFloatArrayVarTest extends com.aparapi.codegen.CodeGenJUnitBas
             + "      com_aparapi_codegen_test_ReturnFloatArrayVar__returnFloatArrayVar(this);\n"
             + "      return;\n"
             + "   }\n"
-            + "}"
+            + '}'
     };
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 

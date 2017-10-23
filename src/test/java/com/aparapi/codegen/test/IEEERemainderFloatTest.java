@@ -45,8 +45,8 @@ public class IEEERemainderFloatTest extends com.aparapi.codegen.CodeGenJUnitBase
 " return;\n" +
 " }\n" +
 " }\n" +
-"\n" +
-" "};
+            '\n' +
+            ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

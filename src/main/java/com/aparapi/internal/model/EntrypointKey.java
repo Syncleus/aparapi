@@ -46,7 +46,7 @@ final class EntrypointKey{
    }
 
    @Override public String toString() {
-      return "EntrypointKey [entrypointName=" + entrypointName + ", descriptor=" + descriptor + "]";
+      return "EntrypointKey [entrypointName=" + entrypointName + ", descriptor=" + descriptor + ']';
    }
 
    @Override public boolean equals(Object obj) {

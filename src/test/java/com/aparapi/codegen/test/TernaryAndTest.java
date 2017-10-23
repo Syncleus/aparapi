@@ -26,7 +26,7 @@ public class TernaryAndTest extends com.aparapi.codegen.CodeGenJUnitBase {
         + " int get_pass_id(This *this){\n"
         + " return this->passid;\n"
         + " }\n"
-        + "\n"
+        + '\n'
         + " float com_aparapi_codegen_test_TernaryAnd__random(This *this){\n"
         + " return(0.1f);\n"
         + " }\n"
@@ -41,7 +41,7 @@ public class TernaryAndTest extends com.aparapi.codegen.CodeGenJUnitBase {
         + " return;\n"
         + " }\n"
         + " }\n"
-        + " "};
+        + ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

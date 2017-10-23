@@ -24,6 +24,7 @@ public class StaticMethodCall extends Kernel {
         return i + j;
     }
 
+    @Override
     public void run() {
         out[0] = add(1, 2);
     }

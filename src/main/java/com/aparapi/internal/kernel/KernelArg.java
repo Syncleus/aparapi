@@ -278,6 +278,6 @@ public class KernelArg extends KernelArgJNI{
 
    @Override
    public String toString() {
-      return Reflection.getSimpleName(field.getType()) + " " + field.getName();
+      return Reflection.getSimpleName(field.getType()) + ' ' + field.getName();
    }
 }

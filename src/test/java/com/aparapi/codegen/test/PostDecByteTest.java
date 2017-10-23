@@ -26,7 +26,7 @@ public class PostDecByteTest extends com.aparapi.codegen.CodeGenJUnitBase {
         + " int get_pass_id(This *this){\n"
         + " return this->passid;\n"
         + " }\n"
-        + "\n"
+        + '\n'
         + " char com_aparapi_codegen_test_PostDecByte__incByte(This *this, char a){\n"
         + " return(a++);\n"
         + " }\n"
@@ -42,7 +42,7 @@ public class PostDecByteTest extends com.aparapi.codegen.CodeGenJUnitBase {
         + " return;\n"
         + " }\n"
         + " }\n"
-        + " "};
+        + ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

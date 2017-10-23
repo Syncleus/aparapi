@@ -203,17 +203,20 @@ public class ClassModel {
 
    /**
     * Determine if this is the superclass of some other named class.
-    * 
+    *
     * @param otherClassName The name of the class to compare against
-    * @return true if 'this' a superclass of another named class 
+    * @return true if 'this' a superclass of another named class
     */
    private boolean isSuperClass(String otherClassName) {
-      if (getClassWeAreModelling().getName().equals(otherClassName)) {
-         return true;
-      } else if (superClazz != null) {
-         return superClazz.isSuperClass(otherClassName);
-      } else {
-         return false;
+      ClassModel other = this;
+      while (true) {
+         if (other.getClassWeAreModelling().getName().equals(otherClassName)) {
+            return true;
+         } else if (other.superClazz != null) {
+            other = other.superClazz;
+         } else {
+            return false;
+         }
       }
    }
 
@@ -500,14 +503,14 @@ public class ClassModel {
       final StringBuilder returnValue = new StringBuilder();
       for (final String s : stringStack) {
          returnValue.append(s);
-         returnValue.append(" ");
+         returnValue.append(' ');
 
       }
 
       if (inMethod) {
          for (final String s : methodStack) {
             returnValue.append(s);
-            returnValue.append(" ");
+            returnValue.append(' ');
          }
       } else {
          returnValue.append(_insert);
@@ -560,8 +563,8 @@ public class ClassModel {
          methodName = "?";
          descriptor = _string;
       } else {
-         final int parenIndex = _string.indexOf("(");
-         final int dotIndex = _string.indexOf(".");
+         final int parenIndex = _string.indexOf('(');
+         final int dotIndex = _string.indexOf('.');
          descriptor = _string.substring(parenIndex);
          className = _string.substring(0, dotIndex);
          methodName = _string.substring(dotIndex + 1, parenIndex);
@@ -642,8 +645,8 @@ public class ClassModel {
       }
 
       if (inMethod) {
-         methodDescription = new MethodDescription(className, methodName, stringStack.toArray(new String[0])[0],
-               methodStack.toArray(new String[0]));
+         methodDescription = new MethodDescription(className, methodName, stringStack.toArray(new String[stringStack.size()])[0],
+                 methodStack.toArray(new String[methodStack.size()]));
       } else {
          System.out.println("can't convert to a description");
       }
@@ -748,7 +751,7 @@ public class ClassModel {
          final StringBuilder stringBuffer = new StringBuilder();
          for (final Access access : Access.values()) {
             if (access.bitIsSet(_accessFlags)) {
-               stringBuffer.append(" ").append(access.name().toLowerCase());
+               stringBuffer.append(' ').append(access.name().toLowerCase());
             }
          }
 
@@ -887,7 +890,7 @@ public class ClassModel {
          public String toString() {
             final StringBuilder sb = new StringBuilder();
             sb.append(getClassEntry().getNameUTF8Entry().getUTF8());
-            sb.append(".");
+            sb.append('.');
             sb.append(getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
             sb.append(getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8());
             return (sb.toString());
@@ -1109,7 +1112,7 @@ public class ClassModel {
                }
                // System.out.println("method "+name+" has signature of "+signature+" which has "+count+" args");
 
-               args = argList.toArray(new Arg[0]);
+               args = argList.toArray(new Arg[argList.size()]);
             }
 
             return (args);
@@ -1424,7 +1427,7 @@ public class ClassModel {
             final ConstantPool.NameAndTypeEntry nameAndTypeEntry = (ConstantPool.NameAndTypeEntry) _entry;
             final ConstantPool.UTF8Entry utf8NameEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getNameIndex());
             final ConstantPool.UTF8Entry utf8DescriptorEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getDescriptorIndex());
-            sb.append(utf8NameEntry.getUTF8()).append(".").append(utf8DescriptorEntry.getUTF8());
+            sb.append(utf8NameEntry.getUTF8()).append('.').append(utf8DescriptorEntry.getUTF8());
          } else if (_entry instanceof ConstantPool.MethodEntry) {
             final ConstantPool.MethodEntry methodEntry = (ConstantPool.MethodEntry) _entry;
             final ConstantPool.ClassEntry classEntry = (ConstantPool.ClassEntry) get(methodEntry.getClassIndex());
@@ -1433,7 +1436,7 @@ public class ClassModel {
                   .getNameAndTypeIndex());
             final ConstantPool.UTF8Entry utf8NameEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getNameIndex());
             final ConstantPool.UTF8Entry utf8DescriptorEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getDescriptorIndex());
-            sb.append(convert(utf8DescriptorEntry.getUTF8(), utf8Entry.getUTF8() + "." + utf8NameEntry.getUTF8()));
+            sb.append(convert(utf8DescriptorEntry.getUTF8(), utf8Entry.getUTF8() + '.' + utf8NameEntry.getUTF8()));
          } else if (_entry instanceof ConstantPool.InterfaceMethodEntry) {
             final ConstantPool.InterfaceMethodEntry interfaceMethodEntry = (ConstantPool.InterfaceMethodEntry) _entry;
             final ConstantPool.ClassEntry classEntry = (ConstantPool.ClassEntry) get(interfaceMethodEntry.getClassIndex());
@@ -1442,7 +1445,7 @@ public class ClassModel {
                   .getNameAndTypeIndex());
             final ConstantPool.UTF8Entry utf8NameEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getNameIndex());
             final ConstantPool.UTF8Entry utf8DescriptorEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getDescriptorIndex());
-            sb.append(convert(utf8DescriptorEntry.getUTF8(), utf8Entry.getUTF8() + "." + utf8NameEntry.getUTF8()));
+            sb.append(convert(utf8DescriptorEntry.getUTF8(), utf8Entry.getUTF8() + '.' + utf8NameEntry.getUTF8()));
          } else if (_entry instanceof ConstantPool.FieldEntry) {
             final ConstantPool.FieldEntry fieldEntry = (ConstantPool.FieldEntry) _entry;
             final ConstantPool.ClassEntry classEntry = (ConstantPool.ClassEntry) get(fieldEntry.getClassIndex());
@@ -1451,7 +1454,7 @@ public class ClassModel {
                   .getNameAndTypeIndex());
             final ConstantPool.UTF8Entry utf8NameEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getNameIndex());
             final ConstantPool.UTF8Entry utf8DescriptorEntry = (ConstantPool.UTF8Entry) get(nameAndTypeEntry.getDescriptorIndex());
-            sb.append(convert(utf8DescriptorEntry.getUTF8(), utf8Entry.getUTF8() + "." + utf8NameEntry.getUTF8()));
+            sb.append(convert(utf8DescriptorEntry.getUTF8(), utf8Entry.getUTF8() + '.' + utf8NameEntry.getUTF8()));
          }
 
          return (sb.toString());
@@ -1908,6 +1911,7 @@ public class ClassModel {
                return (descriptorIndex);
             }
 
+            @Override
             public int getLength() {
                return (usageLength);
             }
@@ -1955,6 +1959,7 @@ public class ClassModel {
             }
          }
 
+         @Override
          public RealLocalVariableInfo getVariable(int _pc, int _index) {
             RealLocalVariableInfo returnValue = null;
             // System.out.println("pc = " + _pc + " index = " + _index);
@@ -2304,56 +2309,74 @@ public class ClassModel {
                throw new IllegalStateException("corrupted state reading attributes for " + name);
             }
             final String attributeName = utf8Entry.getUTF8();
-            if (attributeName.equals(LOCALVARIABLETABLE_TAG)) {
-               localVariableTableEntry = new RealLocalVariableTableEntry(_byteReader, attributeNameIndex, length);
-               entry = (RealLocalVariableTableEntry) localVariableTableEntry;
-            } else if (attributeName.equals(CONSTANTVALUE_TAG)) {
-               entry = new ConstantValueEntry(_byteReader, attributeNameIndex, length);
-            } else if (attributeName.equals(LINENUMBERTABLE_TAG)) {
-               lineNumberTableEntry = new LineNumberTableEntry(_byteReader, attributeNameIndex, length);
-               entry = lineNumberTableEntry;
-            } else if (attributeName.equals(SOURCEFILE_TAG)) {
-               sourceFileEntry = new SourceFileEntry(_byteReader, attributeNameIndex, length);
-               entry = sourceFileEntry;
-            } else if (attributeName.equals(SYNTHETIC_TAG)) {
-               syntheticEntry = new SyntheticEntry(_byteReader, attributeNameIndex, length);
-               entry = syntheticEntry;
-            } else if (attributeName.equals(EXCEPTIONS_TAG)) {
-               exceptionEntry = new ExceptionEntry(_byteReader, attributeNameIndex, length);
-               entry = exceptionEntry;
-            } else if (attributeName.equals(INNERCLASSES_TAG)) {
-               entry = new InnerClassesEntry(_byteReader, attributeNameIndex, length);
-            } else if (attributeName.equals(DEPRECATED_TAG)) {
-               deprecatedEntry = new DeprecatedEntry(_byteReader, attributeNameIndex, length);
-               entry = deprecatedEntry;
-            } else if (attributeName.equals(CODE_TAG)) {
-               codeEntry = new CodeEntry(_byteReader, attributeNameIndex, length);
-               entry = codeEntry;
-            } else if (attributeName.equals(ENCLOSINGMETHOD_TAG)) {
-               enclosingMethodEntry = new EnclosingMethodEntry(_byteReader, attributeNameIndex, length);
-               entry = enclosingMethodEntry;
-            } else if (attributeName.equals(SIGNATURE_TAG)) {
-               entry = new SignatureEntry(_byteReader, attributeNameIndex, length);
-            } else if (attributeName.equals(RUNTIMEINVISIBLEANNOTATIONS_TAG)) {
-               runtimeInvisibleAnnotationsEntry = new RuntimeAnnotationsEntry(_byteReader, attributeNameIndex, length);
-               entry = runtimeInvisibleAnnotationsEntry;
-            } else if (attributeName.equals(RUNTIMEVISIBLEANNOTATIONS_TAG)) {
-               runtimeVisibleAnnotationsEntry = new RuntimeAnnotationsEntry(_byteReader, attributeNameIndex, length);
-               entry = runtimeVisibleAnnotationsEntry;
-            } else if (attributeName.equals(BOOTSTRAPMETHODS_TAG)) {
-               bootstrapMethodsEntry = new BootstrapMethodsEntry(_byteReader, attributeNameIndex, length);
-               entry = bootstrapMethodsEntry;
-               // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.21
-            } else if (attributeName.equals(STACKMAPTABLE_TAG)) {
-               // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.4
+            switch (attributeName) {
+               case LOCALVARIABLETABLE_TAG:
+                  localVariableTableEntry = new RealLocalVariableTableEntry(_byteReader, attributeNameIndex, length);
+                  entry = (RealLocalVariableTableEntry) localVariableTableEntry;
+                  break;
+               case CONSTANTVALUE_TAG:
+                  entry = new ConstantValueEntry(_byteReader, attributeNameIndex, length);
+                  break;
+               case LINENUMBERTABLE_TAG:
+                  lineNumberTableEntry = new LineNumberTableEntry(_byteReader, attributeNameIndex, length);
+                  entry = lineNumberTableEntry;
+                  break;
+               case SOURCEFILE_TAG:
+                  sourceFileEntry = new SourceFileEntry(_byteReader, attributeNameIndex, length);
+                  entry = sourceFileEntry;
+                  break;
+               case SYNTHETIC_TAG:
+                  syntheticEntry = new SyntheticEntry(_byteReader, attributeNameIndex, length);
+                  entry = syntheticEntry;
+                  break;
+               case EXCEPTIONS_TAG:
+                  exceptionEntry = new ExceptionEntry(_byteReader, attributeNameIndex, length);
+                  entry = exceptionEntry;
+                  break;
+               case INNERCLASSES_TAG:
+                  entry = new InnerClassesEntry(_byteReader, attributeNameIndex, length);
+                  break;
+               case DEPRECATED_TAG:
+                  deprecatedEntry = new DeprecatedEntry(_byteReader, attributeNameIndex, length);
+                  entry = deprecatedEntry;
+                  break;
+               case CODE_TAG:
+                  codeEntry = new CodeEntry(_byteReader, attributeNameIndex, length);
+                  entry = codeEntry;
+                  break;
+               case ENCLOSINGMETHOD_TAG:
+                  enclosingMethodEntry = new EnclosingMethodEntry(_byteReader, attributeNameIndex, length);
+                  entry = enclosingMethodEntry;
+                  break;
+               case SIGNATURE_TAG:
+                  entry = new SignatureEntry(_byteReader, attributeNameIndex, length);
+                  break;
+               case RUNTIMEINVISIBLEANNOTATIONS_TAG:
+                  runtimeInvisibleAnnotationsEntry = new RuntimeAnnotationsEntry(_byteReader, attributeNameIndex, length);
+                  entry = runtimeInvisibleAnnotationsEntry;
+                  break;
+               case RUNTIMEVISIBLEANNOTATIONS_TAG:
+                  runtimeVisibleAnnotationsEntry = new RuntimeAnnotationsEntry(_byteReader, attributeNameIndex, length);
+                  entry = runtimeVisibleAnnotationsEntry;
+                  break;
+               case BOOTSTRAPMETHODS_TAG:
+                  bootstrapMethodsEntry = new BootstrapMethodsEntry(_byteReader, attributeNameIndex, length);
+                  entry = bootstrapMethodsEntry;
+                  // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.21
+                  break;
+               case STACKMAPTABLE_TAG:
+                  // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.4
 
-               entry = new StackMapTableEntry(_byteReader, attributeNameIndex, length);
-            } else if (attributeName.equals(LOCALVARIABLETYPETABLE_TAG)) {
-               // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.14
-               entry = new LocalVariableTypeTableEntry(_byteReader, attributeNameIndex, length);
-            } else {
-               logger.warning("Found unexpected Attribute (name = " + attributeName + ")");
-               entry = new OtherEntry(_byteReader, attributeNameIndex, length);
+                  entry = new StackMapTableEntry(_byteReader, attributeNameIndex, length);
+                  break;
+               case LOCALVARIABLETYPETABLE_TAG:
+                  // http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.14
+                  entry = new LocalVariableTypeTableEntry(_byteReader, attributeNameIndex, length);
+                  break;
+               default:
+                  logger.warning("Found unexpected Attribute (name = " + attributeName + ")");
+                  entry = new OtherEntry(_byteReader, attributeNameIndex, length);
+                  break;
             }
             attributePoolEntries.add(entry);
 
@@ -2567,7 +2590,7 @@ public class ClassModel {
       }
 
       public String toString() {
-         return getClassModel().getClassWeAreModelling().getName() + "." + getName() + " " + getDescriptor();
+         return getClassModel().getClassWeAreModelling().getName() + '.' + getName() + ' ' + getDescriptor();
       }
 
       public ClassModel getOwnerClassModel() {
@@ -2687,21 +2710,27 @@ public class ClassModel {
    }
 
    private ClassModelField getField(String _name, String _descriptor) {
-      for (final ClassModelField entry : fields) {
-         if (entry.getName().equals(_name) && entry.getDescriptor().equals(_descriptor)) {
-            return (entry);
+      ClassModel other = this;
+      while (true) {
+         for (final ClassModelField entry : other.fields) {
+            if (entry.getName().equals(_name) && entry.getDescriptor().equals(_descriptor)) {
+               return (entry);
+            }
          }
+         other = other.superClazz;
       }
-      return superClazz.getField(_name, _descriptor);
    }
 
    public ClassModelField getField(String _name) {
-      for (final ClassModelField entry : fields) {
-         if (entry.getName().equals(_name)) {
-            return (entry);
+      ClassModel other = this;
+      while (true) {
+         for (final ClassModelField entry : other.fields) {
+            if (entry.getName().equals(_name)) {
+               return (entry);
+            }
          }
+         other = other.superClazz;
       }
-      return superClazz.getField(_name);
    }
 
    public ClassModelMethod getMethod(String _name, String _descriptor) {
@@ -2715,7 +2744,7 @@ public class ClassModel {
       for (final ClassModelMethod entry : methods) {
          if (entry.getName().equals(_name) && entry.getDescriptor().equals(_descriptor)) {
             if (logger.isLoggable(Level.FINE)) {
-               logger.fine("Found " + clazz.getName() + "." + entry.getName() + " " + entry.getDescriptor() + " for "
+               logger.fine("Found " + clazz.getName() + '.' + entry.getName() + ' ' + entry.getDescriptor() + " for "
                      + _name.replace('/', '.'));
             }
             return (entry);
@@ -2728,12 +2757,12 @@ public class ClassModel {
       return (fields);
    }
 
-   /**
-    * Look up a ConstantPool MethodEntry and return the corresponding Method.  
-    * 
+      /**
+    * Look up a ConstantPool MethodEntry and return the corresponding Method.
+    *
     * @param _methodEntry The ConstantPool MethodEntry we want.
     * @param _isSpecial True if we wish to delegate to super (to support <code>super.foo()</code>)
-    * 
+    *
     * @return The Method or null if we fail to locate a given method.
     */
    public ClassModelMethod getMethod(MethodEntry _methodEntry, boolean _isSpecial) {
@@ -2754,6 +2783,41 @@ public class ClassModel {
       if (methodOrNull == null)
          return superClazz != null ? superClazz.getMethod(_methodEntry, false) : (null);
       return methodOrNull;
+   }
+
+
+   /**
+    * Look up a ConstantPool MethodEntry and return the corresponding Method.
+    *
+    * @param _methodEntry The ConstantPool MethodEntry we want.
+    * @param _isSpecial   True if we wish to delegate to super (to support <code>super.foo()</code>)
+    * @return The Method or null if we fail to locate a given method.
+    */
+   public ClassModelMethod getMethod0(final MethodEntry _methodEntry, boolean _isSpecial) {
+      ClassModel other = this;
+      final NameAndTypeEntry meNT = _methodEntry.getNameAndTypeEntry();
+      String meNT8 = meNT.getNameUTF8Entry().getUTF8();
+      final String entryClassNameInDotForm = meNT8.replace('/', '.');
+      while (true) {
+
+         // Shortcut direct calls to supers to allow "foo() { super.foo() }" type stuff to work
+         if (_isSpecial && (other.superClazz != null) && other.superClazz.isSuperClass(entryClassNameInDotForm)) {
+            if (other.logger.isLoggable(Level.FINE)) {
+               other.logger.fine("going to look in super:" + other.superClazz.getClassWeAreModelling().getName() + " on behalf of "
+                       + entryClassNameInDotForm);
+            }
+            _isSpecial = false;
+            other = other.superClazz;
+            continue;
+         }
+
+         NameAndTypeEntry nameAndTypeEntry = meNT;
+         ClassModelMethod methodOrNull = other.getMethodOrNull(nameAndTypeEntry.getNameUTF8Entry().getUTF8(), nameAndTypeEntry
+                 .getDescriptorUTF8Entry().getUTF8());
+         if (methodOrNull == null)
+            return other.superClazz != null ? other.superClazz.getMethod(_methodEntry, false) : (null);
+         return methodOrNull;
+      }
    }
 
    //   private ValueCache<MethodKey, MethodModel, AparapiException> methodModelCache = ValueCache.on(this::computeMethodModel);
@@ -2826,9 +2890,9 @@ public class ClassModel {
    private Entrypoint getEntrypoint(String _entrypointName, String _descriptor, Object _k) throws AparapiException {
       if (CacheEnabler.areCachesEnabled()) {
          EntrypointKey key = EntrypointKey.of(_entrypointName, _descriptor);
-         long s = System.nanoTime();
+         //long s = System.nanoTime();
          Entrypoint entrypointWithoutKernel = entrypointCache.computeIfAbsent(key);
-         long e = System.nanoTime() - s;
+         //long e = System.nanoTime() - s;
          return entrypointWithoutKernel.cloneForKernel(_k);
       } else {
          final MethodModel method = getMethodModel(_entrypointName, _descriptor);

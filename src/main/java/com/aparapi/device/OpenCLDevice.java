@@ -129,7 +129,7 @@ public class OpenCLDevice extends Device{
          // Hopefully(!) this equates to the recognisable name of the vendor, e.g. "Intel", "NVIDIA", "AMD"
          // Note, it is not necessarily the hardware vendor, e.g. if the AMD CPU driver (i.e. platform) is used for an Intel CPU, this will be "AMD"
          String[] split = vendor.split("[\\s\\(\\)]"); // split on whitespace or on '(' or ')' since Intel use "Intel(R)" here
-         shortDescription = split[0] + "<" + getType() + ">";
+         shortDescription = split[0] + '<' + getType() + '>';
       }
       return shortDescription;
    }
@@ -155,8 +155,9 @@ public class OpenCLDevice extends Device{
                kernel.invoke(args);
             }
          } else {
-            if (method.getName().equals("put")) {
-               System.out.println("put not implemented");
+            switch (method.getName()) {
+               case "put":
+                  System.out.println("put not implemented");
 
                /*
                for (Object arg : args) {
@@ -179,8 +180,9 @@ public class OpenCLDevice extends Device{
                   }
                }
                */
-            } else if (method.getName().equals("get")) {
-               System.out.println("get not implemented");
+                  break;
+               case "get":
+                  System.out.println("get not implemented");
                /*
                for (Object arg : args) {
                   Class<?> argClass = arg.getClass();
@@ -202,20 +204,25 @@ public class OpenCLDevice extends Device{
                   }
                }
                */
-            } else if (method.getName().equals("begin")) {
-               System.out.println("begin not implemented");
-            } else if (method.getName().equals("dispose")) {
-              // System.out.println("dispose");
-               for (OpenCLKernel k:map.values()){
-                   k.dispose();
-               }
-               program.dispose();
-               map.clear();
-               disposed=true;
-            } else if (method.getName().equals("end")) {
-               System.out.println("end not implemented");
-            }  else if (method.getName().equals("getProfileInfo")){
-               proxy = program.getProfileInfo();
+                  break;
+               case "begin":
+                  System.out.println("begin not implemented");
+                  break;
+               case "dispose":
+                  // System.out.println("dispose");
+                  for (OpenCLKernel k : map.values()) {
+                     k.dispose();
+                  }
+                  program.dispose();
+                  map.clear();
+                  disposed = true;
+                  break;
+               case "end":
+                  System.out.println("end not implemented");
+                  break;
+               case "getProfileInfo":
+                  proxy = program.getProfileInfo();
+                  break;
             }
          }
          return proxy;
@@ -317,7 +324,7 @@ public class OpenCLDevice extends Device{
 
          try {
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-               sourceBuilder.append(line).append("\n");
+               sourceBuilder.append(line).append('\n');
             }
          } catch (final IOException e) {
             // TODO Auto-generated catch block
@@ -345,7 +352,7 @@ public class OpenCLDevice extends Device{
    }
 
    public <T extends OpenCL<T>> T bind(Class<T> _interface, String _source) {
-      final Map<String, List<OpenCLArgDescriptor>> kernelNameToArgsMap = new HashMap<String, List<OpenCLArgDescriptor>>();
+      final Map<String, List<OpenCLArgDescriptor>> kernelNameToArgsMap = new HashMap<>();
 
       if (_source == null) {
          final StringBuilder sourceBuilder = new StringBuilder();
@@ -353,7 +360,7 @@ public class OpenCLDevice extends Device{
          for (final Annotation a : _interface.getAnnotations()) {
             if (a instanceof Source) {
                final Source source = (Source) a;
-               sourceBuilder.append(source.value()).append("\n");
+               sourceBuilder.append(source.value()).append('\n');
                interfaceIsAnnotated = true;
             } else if (a instanceof Resource) {
                final Resource sourceResource = (Resource) a;
@@ -379,7 +386,7 @@ public class OpenCLDevice extends Device{
                      //  System.out.println("   annotation "+a);
                      // System.out.println("   annotation type " + a.annotationType());
                      if (a instanceof Kernel) {
-                        sourceBuilder.append("__kernel void " + m.getName() + "(");
+                        sourceBuilder.append("__kernel void ").append(m.getName()).append('(');
                         final List<OpenCLArgDescriptor> args = getArgs(m);
 
                         boolean first = true;
@@ -387,12 +394,12 @@ public class OpenCLDevice extends Device{
                            if (first) {
                               first = false;
                            } else {
-                              sourceBuilder.append(",");
+                              sourceBuilder.append(',');
                            }
-                           sourceBuilder.append("\n   " + arg);
+                           sourceBuilder.append("\n   ").append(arg);
                         }
 
-                        sourceBuilder.append(")");
+                        sourceBuilder.append(')');
                         final Kernel kernel = (Kernel) a;
                         sourceBuilder.append(kernel.value());
                         kernelNameToArgsMap.put(m.getName(), args);
@@ -416,14 +423,14 @@ public class OpenCLDevice extends Device{
       final OpenCLProgram program = new OpenCLProgram(this, _source).createProgram(this);
 
       final Map<String, OpenCLKernel> map = new HashMap<>();
-      for (final String name : kernelNameToArgsMap.keySet()) {
-         final OpenCLKernel kernel = OpenCLKernel.createKernel(program, name, kernelNameToArgsMap.get(name));
+      for (final Map.Entry<String, List<OpenCLArgDescriptor>> stringListEntry : kernelNameToArgsMap.entrySet()) {
+         final OpenCLKernel kernel = OpenCLKernel.createKernel(program, stringListEntry.getKey(), stringListEntry.getValue());
          //final OpenCLKernel kernel = new OpenCLKernel(program, name, kernelNameToArgsMap.get(name));
          if (kernel == null) {
             throw new IllegalStateException("kernel is null");
          }
 
-         map.put(name, kernel);
+         map.put(stringListEntry.getKey(), kernel);
       }
 
       final OpenCLInvocationHandler<T> invocationHandler = new OpenCLInvocationHandler<>(program, map);
@@ -528,7 +535,7 @@ public class OpenCLDevice extends Device{
          s.append(workItemSize);
       }
 
-      s.append("}");
+      s.append('}');
 
       return ("Device " + deviceId + "\n  vendor = " + getOpenCLPlatform().getVendor()
             + "\n  type:" + type + "\n  maxComputeUnits=" + maxComputeUnits + "\n  maxWorkItemDimensions="

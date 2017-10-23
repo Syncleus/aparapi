@@ -99,9 +99,9 @@ public class SwingDiff{
          // Create and add the style
          final Style rootStyle = sc.addStyle("Root", null);
          rootStyle.addAttribute(StyleConstants.Foreground, Color.black);
-         rootStyle.addAttribute(StyleConstants.FontSize, new Integer(12));
+         rootStyle.addAttribute(StyleConstants.FontSize, 12);
          rootStyle.addAttribute(StyleConstants.FontFamily, "serif");
-         rootStyle.addAttribute(StyleConstants.Bold, new Boolean(false));
+         rootStyle.addAttribute(StyleConstants.Bold, Boolean.FALSE);
          final Style heading1Style = sc.addStyle("Heading1", rootStyle);
          heading1Style.addAttribute(StyleConstants.Foreground, Color.blue);
 
@@ -134,19 +134,7 @@ public class SwingDiff{
          frame.getContentPane().add(panel);
          frame.pack();
          frame.setVisible(true);
-      } catch (ClassNotFoundException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (InstantiationException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (IllegalAccessException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (UnsupportedLookAndFeelException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (BadLocationException e) {
+      } catch (ClassNotFoundException | BadLocationException | UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
@@ -166,7 +154,7 @@ public class SwingDiff{
    private static String arrayToString(String[] array) {
       StringBuilder stringBuilder = new StringBuilder();
       for (String line : array) {
-         stringBuilder.append(line).append("\n");
+         stringBuilder.append(line).append('\n');
       }
       return (stringBuilder.toString().trim());
    }
@@ -175,15 +163,12 @@ public class SwingDiff{
       String[] content = null;
       try {
          BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(string)));
-         List<String> lines = new ArrayList<String>();
+         List<String> lines = new ArrayList<>();
          for (String line = reader.readLine(); line != null; line = reader.readLine()) {
             lines.add(line);
          }
          reader.close();
-         content = lines.toArray(new String[0]);
-      } catch (FileNotFoundException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
+         content = lines.toArray(new String[lines.size()]);
       } catch (IOException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
@@ -198,13 +183,10 @@ public class SwingDiff{
          BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(string)));
          StringBuilder sb = new StringBuilder();
          for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-            sb.append(line).append("\n");
+            sb.append(line).append('\n');
          }
          reader.close();
          content = sb.toString();
-      } catch (FileNotFoundException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
       } catch (IOException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();

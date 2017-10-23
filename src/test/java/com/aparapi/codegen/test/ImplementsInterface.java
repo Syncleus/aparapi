@@ -26,10 +26,12 @@ public class ImplementsInterface extends Kernel implements IFoo {
 
     int ival = 3;
 
+    @Override
     public int bar(int n) {
         return n + ival;
     }
 
+    @Override
     public void run() {
         out[0] = bar(1);
         @SuppressWarnings("unused") boolean pass = false;

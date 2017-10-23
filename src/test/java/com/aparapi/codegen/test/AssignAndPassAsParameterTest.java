@@ -28,7 +28,7 @@ public class AssignAndPassAsParameterTest extends com.aparapi.codegen.CodeGenJUn
         + " int get_pass_id(This *this){\n"
         + " return this->passid;\n"
         + " }\n"
-        + "\n"
+        + '\n'
         + " int com_aparapi_codegen_test_AssignAndPassAsParameter__actuallyDoIt(This *this, int a){\n"
         + " return(1);\n"
         + " }\n"
@@ -47,8 +47,8 @@ public class AssignAndPassAsParameterTest extends com.aparapi.codegen.CodeGenJUn
         + " return;\n"
         + " }\n"
         + " }\n"
-        + "\n"
-        + " "};
+        + '\n'
+        + ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

@@ -2308,11 +2308,11 @@ public abstract class Kernel implements Cloneable {
                 Device device = preferredDevices.get(i);
                 preferredDevicesSummary.append(device.getShortDescription());
                 if (i < preferredDevices.size() - 1) {
-                    preferredDevicesSummary.append("|");
+                    preferredDevicesSummary.append('|');
                 }
             }
-            preferredDevicesSummary.append("}");
-            return Reflection.getSimpleName(getClass()) + ", devices=" + preferredDevicesSummary.toString();
+            preferredDevicesSummary.append('}');
+            return Reflection.getSimpleName(getClass()) + ", devices=" + preferredDevicesSummary;
         } else {
             return Reflection.getSimpleName(getClass()) + ", modes=" + executionModes + ", current = " + executionMode;
         }
@@ -2533,13 +2533,13 @@ public abstract class Kernel implements Cloneable {
 
     private static String toClassShortNameIfAny(final Class<?> retClass) {
         if (retClass.isArray()) {
-            return "[" + toClassShortNameIfAny(retClass.getComponentType());
+            return '[' + toClassShortNameIfAny(retClass.getComponentType());
         }
         final String strRetClass = retClass.toString();
         final String mapping = typeToLetterMap.get(strRetClass);
         // System.out.println("strRetClass = <" + strRetClass + ">, mapping = " + mapping);
         if (mapping == null)
-            return "[" + retClass.getName() + ";";
+            return '[' + retClass.getName() + ';';
         return mapping;
     }
 
@@ -2568,7 +2568,7 @@ public abstract class Kernel implements Cloneable {
                     if (toSignature(_methodReferenceEntry).equals(toSignature(kernelMethod))) {
                         final OpenCLMapping annotation = kernelMethod.getAnnotation(OpenCLMapping.class);
                         final String mapTo = annotation.mapTo();
-                        if (!mapTo.equals("")) {
+                        if (!mapTo.isEmpty()) {
                             mappedName = mapTo;
                             // System.out.println("mapTo = " + mapTo);
                         }
@@ -3251,7 +3251,7 @@ public abstract class Kernel implements Cloneable {
         for (Class<?> parameterClass : method.getParameterTypes()) {
             sb.append(toClassShortNameIfAny(parameterClass));
         }
-        sb.append(")");
+        sb.append(')');
         return sb.toString();
     }
 
@@ -3282,7 +3282,7 @@ public abstract class Kernel implements Cloneable {
                     // ultimately, need a way to constrain this based upon signature (to disambiguate abs(float) from abs(int);
                     final OpenCLMapping annotation = method.getAnnotation(OpenCLMapping.class);
                     final String mapTo = annotation.mapTo();
-                    if (mapTo != null && !mapTo.equals("")) {
+                    if (mapTo != null && !mapTo.isEmpty()) {
                         properties.put(toSignature(method), mapTo);
                     }
                 }

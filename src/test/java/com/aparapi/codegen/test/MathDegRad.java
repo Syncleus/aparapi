@@ -18,6 +18,7 @@ package com.aparapi.codegen.test;
 import com.aparapi.Kernel;
 
 public class MathDegRad extends Kernel {
+    @Override
     public void run() {
         double d = -1.0;
         float f = -1.0f;

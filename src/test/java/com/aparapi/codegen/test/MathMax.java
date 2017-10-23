@@ -18,6 +18,7 @@ package com.aparapi.codegen.test;
 import com.aparapi.Kernel;
 
 public class MathMax extends Kernel {
+    @Override
     public void run() {
         double d1 = -1.0, d2 = 1.0;
         float f1 = -1.0f, f2 = 1.0f;

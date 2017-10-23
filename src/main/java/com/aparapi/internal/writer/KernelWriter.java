@@ -170,28 +170,40 @@ public abstract class KernelWriter extends BlockWriter{
     * @return Suitably converted string, "char*", etc
     */
    @Override public String convertType(String _typeDesc, boolean useClassModel, boolean isLocal) {
-      if (_typeDesc.equals("Z") || _typeDesc.equals("boolean")) {
-         return (cvtBooleanToChar);
-      } else if (_typeDesc.equals("[Z") || _typeDesc.equals("boolean[]")) {
-         return isLocal ? (cvtBooleanArrayToChar) : (cvtBooleanArrayToCharStar);
-      } else if (_typeDesc.equals("B") || _typeDesc.equals("byte")) {
-         return (cvtByteToChar);
-      } else if (_typeDesc.equals("[B") || _typeDesc.equals("byte[]")) {
-         return isLocal ? (cvtByteArrayToChar) : (cvtByteArrayToCharStar);
-      } else if (_typeDesc.equals("C") || _typeDesc.equals("char")) {
-         return (cvtCharToShort);
-      } else if (_typeDesc.equals("[C") || _typeDesc.equals("char[]")) {
-         return isLocal ? (cvtCharArrayToShort) : (cvtCharArrayToShortStar);
-      } else if (_typeDesc.equals("[I") || _typeDesc.equals("int[]")) {
-         return isLocal ? (cvtIntArrayToInt) : (cvtIntArrayToIntStar);
-      } else if (_typeDesc.equals("[F") || _typeDesc.equals("float[]")) {
-         return isLocal ? (cvtFloatArrayToFloat) : (cvtFloatArrayToFloatStar);
-      } else if (_typeDesc.equals("[D") || _typeDesc.equals("double[]")) {
-         return isLocal ? (cvtDoubleArrayToDouble) : (cvtDoubleArrayToDoubleStar);
-      } else if (_typeDesc.equals("[J") || _typeDesc.equals("long[]")) {
-         return isLocal ? (cvtLongArrayToLong) : (cvtLongArrayToLongStar);
-      } else if (_typeDesc.equals("[S") || _typeDesc.equals("short[]")) {
-         return isLocal ? (cvtShortArrayToShort) : (cvtShortArrayToShortStar);
+      switch (_typeDesc) {
+         case "Z":
+         case "boolean":
+            return (cvtBooleanToChar);
+         case "[Z":
+         case "boolean[]":
+            return isLocal ? (cvtBooleanArrayToChar) : (cvtBooleanArrayToCharStar);
+         case "B":
+         case "byte":
+            return (cvtByteToChar);
+         case "[B":
+         case "byte[]":
+            return isLocal ? (cvtByteArrayToChar) : (cvtByteArrayToCharStar);
+         case "C":
+         case "char":
+            return (cvtCharToShort);
+         case "[C":
+         case "char[]":
+            return isLocal ? (cvtCharArrayToShort) : (cvtCharArrayToShortStar);
+         case "[I":
+         case "int[]":
+            return isLocal ? (cvtIntArrayToInt) : (cvtIntArrayToIntStar);
+         case "[F":
+         case "float[]":
+            return isLocal ? (cvtFloatArrayToFloat) : (cvtFloatArrayToFloatStar);
+         case "[D":
+         case "double[]":
+            return isLocal ? (cvtDoubleArrayToDouble) : (cvtDoubleArrayToDoubleStar);
+         case "[J":
+         case "long[]":
+            return isLocal ? (cvtLongArrayToLong) : (cvtLongArrayToLongStar);
+         case "[S":
+         case "short[]":
+            return isLocal ? (cvtShortArrayToShort) : (cvtShortArrayToShortStar);
       }
       // if we get this far, we haven't matched anything yet
       if (useClassModel) {
@@ -313,10 +325,10 @@ public abstract class KernelWriter extends BlockWriter{
 
    private final static String __private = "__private";
 
-   private final static String LOCAL_ANNOTATION_NAME = "L" + com.aparapi.Kernel.Local.class.getName().replace('.', '/') + ";";
+   private final static String LOCAL_ANNOTATION_NAME = 'L' + com.aparapi.Kernel.Local.class.getName().replace('.', '/') + ';';
 
-   private final static String CONSTANT_ANNOTATION_NAME = "L" + com.aparapi.Kernel.Constant.class.getName().replace('.', '/')
-         + ";";
+   private final static String CONSTANT_ANNOTATION_NAME = 'L' + com.aparapi.Kernel.Constant.class.getName().replace('.', '/')
+         + ';';
 
    @Override public void write(Entrypoint _entryPoint) throws CodeGenException {
       final List<String> thisStruct = new ArrayList<>();
@@ -370,9 +382,9 @@ public abstract class KernelWriter extends BlockWriter{
          //if we have a multiple dimensional array we want to remember the number of dimensions
          while (signature.startsWith("[")) {
             if (isPointer == false) {
-               argLine.append(argType).append(" ");
+               argLine.append(argType).append(' ');
                if (!(type.equals(__private) && IMPLICIT_PRIVATE_FIELDS)) {
-                  thisStructLine.append(type).append(" ");
+                  thisStructLine.append(type).append(' ');
                }
             }
             isPointer = true;
@@ -395,13 +407,13 @@ public abstract class KernelWriter extends BlockWriter{
             thisStructLine.append(convertType(ClassModel.typeName(signature.charAt(0)), false, false));
          }
 
-         argLine.append(" ");
-         thisStructLine.append(" ");
+         argLine.append(' ');
+         thisStructLine.append(' ');
 
          if (isPointer) {
-            argLine.append("*");
+            argLine.append('*');
             if (privateMemorySize == null) {
-               thisStructLine.append("*");
+               thisStructLine.append('*');
             }
          }
 
@@ -419,7 +431,7 @@ public abstract class KernelWriter extends BlockWriter{
          }
          argLines.add(argLine.toString());
          if (privateMemorySize != null) {
-            thisStructLine.append("[").append(privateMemorySize).append("]");
+            thisStructLine.append('[').append(privateMemorySize).append(']');
          }
          thisStruct.add(thisStructLine.toString());
 
@@ -538,7 +550,7 @@ public abstract class KernelWriter extends BlockWriter{
 
                final String cType = convertType(field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8(), true, false);
                assert cType != null : "could not find type for " + field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-               writeln(cType + " " + field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8() + ";");
+               writeln(cType + ' ' + field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8() + ';');
             }
 
             // compute total size for OpenCL buffer
@@ -552,14 +564,14 @@ public abstract class KernelWriter extends BlockWriter{
             if (totalStructSize > alignTo) {
                while (totalSize < totalStructSize) {
                   // structBuffer.put((byte)-1);
-                  writeln("char _pad_" + totalSize + ";");
+                  writeln("char _pad_" + totalSize + ';');
                   totalSize++;
                }
             }
 
             out();
             newLine();
-            write("} " + mangledClassName + ";");
+            write("} " + mangledClassName + ';');
             newLine();
          }
       }
@@ -603,7 +615,7 @@ public abstract class KernelWriter extends BlockWriter{
          }
          write(convertType(returnType, true, false));
 
-         write(mm.getName() + "(");
+         write(mm.getName() + '(');
 
          if (!mm.getMethod().isStatic()) {
             if ((mm.getMethod().getClassModel() == _entryPoint.getClassModel())
@@ -648,7 +660,7 @@ public abstract class KernelWriter extends BlockWriter{
          newLine();
       }
 
-      write("__kernel void " + _entryPoint.getMethodModel().getSimpleName() + "(");
+      write("__kernel void " + _entryPoint.getMethodModel().getSimpleName() + '(');
 
       in();
       boolean first = true;

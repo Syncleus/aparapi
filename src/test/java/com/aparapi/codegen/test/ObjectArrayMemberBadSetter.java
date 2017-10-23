@@ -30,12 +30,13 @@ public class ObjectArrayMemberBadSetter extends Kernel {
         dummy[0] = new DummyOOA();
     }
 
+    @Override
     public void run() {
         int myId = getGlobalId();
         dummy[myId].setFloatField(dummy[myId].getFloatField() + (float) 2.0);
     }
 
-    final class DummyOOA {
+    static final class DummyOOA {
         int mem;
 
         float floatField;

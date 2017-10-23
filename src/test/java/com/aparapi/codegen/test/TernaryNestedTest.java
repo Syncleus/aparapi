@@ -39,7 +39,7 @@ public class TernaryNestedTest extends com.aparapi.codegen.CodeGenJUnitBase {
         + "      int count = (a!=0)?((b!=0)?1:2):((c!=0)?3:4);\n"
         + "      return;\n"
         + "   }\n"
-        + "}"};
+        + '}'};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

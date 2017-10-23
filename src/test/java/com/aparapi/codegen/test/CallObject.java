@@ -23,6 +23,7 @@ public class CallObject extends Kernel {
     ;
     int out[] = new int[2];
 
+    @Override
     public void run() {
         out[0] = dummy.foo();
     }

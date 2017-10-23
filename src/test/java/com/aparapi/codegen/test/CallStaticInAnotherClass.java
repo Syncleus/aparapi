@@ -31,6 +31,7 @@ public class CallStaticInAnotherClass extends Kernel {
         return AnotherClass.foo();
     }
 
+    @Override
     public void run() {
         out[0] = AnotherClass.foo() + doodoo();
     }

@@ -41,7 +41,7 @@ public class ReturnShortArrayVarTest extends com.aparapi.codegen.CodeGenJUnitBas
             + "      com_aparapi_codegen_test_ReturnShortArrayVar__returnShortArrayVar(this);\n"
             + "      return;\n"
             + "   }\n"
-            + "}"
+            + '}'
     };
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 

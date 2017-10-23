@@ -25,7 +25,7 @@ final class MethodKey{
    private final String signature;
 
    @Override public String toString() {
-      return "MethodKey [name=" + getName() + ", signature=" + getSignature() + "]";
+      return "MethodKey [name=" + getName() + ", signature=" + getSignature() + ']';
    }
 
    @Override public int hashCode() {

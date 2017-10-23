@@ -198,11 +198,11 @@ public class Config extends ConfigJNI{
    }
 
     static {
-      if (enableInstructionDecodeViewer && ((instructionListenerClassName == null) || instructionListenerClassName.equals(""))) {
+      if (enableInstructionDecodeViewer && ((instructionListenerClassName == null) || instructionListenerClassName.isEmpty())) {
          instructionListenerClassName = InstructionViewer.class.getName();
       }
 
-      if ((instructionListenerClassName != null) && !instructionListenerClassName.equals("")) {
+      if ((instructionListenerClassName != null) && !instructionListenerClassName.isEmpty()) {
          try {
             final Class<?> instructionListenerClass = Class.forName(instructionListenerClassName);
             instructionListener = (InstructionListener) instructionListenerClass.newInstance();

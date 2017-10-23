@@ -18,6 +18,7 @@ package com.aparapi.codegen.test;
 import com.aparapi.Kernel;
 
 public class FusedMultiplyAdd extends Kernel {
+    @Override
     public void run() {
         double d1 = 123.0, d2 = 0.456, d3 = 789.0;
         float f1 = 123.0f, f2 = 0.456f, f3 = 789.0f;

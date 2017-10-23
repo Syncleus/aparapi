@@ -430,10 +430,10 @@ public class Range extends RangeJNI{
             sb.append("global:").append(globalSize_0).append(" local:").append(localIsDerived ? "(derived)" : "").append(localSize_0);
             break;
          case 2:
-            sb.append("2D(global:").append(globalSize_0).append("x").append(globalSize_1).append(" local:").append(localIsDerived ? "(derived)" : "").append(localSize_0).append("x").append(localSize_1).append(")");
+            sb.append("2D(global:").append(globalSize_0).append('x').append(globalSize_1).append(" local:").append(localIsDerived ? "(derived)" : "").append(localSize_0).append('x').append(localSize_1).append(')');
             break;
          case 3:
-             sb.append("3D(global:").append(globalSize_0).append("x").append(globalSize_1).append("x").append(globalSize_2).append(" local:").append(localIsDerived ? "(derived)" : "").append(localSize_0).append("x").append(localSize_1).append("x").append(localSize_2).append(")");
+             sb.append("3D(global:").append(globalSize_0).append('x').append(globalSize_1).append('x').append(globalSize_2).append(" local:").append(localIsDerived ? "(derived)" : "").append(localSize_0).append('x').append(localSize_1).append('x').append(localSize_2).append(')');
             break;
       }
 

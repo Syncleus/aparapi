@@ -59,7 +59,7 @@ public class ExplicitBoolean {
         System.out.println(k1.getTargetDevice().getShortDescription());
     }
 
-    class ExplicitBooleanTestKernel extends Kernel {
+    static class ExplicitBooleanTestKernel extends Kernel {
         public boolean[] input, output;
         int size; // Number of work items.
         int iterations; // Number of times to execute kernel.

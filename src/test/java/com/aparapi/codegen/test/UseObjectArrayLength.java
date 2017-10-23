@@ -23,11 +23,12 @@ public class UseObjectArrayLength extends Kernel {
     ;
     Dummy dummy[] = new Dummy[10];
 
+    @Override
     public void run() {
         out[0] = dummy.length;
     }
 
-    final class Dummy {
+    static final class Dummy {
         public int n;
     }
 }

@@ -869,7 +869,7 @@ public class ExpressionList{
          list.add(i);
       }
 
-      final Instruction[] array = list.toArray(new Instruction[0]);
+      final Instruction[] array = list.toArray(new Instruction[list.size()]);
       boolean lastWasCursor = false;
 
       final List<Branch> branches = new ArrayList<>();
@@ -877,12 +877,12 @@ public class ExpressionList{
          sb.append(String.format(" %3d", i.getStartPC()));
       }
 
-      sb.append("\n");
+      sb.append('\n');
       for (final Instruction i : list) {
          sb.append(String.format(" %3d", i.getThisPC()));
       }
 
-      sb.append("\n");
+      sb.append('\n');
       for (final Instruction i : list) {
 
          if (i == _instruction) {

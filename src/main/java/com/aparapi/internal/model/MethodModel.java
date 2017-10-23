@@ -132,7 +132,7 @@ public class MethodModel{
       return calledMethods;
    }
 
-   public void checkForRecursion(Set<MethodModel> transitiveCalledMethods) throws AparapiException {
+   public void checkForRecursion(Set<MethodModel> transitiveCalledMethods) throws AparapiException, ClassParseException {
 
       if (transitiveCalledMethods.contains(this)) {
          throw new ClassParseException(ClassParseException.TYPE.RECURSION, getName());
@@ -1459,7 +1459,7 @@ public class MethodModel{
 
    public static class FakeLocalVariableTableEntry implements LocalVariableTableEntry<LocalVariableInfo>{
 
-      class Var implements LocalVariableInfo{
+      static class Var implements LocalVariableInfo{
 
          int startPc = 0;
 
@@ -1481,7 +1481,7 @@ public class MethodModel{
                name = "arr_" + _slotIndex;
                descriptor = "/* arg */";
             } else {
-               name = _storeSpec.toString().toLowerCase() + "_" + _slotIndex;
+               name = _storeSpec.toString().toLowerCase() + '_' + _slotIndex;
                descriptor = _storeSpec.toString();
             }
          }
@@ -1495,7 +1495,7 @@ public class MethodModel{
          }
 
          public String toString() {
-            return (name + "[" + startPc + "-" + endPc + "]");
+            return (name + '[' + startPc + '-' + endPc + ']');
          }
 
          @Override public boolean isArray() {
@@ -1583,6 +1583,7 @@ public class MethodModel{
 
          Collections.sort(list, new Comparator<LocalVariableInfo>(){
             @Override public int compare(LocalVariableInfo o1, LocalVariableInfo o2) {
+               if (o1 == o2) return 0;
                return o1.getStart() - o2.getStart();
             }
          });
@@ -1619,7 +1620,7 @@ public class MethodModel{
 
    }
 
-   private void init(ClassModelMethod _method) throws AparapiException {
+   private void init(ClassModelMethod _method) throws ClassParseException {
       try {
          method = _method;
          expressionList = new ExpressionList(this);
@@ -1721,7 +1722,7 @@ public class MethodModel{
 
    public String getReturnType() {
       final String returnType = method.getDescriptorUTF8Entry().getUTF8();
-      final int index = returnType.indexOf(")");
+      final int index = returnType.indexOf(')');
       return (returnType.substring(index + 1));
    }
 

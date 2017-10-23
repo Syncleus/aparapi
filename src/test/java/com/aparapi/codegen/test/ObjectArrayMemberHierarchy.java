@@ -42,6 +42,7 @@ public class ObjectArrayMemberHierarchy extends Kernel {
         return -x;
     }
 
+    @Override
     public void run() {
         int myId = getGlobalId();
         dummy[myId].intField = dummy[myId].getIntField() + 2 + getSomething();

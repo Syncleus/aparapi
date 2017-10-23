@@ -59,7 +59,7 @@ public class ObjectArrayMemberHierarchyTest extends com.aparapi.codegen.CodeGenJ
         + "      com_aparapi_codegen_test_ObjectArrayMemberHierarchy$DummyOOA__setFloatField( &(this->dummy[myId]), (this->dummy[myId].floatField + 2.0f));\n"
         + "      return;\n"
         + "   }\n"
-        + "}"};
+        + '}'};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

@@ -16,12 +16,7 @@
 package com.aparapi.internal.kernel;
 
 import java.lang.reflect.Constructor;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 import com.aparapi.Config;
 import com.aparapi.Kernel;
@@ -112,35 +107,35 @@ public class KernelManager {
             }
          }
          if (profile != null) {
-            builder.append("\n");
+            builder.append('\n');
             int row = 0;
             for (KernelDeviceProfile deviceProfile : profile.getDeviceProfiles()) {
                if (row == 0) {
-                  builder.append(KernelDeviceProfile.getTableHeader()).append("\n");
+                  builder.append(KernelDeviceProfile.getTableHeader()).append('\n');
                }
-               builder.append(deviceProfile.getAverageAsTableRow()).append("\n");
+               builder.append(deviceProfile.getAverageAsTableRow()).append('\n');
                ++row;
             }
          }
-         builder.append("\n");
+         builder.append('\n');
       }
    }
 
    private void reportProfilingSummary(StringBuilder builder) {
       builder.append("\nProfiles by Kernel Subclass (mean elapsed times in milliseconds)\n\n");
-      builder.append(KernelDeviceProfile.getTableHeader()).append("\n");
-      for (Class<? extends Kernel> kernelClass : profiles.keySet()) {
-         String simpleName = Reflection.getSimpleName(kernelClass);
+      builder.append(KernelDeviceProfile.getTableHeader()).append('\n');
+      for (Map.Entry<Class<? extends Kernel>, KernelProfile> classKernelProfileEntry : profiles.entrySet()) {
+         String simpleName = Reflection.getSimpleName(classKernelProfileEntry.getKey());
          String kernelName = "----------------- [[ " + simpleName + " ]] ";
          builder.append(kernelName);
          int dashes = 132 - kernelName.length();
          for (int i = 0; i < dashes; ++i) {
             builder.append('-');
          }
-         builder.append("\n");
-         KernelProfile kernelProfile = profiles.get(kernelClass);
+         builder.append('\n');
+         KernelProfile kernelProfile = classKernelProfileEntry.getValue();
          for (KernelDeviceProfile deviceProfile : kernelProfile.getDeviceProfiles()) {
-            builder.append(deviceProfile.getAverageAsTableRow()).append("\n");
+            builder.append(deviceProfile.getAverageAsTableRow()).append('\n');
          }
       }
    }

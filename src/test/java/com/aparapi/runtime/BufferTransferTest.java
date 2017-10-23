@@ -26,7 +26,6 @@ import org.junit.Test;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 public class BufferTransferTest {
@@ -52,6 +51,7 @@ public class BufferTransferTest {
         kernel.out = new int[SIZE];
 
         Util.fill(kernel.in, new Util.Filler() {
+            @Override
             public void fill(int[] array, int index) {
                 array[index] = index;
             }
@@ -73,6 +73,7 @@ public class BufferTransferTest {
         kernel.result = new int[SIZE];
         Util.zero(kernel.result);
         Util.fill(kernel.values, new Util.Filler() {
+            @Override
             public void fill(int[] array, int index) {
                 array[index] = index;
             }
@@ -122,6 +123,7 @@ public class BufferTransferTest {
         kernel.result = new int[SIZE];
         Util.zero(kernel.result);
         Util.fill(kernel.values, new Util.Filler() {
+            @Override
             public void fill(int[] array, int index) {
                 array[index] = index;
             }
@@ -216,7 +218,7 @@ public class BufferTransferTest {
 
     }
 
-    private class TestKernel extends Kernel {
+    private static class TestKernel extends Kernel {
         int[] simStep = new int[1];
 
         int[] neuronOutputs = new int[3];

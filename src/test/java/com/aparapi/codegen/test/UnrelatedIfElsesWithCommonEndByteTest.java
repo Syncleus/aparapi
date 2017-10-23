@@ -21,13 +21,13 @@ public class UnrelatedIfElsesWithCommonEndByteTest extends com.aparapi.codegen.C
 
     private static final String[] expectedOpenCL = {
         "typedef struct This_s{\n"
-        + "\n"
+        + '\n'
         + " int passid;\n"
         + " }This;\n"
         + " int get_pass_id(This *this){\n"
         + " return this->passid;\n"
         + " }\n"
-        + "\n"
+        + '\n'
         + " __kernel void run(\n"
         + " int passid\n"
         + " ){\n"
@@ -54,7 +54,7 @@ public class UnrelatedIfElsesWithCommonEndByteTest extends com.aparapi.codegen.C
         + " return;\n"
         + " }\n"
         + " }\n"
-        + " "};
+        + ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

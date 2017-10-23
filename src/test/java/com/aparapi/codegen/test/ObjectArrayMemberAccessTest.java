@@ -22,9 +22,9 @@ public class ObjectArrayMemberAccessTest extends com.aparapi.codegen.CodeGenJUni
         "typedef struct com_aparapi_codegen_test_ObjectArrayMemberAccess$DummyOOA_s{\n" +
 " int  mem;\n" +
 " float  floatField;\n" +
-"\n" +
+                '\n' +
 " } com_aparapi_codegen_test_ObjectArrayMemberAccess$DummyOOA;\n" +
-"\n" +
+                '\n' +
 " typedef struct This_s{\n" +
 " __global com_aparapi_codegen_test_ObjectArrayMemberAccess$DummyOOA *dummy;\n" +
 " int passid;\n" +
@@ -32,7 +32,7 @@ public class ObjectArrayMemberAccessTest extends com.aparapi.codegen.CodeGenJUni
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-"\n" +
+                '\n' +
 " __kernel void run(\n" +
 " __global com_aparapi_codegen_test_ObjectArrayMemberAccess$DummyOOA *dummy,\n" +
 " int passid\n" +
@@ -48,7 +48,7 @@ public class ObjectArrayMemberAccessTest extends com.aparapi.codegen.CodeGenJUni
 " return;\n" +
 " }\n" +
 " }\n" +
-" "};
+                ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

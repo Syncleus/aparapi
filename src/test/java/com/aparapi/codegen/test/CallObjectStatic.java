@@ -22,6 +22,7 @@ public class CallObjectStatic extends Kernel {
 
     ;
 
+    @Override
     public void run() {
         out[0] = Dummy.foo();
     }

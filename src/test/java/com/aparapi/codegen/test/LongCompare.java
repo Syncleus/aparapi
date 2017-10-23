@@ -18,6 +18,7 @@ package com.aparapi.codegen.test;
 import com.aparapi.Kernel;
 
 public class LongCompare extends Kernel {
+    @Override
     public void run() {
         long n1 = 1;
         long n2 = 2;

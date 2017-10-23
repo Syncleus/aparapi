@@ -20,7 +20,7 @@ import org.junit.Test;
 public class IEEERemainderDoubleTest extends com.aparapi.codegen.CodeGenJUnitBase {
     private static final String[] expectedOpenCL = {
     "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n" +
-"\n" +
+            '\n' +
 " typedef struct This_s{\n" +
 " __global double *out;\n" +
 " double m;\n" +
@@ -47,8 +47,8 @@ public class IEEERemainderDoubleTest extends com.aparapi.codegen.CodeGenJUnitBas
 " return;\n" +
 " }\n" +
 " }\n" +
-"\n" +
-" "};
+            '\n' +
+            ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

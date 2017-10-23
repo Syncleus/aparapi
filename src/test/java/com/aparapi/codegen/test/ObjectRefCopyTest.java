@@ -15,8 +15,6 @@
  */
 package com.aparapi.codegen.test;
 
-import com.aparapi.internal.exception.ClassParseException;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class ObjectRefCopyTest extends com.aparapi.codegen.CodeGenJUnitBase {
@@ -41,7 +39,7 @@ public class ObjectRefCopyTest extends com.aparapi.codegen.CodeGenJUnitBase {
             + "      this->dummy[myId]  = this->dummy[(myId + 1)];\n"
             + "      return;\n"
             + "   }\n"
-            + "}"
+            + '}'
     };
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 

@@ -45,8 +45,8 @@ public class CallStaticInAnotherClassTest extends com.aparapi.codegen.CodeGenJUn
 " return;\n" +
 " }\n" +
 " }\n" +
-"\n" +
-" "};
+        '\n' +
+        ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

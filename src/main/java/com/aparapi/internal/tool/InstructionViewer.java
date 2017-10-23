@@ -177,21 +177,21 @@ public class InstructionViewer implements Config.InstructionListener{
             }
          }
 
-         for (final Field field : fieldToLabelMap.keySet()) {
-            layout.putConstraint(SpringLayout.NORTH, fieldToLabelMap.get(field), INSET, (last == panel) ? SpringLayout.NORTH
+         for (final Map.Entry<Field, JLabel> fieldJLabelEntry : fieldToLabelMap.entrySet()) {
+            layout.putConstraint(SpringLayout.NORTH, fieldJLabelEntry.getValue(), INSET, (last == panel) ? SpringLayout.NORTH
                   : SpringLayout.SOUTH, last);
-            layout.putConstraint(SpringLayout.WEST, fieldToLabelMap.get(field), INSET, SpringLayout.WEST, panel);
+            layout.putConstraint(SpringLayout.WEST, fieldJLabelEntry.getValue(), INSET, SpringLayout.WEST, panel);
             JComponent newComponent = null;
 
-            if (field.getType().isAssignableFrom(Boolean.TYPE)) {
-               final Field booleanField = field;
+            if (((Field) fieldJLabelEntry.getKey()).getType().isAssignableFrom(Boolean.TYPE)) {
+               final Field booleanField = fieldJLabelEntry.getKey();
 
-               final Toggle toggleAnnotation = field.getAnnotation(Toggle.class);
+               final Toggle toggleAnnotation = (fieldJLabelEntry.getKey()).getAnnotation(Toggle.class);
                if (toggleAnnotation != null) {
                   final String toggleButtonOnLabel = toggleAnnotation.on();
                   final String toggleButtonOffLabel = toggleAnnotation.off();
-                  final String toggleButtonLabel = getBoolean(field) ? toggleButtonOnLabel : toggleButtonOffLabel;
-                  final JToggleButton toggleButton = new JToggleButton(toggleButtonLabel, getBoolean(field));
+                  final String toggleButtonLabel = getBoolean(fieldJLabelEntry.getKey()) ? toggleButtonOnLabel : toggleButtonOffLabel;
+                  final JToggleButton toggleButton = new JToggleButton(toggleButtonLabel, getBoolean(fieldJLabelEntry.getKey()));
                   toggleButton.addActionListener(new ActionListener(){
                      @Override public void actionPerformed(ActionEvent _actionEvent) {
                         final JToggleButton toggleButton = ((JToggleButton) _actionEvent.getSource());
@@ -211,10 +211,10 @@ public class InstructionViewer implements Config.InstructionListener{
                   });
                   newComponent = toggleButton;
                }
-               final Check checkAnnotation = field.getAnnotation(Check.class);
+               final Check checkAnnotation = (fieldJLabelEntry.getKey()).getAnnotation(Check.class);
                if (checkAnnotation != null) {
                   final JCheckBox checkBox = new JCheckBox();
-                  checkBox.setSelected(getBoolean(field));
+                  checkBox.setSelected(getBoolean(fieldJLabelEntry.getKey()));
 
                   checkBox.addChangeListener(new ChangeListener(){
 
@@ -475,7 +475,7 @@ public class InstructionViewer implements Config.InstructionListener{
       arrowHeadIn.addPoint(0, -4);
    }
 
-   class InstructionView{
+   static class InstructionView{
 
       private final Instruction instruction;
 

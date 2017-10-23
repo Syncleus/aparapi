@@ -58,7 +58,7 @@ public class ObjectArrayMemberCallTest extends com.aparapi.codegen.CodeGenJUnitB
         + "      int tmp2 = com_aparapi_codegen_test_ObjectArrayMemberCall$DummyOOA__addEmUpPlusOne( &(this->dummy[myId]), 2, tmp);\n"
         + "      return;\n"
         + "   }\n"
-        + "}"};
+        + '}'};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

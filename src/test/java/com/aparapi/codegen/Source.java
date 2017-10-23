@@ -87,19 +87,19 @@ public class Source{
 
    Source.STATE state = STATE.NONE;
 
-   List<String> all = new ArrayList<String>();
+   List<String> all = new ArrayList<>();
 
-   List<List<String>> opencl = new ArrayList<List<String>>();
+   List<List<String>> opencl = new ArrayList<>();
 
-   List<String> doc = new ArrayList<String>();
+   List<String> doc = new ArrayList<>();
 
-   List<String> java = new ArrayList<String>();
+   List<String> java = new ArrayList<>();
 
-   List<String> exceptions = new ArrayList<String>();
+   List<String> exceptions = new ArrayList<>();
 
    public Source(Class<?> _clazz, File _rootDir) {
       clazz = _clazz;
-      String srcName = clazz.getPackage().getName().replace(".", "/") + "/" + clazz + ".java";
+      String srcName = clazz.getPackage().getName().replace(".", "/") + '/' + clazz + ".java";
       file = new File(_rootDir, srcName);
       try {
          BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
@@ -113,7 +113,7 @@ public class Source{
                case JAVA:
                   if (trimmedLine.equals(OpenCLStart)) {
                      state = STATE.OPENCL;
-                     openclSection = new ArrayList<String>();
+                     openclSection = new ArrayList<>();
                      opencl.add(openclSection);
 
                   } else if (trimmedLine.startsWith(ThrowsStart) && trimmedLine.endsWith(ThrowsEnd)) {
@@ -141,9 +141,6 @@ public class Source{
 
             }
          }
-      } catch (FileNotFoundException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
       } catch (IOException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
@@ -154,7 +151,7 @@ public class Source{
    private String listToString(List<String> list) {
       StringBuilder stringBuilder = new StringBuilder();
       for (String line : list) {
-         stringBuilder.append(line).append("\n");
+         stringBuilder.append(line).append('\n');
       }
       return (stringBuilder.toString().trim());
    }

@@ -28,7 +28,8 @@ public class Interface {
         public double operate(double d);
     }
 
-    public class SimpleAdder implements Operator {
+    public static class SimpleAdder implements Operator {
+        @Override
         public double operate(double d) {
             return d + 1.0;
         }

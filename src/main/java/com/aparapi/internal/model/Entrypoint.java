@@ -150,7 +150,7 @@ public class Entrypoint implements Cloneable {
       return objectArrayFieldsClasses;
    }
 
-   private static Field getFieldFromClassHierarchy(Class<?> _clazz, String _name) throws AparapiException {
+   private static Field getFieldFromClassHierarchy(Class<?> _clazz, String _name) throws ClassParseException {
 
       // look in self
       // if found, done
@@ -303,7 +303,7 @@ public class Entrypoint implements Cloneable {
     * Update accessor structures when there is a direct access to an 
     * obect array element's data members
     */
-   private void updateObjectMemberFieldAccesses(String className, FieldEntry field) throws AparapiException {
+   private void updateObjectMemberFieldAccesses(String className, FieldEntry field) throws AparapiException, ClassParseException {
       final String accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
 
       // Quickly bail if it is a ref
@@ -442,14 +442,14 @@ public class Entrypoint implements Cloneable {
          m = otherClassModel.getMethod(methodEntry, false);
       }
 
-      if (logger.isLoggable(Level.INFO)) {
+      if (logger.isLoggable(Level.FINE)) {
          logger.fine("Selected method for: " + methodEntry + " is " + m);
       }
 
       return m;
    }
 
-   public Entrypoint(ClassModel _classModel, MethodModel _methodModel, Object _k) throws AparapiException {
+   public Entrypoint(ClassModel _classModel, MethodModel _methodModel, Object _k) throws AparapiException, ClassParseException {
       classModel = _classModel;
       methodModel = _methodModel;
       kernelInstance = _k;
@@ -474,10 +474,11 @@ public class Entrypoint implements Cloneable {
       }
 
       // Collect all methods called directly from kernel's run method
+      Set<ClassModelMethod> methodMapKeys = methodMap.keySet();
       for (final MethodCall methodCall : methodModel.getMethodCalls()) {
 
          ClassModelMethod m = resolveCalledMethod(methodCall, classModel);
-         if ((m != null) && !methodMap.keySet().contains(m) && !noCL(m)) {
+         if ((m != null) && !methodMapKeys.contains(m) && !noCL(m)) {
             final MethodModel target = new MethodModel(m, this);
             methodMap.put(m, target);
             methodModel.getCalledMethods().add(target);
@@ -495,15 +496,15 @@ public class Entrypoint implements Cloneable {
                ClassModelMethod m = resolveCalledMethod(methodCall, classModel);
                if (m != null && !noCL(m)) {
                   MethodModel target = null;
-                  if (methodMap.keySet().contains(m)) {
+                  if (methodMapKeys.contains(m)) {
                      // we remove and then add again.  Because this is a LinkedHashMap this 
                      // places this at the end of the list underlying the map
                      // then when we reverse the collection (below) we get the method 
                      // declarations in the correct order.  We are trying to avoid creating forward references
                      target = methodMap.remove(m);
-                     if (logger.isLoggable(Level.FINEST)) {
-                        logger.fine("repositioning : " + m.getClassModel().getClassWeAreModelling().getName() + " " + m.getName()
-                              + " " + m.getDescriptor());
+                     if (logger.isLoggable(Level.FINE)) {
+                        logger.fine("repositioning : " + m.getClassModel().getClassWeAreModelling().getName() + ' ' + m.getName()
+                              + ' ' + m.getDescriptor());
                      }
                   } else {
                      target = new MethodModel(m, this);
@@ -706,7 +707,7 @@ public class Entrypoint implements Cloneable {
             if (field != null) {
                referencedFields.add(field);
                final ClassModelField ff = classModel.getField(referencedFieldName);
-               assert ff != null : "ff should not be null for " + clazz.getName() + "." + referencedFieldName;
+               assert ff != null : "ff should not be null for " + clazz.getName() + '.' + referencedFieldName;
                referencedClassModelFields.add(ff);
             }
          } catch (final SecurityException e) {
@@ -736,6 +737,8 @@ public class Entrypoint implements Cloneable {
          // Sort fields of each class biggest->smallest
          final Comparator<FieldEntry> fieldSizeComparator = new Comparator<FieldEntry>(){
             @Override public int compare(FieldEntry aa, FieldEntry bb) {
+               if (aa == bb)
+                  return 0;
                final String aType = aa.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
                final String bType = bb.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
 
@@ -748,13 +751,7 @@ public class Entrypoint implements Cloneable {
                }
 
                // Note this is sorting in reverse order so the biggest is first
-               if (aSize > bSize) {
-                  return -1;
-               } else if (aSize == bSize) {
-                  return 0;
-               } else {
-                  return 1;
-               }
+               return Integer.compare(bSize, aSize);
             }
          };
 
@@ -865,8 +862,8 @@ public class Entrypoint implements Cloneable {
 
       if (target == null) {
          // Look for member obj accessor calls
+         final String entryClassNameInDotForm = _methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.');
          for (final ClassModel memberObjClass : objectArrayFieldsClasses.values()) {
-            final String entryClassNameInDotForm = _methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.');
             if (entryClassNameInDotForm.equals(memberObjClass.getClassWeAreModelling().getName())) {
                if (logger.isLoggable(Level.FINE)) {
                   logger.fine("Searching for call target: " + _methodEntry + " in "
@@ -893,15 +890,17 @@ public class Entrypoint implements Cloneable {
       }
 
       // Search for static calls to other classes
+      String meNT = _methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+      String deNT = _methodEntry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
       for (MethodModel m : calledMethods) {
          if (logger.isLoggable(Level.FINE)) {
             logger.fine("Searching for call target: " + _methodEntry + " in " + m.getName());
          }
-         if (m.getMethod().getName().equals(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8())
-               && m.getMethod().getDescriptor().equals(_methodEntry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8())) {
+         if (m.getMethod().getName().equals(meNT)
+               && m.getMethod().getDescriptor().equals(deNT)) {
             if (logger.isLoggable(Level.FINE)) {
-               logger.fine("Found " + m.getMethod().getClassModel().getClassWeAreModelling().getName() + "."
-                     + m.getMethod().getName() + " " + m.getMethod().getDescriptor());
+               logger.fine("Found " + m.getMethod().getClassModel().getClassWeAreModelling().getName() + '.'
+                     + m.getMethod().getName() + ' ' + m.getMethod().getDescriptor());
             }
             return m;
          }

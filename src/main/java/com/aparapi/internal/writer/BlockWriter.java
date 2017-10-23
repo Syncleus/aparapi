@@ -371,7 +371,7 @@ public abstract class BlockWriter{
       // Strip parens off cast
       //System.out.println("cast = " + _cast);
       final String raw = convertType(_cast.substring(1, _cast.length() - 1), false, false);
-      return ("(" + raw + ")");
+      return ('(' + raw + ')');
    }
 
    public void writeInstruction(Instruction _instruction) throws CodeGenException {
@@ -605,7 +605,7 @@ public abstract class BlockWriter{
 
          writeInstruction(binaryInstruction.getLhs());
 
-         write(" " + binaryInstruction.getOperator().getText() + " ");
+         write(' ' + binaryInstruction.getOperator().getText() + ' ');
          writeInstruction(binaryInstruction.getRhs());
 
          if (needsParenthesis) {

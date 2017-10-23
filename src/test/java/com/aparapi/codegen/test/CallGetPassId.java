@@ -18,6 +18,7 @@ package com.aparapi.codegen.test;
 import com.aparapi.Kernel;
 
 public class CallGetPassId extends Kernel {
+    @Override
     public void run() {
         int thePassId = getPassId();
     }

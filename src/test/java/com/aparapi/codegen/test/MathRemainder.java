@@ -18,6 +18,7 @@ package com.aparapi.codegen.test;
 import com.aparapi.Kernel;
 
 public class MathRemainder extends Kernel {
+    @Override
     public void run() {
         double d1 = 7.0, d2 = 2.0;
         float f1 = 7.0f, f2 = 2.0f;

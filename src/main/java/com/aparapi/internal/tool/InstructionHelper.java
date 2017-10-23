@@ -119,7 +119,7 @@ public class InstructionHelper{
             for (final Table.Col col : cols) {
                sb.append(col.get(i));
             }
-            sb.append("\n");
+            sb.append('\n');
          }
 
          return (sb.toString());
@@ -167,9 +167,6 @@ public class InstructionHelper{
          // TODO Auto-generated method stub
       }
 
-      @Override public void writeMethodBody(MethodModel _methodModel) throws CodeGenException {
-         super.writeMethodBody(_methodModel);
-      }
    }
 
    static class BranchVector{
@@ -345,11 +342,11 @@ public class InstructionHelper{
             } else if (instruction instanceof MethodCall) {
                final MethodCall methodCall = (MethodCall) instruction;
                label.append(methodCall.getConstantPoolMethodEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
-               label.append(" ");
+               label.append(' ');
                label.append(methodCall.getConstantPoolMethodEntry().getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8());
             } else if (instruction instanceof OperatorInstruction) {
                final OperatorInstruction operatorInstruction = (OperatorInstruction) instruction;
-               label.append(operatorInstruction.getOperator().getText()).append("(").append(byteCodeName).append(")");
+               label.append(operatorInstruction.getOperator().getText()).append('(').append(byteCodeName).append(')');
             } else if (instruction instanceof FieldReference) {
                final FieldReference field = (FieldReference) instruction;
                label.append(field.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
@@ -376,7 +373,7 @@ public class InstructionHelper{
                }
 
                label.append(info == null ? "?" : info.getVariableName());
-               label.append("=");
+               label.append('=');
 
             } else if (instruction instanceof LocalVariableTableIndexAccessor) {
                final LocalVariableTableIndexAccessor localVariableAccessor = (LocalVariableTableIndexAccessor) instruction;
@@ -386,8 +383,8 @@ public class InstructionHelper{
             } else if (instruction instanceof I_IINC) {
 
                label.append(instruction.getByteCode());
-               label.append(" ").append(((I_IINC) instruction).getDelta());
-               label.append(" ").append(((I_IINC) instruction).getLocalVariableInfo().getVariableName());
+               label.append(' ').append(((I_IINC) instruction).getDelta());
+               label.append(' ').append(((I_IINC) instruction).getLocalVariableInfo().getVariableName());
             } else if (instruction instanceof CompositeInstruction) {
                label.append("composite ");
                label.append(instruction.getByteCode());
@@ -467,7 +464,7 @@ public class InstructionHelper{
             sb.append(branchInfo.render(root.getThisPC(), root.getStartPC()));
          }
          table.data(root.getStartPC(), root.getThisPC());
-         table.data(" " + label);
+         table.data(' ' + label);
          table.data(sb);
          table.data(_pcForwardBranchTargetCounts[root.getStartPC()]);
       }
@@ -477,7 +474,7 @@ public class InstructionHelper{
          sb.append(branchInfo.render(_tail.getThisPC(), _tail.getStartPC()));
       }
       table.data(_tail.getStartPC(), _tail.getThisPC());
-      table.data("[" + label + "]");
+      table.data('[' + label + ']');
       table.data(sb);
       table.data(_pcForwardBranchTargetCounts[_tail.getStartPC()]);
       return (_msg + "{\n" + table.toString() + "}\n");
@@ -543,11 +540,11 @@ public class InstructionHelper{
          }
 
          if (clone) {
-            _sb.append("*");
+            _sb.append('*');
          } else {
-            _sb.append(" ");
+            _sb.append(' ');
          }
-         _sb.append(i.getThisPC()).append(":").append(label);
+         _sb.append(i.getThisPC()).append(':').append(label);
       }
 
    }

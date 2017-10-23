@@ -39,7 +39,7 @@ public class CharArrayFieldTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " return;\n" +
 " }\n" +
 " }\n" +
-" "};
+        ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

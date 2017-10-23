@@ -73,7 +73,7 @@ public class OpenCLPlatform extends OpenCLJNI{
          if (OpenCLLoader.isOpenCLAvailable()) {
             platforms = getPlatforms();
          } else {
-            return (Collections.EMPTY_LIST);
+            return (Collections.emptyList());
          }
       }
       return platforms;

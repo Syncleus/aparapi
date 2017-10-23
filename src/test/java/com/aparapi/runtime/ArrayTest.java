@@ -20,7 +20,6 @@ import static org.junit.Assert.assertArrayEquals;
 import com.aparapi.Kernel;
 import java.util.Arrays;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class ArrayTest {
@@ -71,7 +70,7 @@ public class ArrayTest {
                     expected[i] = i + j;
                 }
 
-                assertArrayEquals("target["+j+"]", expected, target[j]);
+                assertArrayEquals("target["+j+ ']', expected, target[j]);
             }
         }
 

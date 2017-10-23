@@ -34,7 +34,7 @@ public class ObjectArrayMemberGetterSetterTest extends com.aparapi.codegen.CodeG
         + "   char _pad_23;\n"
         + "   \n"
         + "} com_aparapi_codegen_test_DummyOOA;\n"
-        + "\n"
+        + '\n'
         + "typedef struct com_aparapi_codegen_test_TheOtherOne_s{\n"
         + "   int  mem;\n"
         + "   \n"
@@ -116,7 +116,7 @@ public class ObjectArrayMemberGetterSetterTest extends com.aparapi.codegen.CodeG
         + "      this->out[myId]  = com_aparapi_codegen_test_ObjectArrayMemberGetterSetter__getSomething(this);\n"
         + "      return;\n"
         + "   }\n"
-        + "}"};
+        + '}'};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

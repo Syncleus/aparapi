@@ -24,6 +24,7 @@ public class ObjectWithinObject extends Kernel {
     ;
     DummyOOA dummy[] = new DummyOOA[size];
 
+    @Override
     public void run() {
         int myId = getGlobalId();
         dummy[myId].mem = dummy[myId].next.mem + 4;

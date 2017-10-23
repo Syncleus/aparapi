@@ -18,7 +18,6 @@ package com.aparapi;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
-import com.aparapi.Kernel;
 import com.aparapi.internal.model.CacheEnabler;
 import com.aparapi.internal.model.Supplier;
 import org.junit.Test;
@@ -160,7 +159,7 @@ public class ConvolutionLargeTest {
         long totalTime = 0;
         Supplier<ImageConvolution> imageConvolutionSupplier = imageConvolutionCreationContext.getSupplier();
         Consumer<ImageConvolution> disposer = imageConvolutionCreationContext.getDisposer();
-        System.out.print("\tTesting " + name + "[" + imageConvolutionCreationContext.getName() + "] (" + seconds + " seconds) ");
+        System.out.print("\tTesting " + name + '[' + imageConvolutionCreationContext.getName() + "] (" + seconds + " seconds) ");
         int calls = 0;
         long initialTime = System.nanoTime();
         long maxElapsedNs = TimeUnit.SECONDS.toNanos(seconds);

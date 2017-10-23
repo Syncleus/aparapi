@@ -20,13 +20,13 @@ import org.junit.Test;
 public class ConstantAssignInExpressionTest extends com.aparapi.codegen.CodeGenJUnitBase {
     private static final String[] expectedOpenCL = {
         "typedef struct This_s{\n" +
-"\n" +
+                '\n' +
 " int passid;\n" +
 " }This;\n" +
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-"\n" +
+                '\n' +
 " void com_aparapi_codegen_test_ConstantAssignInExpression__func(This *this, int _arg){\n" +
 " return;\n" +
 " }\n" +
@@ -42,7 +42,7 @@ public class ConstantAssignInExpressionTest extends com.aparapi.codegen.CodeGenJ
 " return;\n" +
 " }\n" +
 " }\n" +
-" "};
+                ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

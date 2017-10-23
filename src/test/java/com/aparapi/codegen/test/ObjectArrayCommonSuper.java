@@ -34,6 +34,7 @@ public class ObjectArrayCommonSuper extends Kernel {
 
     ;
 
+    @Override
     public void run() {
         int myId = getGlobalId();
         db[myId].intField = db[myId].getIntField() + db[myId].getBrosInt();

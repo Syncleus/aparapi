@@ -215,7 +215,7 @@ public class BranchSet {
 
       @Override
       public String toString() {
-         return invert ? ("!(" + getBranch() + ")") : getBranch().toString();
+         return invert ? ("!(" + getBranch() + ')') : getBranch().toString();
       }
    }
 
@@ -295,7 +295,7 @@ public class BranchSet {
 
       @Override
       public String toString() {
-         return getLhs().toString() + " " + (isAnd() ? "&&" : "||") + " " + getRhs().toString();
+         return getLhs().toString() + ' ' + (isAnd() ? "&&" : "||") + ' ' + getRhs().toString();
       }
 
    }

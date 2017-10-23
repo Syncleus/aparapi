@@ -40,7 +40,7 @@ public class Issue68Test {
     }
 
     // Runnable for calculating the column transforms in parallel
-    private class ColumnTableFNTRunnable extends Kernel {
+    private static class ColumnTableFNTRunnable extends Kernel {
         private final int stride;
         private final int length;
         private final boolean isInverse;

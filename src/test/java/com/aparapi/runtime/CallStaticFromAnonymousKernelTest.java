@@ -16,7 +16,6 @@
 package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
-import com.aparapi.device.Device;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;

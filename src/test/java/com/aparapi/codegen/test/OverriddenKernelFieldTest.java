@@ -46,7 +46,7 @@ public class OverriddenKernelFieldTest extends com.aparapi.codegen.CodeGenJUnitB
 " return;\n" +
 " }\n" +
 " }\n" +
-" "};
+            ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     

@@ -131,7 +131,7 @@ public class ProfileInfo{
       sb.append(queued);
       sb.append(", duration=");
       sb.append((end - start));
-      sb.append("]");
+      sb.append(']');
 
       return sb.toString();
    }

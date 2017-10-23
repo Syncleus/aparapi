@@ -21,13 +21,13 @@ public class PreIncIntTest extends com.aparapi.codegen.CodeGenJUnitBase {
 
     private static final String[] expectedOpenCL = {
         "typedef struct This_s{\n"
-        + "\n"
+        + '\n'
         + " int passid;\n"
         + " }This;\n"
         + " int get_pass_id(This *this){\n"
         + " return this->passid;\n"
         + " }\n"
-        + "\n"
+        + '\n'
         + " int com_aparapi_codegen_test_PreIncInt__preIncInt(This *this, int a){\n"
         + " return(a);\n"
         + " }\n"
@@ -43,7 +43,7 @@ public class PreIncIntTest extends com.aparapi.codegen.CodeGenJUnitBase {
         + " return;\n"
         + " }\n"
         + " }\n"
-        + " "};
+        + ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     

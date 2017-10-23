@@ -276,6 +276,6 @@ public class KernelDeviceProfile {
 
     @Override
     public String toString() {
-        return "KernelDeviceProfile{" + kernel.toString() + ", " + device.getShortDescription() + "}";
+        return "KernelDeviceProfile{" + kernel.toString() + ", " + device.getShortDescription() + '}';
     }
 }

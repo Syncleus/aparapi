@@ -68,7 +68,9 @@ import com.aparapi.internal.instruction.InstructionSet.MethodCall;
 
 public class InstructionPattern{
 
-   @SuppressWarnings("unused") private boolean compareSubTrees(Instruction _lhs, Instruction _rhs) {
+   @SuppressWarnings("unused") private static boolean compareSubTrees(Instruction _lhs, Instruction _rhs) {
+      if (_lhs == _rhs)
+         return true;
       _lhs = _lhs.getReal();
       _rhs = _rhs.getReal();
       boolean same = _lhs.sameAs(_rhs);
@@ -129,7 +131,7 @@ public class InstructionPattern{
       }
    }
 
-   class AssignableInstructionMatcher extends InstructionMatcher{
+   static class AssignableInstructionMatcher extends InstructionMatcher{
       private final Class<?>[] classes;
 
       public AssignableInstructionMatcher(Class<?>... _classes) {

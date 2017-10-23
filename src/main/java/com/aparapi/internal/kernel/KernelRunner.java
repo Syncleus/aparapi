@@ -430,35 +430,39 @@ public class KernelRunner extends KernelRunnerJNI {
                         kernelState.setPassId(passId);
 
                         int ds = _settings.range.getGlobalSize(0);
-                        if (_settings.range.getDims() == 1) {
-                            for (int id = 0; id < ds; id++) {
-                                kernelState.setGlobalId(0, id);
-                                kernelClone.run();
-                            }
-                        } else if (_settings.range.getDims() == 2) {
-                            for (int x = 0; x < ds; x++) {
-                                kernelState.setGlobalId(0, x);
-
-                                for (int y = 0; y < globalSize1; y++) {
-                                    kernelState.setGlobalId(1, y);
+                        switch (_settings.range.getDims()) {
+                            case 1:
+                                for (int id = 0; id < ds; id++) {
+                                    kernelState.setGlobalId(0, id);
                                     kernelClone.run();
                                 }
-                            }
-                        } else if (_settings.range.getDims() == 3) {
-                            for (int x = 0; x < ds; x++) {
-                                kernelState.setGlobalId(0, x);
+                                break;
+                            case 2:
+                                for (int x = 0; x < ds; x++) {
+                                    kernelState.setGlobalId(0, x);
 
-                                for (int y = 0; y < globalSize1; y++) {
-                                    kernelState.setGlobalId(1, y);
-
-                                    for (int z = 0; z < _settings.range.getGlobalSize(2); z++) {
-                                        kernelState.setGlobalId(2, z);
+                                    for (int y = 0; y < globalSize1; y++) {
+                                        kernelState.setGlobalId(1, y);
                                         kernelClone.run();
                                     }
-
-                                    kernelClone.run();
                                 }
-                            }
+                                break;
+                            case 3:
+                                for (int x = 0; x < ds; x++) {
+                                    kernelState.setGlobalId(0, x);
+
+                                    for (int y = 0; y < globalSize1; y++) {
+                                        kernelState.setGlobalId(1, y);
+
+                                        for (int z = 0; z < _settings.range.getGlobalSize(2); z++) {
+                                            kernelState.setGlobalId(2, z);
+                                            kernelClone.run();
+                                        }
+
+                                        kernelClone.run();
+                                    }
+                                }
+                                break;
                         }
                     }
                     passId = PASS_ID_COMPLETED_EXECUTION;
@@ -491,129 +495,134 @@ public class KernelRunner extends KernelRunnerJNI {
 
                     final ThreadIdSetter threadIdSetter;
 
-                    if (_settings.range.getDims() == 1) {
-                        threadIdSetter = new ThreadIdSetter() {
-                            @Override
-                            public void set(KernelState kernelState, int globalGroupId, int threadId) {
-                                //                   (kernelState, globalGroupId, threadId) ->{
-                                kernelState.setLocalId(0, (threadId % localSize0));
-                                kernelState.setGlobalId(0, (threadId + (globalGroupId * threads)));
-                                kernelState.setGroupId(0, globalGroupId);
-                            }
-                        };
-                    } else if (_settings.range.getDims() == 2) {
+                    switch (_settings.range.getDims()) {
+                        case 1:
+                            threadIdSetter = new ThreadIdSetter() {
+                                @Override
+                                public void set(KernelState kernelState, int globalGroupId, int threadId) {
+                                    //                   (kernelState, globalGroupId, threadId) ->{
+                                    kernelState.setLocalId(0, (threadId % localSize0));
+                                    kernelState.setGlobalId(0, (threadId + (globalGroupId * threads)));
+                                    kernelState.setGroupId(0, globalGroupId);
+                                }
+                            };
+                            break;
+                        case 2:
 
-                        /**
-                         * Consider a 12x4 grid of 4*2 local groups
-                         * <pre>
-                         *                                             threads = 4*2 = 8
-                         *                                             localWidth=4
-                         *                                             localHeight=2
-                         *                                             globalWidth=12
-                         *                                             globalHeight=4
-                         *
-                         *    00 01 02 03 | 04 05 06 07 | 08 09 10 11
-                         *    12 13 14 15 | 16 17 18 19 | 20 21 22 23
-                         *    ------------+-------------+------------
-                         *    24 25 26 27 | 28 29 30 31 | 32 33 34 35
-                         *    36 37 38 39 | 40 41 42 43 | 44 45 46 47
-                         *
-                         *    00 01 02 03 | 00 01 02 03 | 00 01 02 03  threadIds : [0..7]*6
-                         *    04 05 06 07 | 04 05 06 07 | 04 05 06 07
-                         *    ------------+-------------+------------
-                         *    00 01 02 03 | 00 01 02 03 | 00 01 02 03
-                         *    04 05 06 07 | 04 05 06 07 | 04 05 06 07
-                         *
-                         *    00 00 00 00 | 01 01 01 01 | 02 02 02 02  groupId[0] : 0..6
-                         *    00 00 00 00 | 01 01 01 01 | 02 02 02 02
-                         *    ------------+-------------+------------
-                         *    00 00 00 00 | 01 01 01 01 | 02 02 02 02
-                         *    00 00 00 00 | 01 01 01 01 | 02 02 02 02
-                         *
-                         *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  groupId[1] : 0..6
-                         *    00 00 00 00 | 00 00 00 00 | 00 00 00 00
-                         *    ------------+-------------+------------
-                         *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
-                         *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
-                         *
-                         *    00 01 02 03 | 08 09 10 11 | 16 17 18 19  globalThreadIds == threadId + groupId * threads;
-                         *    04 05 06 07 | 12 13 14 15 | 20 21 22 23
-                         *    ------------+-------------+------------
-                         *    24 25 26 27 | 32[33]34 35 | 40 41 42 43
-                         *    28 29 30 31 | 36 37 38 39 | 44 45 46 47
-                         *
-                         *    00 01 02 03 | 00 01 02 03 | 00 01 02 03  localX = threadId % localWidth; (for globalThreadId 33 = threadId = 01 : 01%4 =1)
-                         *    00 01 02 03 | 00 01 02 03 | 00 01 02 03
-                         *    ------------+-------------+------------
-                         *    00 01 02 03 | 00[01]02 03 | 00 01 02 03
-                         *    00 01 02 03 | 00 01 02 03 | 00 01 02 03
-                         *
-                         *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  localY = threadId /localWidth  (for globalThreadId 33 = threadId = 01 : 01/4 =0)
-                         *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
-                         *    ------------+-------------+------------
-                         *    00 00 00 00 | 00[00]00 00 | 00 00 00 00
-                         *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
-                         *
-                         *    00 01 02 03 | 04 05 06 07 | 08 09 10 11  globalX=
-                         *    00 01 02 03 | 04 05 06 07 | 08 09 10 11     groupsPerLineWidth=globalWidth/localWidth (=12/4 =3)
-                         *    ------------+-------------+------------     groupInset =groupId%groupsPerLineWidth (=4%3 = 1)
-                         *    00 01 02 03 | 04[05]06 07 | 08 09 10 11
-                         *    00 01 02 03 | 04 05 06 07 | 08 09 10 11     globalX = groupInset*localWidth+localX (= 1*4+1 = 5)
-                         *
-                         *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  globalY
-                         *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
-                         *    ------------+-------------+------------
-                         *    02 02 02 02 | 02[02]02 02 | 02 02 02 02
-                         *    03 03 03 03 | 03 03 03 03 | 03 03 03 03
-                         *
-                         * </pre>
-                         * Assume we are trying to locate the id's for #33
-                         *
-                         */
-                        threadIdSetter = new ThreadIdSetter() {
-                            @Override
-                            public void set(KernelState kernelState, int globalGroupId, int threadId) {
-                                //                   (kernelState, globalGroupId, threadId) ->{
-                                kernelState.setLocalId(0, (threadId % localSize0)); // threadId % localWidth =  (for 33 = 1 % 4 = 1)
-                                kernelState.setLocalId(1, (threadId / localSize0)); // threadId / localWidth = (for 33 = 1 / 4 == 0)
+                            /**
+                             * Consider a 12x4 grid of 4*2 local groups
+                             * <pre>
+                             *                                             threads = 4*2 = 8
+                             *                                             localWidth=4
+                             *                                             localHeight=2
+                             *                                             globalWidth=12
+                             *                                             globalHeight=4
+                             *
+                             *    00 01 02 03 | 04 05 06 07 | 08 09 10 11
+                             *    12 13 14 15 | 16 17 18 19 | 20 21 22 23
+                             *    ------------+-------------+------------
+                             *    24 25 26 27 | 28 29 30 31 | 32 33 34 35
+                             *    36 37 38 39 | 40 41 42 43 | 44 45 46 47
+                             *
+                             *    00 01 02 03 | 00 01 02 03 | 00 01 02 03  threadIds : [0..7]*6
+                             *    04 05 06 07 | 04 05 06 07 | 04 05 06 07
+                             *    ------------+-------------+------------
+                             *    00 01 02 03 | 00 01 02 03 | 00 01 02 03
+                             *    04 05 06 07 | 04 05 06 07 | 04 05 06 07
+                             *
+                             *    00 00 00 00 | 01 01 01 01 | 02 02 02 02  groupId[0] : 0..6
+                             *    00 00 00 00 | 01 01 01 01 | 02 02 02 02
+                             *    ------------+-------------+------------
+                             *    00 00 00 00 | 01 01 01 01 | 02 02 02 02
+                             *    00 00 00 00 | 01 01 01 01 | 02 02 02 02
+                             *
+                             *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  groupId[1] : 0..6
+                             *    00 00 00 00 | 00 00 00 00 | 00 00 00 00
+                             *    ------------+-------------+------------
+                             *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
+                             *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
+                             *
+                             *    00 01 02 03 | 08 09 10 11 | 16 17 18 19  globalThreadIds == threadId + groupId * threads;
+                             *    04 05 06 07 | 12 13 14 15 | 20 21 22 23
+                             *    ------------+-------------+------------
+                             *    24 25 26 27 | 32[33]34 35 | 40 41 42 43
+                             *    28 29 30 31 | 36 37 38 39 | 44 45 46 47
+                             *
+                             *    00 01 02 03 | 00 01 02 03 | 00 01 02 03  localX = threadId % localWidth; (for globalThreadId 33 = threadId = 01 : 01%4 =1)
+                             *    00 01 02 03 | 00 01 02 03 | 00 01 02 03
+                             *    ------------+-------------+------------
+                             *    00 01 02 03 | 00[01]02 03 | 00 01 02 03
+                             *    00 01 02 03 | 00 01 02 03 | 00 01 02 03
+                             *
+                             *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  localY = threadId /localWidth  (for globalThreadId 33 = threadId = 01 : 01/4 =0)
+                             *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
+                             *    ------------+-------------+------------
+                             *    00 00 00 00 | 00[00]00 00 | 00 00 00 00
+                             *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
+                             *
+                             *    00 01 02 03 | 04 05 06 07 | 08 09 10 11  globalX=
+                             *    00 01 02 03 | 04 05 06 07 | 08 09 10 11     groupsPerLineWidth=globalWidth/localWidth (=12/4 =3)
+                             *    ------------+-------------+------------     groupInset =groupId%groupsPerLineWidth (=4%3 = 1)
+                             *    00 01 02 03 | 04[05]06 07 | 08 09 10 11
+                             *    00 01 02 03 | 04 05 06 07 | 08 09 10 11     globalX = groupInset*localWidth+localX (= 1*4+1 = 5)
+                             *
+                             *    00 00 00 00 | 00 00 00 00 | 00 00 00 00  globalY
+                             *    01 01 01 01 | 01 01 01 01 | 01 01 01 01
+                             *    ------------+-------------+------------
+                             *    02 02 02 02 | 02[02]02 02 | 02 02 02 02
+                             *    03 03 03 03 | 03 03 03 03 | 03 03 03 03
+                             *
+                             * </pre>
+                             * Assume we are trying to locate the id's for #33
+                             *
+                             */
+                            threadIdSetter = new ThreadIdSetter() {
+                                @Override
+                                public void set(KernelState kernelState, int globalGroupId, int threadId) {
+                                    //                   (kernelState, globalGroupId, threadId) ->{
+                                    kernelState.setLocalId(0, (threadId % localSize0)); // threadId % localWidth =  (for 33 = 1 % 4 = 1)
+                                    kernelState.setLocalId(1, (threadId / localSize0)); // threadId / localWidth = (for 33 = 1 / 4 == 0)
 
-                                final int groupInset = globalGroupId % numGroups0; // 4%3 = 1
-                                kernelState.setGlobalId(0, ((groupInset * localSize0) + kernelState.getLocalIds()[0])); // 1*4+1=5
+                                    final int groupInset = globalGroupId % numGroups0; // 4%3 = 1
+                                    kernelState.setGlobalId(0, ((groupInset * localSize0) + kernelState.getLocalIds()[0])); // 1*4+1=5
 
-                                final int completeLines = (globalGroupId / numGroups0) * localSize1;// (4/3) * 2
-                                kernelState.setGlobalId(1, (completeLines + kernelState.getLocalIds()[1])); // 2+0 = 2
-                                kernelState.setGroupId(0, (globalGroupId % numGroups0));
-                                kernelState.setGroupId(1, (globalGroupId / numGroups0));
-                            }
-                        };
-                    } else if (_settings.range.getDims() == 3) {
-                        //Same as 2D actually turns out that localId[0] is identical for all three dims so could be hoisted out of conditional code
-                        threadIdSetter = new ThreadIdSetter() {
-                            @Override
-                            public void set(KernelState kernelState, int globalGroupId, int threadId) {
-                                //                   (kernelState, globalGroupId, threadId) ->{
-                                kernelState.setLocalId(0, (threadId % localSize0));
+                                    final int completeLines = (globalGroupId / numGroups0) * localSize1;// (4/3) * 2
+                                    kernelState.setGlobalId(1, (completeLines + kernelState.getLocalIds()[1])); // 2+0 = 2
+                                    kernelState.setGroupId(0, (globalGroupId % numGroups0));
+                                    kernelState.setGroupId(1, (globalGroupId / numGroups0));
+                                }
+                            };
+                            break;
+                        case 3:
+                            //Same as 2D actually turns out that localId[0] is identical for all three dims so could be hoisted out of conditional code
+                            threadIdSetter = new ThreadIdSetter() {
+                                @Override
+                                public void set(KernelState kernelState, int globalGroupId, int threadId) {
+                                    //                   (kernelState, globalGroupId, threadId) ->{
+                                    kernelState.setLocalId(0, (threadId % localSize0));
 
-                                kernelState.setLocalId(1, ((threadId / localSize0) % localSize1));
+                                    kernelState.setLocalId(1, ((threadId / localSize0) % localSize1));
 
-                                // the thread id's span WxHxD so threadId/(WxH) should yield the local depth
-                                kernelState.setLocalId(2, (threadId / (localSize0 * localSize1)));
+                                    // the thread id's span WxHxD so threadId/(WxH) should yield the local depth
+                                    kernelState.setLocalId(2, (threadId / (localSize0 * localSize1)));
 
-                                kernelState.setGlobalId(0, (((globalGroupId % numGroups0) * localSize0) + kernelState.getLocalIds()[0]));
+                                    kernelState.setGlobalId(0, (((globalGroupId % numGroups0) * localSize0) + kernelState.getLocalIds()[0]));
 
-                                kernelState.setGlobalId(1,
-                                        ((((globalGroupId / numGroups0) * localSize1) % globalSize1) + kernelState.getLocalIds()[1]));
+                                    kernelState.setGlobalId(1,
+                                            ((((globalGroupId / numGroups0) * localSize1) % globalSize1) + kernelState.getLocalIds()[1]));
 
-                                kernelState.setGlobalId(2,
-                                        (((globalGroupId / (numGroups0 * numGroups1)) * localSize2) + kernelState.getLocalIds()[2]));
+                                    kernelState.setGlobalId(2,
+                                            (((globalGroupId / (numGroups0 * numGroups1)) * localSize2) + kernelState.getLocalIds()[2]));
 
-                                kernelState.setGroupId(0, (globalGroupId % numGroups0));
-                                kernelState.setGroupId(1, ((globalGroupId / numGroups0) % numGroups1));
-                                kernelState.setGroupId(2, (globalGroupId / (numGroups0 * numGroups1)));
-                            }
-                        };
-                    } else
-                        throw new IllegalArgumentException("Expected 1,2 or 3 dimensions, found " + _settings.range.getDims());
+                                    kernelState.setGroupId(0, (globalGroupId % numGroups0));
+                                    kernelState.setGroupId(1, ((globalGroupId / numGroups0) % numGroups1));
+                                    kernelState.setGroupId(2, (globalGroupId / (numGroups0 * numGroups1)));
+                                }
+                            };
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Expected 1,2 or 3 dimensions, found " + _settings.range.getDims());
+                    }
                     for (passId = 0; passId < _settings.passes; passId++) {
                         if (getCancelState() == CANCEL_STATUS_TRUE) {
                             break;
@@ -670,6 +679,7 @@ public class KernelRunner extends KernelRunnerJNI {
                             threadPool.submit(
                                     //                     () -> {
                                     new Runnable() {
+                                        @Override
                                         public void run() {
                                             try {
                                                 for (int globalGroupId = 0; globalGroupId < globalGroups; globalGroupId++) {
@@ -966,7 +976,7 @@ public class KernelRunner extends KernelRunnerJNI {
         }
     }
 
-    private boolean updateKernelArrayRefs() throws AparapiException {
+    private boolean updateKernelArrayRefs() throws AparapiException, com.aparapi.internal.exception.ClassParseException {
         boolean needsSync = false;
 
         for (int i = 0; i < argc; i++) {
@@ -1069,7 +1079,7 @@ public class KernelRunner extends KernelRunnerJNI {
         // native side will reallocate array buffers if necessary
         int returnValue = runKernelJNI(jniContextHandle, _settings.range, needSync, _settings.passes, inBufferRemote, outBufferRemote);
         if (returnValue != 0) {
-            String reason = "OpenCL execution seems to have failed (runKernelJNI returned " + returnValue + ")";
+            String reason = "OpenCL execution seems to have failed (runKernelJNI returned " + returnValue + ')';
             return fallBackToNextDevice(_settings, new AparapiException(reason));
         }
 
@@ -1328,7 +1338,7 @@ public class KernelRunner extends KernelRunnerJNI {
                             handle = buildProgramJNI(jniContextHandle, openCL, "");
                         } else {
                             synchronized (seenBinaryKeys) {
-                                String binaryKey = kernelClass.getName() + ":" + device.getDeviceId();
+                                String binaryKey = kernelClass.getName() + ':' + device.getDeviceId();
                                 if (seenBinaryKeys.contains(binaryKey)) {
                                     // use cached binary
                                     if (isInfoLogging)
@@ -1516,7 +1526,7 @@ public class KernelRunner extends KernelRunnerJNI {
 
     @Override
     public String toString() {
-        return "KernelRunner{" + kernel + "}";
+        return "KernelRunner{" + kernel + '}';
     }
 
     private String describeDevice() {
