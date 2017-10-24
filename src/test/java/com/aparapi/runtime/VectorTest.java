@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.aparapi.Kernel;
 import com.aparapi.opencl.vector.Float2;
+import java.util.Arrays;
 import org.junit.Test;
 
 
@@ -43,9 +44,6 @@ public class VectorTest {
         @Override
         public void run() {
             int id = getGlobalId();
-
-            // float2 v = (float2)( 0, 0 );
-//            final Float2 v = Float2.create(id);
 
             final Float2 v = Float2.create(id, id * 2);
             target[id] = v;

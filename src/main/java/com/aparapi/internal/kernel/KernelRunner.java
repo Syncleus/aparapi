@@ -65,6 +65,7 @@ import com.aparapi.internal.util.*;
 import com.aparapi.internal.writer.*;
 import com.aparapi.opencl.*;
 
+import com.aparapi.opencl.vector.Float2;
 import java.lang.reflect.*;
 import java.nio.*;
 import java.util.*;
@@ -943,7 +944,24 @@ public class KernelRunner extends KernelRunnerJNI{
    private void restoreObjects() throws AparapiException {
       for (int i = 0; i < argc; i++) {
          final KernelArg arg = args[i];
-         if ((arg.getType() & ARG_OBJ_ARRAY_STRUCT) != 0) {
+
+         //TODO: code it properly
+         if ((arg.getType() & ARG_VECTOR_2) != 0) {
+             Object obj = arg.getArray();
+
+             float[] array = (float[])obj;
+
+             try {
+                 Float2[] ref = (Float2[])arg.getField().get(kernel);
+
+                 for (int j = 0; j < ref.length; j++) {
+                     ref[j] = Float2.create(array[j * 2 + 0], array[j * 2 + 1]);
+                 }
+             } catch (IllegalAccessException e) {
+                 e.printStackTrace();
+             }
+
+         } else if ((arg.getType() & ARG_OBJ_ARRAY_STRUCT) != 0) {
             extractOopConversionBuffer(arg);
          }
       }
@@ -979,6 +997,11 @@ public class KernelRunner extends KernelRunnerJNI{
                if ((arg.getType() & ARG_OBJ_ARRAY_STRUCT) != 0) {
                   prepareOopConversionBuffer(arg);
                } else {
+                  //TODO: handle vectors
+                  if ((arg.getType() & ARG_VECTOR_2) != 0) {
+                      usesOopConversion = true;
+                      newArrayRef = new float[arrayLength * 2];
+                  }
                   // set up JNI fields for normal arrays
                   arg.setJavaArray(newArrayRef);
                   arg.setNumElements(arrayLength);
@@ -1415,9 +1438,19 @@ public class KernelRunner extends KernelRunnerJNI{
                            // args[i].type |= ARG_GLOBAL;
 
                            if (type.getName().startsWith("[L")) {
-                              args[i].setArray(null); // will get updated in updateKernelArrayRefs
-                              args[i].setType(args[i].getType()
-                                    | (ARG_ARRAY | ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ));
+                              //TODO: get flags from annotation
+                              if ("[Lcom.aparapi.opencl.vector.Float2;".equals(type.getName())) {
+                                  args[i].setArray(null);
+                                  args[i].setType(
+                                      args[i].getType() | (ARG_ARRAY | ARG_FLOAT | ARG_VECTOR_2 | ARG_WRITE | ARG_READ)
+                                  );
+                              } else {
+                                  // will get updated in updateKernelArrayRefs
+                                  args[i].setArray(null);
+                                  args[i].setType(
+                                      args[i].getType() | (ARG_ARRAY | ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ)
+                                  );
+                              }
 
                               if (logger.isLoggable(Level.FINE)) {
                                  logger.fine("tagging " + args[i].getName() + " as (ARG_ARRAY | ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ)");
@@ -1633,24 +1666,39 @@ public class KernelRunner extends KernelRunnerJNI{
    }
 
    private int getPrimitiveSize(int type) {
+      int size = 0;
       if ((type & ARG_FLOAT) != 0) {
-         return 4;
+         size = 4;
       } else if ((type & ARG_INT) != 0) {
-         return 4;
+         size = 4;
       } else if ((type & ARG_BYTE) != 0) {
-         return 1;
+         size = 1;
       } else if ((type & ARG_CHAR) != 0) {
-         return 2;
+         size = 2;
       } else if ((type & ARG_BOOLEAN) != 0) {
-         return 1;
+         size = 1;
       } else if ((type & ARG_SHORT) != 0) {
-         return 2;
+         size = 2;
       } else if ((type & ARG_LONG) != 0) {
-         return 8;
+         size = 8;
       } else if ((type & ARG_DOUBLE) != 0) {
-         return 8;
+         size = 8;
       }
-      return 0;
+
+      int vectorFactor = 1;
+      if ((type & ARG_VECTOR_2) != 0) {
+          vectorFactor = 2;
+      } else if ((type & ARG_VECTOR_3) != 0) {
+          vectorFactor = 3;
+      } else if ((type & ARG_VECTOR_4) != 0) {
+          vectorFactor = 4;
+      } else if ((type & ARG_VECTOR_8) != 0) {
+          vectorFactor = 8;
+      } else if ((type & ARG_VECTOR_16) != 0) {
+          vectorFactor = 16;
+      }
+
+      return size * vectorFactor;
    }
 
    private void setMultiArrayType(KernelArg arg, Class<?> type) throws AparapiException {
