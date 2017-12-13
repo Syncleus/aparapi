@@ -1110,23 +1110,46 @@ public class KernelRunner extends KernelRunnerJNI {
     }
 
     public void recreateRange(Device device, ExecutionSettings _settings) {
-        if (_settings.range.isLocalIsDerived() && !_settings.legacyExecutionMode) {
+        if (!_settings.legacyExecutionMode) {
             Range result;
-            switch (_settings.range.getDims()) {
-                case 1: {
-                    result = Range.create(device, _settings.range.getGlobalSize_0());
-                    break;
+            if (_settings.range.isLocalIsDerived()) {
+                switch (_settings.range.getDims()) {
+                    case 1: {
+                        result = Range.create(device, _settings.range.getGlobalSize_0());
+                        break;
+                    }
+                    case 2: {
+                        result = Range.create2D(device, _settings.range.getGlobalSize_0(), _settings.range.getGlobalSize_1());
+                        break;
+                    }
+                    case 3: {
+                        result = Range.create3D(device, _settings.range.getGlobalSize_0(), _settings.range.getGlobalSize_1(), _settings.range.getGlobalSize_2());
+                        break;
+                    }
+                    default: {
+                        throw new AssertionError("Range.getDims() = " + _settings.range.getDims());
+                    }
                 }
-                case 2: {
-                    result = Range.create2D(device, _settings.range.getGlobalSize_0(), _settings.range.getGlobalSize_1());
-                    break;
-                }
-                case 3: {
-                    result = Range.create3D(device, _settings.range.getGlobalSize_0(), _settings.range.getGlobalSize_1(), _settings.range.getGlobalSize_2());
-                    break;
-                }
-                default: {
-                    throw new AssertionError("Range.getDims() = " + _settings.range.getDims());
+            } else {
+                switch (_settings.range.getDims()) {
+                    case 1: {
+                        result = Range.create(device, _settings.range.getGlobalSize_0(), _settings.range.getLocalSize(0));
+                        break;
+                    }
+                    case 2: {
+                        result = Range.create2D(device, _settings.range.getGlobalSize_0(), _settings.range.getGlobalSize_1(),
+                            _settings.range.getLocalSize(0), _settings.range.getLocalSize(1));
+                        break;
+                    }
+                    case 3: {
+                        result = Range.create3D(device, _settings.range.getGlobalSize_0(), _settings.range.getGlobalSize_1(),
+                            _settings.range.getGlobalSize_2(), _settings.range.getLocalSize(0),
+                            _settings.range.getLocalSize(1), _settings.range.getLocalSize(2));
+                        break;
+                    }
+                    default: {
+                        throw new AssertionError("Range.getDims() = " + _settings.range.getDims());
+                    }
                 }
             }
             _settings.range = result;
