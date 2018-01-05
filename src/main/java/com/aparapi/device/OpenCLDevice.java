@@ -125,10 +125,15 @@ public class OpenCLDevice extends Device{
    @Override
    public String getShortDescription() {
       if (shortDescription == null) {
-         String vendor = platform.getName();
+         String vendor = getName();
          // Hopefully(!) this equates to the recognisable name of the vendor, e.g. "Intel", "NVIDIA", "AMD"
          // Note, it is not necessarily the hardware vendor, e.g. if the AMD CPU driver (i.e. platform) is used for an Intel CPU, this will be "AMD"
          String[] split = vendor.split("[\\s\\(\\)]"); // split on whitespace or on '(' or ')' since Intel use "Intel(R)" here
+         if (split.length == 0 || split[0] == null
+             || !(split[0].equals("Intel") || split[0].equals("NVIDIA") || split[0].equals("AMD"))) {
+            vendor = platform.getName();
+            split = vendor.split("[\\s\\(\\)]");
+         }
          shortDescription = split[0] + '<' + getType() + '>';
       }
       return shortDescription;
