@@ -81,12 +81,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.*;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.*;
 import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
 import java.util.concurrent.ForkJoinPool.ManagedBlocker;
-import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -159,17 +156,20 @@ public class KernelRunner extends KernelRunnerJNI {
 
     private boolean isFallBack = false; // If isFallBack, rebuild the kernel (necessary?)
 
-    private static final ForkJoinWorkerThreadFactory lowPriorityThreadFactory = new ForkJoinWorkerThreadFactory() {
-        @Override
-        public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
-            ForkJoinWorkerThread newThread = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
-            newThread.setPriority(Thread.MIN_PRIORITY);
-            return newThread;
-        }
-    };
+//    private static final ForkJoinWorkerThreadFactory lowPriorityThreadFactory = new ForkJoinWorkerThreadFactory() {
+//        @Override
+//        public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
+//            ForkJoinWorkerThread newThread = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
+//            newThread.setPriority(Thread.MIN_PRIORITY);
+//            return newThread;
+//        }
+//    };
 
-    private static final ForkJoinPool threadPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors(),
-            lowPriorityThreadFactory, null, false);
+    private static final ForkJoinPool threadPool =
+        ForkJoinPool.commonPool();
+//        new ForkJoinPool(Runtime.getRuntime().availableProcessors(),
+//            lowPriorityThreadFactory, null, false);
+
     private static final HashMap<Class<? extends Kernel>, String> openCLCache = new HashMap<>();
     private static final LinkedHashSet<String> seenBinaryKeys = new LinkedHashSet<>();
 
@@ -197,25 +197,28 @@ public class KernelRunner extends KernelRunnerJNI {
      * @see Kernel#cleanUpArrays().
      */
     public void cleanUpArrays() {
-        if (args != null && kernel.isRunningCL()) {
-            for (KernelArg arg : args) {
-                if ((arg.getType() & KernelRunnerJNI.ARG_ARRAY) != 0) {
-                    Field field = arg.getField();
-                    if (field != null && field.getType().isArray() && !Modifier.isFinal(field.getModifiers())) {
-                        field.setAccessible(true);
-                        Class<?> componentType = field.getType().getComponentType();
-                        Object newValue = Array.newInstance(componentType, MINIMUM_ARRAY_SIZE);
-                        try {
-                            field.set(kernel, newValue);
-                        } catch (IllegalAccessException e) {
-                            throw new RuntimeException(e);
+        synchronized (kernel) {
+
+            if (args != null && kernel.isRunningCL()) {
+                for (KernelArg arg : args) {
+                    if ((arg.getType() & KernelRunnerJNI.ARG_ARRAY) != 0) {
+                        Field field = arg.getField();
+                        if (field != null && field.getType().isArray() && !Modifier.isFinal(field.getModifiers())) {
+                            field.setAccessible(true);
+                            Class<?> componentType = field.getType().getComponentType();
+                            Object newValue = Array.newInstance(componentType, MINIMUM_ARRAY_SIZE);
+                            try {
+                                field.set(kernel, newValue);
+                            } catch (IllegalAccessException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                     }
                 }
+                kernel.execute(0);
+            } else if (kernel.isRunningCL()) {
+                logger.log(Level.SEVERE, "KernelRunner#cleanUpArrays() could not execute as no args available (Kernel has not been executed?)");
             }
-            kernel.execute(0);
-        } else if (kernel.isRunningCL()) {
-            logger.log(Level.SEVERE, "KernelRunner#cleanUpArrays() could not execute as no args available (Kernel has not been executed?)");
         }
     }
 
@@ -474,11 +477,14 @@ public class KernelRunner extends KernelRunnerJNI {
                     final int numGroups0 = _settings.range.getNumGroups(0);
                     final int numGroups1 = _settings.range.getNumGroups(1);
                     final int globalGroups = numGroups0 * numGroups1 * _settings.range.getNumGroups(2);
+
+                    assert(globalGroups > 0);
+
                     /**
                      * This joinBarrier is the barrier that we provide for the kernel threads to rendezvous with the current dispatch thread.
                      * So this barrier is threadCount+1 wide (the +1 is for the dispatch thread)
                      */
-                    final CyclicBarrier joinBarrier = new FJSafeCyclicBarrier(threads + 1);
+                    //final CyclicBarrier joinBarrier = new FJSafeCyclicBarrier(threads + 1);
 
                     /**
                      * This localBarrier is only ever used by the kernels.  If the kernel does not use the barrier the threads
@@ -491,7 +497,7 @@ public class KernelRunner extends KernelRunnerJNI {
                      *
                      * This barrier is threadCount wide.  We never hit the barrier from the dispatch thread.
                      */
-                    final CyclicBarrier localBarrier = new FJSafeCyclicBarrier(threads);
+                    //final CyclicBarrier localBarrier = new FJSafeCyclicBarrier(threads);
 
                     final ThreadIdSetter threadIdSetter;
 
@@ -656,7 +662,17 @@ public class KernelRunner extends KernelRunnerJNI {
                          * So even JTP mode use of local buffers will need to use barriers. Not for the same reason as OpenCL but to keep groups in lockstep.
                          *
                          **/
-                        for (int id = 0; id < threads; id++) {
+                        final int volume = _settings.range.volume();
+
+                        int threadsActivated =
+                            //threads;
+                            Math.min(volume, threads);
+
+
+
+                        final CountDownLatch countdown = new CountDownLatch(threadsActivated);
+
+                        for (int id = 0; id < threadsActivated; id++) {
                             final int threadId = id;
 
                             /**
@@ -670,32 +686,35 @@ public class KernelRunner extends KernelRunnerJNI {
                             final KernelState kernelState = kernelClone.getKernelState();
                             kernelState.setPassId(passId);
 
-                            if (threads == 1) {
+//                            if (threads == 1) {
                                 kernelState.disableLocalBarrier();
-                            } else {
-                                kernelState.setLocalBarrier(localBarrier);
-                            }
+//                            } else {
+//                                kernelState.setLocalBarrier(localBarrier);
+//                            }
 
                             threadPool.submit(
-                                    //                     () -> {
-                                    new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            try {
-                                                for (int globalGroupId = 0; globalGroupId < globalGroups; globalGroupId++) {
-                                                    threadIdSetter.set(kernelState, globalGroupId, threadId);
-                                                    kernelClone.run();
-                                                }
-                                            } catch (RuntimeException | Error e) {
-                                                logger.log(Level.SEVERE, "Execution failed", e);
-                                            } finally {
-                                                await(joinBarrier); // This thread will rendezvous with dispatch thread here. This is effectively a join.
-                                            }
+                                () -> {
+                                    try {
+                                        for (int globalGroupId = 0; globalGroupId < globalGroups; globalGroupId++) {
+                                            threadIdSetter.set(kernelState, globalGroupId, threadId);
+                                            if (kernelState.globalIds.get(0) < volume)
+                                                kernelClone.run();
                                         }
-                                    });
+                                    } catch (Throwable e) {
+                                        logger.log(Level.SEVERE, "Execution failed", e);
+                                    } finally {
+                                        //await(joinBarrier); // This thread will rendezvous with dispatch thread here. This is effectively a join.
+                                        countdown.countDown();
+                                    }
+                                });
                         }
 
-                        await(joinBarrier); // This dispatch thread waits for all worker threads here.
+                        try {
+                            countdown.await();
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        //await(joinBarrier); // This dispatch thread waits for all worker threads here.
                     }
                     passId = PASS_ID_COMPLETED_EXECUTION;
                 } // execution mode == JTP
@@ -709,8 +728,8 @@ public class KernelRunner extends KernelRunnerJNI {
         try {
             _barrier.await();
         } catch (final InterruptedException | BrokenBarrierException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            //e.printStackTrace();
+            logger.severe(()->"await: " +  e.getMessage());
         }
     }
 

@@ -73,6 +73,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.logging.Logger;
 
 /**
@@ -441,7 +442,7 @@ public abstract class Kernel implements Cloneable {
                         logger.fine(" " + mode);
                     }
                     if ((OpenCLLoader.isOpenCLAvailable() && EXECUTION_MODE.anyOpenCL(requestedExecutionModes))
-                            || !EXECUTION_MODE.anyOpenCL(requestedExecutionModes)) {
+                        || !EXECUTION_MODE.anyOpenCL(requestedExecutionModes)) {
                         defaultExecutionModes = requestedExecutionModes;
                     }
                 } catch (final Throwable t) {
@@ -497,7 +498,7 @@ public abstract class Kernel implements Cloneable {
      */
     public final class KernelState {
 
-        private int[] globalIds = new int[]{0, 0, 0};
+        public final AtomicIntegerArray globalIds = new AtomicIntegerArray(3);
 
         private int[] localIds = new int[]{0, 0, 0};
 
@@ -522,7 +523,8 @@ public abstract class Kernel implements Cloneable {
          * Copy constructor
          */
         KernelState(KernelState kernelState) {
-            globalIds = kernelState.getGlobalIds();
+            for (int i = 0; i < globalIds.length(); i++)
+                globalIds.set(i, kernelState.globalIds.get(i));
             localIds = kernelState.getLocalIds();
             groupIds = kernelState.getGroupIds();
             range = kernelState.getRange();
@@ -531,17 +533,12 @@ public abstract class Kernel implements Cloneable {
         }
 
         /**
-         * @return the globalIds
-         */
-        int[] getGlobalIds() {
-            return globalIds;
-        }
-
-        /**
          * @param globalIds the globalIds to set
          */
         void setGlobalIds(int[] globalIds) {
-            this.globalIds = globalIds;
+            int i = 0;
+            for (int x : globalIds)
+                this.globalIds.set(i++, x);
         }
 
         /**
@@ -551,7 +548,7 @@ public abstract class Kernel implements Cloneable {
          * @param value
          */
         public void setGlobalId(int _index, int value) {
-            globalIds[_index] = value;
+            globalIds.set(_index, value);
         }
 
         /**
@@ -703,7 +700,7 @@ public abstract class Kernel implements Cloneable {
 
     @OpenCLDelegate
     protected final int getGlobalId(int _dim) {
-        return kernelState.getGlobalIds()[_dim];
+        return kernelState.globalIds.get(_dim);
     }
 
    /*
@@ -1283,6 +1280,61 @@ public abstract class Kernel implements Cloneable {
     @OpenCLMapping(mapTo = "fabs")
     protected float abs(float _f) {
         return Math.abs(_f);
+    }
+
+
+    /**
+     * Delegates to either {@link java.lang.Integer#bitCount(int)} (Java) or <code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/popcount.html">popcount(int)</a></code> (OpenCL).
+     *
+     * @param _i value to delegate to {@link java.lang.Integer#bitCount(int)}/<code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/popcount.html">popcount(int)</a></code>
+     * @return {@link java.lang.Integer#bitCount(int)}/<code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/popcount.html">popcount(int)</a></code>
+     * @see java.lang.Integer#bitCount(int)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/popcount.html">popcount(int)</a></code>
+     */
+    @OpenCLMapping(mapTo = "popcount")
+    protected int popcount(int _i) {
+        return Integer.bitCount(_i);
+    }
+
+    /**
+     * Delegates to either {@link java.lang.Long#bitCount(long)} (Java) or <code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/popcount.html">popcount(long)</a></code> (OpenCL).
+     *
+     * @param _i value to delegate to {@link java.lang.Long#bitCount(long)}/<code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/popcount.html">popcount(long)</a></code>
+     * @return {@link java.lang.Long#bitCount(long)}/<code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/popcount.html">popcount(long)</a></code>
+     * @see java.lang.Long#bitCount(long)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/popcount.html">popcount(long)</a></code>
+     */
+    @OpenCLMapping(mapTo = "popcount")
+    protected long popcount(long _i) {
+        return Long.bitCount(_i);
+    }
+
+    /**
+     * Delegates to either {@link java.lang.Integer#numberOfLeadingZeros(int)} (Java) or <code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/clz.html">clz(int)</a></code> (OpenCL).
+     *
+     * @param _i value to delegate to {@link java.lang.Integer#numberOfLeadingZeros(int)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/clz.html">clz(int)</a></code>
+     * @return {@link java.lang.Integer#numberOfLeadingZeros(int)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/clz.html">clz(int)</a></code>
+     * @see java.lang.Integer#numberOfLeadingZeros(int)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/clz.html">clz(int)</a></code>
+     */
+
+    @OpenCLMapping(mapTo = "clz")
+    protected int clz(int _i) {
+        return Integer.numberOfLeadingZeros(_i);
+    }
+
+
+    /**
+     * Delegates to either {@link java.lang.Long#numberOfLeadingZeros(long)} (Java) or <code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/clz.html">clz(long)</a></code> (OpenCL).
+     *
+     * @param _l value to delegate to {@link java.lang.Long#numberOfLeadingZeros(long)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/clz.html">clz(long)</a></code>
+     * @return {@link java.lang.Long#numberOfLeadingZeros(long)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/clz.html">clz(long)</a></code>
+     * @see java.lang.Long#numberOfLeadingZeros(long)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/clz.html">clz(long)</a></code>
+     */
+    @OpenCLMapping(mapTo = "clz")
+    protected long clz(long _l) {
+        return Long.numberOfLeadingZeros(_l);
     }
 
     /**
@@ -2173,11 +2225,11 @@ public abstract class Kernel implements Cloneable {
         if (!Config.disableUnsafe) {
             return UnsafeWrapper.atomicAdd(_arr, _index, _delta);
         } else {
-            synchronized (_arr) {
+            //synchronized (_arr) {
                 final int previous = _arr[_index];
                 _arr[_index] += _delta;
                 return previous;
-            }
+            //}
         }
     }
 
@@ -2206,7 +2258,7 @@ public abstract class Kernel implements Cloneable {
     @Deprecated
     protected final void globalBarrier() throws DeprecatedException {
         throw new DeprecatedException(
-                "Kernel.globalBarrier() has been deprecated. It was based an incorrect understanding of OpenCL functionality.");
+            "Kernel.globalBarrier() has been deprecated. It was based an incorrect understanding of OpenCL functionality.");
     }
 
     @OpenCLMapping(mapTo = "hypot")
@@ -2223,19 +2275,16 @@ public abstract class Kernel implements Cloneable {
         return kernelState;
     }
 
-    //final static ThreadLocal<KernelRunner> runners = new ThreadLocal();
-    private final Map<Thread,KernelRunner> runners = Collections.synchronizedMap(
-            new WeakHashMap<Thread,KernelRunner>(Runtime.getRuntime().availableProcessors()*2, 0.95f)
+
+
+    //TODO use WeakConcurrent HashMap
+    private final Map<Thread, KernelRunner> runners = Collections.synchronizedMap(
+        new WeakHashMap<Thread, KernelRunner>(Runtime.getRuntime().availableProcessors() * 2, 0.95f)
     );
 
+
     private KernelRunner runner() {
-        Thread t = Thread.currentThread();
-        KernelRunner kernelRunner = runners.get(t);
-        if (kernelRunner == null) {
-            kernelRunner = new KernelRunner(this);
-            runners.put(t, kernelRunner);
-        }
-        return kernelRunner;
+        return runners.computeIfAbsent(Thread.currentThread(), (tt)-> new KernelRunner(this));
     }
 
     /**
@@ -2249,9 +2298,9 @@ public abstract class Kernel implements Cloneable {
      */
     public double getExecutionTime() {
         KernelProfile profile = KernelManager.instance().getProfile(getClass());
-        synchronized (profile) {
+
             return profile.getTotalExecutionTime();
-        }
+
     }
 
     /**
@@ -2265,9 +2314,9 @@ public abstract class Kernel implements Cloneable {
      */
     public double getAccumulatedExecutionTime() {
         KernelProfile profile = KernelManager.instance().getProfile(getClass());
-        synchronized (profile) {
+
             return profile.getTotalTime();
-        }
+
     }
 
     /**
@@ -2279,9 +2328,9 @@ public abstract class Kernel implements Cloneable {
      */
     public double getTotalConversionTime() {
         KernelProfile profile = KernelManager.instance().getProfile(getClass());
-        synchronized (profile) {
+
             return profile.getTotalConversionTime();
-        }
+
     }
 
     /**
@@ -2329,8 +2378,8 @@ public abstract class Kernel implements Cloneable {
      * @param _range The number of Kernels that we would like to initiate.
      * @returnThe Kernel instance (this) so we can chain calls to put(arr).execute(range).get(arr)
      */
-    public synchronized Kernel execute(int _range) {
-        return (execute(createRange(_range), 1));
+    public Kernel execute(int _range) {
+        return execute(createRange(_range), 1);
     }
 
     @SuppressWarnings("deprecation")
@@ -2369,8 +2418,8 @@ public abstract class Kernel implements Cloneable {
      * @param _range The number of Kernels that we would like to initiate.
      * @returnThe Kernel instance (this) so we can chain calls to put(arr).execute(range).get(arr)
      */
-    public synchronized Kernel execute(int _range, int _passes) {
-        return (execute(createRange(_range), _passes));
+    public Kernel execute(int _range, int _passes) {
+        return execute(createRange(_range), _passes);
     }
 
     /**
@@ -2383,8 +2432,8 @@ public abstract class Kernel implements Cloneable {
      * @param _entrypoint is the name of the method we wish to use as the entrypoint to the kernel
      * @return The Kernel instance (this) so we can chain calls to put(arr).execute(range).get(arr)
      */
-    public synchronized Kernel execute(String _entrypoint, Range _range) {
-        return (execute(_entrypoint, _range, 1));
+    public Kernel execute(String _entrypoint, Range _range) {
+        return execute(_entrypoint, _range, 1);
     }
 
     /**
@@ -2422,10 +2471,8 @@ public abstract class Kernel implements Cloneable {
      * <p>
      * <p>Note that where the underlying array field is declared final, for obvious reasons it is not resized to zero.</p>
      */
-    public synchronized void cleanUpArrays() {
-        for (KernelRunner k : runners.values()) {
-            k.cleanUpArrays();
-        }
+    public void cleanUpArrays() {
+        runners.values().forEach(KernelRunner::cleanUpArrays);
     }
 
     /**
@@ -2436,11 +2483,11 @@ public abstract class Kernel implements Cloneable {
      * <p>
      * If <code>execute(int _globalSize)</code> is called after <code>dispose()</code> is called the results are undefined.
      */
-    public synchronized void dispose() {
-       for (KernelRunner k : runners.values()) {
-            k.dispose();
-        }
-        runners.clear();
+    public void dispose() {
+        runners.entrySet().removeIf(e -> {
+           e.getValue().dispose();
+           return true;
+        });
     }
 
     public boolean isRunningCL() {
@@ -2503,7 +2550,7 @@ public abstract class Kernel implements Cloneable {
      * @deprecated See {@link EXECUTION_MODE}
      */
     @Deprecated
-    public synchronized void setFallbackExecutionMode() {
+    public void setFallbackExecutionMode() {
         executionMode = EXECUTION_MODE.getFallbackExecutionMode();
     }
 
@@ -2560,10 +2607,10 @@ public abstract class Kernel implements Cloneable {
                         System.out.println("returnTypeLetter = " + getReturnTypeLetter(kernelMethod));
                         System.out.println("kernelMethod getName = " + kernelMethod.getName());
                         System.out.println("methRefName = " + name + " descriptor = "
-                                + _methodReferenceEntry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8());
+                            + _methodReferenceEntry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8());
                         System.out.println("descToReturnTypeLetter = "
-                                + descriptorToReturnTypeLetter(_methodReferenceEntry.getNameAndTypeEntry().getDescriptorUTF8Entry()
-                                .getUTF8()));
+                            + descriptorToReturnTypeLetter(_methodReferenceEntry.getNameAndTypeEntry().getDescriptorUTF8Entry()
+                            .getUTF8()));
                     }
                     if (toSignature(_methodReferenceEntry).equals(toSignature(kernelMethod))) {
                         final OpenCLMapping annotation = kernelMethod.getAnnotation(OpenCLMapping.class);
@@ -3229,7 +3276,7 @@ public abstract class Kernel implements Cloneable {
     }
 
     private static <A extends Annotation> ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> markedWith(
-            final Class<A> annotationClass) {
+        final Class<A> annotationClass) {
         return cacheProperty(new ValueComputer<Class<?>, Map<String, Boolean>>() {
             @Override
             public Map<String, Boolean> compute(Class<?> key) {
@@ -3292,7 +3339,7 @@ public abstract class Kernel implements Cloneable {
     });
 
     private static <K, V, T extends Throwable> ValueCache<Class<?>, Map<K, V>, T> cacheProperty(
-            final ThrowingValueComputer<Class<?>, Map<K, V>, T> throwingValueComputer) {
+        final ThrowingValueComputer<Class<?>, Map<K, V>, T> throwingValueComputer) {
         return ValueCache.on(new ThrowingValueComputer<Class<?>, Map<K, V>, T>() {
             @Override
             public Map<K, V> compute(Class<?> key) throws T {

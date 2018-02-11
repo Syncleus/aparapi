@@ -64,7 +64,9 @@ import java.util.*;
  */
 public class Range extends RangeJNI{
 
-   private static final int THREADS_PER_CORE = 16;
+   private static final int THREADS_PER_CORE =
+        1;
+       //16;
 
    private static final int MAX_OPENCL_GROUP_SIZE = 256;
 
@@ -87,7 +89,7 @@ public class Range extends RangeJNI{
     * @param _device
     * @param _dims
     */
-   public Range(Device _device, int _dims) {
+   private Range(Device _device, int _dims) {
       device = _device; //!(_device instanceof OpenCLDevice) ? null : (OpenCLDevice) _device;
       dims = _dims;
 
@@ -99,6 +101,9 @@ public class Range extends RangeJNI{
       }
    }
 
+   public int volume() {
+       return globalSize_0 * globalSize_1 * globalSize_2;
+   }
    /** 
     * Create a one dimensional range <code>0.._globalWidth</code> which is processed in groups of size _localWidth.
     * <br/>
@@ -469,7 +474,19 @@ public class Range extends RangeJNI{
     * @return the number of groups for the given dimension. 
     */
    public int getNumGroups(int _dim) {
-      return (_dim == 0 ? (globalSize_0 / localSize_0) : (_dim == 1 ? (globalSize_1 / localSize_1) : (globalSize_2 / localSize_2)));
+       int g, l;
+       switch (_dim) {
+           case 0: g = globalSize_0; l = localSize_0; break;
+           case 1: g = globalSize_1; l = localSize_1; break;
+           case 2: g = globalSize_2; l = localSize_2; break;
+           default:
+               throw new UnsupportedOperationException();
+       }
+       return divideWork(g, l);
+   }
+
+   static int divideWork(int total, int div) {
+       return (int) Math.ceil(((float)total)/div);
    }
 
    /**

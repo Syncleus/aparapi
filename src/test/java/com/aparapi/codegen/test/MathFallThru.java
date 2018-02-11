@@ -19,15 +19,19 @@ import com.aparapi.Kernel;
 
 public class MathFallThru extends Kernel {
 
-    long longout[] = new long[1];
-    int intout[] = new int[1];
+    long longout[] = new long[3];
+    int intout[] = new int[3];
 
     @Override
     public void run() {
         float f1 = 1.0f;
         double d1 = 1.0;
         longout[0] = round(ceil(cos(exp(floor(log(pow(d1, d1)))))) + tan(sqrt(sin(rint(acos(asin(atan(atan2(d1, d1)))))))));
+        longout[1] = popcount(longout[0]);
+        longout[2] = clz(longout[0]);
         intout[0] = round(ceil(cos(exp(floor(log(pow(f1, f1)))))) + tan(sqrt(sin(rint(acos(asin(atan(atan2(f1, f1)))))))));
+        intout[1] = popcount(intout[0]);
+        intout[2] = clz(intout[0]);
         @SuppressWarnings("unused") boolean pass = false;
     }
 }
@@ -57,7 +61,11 @@ public class MathFallThru extends Kernel {
  float f1 = 1.0f;
  double d1 = 1.0;
  this->longout[0]  = round((ceil(cos(exp(floor(log(pow(d1, d1)))))) + tan(sqrt(sin(rint(acos(asin(atan(atan2(d1, d1))))))))));
+ this->longout[1]  = popcount(this->longout[0]);
+ this->longout[2]  = clz(this->longout[0]);
  this->intout[0]  = round((ceil(cos(exp(floor(log(pow(f1, f1)))))) + tan(sqrt(sin(rint(acos(asin(atan(atan2(f1, f1))))))))));
+ this->intout[1]  = popcount(this->intout[0]);
+ this->intout[2]  = clz(this->intout[0]);
  char pass = 0;
  return;
  }
