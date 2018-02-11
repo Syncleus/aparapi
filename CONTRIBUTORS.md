@@ -20,6 +20,7 @@
 * Fernando Marino`
 * AMD Corporation
 * Dmitriy Shabanov <shabanovd@gmail.com>
+* Toon Baeyens <toon.baeyens@gmail.com>
 
 # Details
 

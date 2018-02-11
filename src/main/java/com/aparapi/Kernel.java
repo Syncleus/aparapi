@@ -1316,7 +1316,64 @@ public abstract class Kernel implements Cloneable {
       return Math.abs(_f);
    }
 
+
    /**
+    * Delegates to either {@link java.lang.Integer#bitCount(int)} (Java) or <code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/popcount.html">popcount(int)</a></code> (OpenCL).
+     *
+     * @param _i value to delegate to {@link java.lang.Integer#bitCount(int)}/<code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/popcount.html">popcount(int)</a></code>
+     * @return {@link java.lang.Integer#bitCount(int)}/<code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/popcount.html">popcount(int)</a></code>
+     * @see java.lang.Integer#bitCount(int)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/popcount.html">popcount(int)</a></code>
+     */
+   @OpenCLMapping(mapTo = "popcount")
+   protected int popcount(int _i) {
+      return Integer.bitCount(_i);
+   }
+
+   /**
+    * Delegates to either {@link java.lang.Long#bitCount(long)} (Java) or <code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/popcount.html">popcount(long)</a></code> (OpenCL).
+     *
+     * @param _i value to delegate to {@link java.lang.Long#bitCount(long)}/<code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/popcount.html">popcount(long)</a></code>
+     * @return {@link java.lang.Long#bitCount(long)}/<code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/popcount.html">popcount(long)</a></code>
+     * @see java.lang.Long#bitCount(long)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/popcount.html">popcount(long)</a></code>
+     */
+   @OpenCLMapping(mapTo = "popcount")
+   protected long popcount(long _i) {
+      return Long.bitCount(_i);
+   }
+
+   /**
+    * Delegates to either {@link java.lang.Integer#numberOfLeadingZeros(int)} (Java) or <code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/clz.html">clz(int)</a></code> (OpenCL).
+     *
+     * @param _i value to delegate to {@link java.lang.Integer#numberOfLeadingZeros(int)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/clz.html">clz(int)</a></code>
+     * @return {@link java.lang.Integer#numberOfLeadingZeros(int)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/clz.html">clz(int)</a></code>
+     * @see java.lang.Integer#numberOfLeadingZeros(int)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/clz.html">clz(int)</a></code>
+     */
+
+   @OpenCLMapping(mapTo = "clz")
+   protected int clz(int _i) {
+      return Integer.numberOfLeadingZeros(_i);
+   }
+
+
+   /**
+    * Delegates to either {@link java.lang.Long#numberOfLeadingZeros(long)} (Java) or <code><a href="https://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/clz.html">clz(long)</a></code> (OpenCL).
+     *
+     * @param _l value to delegate to {@link java.lang.Long#numberOfLeadingZeros(long)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/clz.html">clz(long)</a></code>
+     * @return {@link java.lang.Long#numberOfLeadingZeros(long)}/<code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/clz.html">clz(long)</a></code>
+     * @see java.lang.Long#numberOfLeadingZeros(long)
+     * @see <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/clz.html">clz(long)</a></code>
+     */
+
+
+   @OpenCLMapping(mapTo = "clz")
+   protected long clz(long _l) {
+      return Long.numberOfLeadingZeros(_l);
+   }
+
+    /**
     * Delegates to either {@link java.lang.Math#abs(double)} (Java) or <code><a href="http://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/fabs.html">fabs(double)</a></code> (OpenCL).
      *
      * User should note the differences in precision between Java and OpenCL's implementation of arithmetic functions to determine whether the difference in precision is acceptable.
