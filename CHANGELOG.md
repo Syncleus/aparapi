@@ -2,6 +2,7 @@
 
 ## 1.5.0
 
+* Support for OpenCL 2.1 added.
 * Support inline array creation in the kernel, which is implemented in the GPU in private memory.
 * Updated parent pon to v6.
 * createProgram had the wrong signature producing a unsatisfied link exception that is now fixed.
