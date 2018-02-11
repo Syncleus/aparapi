@@ -7,6 +7,7 @@
 * Updated parent pon to v6.
 * createProgram had the wrong signature producing a unsatisfied link exception that is now fixed.
 * Build now requires version 3.5.0 of maven due to changes in surefire plugin.
+* Added the functions popcount and clz
 
 ## 1.4.1
 
