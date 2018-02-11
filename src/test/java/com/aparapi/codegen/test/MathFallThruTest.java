@@ -44,7 +44,11 @@ public class MathFallThruTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " float f1 = 1.0f;\n" +
 " double d1 = 1.0;\n" +
 " this->longout[0]  = round((ceil(cos(exp(floor(log(pow(d1, d1)))))) + tan(sqrt(sin(rint(acos(asin(atan(atan2(d1, d1))))))))));\n" +
+" this->longout[1]  = popcount(this->longout[0]);\n" +
+" this->longout[2]  = clz(this->longout[0]);\n" +
 " this->intout[0]  = round((ceil(cos(exp(floor(log(pow(f1, f1)))))) + tan(sqrt(sin(rint(acos(asin(atan(atan2(f1, f1))))))))));\n" +
+" this->intout[1]  = popcount(this->intout[0]);\n" +
+" this->intout[2]  = clz(this->intout[0]);\n" +
 " char pass = 0;\n" +
 " return;\n" +
 " }\n" +

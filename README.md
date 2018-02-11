@@ -23,7 +23,9 @@ Aparapi was originally a project conceived and developed by AMD corporation. It 
 
 Below you will find two side-by-side comparisons for the nbody problem on a CPU vs a GPU. The simulation is being run on an inexpensive graphics card; you can even run it yourself from the [examples project](https://github.com/Syncleus/aparapi-examples). Its obvious the drastic performance gains that can be acheived with Aparapi.
 
-![NBody GPU](http://aparapi.com/images/nbody_gpu.gif) ![NBody CPU](http://aparapi.com/images/nbody_cpu.gif)
+| ![NBody GPU](http://aparapi.com/images/nbody_gpu.gif) | ![NBody CPU](http://aparapi.com/images/nbody_cpu.gif) |
+|:---:|:---:|
+| GPU Accelerated | CPU Multi-threaded (8 cores) |
 
 ## Support and Documentation
 

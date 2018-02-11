@@ -18,6 +18,7 @@ package com.aparapi.runtime;
 import com.aparapi.Kernel;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class CallStaticFromAnonymousKernelTest {
@@ -61,7 +62,7 @@ public class CallStaticFromAnonymousKernelTest {
         kernel.execute(size);
 
         for (int i = 0; i < size; i++) {
-            assertTrue("results == fooBar", results[i] == (fooBar(values[i]) + AnotherClass.foo(i)));
+            assertEquals(results[i], (fooBar(values[i]) + AnotherClass.foo(i)));
         }
     }
 
