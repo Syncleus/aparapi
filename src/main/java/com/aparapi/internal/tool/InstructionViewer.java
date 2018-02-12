@@ -47,20 +47,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.SpringLayout;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -192,22 +179,20 @@ public class InstructionViewer implements Config.InstructionListener{
                   final String toggleButtonOffLabel = toggleAnnotation.off();
                   final String toggleButtonLabel = getBoolean(fieldJLabelEntry.getKey()) ? toggleButtonOnLabel : toggleButtonOffLabel;
                   final JToggleButton toggleButton = new JToggleButton(toggleButtonLabel, getBoolean(fieldJLabelEntry.getKey()));
-                  toggleButton.addActionListener(new ActionListener(){
-                     @Override public void actionPerformed(ActionEvent _actionEvent) {
-                        final JToggleButton toggleButton = ((JToggleButton) _actionEvent.getSource());
-                        //  System.out.println("toggle toggle "+toggleButton);
-                        if (toggleButton.getText().equals(toggleButtonOnLabel)) {
-                           toggleButton.setText(toggleButtonOffLabel);
-                           setBoolean(booleanField, false);
+                  toggleButton.addActionListener(_actionEvent -> {
+                     final JToggleButton toggleButton1 = ((JToggleButton) _actionEvent.getSource());
+                     //  System.out.println("toggle toggle "+toggleButton);
+                     if (toggleButton1.getText().equals(toggleButtonOnLabel)) {
+                        toggleButton1.setText(toggleButtonOffLabel);
+                        setBoolean(booleanField, false);
 
-                        } else {
-                           toggleButton.setText(toggleButtonOnLabel);
-                           setBoolean(booleanField, true);
-
-                        }
-                        sync();
+                     } else {
+                        toggleButton1.setText(toggleButtonOnLabel);
+                        setBoolean(booleanField, true);
 
                      }
+                     sync();
+
                   });
                   newComponent = toggleButton;
                }
@@ -216,16 +201,13 @@ public class InstructionViewer implements Config.InstructionListener{
                   final JCheckBox checkBox = new JCheckBox();
                   checkBox.setSelected(getBoolean(fieldJLabelEntry.getKey()));
 
-                  checkBox.addChangeListener(new ChangeListener(){
+                  checkBox.addChangeListener(_changeEvent -> {
 
-                     @Override public void stateChanged(ChangeEvent _changeEvent) {
+                     final JCheckBox checkBox1 = ((JCheckBox) _changeEvent.getSource());
+                     //  System.out.println("check toggle "+checkBox);
+                     setBoolean(booleanField, checkBox1.isSelected());
+                     sync();
 
-                        final JCheckBox checkBox = ((JCheckBox) _changeEvent.getSource());
-                        //  System.out.println("check toggle "+checkBox);
-                        setBoolean(booleanField, checkBox.isSelected());
-                        sync();
-
-                     }
                   });
                   newComponent = checkBox;
                }
@@ -343,7 +325,7 @@ public class InstructionViewer implements Config.InstructionListener{
       container.repaint();
    }
 
-   private boolean dirty = false;
+   volatile private boolean dirty = false;
 
    private final View view = new View();
 
@@ -391,13 +373,13 @@ public class InstructionViewer implements Config.InstructionListener{
       return (container);
    }
 
-   private void text(Graphics2D _g, String _text, double _x, double _y) {
+   private static void text(Graphics2D _g, String _text, double _x, double _y) {
       final FontMetrics fm = _g.getFontMetrics();
       _g.drawString(_text, (int) _x, (int) ((_y - fm.getAscent()) + fm.getHeight()));
 
    }
 
-   public void text(Graphics2D _g, Color _color, String _text, double _x, double _y) {
+   public static void text(Graphics2D _g, Color _color, String _text, double _x, double _y) {
       final Color color = _g.getColor();
       _g.setColor(_color);
       text(_g, _text, _x, _y);
@@ -405,28 +387,28 @@ public class InstructionViewer implements Config.InstructionListener{
 
    }
 
-   private void line(Graphics2D _g, Stroke _stroke, double _x1, double _y1, double _x2, double _y2) {
+   private static void line(Graphics2D _g, Stroke _stroke, double _x1, double _y1, double _x2, double _y2) {
       final Stroke stroke = _g.getStroke();
       _g.setStroke(_stroke);
       line(_g, _x1, _y1, _x2, _y2);
       _g.setStroke(stroke);
    }
 
-   private void stroke(Graphics2D _g, Stroke _stroke, Shape _rect) {
+   private static void stroke(Graphics2D _g, Stroke _stroke, Shape _rect) {
       final Stroke stroke = _g.getStroke();
       _g.setStroke(_stroke);
       draw(_g, _rect);
       _g.setStroke(stroke);
    }
 
-   public void fill(Graphics2D _g, Color _color, Shape _rect) {
+   public static void fill(Graphics2D _g, Color _color, Shape _rect) {
       final Color color = _g.getColor();
       _g.setColor(_color);
       fill(_g, _rect);
       _g.setColor(color);
    }
 
-   public void fillStroke(Graphics2D _g, Color _fillColor, Color _strokeColor, Stroke _stroke, Shape _rect) {
+   public static void fillStroke(Graphics2D _g, Color _fillColor, Color _strokeColor, Stroke _stroke, Shape _rect) {
       final Color color = _g.getColor();
       _g.setColor(_fillColor);
       fill(_g, _rect);
@@ -435,15 +417,15 @@ public class InstructionViewer implements Config.InstructionListener{
       _g.setColor(color);
    }
 
-   private void line(Graphics2D _g, double _x1, double _y1, double _x2, double _y2) {
+   private static void line(Graphics2D _g, double _x1, double _y1, double _x2, double _y2) {
       _g.drawLine((int) _x1, (int) _y1, (int) _x2, (int) _y2);
    }
 
-   private void draw(Graphics2D _g, Shape _rectangle) {
+   private static void draw(Graphics2D _g, Shape _rectangle) {
       _g.draw(_rectangle);
    }
 
-   private void fill(Graphics2D _g, Shape _rectangle) {
+   private static void fill(Graphics2D _g, Shape _rectangle) {
       _g.fill(_rectangle);
    }
 
@@ -499,12 +481,8 @@ public class InstructionViewer implements Config.InstructionListener{
 
    private InstructionView getInstructionView(Instruction _instruction) {
 
-      InstructionView instructionView = locationToInstructionViewMap.get(_instruction);
-      if (instructionView == null) {
-         locationToInstructionViewMap.put(_instruction, instructionView = new InstructionView(_instruction));
-
-      }
-      return (instructionView);
+       InstructionView instructionView = locationToInstructionViewMap.computeIfAbsent(_instruction, InstructionView::new);
+       return (instructionView);
    }
 
    private double foldPlace(Graphics2D _g, InstructionView _instructionView, double _x, double _y, boolean _dim) {
@@ -531,7 +509,7 @@ public class InstructionViewer implements Config.InstructionListener{
          }
 
       }
-      final double top = ((y + _y) / 2) - (h / 2);
+      final double top = ((y + _y) / 2.0) - (h / 2.0);
       _instructionView.shape = new Rectangle((int) _x, (int) top, w, h);
       return (Math.max(_y, y));
 
@@ -621,7 +599,7 @@ public class InstructionViewer implements Config.InstructionListener{
             config.verboseBytecodeLabels);
 
       final int h = fm.getHeight() + 2;
-      final double top = (_y / 2) - (h / 2);
+      final double top = (_y / 2) - (h / 2.0);
       _instructionView.shape = new Rectangle((int) _x, (int) top, fm.stringWidth(_instructionView.label) + 2, h);
       return (_y + h);
    }
@@ -731,19 +709,8 @@ public class InstructionViewer implements Config.InstructionListener{
 
       final JMenu fileMenu = new JMenu("File");
       fileMenu.setMnemonic(KeyEvent.VK_F);
-      final ActionListener closeActionListener = new ActionListener(){
-         @Override public void actionPerformed(ActionEvent arg0) {
-            System.exit(1);
-         }
-
-      };
-      final ActionListener nextActionListener = new ActionListener(){
-         @Override public void actionPerformed(ActionEvent arg0) {
-            doorbell.ring();
-
-         }
-
-      };
+      final ActionListener closeActionListener = arg0 -> System.exit(1);
+      final ActionListener nextActionListener = arg0 -> doorbell.ring();
       final JMenuItem closeMenuItem = new JMenuItem("Close");
       closeMenuItem.setMnemonic(KeyEvent.VK_C);
       closeMenuItem.addActionListener(closeActionListener);
@@ -1014,8 +981,8 @@ public class InstructionViewer implements Config.InstructionListener{
 
    }
 
-   public static class DoorBell{
-      volatile boolean notified = false;
+   static class DoorBell{
+      private volatile boolean notified = false;
 
       synchronized void snooze() {
          while (!notified) {
@@ -1044,7 +1011,7 @@ public class InstructionViewer implements Config.InstructionListener{
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
       final JFrame frame = new JFrame();
-      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
       final Color background = Color.WHITE;
       final JPanel panel = new JPanel(new BorderLayout());
@@ -1052,19 +1019,8 @@ public class InstructionViewer implements Config.InstructionListener{
 
       final JMenu fileMenu = new JMenu("File");
       fileMenu.setMnemonic(KeyEvent.VK_F);
-      final ActionListener closeActionListener = new ActionListener(){
-         @Override public void actionPerformed(ActionEvent arg0) {
-            System.exit(1);
-         }
-
-      };
-      final ActionListener nextActionListener = new ActionListener(){
-         @Override public void actionPerformed(ActionEvent arg0) {
-            doorbell.ring();
-
-         }
-
-      };
+      final ActionListener closeActionListener = arg0 -> System.exit(1);
+      final ActionListener nextActionListener = arg0 -> doorbell.ring();
       final JMenuItem closeMenuItem = new JMenuItem("Close");
       closeMenuItem.setMnemonic(KeyEvent.VK_C);
       closeMenuItem.addActionListener(closeActionListener);
@@ -1107,19 +1063,15 @@ public class InstructionViewer implements Config.InstructionListener{
       frame.pack();
       frame.setVisible(true);
 
-      (new Thread(new Runnable(){
+      (new Thread(() -> {
 
-         @Override public void run() {
-
-            Entrypoint entrypoint;
-            try {
-               entrypoint = instructionViewer.classModel.getEntrypoint();
-               final MethodModel method = entrypoint.getMethodModel();
-            } catch (final AparapiException e) {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            }
-
+         Entrypoint entrypoint;
+         try {
+            entrypoint = instructionViewer.classModel.getEntrypoint();
+            final MethodModel method = entrypoint.getMethodModel();
+         } catch (final AparapiException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
          }
 
       })).start();

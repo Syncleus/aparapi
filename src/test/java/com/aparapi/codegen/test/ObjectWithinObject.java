@@ -21,7 +21,6 @@ public class ObjectWithinObject extends Kernel {
 
     final int size = 8;
 
-    ;
     DummyOOA dummy[] = new DummyOOA[size];
 
     @Override

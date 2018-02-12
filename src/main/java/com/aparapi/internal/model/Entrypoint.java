@@ -247,18 +247,18 @@ public class Entrypoint implements Cloneable {
             ClassModel superModel = memberClassModel.getSuperClazz();
             while (superModel != null) {
                // See if super is already added
-               final ClassModel oldSuper = allFieldsClasses.get(superModel.getClassWeAreModelling().getName());
+                final ClassModel oldSuper = allFieldsClasses.get(superModel.clazz.getName());
                if (oldSuper != null) {
                   if (oldSuper != superModel) {
                      memberClassModel.replaceSuperClazz(oldSuper);
                      if (logger.isLoggable(Level.FINEST)) {
-                        logger.finest("replaced super " + oldSuper.getClassWeAreModelling().getName() + " for " + className);
+                         logger.finest("replaced super " + oldSuper.clazz.getName() + " for " + className);
                      }
                   }
                } else {
-                  allFieldsClasses.put(superModel.getClassWeAreModelling().getName(), superModel);
+                   allFieldsClasses.put(superModel.clazz.getName(), superModel);
                   if (logger.isLoggable(Level.FINEST)) {
-                     logger.finest("add new super " + superModel.getClassWeAreModelling().getName() + " for " + className);
+                      logger.finest("add new super " + superModel.clazz.getName() + " for " + className);
                   }
                }
 
@@ -303,7 +303,7 @@ public class Entrypoint implements Cloneable {
     * Update accessor structures when there is a direct access to an 
     * obect array element's data members
     */
-   private void updateObjectMemberFieldAccesses(String className, FieldEntry field) throws AparapiException, ClassParseException {
+   private void updateObjectMemberFieldAccesses(String className, FieldEntry field) throws AparapiException {
       final String accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
 
       // Quickly bail if it is a ref
@@ -317,7 +317,7 @@ public class Entrypoint implements Cloneable {
       }
 
       final ClassModel memberClassModel = getOrUpdateAllClassAccesses(className);
-      final Class<?> memberClass = memberClassModel.getClassWeAreModelling();
+       final Class<?> memberClass = memberClassModel.clazz;
       ClassModel superCandidate = null;
 
       // We may add this field if no superclass match
@@ -326,11 +326,11 @@ public class Entrypoint implements Cloneable {
       // No exact match, look for a superclass
       for (final ClassModel c : allFieldsClasses.values()) {
          if (logger.isLoggable(Level.FINEST)) {
-            logger.finest(" super: " + c.getClassWeAreModelling().getName() + " for " + className);
+             logger.finest(" super: " + c.clazz.getName() + " for " + className);
          }
          if (c.isSuperClass(memberClass)) {
             if (logger.isLoggable(Level.FINE)) {
-               logger.fine("selected super: " + c.getClassWeAreModelling().getName() + " for " + className);
+                logger.fine("selected super: " + c.clazz.getName() + " for " + className);
             }
             superCandidate = c;
             break;
@@ -356,7 +356,7 @@ public class Entrypoint implements Cloneable {
 
                if (!f.getClassEntry().getNameUTF8Entry().getUTF8().equals(field.getClassEntry().getNameUTF8Entry().getUTF8())) {
                   // Look up in class hierarchy to ensure it is the same field
-                  final Field superField = getFieldFromClassHierarchy(superCandidate.getClassWeAreModelling(), f
+                   final Field superField = getFieldFromClassHierarchy(superCandidate.clazz, f
                         .getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
                   final Field classField = getFieldFromClassHierarchy(memberClass, f.getNameAndTypeEntry().getNameUTF8Entry()
                         .getUTF8());
@@ -386,9 +386,9 @@ public class Entrypoint implements Cloneable {
          if (!found) {
             structMemberSet.add(field);
             if (logger.isLoggable(Level.FINE)) {
-               logger.fine("Adding assigned field " + field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8() + " type: "
+                logger.fine("Adding assigned field " + field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8() + " type: "
                      + field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8() + " to "
-                     + memberClassModel.getClassWeAreModelling().getName());
+                     + memberClassModel.clazz.getName());
             }
          }
       }
@@ -421,7 +421,7 @@ public class Entrypoint implements Cloneable {
       // Look for a intra-object call in a object member
       if (m == null && !isMapped) {
          for (ClassModel c : allFieldsClasses.values()) {
-            if (c.getClassWeAreModelling().getName()
+             if (c.clazz.getName()
                   .equals(methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.'))) {
                m = c.getMethod(methodEntry, methodCall instanceof I_INVOKESPECIAL);
                assert m != null;
@@ -449,7 +449,7 @@ public class Entrypoint implements Cloneable {
       return m;
    }
 
-   public Entrypoint(ClassModel _classModel, MethodModel _methodModel, Object _k) throws AparapiException, ClassParseException {
+   public Entrypoint(ClassModel _classModel, MethodModel _methodModel, Object _k) throws AparapiException {
       classModel = _classModel;
       methodModel = _methodModel;
       kernelInstance = _k;
@@ -481,7 +481,7 @@ public class Entrypoint implements Cloneable {
          if ((m != null) && !methodMapKeys.contains(m) && !noCL(m)) {
             final MethodModel target = new MethodModel(m, this);
             methodMap.put(m, target);
-            methodModel.getCalledMethods().add(target);
+             methodModel.calledMethods.add(target);
             discovered = true;
          }
       }
@@ -503,7 +503,7 @@ public class Entrypoint implements Cloneable {
                      // declarations in the correct order.  We are trying to avoid creating forward references
                      target = methodMap.remove(m);
                      if (logger.isLoggable(Level.FINE)) {
-                        logger.fine("repositioning : " + m.getClassModel().getClassWeAreModelling().getName() + ' ' + m.getName()
+                         logger.fine("repositioning : " + m.getClassModel().clazz.getName() + ' ' + m.getName()
                               + ' ' + m.getDescriptor());
                      }
                   } else {
@@ -512,13 +512,13 @@ public class Entrypoint implements Cloneable {
                   }
                   methodMap.put(m, target);
                   // Build graph of call targets to look for recursion
-                  mm.getCalledMethods().add(target);
+                   mm.calledMethods.add(target);
                }
             }
          }
       }
 
-      methodModel.checkForRecursion(new HashSet<MethodModel>());
+      methodModel.checkForRecursion(new LinkedHashSet<>());
 
       calledMethods.addAll(methodMap.values());
       Collections.reverse(calledMethods);
@@ -607,7 +607,7 @@ public class Entrypoint implements Cloneable {
                   final String className = (signature.substring(2, signature.length() - 1)).replace('/', '.');
                   final ClassModel arrayFieldModel = getOrUpdateAllClassAccesses(className);
                   if (arrayFieldModel != null) {
-                     final Class<?> memberClass = arrayFieldModel.getClassWeAreModelling();
+                      final Class<?> memberClass = arrayFieldModel.clazz;
                      final int modifiers = memberClass.getModifiers();
                      if (!Modifier.isFinal(modifiers)) {
                         throw new ClassParseException(ClassParseException.TYPE.ACCESSEDOBJECTNONFINAL);
@@ -636,8 +636,8 @@ public class Entrypoint implements Cloneable {
                } else {
                   final String className = (field.getClassEntry().getNameUTF8Entry().getUTF8()).replace('/', '.');
                   // Look for object data member access
-                  if (!className.equals(getClassModel().getClassWeAreModelling().getName())
-                        && (getFieldFromClassHierarchy(getClassModel().getClassWeAreModelling(), accessedFieldName) == null)) {
+                   if (!className.equals(getClassModel().clazz.getName())
+                        && (getFieldFromClassHierarchy(getClassModel().clazz, accessedFieldName) == null)) {
                      updateObjectMemberFieldAccesses(className, field);
                   }
                }
@@ -651,8 +651,8 @@ public class Entrypoint implements Cloneable {
 
                final String className = (field.getClassEntry().getNameUTF8Entry().getUTF8()).replace('/', '.');
                // Look for object data member access
-               if (!className.equals(getClassModel().getClassWeAreModelling().getName())
-                     && (getFieldFromClassHierarchy(getClassModel().getClassWeAreModelling(), assignedFieldName) == null)) {
+                if (!className.equals(getClassModel().clazz.getName())
+                     && (getFieldFromClassHierarchy(getClassModel().clazz, assignedFieldName) == null)) {
                   updateObjectMemberFieldAccesses(className, field);
                } else {
 
@@ -702,7 +702,7 @@ public class Entrypoint implements Cloneable {
       for (final String referencedFieldName : referencedFieldNames) {
 
          try {
-            final Class<?> clazz = classModel.getClassWeAreModelling();
+             final Class<?> clazz = classModel.clazz;
             final Field field = getFieldFromClassHierarchy(clazz, referencedFieldName);
             if (field != null) {
                referencedFields.add(field);
@@ -726,8 +726,8 @@ public class Entrypoint implements Cloneable {
             ClassModel superModel = memberObjClass.getSuperClazz();
             while (superModel != null) {
                if (logger.isLoggable(Level.FINEST)) {
-                  logger.finest("adding = " + superModel.getClassWeAreModelling().getName() + " fields into "
-                        + memberObjClass.getClassWeAreModelling().getName());
+                   logger.finest("adding = " + superModel.clazz.getName() + " fields into "
+                        + memberObjClass.clazz.getName());
                }
                memberObjClass.getStructMembers().addAll(superModel.getStructMembers());
                superModel = superModel.getSuperClazz();
@@ -735,30 +735,31 @@ public class Entrypoint implements Cloneable {
          }
 
          // Sort fields of each class biggest->smallest
-         final Comparator<FieldEntry> fieldSizeComparator = new Comparator<FieldEntry>(){
-            @Override public int compare(FieldEntry aa, FieldEntry bb) {
-               if (aa == bb)
-                  return 0;
-               final String aType = aa.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-               final String bType = bb.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
+         final Comparator<FieldEntry> fieldSizeComparator = (aa, bb) -> {
+            if (aa == bb)
+               return 0;
+            final String aType = aa.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
+            final String bType = bb.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
 
-               // Booleans get converted down to bytes
-               final int aSize = InstructionSet.TypeSpec.valueOf(aType.equals("Z") ? "B" : aType).getSize();
-               final int bSize = InstructionSet.TypeSpec.valueOf(bType.equals("Z") ? "B" : bType).getSize();
+            if (aType.equals(bType))
+                return 0;
 
-               if (logger.isLoggable(Level.FINEST)) {
-                  logger.finest("aType= " + aType + " aSize= " + aSize + " . . bType= " + bType + " bSize= " + bSize);
-               }
+            // Booleans get converted down to bytes
+            final int aSize = TypeSpec.valueOf(aType.equals("Z") ? "B" : aType).getSize();
+            final int bSize = TypeSpec.valueOf(bType.equals("Z") ? "B" : bType).getSize();
 
-               // Note this is sorting in reverse order so the biggest is first
-               return Integer.compare(bSize, aSize);
-            }
+//               if (logger.isLoggable(Level.FINEST)) {
+//                  logger.finest("aType= " + aType + " aSize= " + aSize + " . . bType= " + bType + " bSize= " + bSize);
+//               }
+
+            // Note this is sorting in reverse order so the biggest is first
+            return Integer.compare(bSize, aSize);
          };
 
          for (final ClassModel c : objectArrayFieldsClasses.values()) {
             final ArrayList<FieldEntry> fields = c.getStructMembers();
             if (fields.size() > 0) {
-               Collections.sort(fields, fieldSizeComparator);
+               fields.sort(fieldSizeComparator);
 
                // Now compute the total size for the struct
                int totalSize = 0;
@@ -767,7 +768,7 @@ public class Entrypoint implements Cloneable {
                for (final FieldEntry f : fields) {
                   // Record field offset for use while copying
                   // Get field we will copy out of the kernel member object
-                  final Field rfield = getFieldFromClassHierarchy(c.getClassWeAreModelling(), f.getNameAndTypeEntry()
+                   final Field rfield = getFieldFromClassHierarchy(c.clazz, f.getNameAndTypeEntry()
                         .getNameUTF8Entry().getUTF8());
 
                   c.getStructMemberOffsets().add(UnsafeWrapper.objectFieldOffset(rfield));
@@ -802,8 +803,7 @@ public class Entrypoint implements Cloneable {
    }
 
    private boolean noCL(ClassModelMethod m) {
-      boolean found = m.getClassModel().getNoCLMethods().contains(m.getName());
-      return found;
+       return m.getClassModel().isNoCLMethod(m.getName());
    }
 
    private FieldEntry getSimpleGetterField(MethodModel method) {
@@ -856,7 +856,7 @@ public class Entrypoint implements Cloneable {
       boolean isMapped = Kernel.isMappedMethod(_methodEntry);
 
       if (logger.isLoggable(Level.FINE) && (target == null)) {
-         logger.fine("Did not find call target: " + _methodEntry + " in " + getClassModel().getClassWeAreModelling().getName()
+          logger.fine("Did not find call target: " + _methodEntry + " in " + getClassModel().clazz.getName()
                + " isMapped=" + isMapped);
       }
 
@@ -864,10 +864,10 @@ public class Entrypoint implements Cloneable {
          // Look for member obj accessor calls
          final String entryClassNameInDotForm = _methodEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace('/', '.');
          for (final ClassModel memberObjClass : objectArrayFieldsClasses.values()) {
-            if (entryClassNameInDotForm.equals(memberObjClass.getClassWeAreModelling().getName())) {
+             if (entryClassNameInDotForm.equals(memberObjClass.clazz.getName())) {
                if (logger.isLoggable(Level.FINE)) {
-                  logger.fine("Searching for call target: " + _methodEntry + " in "
-                        + memberObjClass.getClassWeAreModelling().getName());
+                   logger.fine("Searching for call target: " + _methodEntry + " in "
+                        + memberObjClass.clazz.getName());
                }
 
                target = memberObjClass.getMethod(_methodEntry, false);
@@ -899,7 +899,7 @@ public class Entrypoint implements Cloneable {
          if (m.getMethod().getName().equals(meNT)
                && m.getMethod().getDescriptor().equals(deNT)) {
             if (logger.isLoggable(Level.FINE)) {
-               logger.fine("Found " + m.getMethod().getClassModel().getClassWeAreModelling().getName() + '.'
+                logger.fine("Found " + m.getMethod().getClassModel().clazz.getName() + '.'
                      + m.getMethod().getName() + ' ' + m.getMethod().getDescriptor());
             }
             return m;

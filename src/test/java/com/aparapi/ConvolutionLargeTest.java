@@ -61,21 +61,13 @@ public class ConvolutionLargeTest {
 
                 @Override
                 public Supplier<ImageConvolution> getSupplier() {
-                    return new Supplier<ImageConvolution>() {
-                        @Override
-                        public ImageConvolution get() {
-                            return convolution;
-                        }
-                    };
+                    return () -> convolution;
                 }
 
                 @Override
                 public Consumer<ImageConvolution> getDisposer() {
-                    return new Consumer<ImageConvolution>() {
-                        @Override
-                        public void accept(ImageConvolution k) {
-                            // Do nothing
-                        }
+                    return k -> {
+                        // Do nothing
                     };
                 }
 
@@ -92,22 +84,12 @@ public class ConvolutionLargeTest {
             testWithSupplier(new ImageConvolutionCreationContext() {
                 @Override
                 public Supplier<ImageConvolution> getSupplier() {
-                    return new Supplier<ImageConvolution>() {
-                        @Override
-                        public ImageConvolution get() {
-                            return new ImageConvolution();
-                        }
-                    };
+                    return ImageConvolution::new;
                 }
 
                 @Override
                 public Consumer<ImageConvolution> getDisposer() {
-                    return new Consumer<ImageConvolution>() {
-                        @Override
-                        public void accept(ImageConvolution k) {
-                            k.dispose();
-                        }
-                    };
+                    return Kernel::dispose;
                 }
 
                 @Override

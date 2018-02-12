@@ -44,7 +44,7 @@ public class KernelPreferences {
       }
       List<Device> localPreferredDevices = new ArrayList<>();
       ArrayList<Device> copy;
-      synchronized (preferredDevices) {
+      synchronized (this) {
          copy = new ArrayList(preferredDevices);
       }
       for (Device device : copy) {

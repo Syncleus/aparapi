@@ -56,6 +56,7 @@ import com.aparapi.internal.instruction.*;
 import com.aparapi.internal.jni.*;
 import com.aparapi.internal.tool.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.logging.*;
 
 /**
@@ -205,10 +206,14 @@ public class Config extends ConfigJNI{
       if ((instructionListenerClassName != null) && !instructionListenerClassName.isEmpty()) {
          try {
             final Class<?> instructionListenerClass = Class.forName(instructionListenerClassName);
-            instructionListener = (InstructionListener) instructionListenerClass.newInstance();
+            instructionListener = (InstructionListener) instructionListenerClass.getConstructor().newInstance();
          } catch (final ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+         } catch (NoSuchMethodException e) {
+             e.printStackTrace();
+         } catch (InvocationTargetException e) {
+             e.printStackTrace();
          }
       }
 

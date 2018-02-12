@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) 2016 - 2017 Syncleus, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
@@ -17,17 +32,26 @@ public class MultithreadTest {
     static float[] p = new float[]{2034.91f, 2042.03f, 2044.13f, 2063.15f, 2060.7f, 2056.29f, 2057.51f, 2058.18f, 2047.97f, 2001.26f, 2008.72f, 1999.9f, 1981.21f, 1933.88f, 1923.55f, 1939.44f, 1929.48f, 1893.06f, 1910.54f, 1930.46f, 1940.75f, 1929.77f, 1914.37f, 1872.92f, 1831.74f, 1857.52f, 1832.32f, 1830.06f, 1785.75f, 1784.81f, 1796.98f, 1809.07f, 1791.85f, 1768.04f, 1754.01f, 1741.92f, 1765.34f, 1785.87f, 1807.05f, 1797.9f, 1813.57f, 1758.5f, 1775.85f, 1768.07f, 1725.15f, 1716.43f, 1731.33f, 1761.02f, 1760.95f, 1742.41f, 1734.22f, 1731.33f, 1711.96f, 1710.56f, 1663.85f, 1656.57f, 1616.43f, 1611.78f, 1669.43f, 1651.7f, 1662.17f, 1707.62f, 1698.16f, 1669.59f, 1623.32f, 1622.89f, 1648.25f, 1685.88f, 1670.64f, 1694f, 1722.13f, 1706.31f, 1705.01f, 1735.95f, 1743.88f, 1775.36f, 1818.09f, 1812.17f, 1813.04f, 1775.78f, 1756.78f, 1756.94f, 1764.34f, 1812.26f, 1794.48f, 1802.72f, 1865.28f, 1863.09f, 1843.68f, 1893.35f, 1882.88f, 1915.17f, 1934.48f, 1912f, 1907.62f, 1910.38f, 1881.93f, 1914.18f, 1933.92f, 1952.46f, 1974.38f, 1954.74f, 1958.4f, 1956.65f, 1993.21f, 2000.73f, 2019.83f, 2045.57f, 2047.59f, 2002.27f, 2030.48f, 2037.54f, 2043.64f, 2069.43f, 2043.62f, 1992.19f, 2011.31f, 1964.96f, 1992.72f, 1985.37f, 2038.22f, 2018.29f, 2041.33f, 2053.25f, 2086.2f, 2079.23f, 2061.43f, 2060.43f, 2047.58f, 2027.91f, 2004.27f, 2042.32f, 2022.79f, 1999.28f, 1995.37f, 1989.62f, 1945.19f, 1961.19f, 1968.31f, 1971.8f, 1968.05f, 1980.25f, 2009.48f, 2026.87f, 2022.79f, 2023.39f, 2041.25f, 2021.78f, 2022.01f, 2026.15f, 2030.88f, 2041.01f, 2141.41f, 2190.04f, 2248.67f, 2221.63f, 2270.04f, 2259.56f, 2249.08f, 2280.56f, 2284.33f, 2348.77f, 2364.71f, 2438.89f, 2436.04f, 2370.25f, 2411.94f, 2341.18f, 2330.4f, 2377.23f, 2400.77f, 2372f, 2373.93f, 2324.76f, 2355f, 2328.78f, 2369.15f, 2392.48f, 2376.29f, 2359.96f, 2340.38f, 2339.7f, 2304.06f, 2286.95f, 2258.27f, 2268.42f, 2266.97f, 2317.76f, 2295.68f, 2299.64f, 2323.04f, 2340.8f, 2332.45f, 2316.51f, 2351.41f, 2362.82f, 2378.29f, 2404.29f, 2410.59f, 2443.15f};
 
     @Test
-    public void test() throws InterruptedException {
+    public void test1() throws InterruptedException {
+        test(1, 1);
+        test(1, 2);
+    }
+    @Test
+    public void testN() throws InterruptedException {
+        for (int t = 2; t< Math.max(3,Runtime.getRuntime().availableProcessors()); t++) {
+            test(t, t/2);
+            test(t, t);
+            test(t, t*2);
+            test(t, t*2+1); //odd
+        }
+    }
 
-        final int N = 10;
-        final int E = 10000;
-        final int THREADS =
-                //1;
-                //2;
-                Runtime.getRuntime().availableProcessors() - 1;
+    static void test(int THREADS, int KERNELS) throws InterruptedException {
 
-        final List<ABCCKernel> kernels = new ArrayList(N);
-        for (int i = 0; i < N; i++) {
+        final int E = (KERNELS * 100); //10000;
+
+        final List<ABCCKernel> kernels = new ArrayList(KERNELS);
+        for (int i = 0; i < KERNELS; i++) {
             kernels.add( new ABCCKernel(t, p) );
         }
 
@@ -39,15 +63,12 @@ public class MultithreadTest {
         final AtomicInteger next = new AtomicInteger(0);
 
         for (int i = 0; i< E; i++) {
-            f.execute(new Runnable() {
-                @Override public void run() {
-                    kernels.get(next.getAndIncrement() % N).execute(Range.create(t.length));
-                }
-            });
+            f.execute(() ->
+                kernels.get(next.getAndIncrement() % KERNELS).execute(Range.create(t.length)));
         }
 
         f.shutdown();
-        f.awaitTermination(1, TimeUnit.DAYS);
+        f.awaitTermination(1, TimeUnit.MINUTES);
 
         for (Kernel k : kernels)
             k.dispose();

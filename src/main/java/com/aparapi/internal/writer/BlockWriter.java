@@ -476,7 +476,7 @@ public abstract class BlockWriter{
                dim++;
             }
 
-            NameAndTypeEntry nameAndTypeEntry = ((AccessField) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
+            NameAndTypeEntry nameAndTypeEntry = ((FieldReference) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
             if (isMultiDimensionalArray(nameAndTypeEntry)) {
                String arrayName = nameAndTypeEntry.getNameUTF8Entry().getUTF8();
                write(" * this->" + arrayName + arrayDimMangleSuffix + dim);
@@ -517,7 +517,7 @@ public abstract class BlockWriter{
             load = load.getFirstChild();
             dim++;
          }
-         NameAndTypeEntry nameAndTypeEntry = ((AccessInstanceField) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
+         NameAndTypeEntry nameAndTypeEntry = ((FieldReference) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
          final String arrayName = nameAndTypeEntry.getNameUTF8Entry().getUTF8();
          String dimSuffix = isMultiDimensionalArray(nameAndTypeEntry) ? Integer.toString(dim) : "";
          write("this->" + arrayName + arrayLengthMangleSuffix + dimSuffix);
@@ -753,7 +753,7 @@ public abstract class BlockWriter{
 
    }
 
-   private boolean isNeedParenthesis(Instruction instruction){
+   private static boolean isNeedParenthesis(Instruction instruction){
         final Instruction parent = instruction.getParentExpr();
         boolean needsParenthesis = true;
 
@@ -794,7 +794,7 @@ public abstract class BlockWriter{
       return isObjectArray(accessInstanceField.getConstantPoolFieldEntry().getNameAndTypeEntry());
    }
 
-   private AccessField getUltimateInstanceFieldAccess(final AccessArrayElement arrayLoadInstruction) {
+   private static AccessField getUltimateInstanceFieldAccess(final AccessArrayElement arrayLoadInstruction) {
       Instruction load = arrayLoadInstruction.getArrayRef();
       while (load instanceof I_AALOAD) {
          load = load.getFirstChild();
@@ -804,8 +804,7 @@ public abstract class BlockWriter{
    }
 
    void writeMethod(MethodCall _methodCall, MethodEntry _methodEntry) throws CodeGenException {
-      boolean noCL = _methodEntry.getOwnerClassModel().getNoCLMethods()
-            .contains(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
+      boolean noCL = _methodEntry.getOwnerClassModel().isNoCLMethod(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
       if (noCL) {
          return;
       }

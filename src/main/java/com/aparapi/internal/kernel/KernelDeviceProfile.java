@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,10 +20,12 @@ import com.aparapi.Kernel;
 import com.aparapi.device.Device;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,7 +70,7 @@ public class KernelDeviceProfile {
 
                 Arrays.fill(cur, 0L);
 
-                ++invocationCount;
+                invocationCount.incrementAndGet();
 
             } else {
                 if (lastEvent != null) {
@@ -108,7 +110,7 @@ public class KernelDeviceProfile {
             new WeakHashMap<Thread,Accumulator>(Runtime.getRuntime().availableProcessors()*2, 0.95f)
     );
 
-    private volatile long invocationCount = 0;
+    private final AtomicLong invocationCount = new AtomicLong();
 
     static {
         assert ProfilingEvent.START.ordinal() == 0 : "ProfilingEvent.START.ordinal() != 0";
@@ -122,18 +124,14 @@ public class KernelDeviceProfile {
     public KernelDeviceProfile(Class<? extends Kernel> kernel, Device device) {
         this.kernel = kernel;
         this.device = device;
-        this.format = (DecimalFormat) DecimalFormat.getNumberInstance();
+        this.format = (DecimalFormat) NumberFormat.getNumberInstance();
         format.setMinimumFractionDigits(3);
         format.setMaximumFractionDigits(3);
     }
 
     private Accumulator acc() {
         Thread t = Thread.currentThread();
-        Accumulator a = acc.get(t);
-        if ( a == null) {
-            a = new Accumulator();
-            acc.put(t, a);
-        }
+        Accumulator a = acc.computeIfAbsent(t, k -> new Accumulator());
         return a;
     }
 
@@ -209,7 +207,7 @@ public class KernelDeviceProfile {
         commit();
 
         StringBuilder builder = new StringBuilder(150);
-        appendRowHeaders(builder, device.getShortDescription(), String.valueOf(invocationCount));
+        appendRowHeaders(builder, device.getShortDescription(), String.valueOf(invocationCount.get()));
         double total = 0;
         for (int i = 1; i < combined.currentTimes.length; ++i) {
             double time = getLastElapsedTime(i);
@@ -233,9 +231,9 @@ public class KernelDeviceProfile {
         commit();
 
         double total = 0;
-        double count = mean ? invocationCount : 1;
+        double count = mean ? invocationCount.doubleValue() : 1;
         StringBuilder builder = new StringBuilder(150);
-        appendRowHeaders(builder, device.getShortDescription(), String.valueOf(invocationCount));
+        appendRowHeaders(builder, device.getShortDescription(), String.valueOf(invocationCount.get()));
         for (int i = 1; i < combined.currentTimes.length; ++i) {
             double time = getCumulativeElapsedTime(i);
             if (mean) {

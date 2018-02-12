@@ -55,7 +55,6 @@ package com.aparapi.codegen;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -148,12 +147,15 @@ public class Source{
 
    }
 
-   private String listToString(List<String> list) {
-      StringBuilder stringBuilder = new StringBuilder();
-      for (String line : list) {
-         stringBuilder.append(line).append('\n');
-      }
-      return (stringBuilder.toString().trim());
+   private static String listToString(List<String> list) {
+      StringBuilder sb = new StringBuilder();
+       for (int i = 0, listSize = list.size(); i < listSize; i++) {
+           String line = list.get(i);
+           sb.append(line);
+           if (i < listSize-1)
+               sb.append('\n');
+       }
+      return sb.toString();
    }
 
    public String getOpenCLString(int _index) {

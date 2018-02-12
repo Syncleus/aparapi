@@ -66,698 +66,709 @@ import com.aparapi.internal.model.ClassModel.ConstantPool.*;
 
 import java.util.*;
 
-public abstract class KernelWriter extends BlockWriter{
+public abstract class KernelWriter extends BlockWriter {
 
-   private final String cvtBooleanToChar = "char ";
+    private static final String cvtBooleanToChar = "char ";
 
-   private final String cvtBooleanArrayToCharStar = "char* ";
+    private static final String cvtBooleanArrayToCharStar = "char* ";
 
-   private final String cvtBooleanArrayToChar = "char ";
+    private static final String cvtBooleanArrayToChar = "char ";
 
-   private final String cvtByteToChar = "char ";
+    private static final String cvtByteToChar = "char ";
 
-   private final String cvtByteArrayToCharStar = "char* ";
+    private static final String cvtByteArrayToCharStar = "char* ";
 
-   private final String cvtByteArrayToChar = "char ";
+    private static final String cvtByteArrayToChar = "char ";
 
-   private final String cvtCharToShort = "unsigned short ";
+    private static final String cvtCharToShort = "unsigned short ";
 
-   private final String cvtCharArrayToShortStar = "unsigned short* ";
+    private static final String cvtCharArrayToShortStar = "unsigned short* ";
 
-   private final String cvtCharArrayToShort = "unsigned short ";
+    private static final String cvtCharArrayToShort = "unsigned short ";
 
-   private final String cvtIntArrayToIntStar = "int* ";
+    private static final String cvtIntArrayToIntStar = "int* ";
 
-   private final String cvtIntArrayToInt = "int ";
+    private static final String cvtIntArrayToInt = "int ";
 
-   private final String cvtFloatArrayToFloatStar = "float* ";
+    private static final String cvtFloatArrayToFloatStar = "float* ";
 
-   private final String cvtFloatArrayToFloat = "float ";
+    private static final String cvtFloatArrayToFloat = "float ";
 
-   private final String cvtDoubleArrayToDoubleStar = "double* ";
+    private static final String cvtDoubleArrayToDoubleStar = "double* ";
 
-   private final String cvtDoubleArrayToDouble = "double ";
+    private static final String cvtDoubleArrayToDouble = "double ";
 
-   private final String cvtLongArrayToLongStar = "long* ";
+    private static final String cvtLongArrayToLongStar = "long* ";
 
-   private final String cvtLongArrayToLong = "long ";
+    private static final String cvtLongArrayToLong = "long ";
 
-   private final String cvtShortArrayToShortStar = "short* ";
+    private static final String cvtShortArrayToShortStar = "short* ";
 
-   private final String cvtShortArrayToShort = "short ";
+    private static final String cvtShortArrayToShort = "short ";
 
-   /** When declaring a __private struct pointer field, we always omit the "__private" qualifier. This is because the NVidia OpenCL compiler, at time of writing
-    * erroneously complains about explicitly qualifying pointers with __private ("error: field may not be qualified with an address space").
-    */
-   private static final boolean IMPLICIT_PRIVATE_FIELDS = true;
+    /** When declaring a __private struct pointer field, we always omit the "__private" qualifier. This is because the NVidia OpenCL compiler, at time of writing
+     * erroneously complains about explicitly qualifying pointers with __private ("error: field may not be qualified with an address space").
+     */
+    private static final boolean IMPLICIT_PRIVATE_FIELDS = true;
 
-   // private static Logger logger = Logger.getLogger(Config.getLoggerName());
+    // private static Logger logger = Logger.getLogger(Config.getLoggerName());
 
-   private Entrypoint entryPoint = null;
+    private Entrypoint entryPoint = null;
 
-   private final static Map<String, String> javaToCLIdentifierMap = new HashMap<>();
-   static {
-      javaToCLIdentifierMap.put("getGlobalId()I", "get_global_id(0)");
-      javaToCLIdentifierMap.put("getGlobalId(I)I", "get_global_id"); // no parenthesis if we are conveying args
-      javaToCLIdentifierMap.put("getGlobalX()I", "get_global_id(0)");
-      javaToCLIdentifierMap.put("getGlobalY()I", "get_global_id(1)");
-      javaToCLIdentifierMap.put("getGlobalZ()I", "get_global_id(2)");
+    private final static Map<String, String> javaToCLIdentifierMap = new HashMap<String,String>() {{
+        put("getGlobalId()I", "get_global_id(0)");
+        put("getGlobalId(I)I", "get_global_id"); // no parenthesis if we are conveying args
+        put("getGlobalX()I", "get_global_id(0)");
+        put("getGlobalY()I", "get_global_id(1)");
+        put("getGlobalZ()I", "get_global_id(2)");
 
-      javaToCLIdentifierMap.put("getGlobalSize()I", "get_global_size(0)");
-      javaToCLIdentifierMap.put("getGlobalSize(I)I", "get_global_size"); // no parenthesis if we are conveying args
-      javaToCLIdentifierMap.put("getGlobalWidth()I", "get_global_size(0)");
-      javaToCLIdentifierMap.put("getGlobalHeight()I", "get_global_size(1)");
-      javaToCLIdentifierMap.put("getGlobalDepth()I", "get_global_size(2)");
+        put("getGlobalSize()I", "get_global_size(0)");
+        put("getGlobalSize(I)I", "get_global_size"); // no parenthesis if we are conveying args
+        put("getGlobalWidth()I", "get_global_size(0)");
+        put("getGlobalHeight()I", "get_global_size(1)");
+        put("getGlobalDepth()I", "get_global_size(2)");
 
-      javaToCLIdentifierMap.put("getLocalId()I", "get_local_id(0)");
-      javaToCLIdentifierMap.put("getLocalId(I)I", "get_local_id"); // no parenthesis if we are conveying args
-      javaToCLIdentifierMap.put("getLocalX()I", "get_local_id(0)");
-      javaToCLIdentifierMap.put("getLocalY()I", "get_local_id(1)");
-      javaToCLIdentifierMap.put("getLocalZ()I", "get_local_id(2)");
+        put("getLocalId()I", "get_local_id(0)");
+        put("getLocalId(I)I", "get_local_id"); // no parenthesis if we are conveying args
+        put("getLocalX()I", "get_local_id(0)");
+        put("getLocalY()I", "get_local_id(1)");
+        put("getLocalZ()I", "get_local_id(2)");
 
-      javaToCLIdentifierMap.put("getLocalSize()I", "get_local_size(0)");
-      javaToCLIdentifierMap.put("getLocalSize(I)I", "get_local_size"); // no parenthesis if we are conveying args
-      javaToCLIdentifierMap.put("getLocalWidth()I", "get_local_size(0)");
-      javaToCLIdentifierMap.put("getLocalHeight()I", "get_local_size(1)");
-      javaToCLIdentifierMap.put("getLocalDepth()I", "get_local_size(2)");
+        put("getLocalSize()I", "get_local_size(0)");
+        put("getLocalSize(I)I", "get_local_size"); // no parenthesis if we are conveying args
+        put("getLocalWidth()I", "get_local_size(0)");
+        put("getLocalHeight()I", "get_local_size(1)");
+        put("getLocalDepth()I", "get_local_size(2)");
 
-      javaToCLIdentifierMap.put("getNumGroups()I", "get_num_groups(0)");
-      javaToCLIdentifierMap.put("getNumGroups(I)I", "get_num_groups"); // no parenthesis if we are conveying args
-      javaToCLIdentifierMap.put("getNumGroupsX()I", "get_num_groups(0)");
-      javaToCLIdentifierMap.put("getNumGroupsY()I", "get_num_groups(1)");
-      javaToCLIdentifierMap.put("getNumGroupsZ()I", "get_num_groups(2)");
+        put("getNumGroups()I", "get_num_groups(0)");
+        put("getNumGroups(I)I", "get_num_groups"); // no parenthesis if we are conveying args
+        put("getNumGroupsX()I", "get_num_groups(0)");
+        put("getNumGroupsY()I", "get_num_groups(1)");
+        put("getNumGroupsZ()I", "get_num_groups(2)");
 
-      javaToCLIdentifierMap.put("getGroupId()I", "get_group_id(0)");
-      javaToCLIdentifierMap.put("getGroupId(I)I", "get_group_id"); // no parenthesis if we are conveying args
-      javaToCLIdentifierMap.put("getGroupX()I", "get_group_id(0)");
-      javaToCLIdentifierMap.put("getGroupY()I", "get_group_id(1)");
-      javaToCLIdentifierMap.put("getGroupZ()I", "get_group_id(2)");
+        put("getGroupId()I", "get_group_id(0)");
+        put("getGroupId(I)I", "get_group_id"); // no parenthesis if we are conveying args
+        put("getGroupX()I", "get_group_id(0)");
+        put("getGroupY()I", "get_group_id(1)");
+        put("getGroupZ()I", "get_group_id(2)");
 
-      javaToCLIdentifierMap.put("getPassId()I", "get_pass_id(this)");
+        put("getPassId()I", "get_pass_id(this)");
 
-      javaToCLIdentifierMap.put("localBarrier()V", "barrier(CLK_LOCAL_MEM_FENCE)");
+        put("localBarrier()V", "barrier(CLK_LOCAL_MEM_FENCE)");
 
-      javaToCLIdentifierMap.put("globalBarrier()V", "barrier(CLK_GLOBAL_MEM_FENCE)");
-   }
+        put("globalBarrier()V", "barrier(CLK_GLOBAL_MEM_FENCE)");
 
-   /**
-    * These three convert functions are here to perform
-    * any type conversion that may be required between
-    * Java and OpenCL.
-    * 
-    * @param _typeDesc
-    *          String in the Java JNI notation, [I, etc
-    * @return Suitably converted string, "char*", etc
-    */
-   @Override public String convertType(String _typeDesc, boolean useClassModel, boolean isLocal) {
-      switch (_typeDesc) {
-         case "Z":
-         case "boolean":
-            return (cvtBooleanToChar);
-         case "[Z":
-         case "boolean[]":
-            return isLocal ? (cvtBooleanArrayToChar) : (cvtBooleanArrayToCharStar);
-         case "B":
-         case "byte":
-            return (cvtByteToChar);
-         case "[B":
-         case "byte[]":
-            return isLocal ? (cvtByteArrayToChar) : (cvtByteArrayToCharStar);
-         case "C":
-         case "char":
-            return (cvtCharToShort);
-         case "[C":
-         case "char[]":
-            return isLocal ? (cvtCharArrayToShort) : (cvtCharArrayToShortStar);
-         case "[I":
-         case "int[]":
-            return isLocal ? (cvtIntArrayToInt) : (cvtIntArrayToIntStar);
-         case "[F":
-         case "float[]":
-            return isLocal ? (cvtFloatArrayToFloat) : (cvtFloatArrayToFloatStar);
-         case "[D":
-         case "double[]":
-            return isLocal ? (cvtDoubleArrayToDouble) : (cvtDoubleArrayToDoubleStar);
-         case "[J":
-         case "long[]":
-            return isLocal ? (cvtLongArrayToLong) : (cvtLongArrayToLongStar);
-         case "[S":
-         case "short[]":
-            return isLocal ? (cvtShortArrayToShort) : (cvtShortArrayToShortStar);
-      }
-      // if we get this far, we haven't matched anything yet
-      if (useClassModel) {
-         return (ClassModel.convert(_typeDesc, "", true));
-      } else {
-         return _typeDesc;
-      }
-   }
+    }};
 
-   @Override public void writeMethod(MethodCall _methodCall, MethodEntry _methodEntry) throws CodeGenException {
-      final int argc = _methodEntry.getStackConsumeCount();
+    /**
+     * These three convert functions are here to perform
+     * any type conversion that may be required between
+     * Java and OpenCL.
+     *
+     * @param _typeDesc
+     *          String in the Java JNI notation, [I, etc
+     * @return Suitably converted string, "char*", etc
+     */
+    @Override
+    public String convertType(String _typeDesc, boolean useClassModel, boolean isLocal) {
+        switch (_typeDesc) {
+            case "Z":
+            case "boolean":
+                return (cvtBooleanToChar);
+            case "[Z":
+            case "boolean[]":
+                return isLocal ? (cvtBooleanArrayToChar) : (cvtBooleanArrayToCharStar);
+            case "B":
+            case "byte":
+                return (cvtByteToChar);
+            case "[B":
+            case "byte[]":
+                return isLocal ? (cvtByteArrayToChar) : (cvtByteArrayToCharStar);
+            case "C":
+            case "char":
+                return (cvtCharToShort);
+            case "[C":
+            case "char[]":
+                return isLocal ? (cvtCharArrayToShort) : (cvtCharArrayToShortStar);
+            case "[I":
+            case "int[]":
+                return isLocal ? (cvtIntArrayToInt) : (cvtIntArrayToIntStar);
+            case "[F":
+            case "float[]":
+                return isLocal ? (cvtFloatArrayToFloat) : (cvtFloatArrayToFloatStar);
+            case "[D":
+            case "double[]":
+                return isLocal ? (cvtDoubleArrayToDouble) : (cvtDoubleArrayToDoubleStar);
+            case "[J":
+            case "long[]":
+                return isLocal ? (cvtLongArrayToLong) : (cvtLongArrayToLongStar);
+            case "[S":
+            case "short[]":
+                return isLocal ? (cvtShortArrayToShort) : (cvtShortArrayToShortStar);
+        }
+        // if we get this far, we haven't matched anything yet
+        if (useClassModel) {
+            return (ClassModel.convert(_typeDesc, "", true));
+        } else {
+            return _typeDesc;
+        }
+    }
 
-      final String methodName = _methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-      final String methodSignature = _methodEntry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
+    @Override
+    public void writeMethod(MethodCall _methodCall, MethodEntry _methodEntry) throws CodeGenException {
+        final int argc = _methodEntry.getStackConsumeCount();
 
-      final String barrierAndGetterMappings = javaToCLIdentifierMap.get(methodName + methodSignature);
+        NameAndTypeEntry entry = _methodEntry.getNameAndTypeEntry();
+        final String methodName = entry.getNameUTF8Entry().getUTF8();
+        final String methodSignature = entry.getDescriptorUTF8Entry().getUTF8();
 
-      if (barrierAndGetterMappings != null) {
-         // this is one of the OpenCL barrier or size getter methods
-         // write the mapping and exit
-         if (argc > 0) {
-            write(barrierAndGetterMappings);
+        final String barrierAndGetterMappings = javaToCLIdentifierMap.get(methodName + methodSignature);
+
+        if (barrierAndGetterMappings != null) {
+            // this is one of the OpenCL barrier or size getter methods
+            // write the mapping and exit
+            if (argc > 0) {
+                write(barrierAndGetterMappings);
+                write("(");
+                for (int arg = 0; arg < argc; arg++) {
+                    if ((arg != 0)) {
+                        write(", ");
+                    }
+                    writeInstruction(_methodCall.getArg(arg));
+                }
+                write(")");
+            } else {
+                write(barrierAndGetterMappings);
+            }
+        } else {
+            final boolean isSpecial = _methodCall instanceof I_INVOKESPECIAL;
+            MethodModel m = entryPoint.getCallTarget(_methodEntry, isSpecial);
+
+            FieldEntry getterField = null;
+            if (m != null && m.isGetter()) {
+                getterField = m.getAccessorVariableFieldEntry();
+            }
+            if (getterField != null && isThis(_methodCall.getArg(0))) {
+                String fieldName = getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+                write("this->");
+                write(fieldName);
+                return;
+            }
+            boolean noCL = _methodEntry.getOwnerClassModel().isNoCLMethod(
+                entry.getNameUTF8Entry().getUTF8());
+            if (noCL) {
+                return;
+            }
+            final String intrinsicMapping = Kernel.getMappedMethodName(_methodEntry);
+            // System.out.println("getMappedMethodName for " + methodName + " returned " + mapping);
+            boolean isIntrinsic = false;
+
+            if (intrinsicMapping == null) {
+                assert entryPoint != null : "entryPoint should not be null";
+                boolean isMapped = Kernel.isMappedMethod(_methodEntry);
+
+                if (m != null) {
+                    write(m.getName());
+                } else {
+                    // Must be a library call like rsqrt
+                    assert isMapped : _methodEntry + " should be mapped method!";
+                    write(methodName);
+                    isIntrinsic = true;
+                }
+            } else {
+                write(intrinsicMapping);
+            }
+
             write("(");
+
+            if ((intrinsicMapping == null) && (_methodCall instanceof VirtualMethodCall) && (!isIntrinsic)) {
+
+                final Instruction i = ((VirtualMethodCall) _methodCall).getInstanceReference();
+
+                if (i instanceof I_ALOAD_0) {
+                    write("this");
+                } else if (i instanceof AccessArrayElement) {
+                    final AccessArrayElement arrayAccess = (AccessArrayElement) ((VirtualMethodCall) _methodCall).getInstanceReference();
+                    final Instruction refAccess = arrayAccess.getArrayRef();
+                    //assert refAccess instanceof I_GETFIELD : "ref should come from getfield";
+                    final String fieldName = ((FieldReference) refAccess).getConstantPoolFieldEntry().getNameAndTypeEntry()
+                        .getNameUTF8Entry().getUTF8();
+                    write(" &(this->" + fieldName);
+                    write("[");
+                    writeInstruction(arrayAccess.getArrayIndex());
+                    write("])");
+                } else {
+                    assert false : "unhandled call from: " + i;
+                }
+            }
             for (int arg = 0; arg < argc; arg++) {
-               if ((arg != 0)) {
-                  write(", ");
-               }
-               writeInstruction(_methodCall.getArg(arg));
+                if (((intrinsicMapping == null) && (_methodCall instanceof VirtualMethodCall) && (!isIntrinsic)) || (arg != 0)) {
+                    write(", ");
+                }
+                writeInstruction(_methodCall.getArg(arg));
             }
             write(")");
-         } else {
-            write(barrierAndGetterMappings);
-         }
-      } else {
-         final boolean isSpecial = _methodCall instanceof I_INVOKESPECIAL;
-         MethodModel m = entryPoint.getCallTarget(_methodEntry, isSpecial);
+        }
+    }
 
-         FieldEntry getterField = null;
-         if (m != null && m.isGetter()) {
-            getterField = m.getAccessorVariableFieldEntry();
-         }
-         if (getterField != null && isThis(_methodCall.getArg(0))) {
-            String fieldName = getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-            write("this->");
-            write(fieldName);
-            return;
-         }
-         boolean noCL = _methodEntry.getOwnerClassModel().getNoCLMethods()
-               .contains(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
-         if (noCL) {
-            return;
-         }
-         final String intrinsicMapping = Kernel.getMappedMethodName(_methodEntry);
-         // System.out.println("getMappedMethodName for " + methodName + " returned " + mapping);
-         boolean isIntrinsic = false;
+    private static boolean isThis(Instruction instruction) {
+        return instruction instanceof I_ALOAD_0;
+    }
 
-         if (intrinsicMapping == null) {
-            assert entryPoint != null : "entryPoint should not be null";
-            boolean isMapped = Kernel.isMappedMethod(_methodEntry);
+    private void writePragma(String _name, boolean _enable) {
+        write("#pragma OPENCL EXTENSION " + _name + " : " + (_enable ? "en" : "dis") + "able");
+        newLine();
+    }
 
-            if (m != null) {
-               write(m.getName());
+    private final static String __local = "__local";
+
+    private final static String __global = "__global";
+
+    private final static String __constant = "__constant";
+
+    private final static String __private = "__private";
+
+    private final static String LOCAL_ANNOTATION_NAME = 'L' + com.aparapi.Kernel.Local.class.getName().replace('.', '/') + ';';
+
+    private final static String CONSTANT_ANNOTATION_NAME = 'L' + com.aparapi.Kernel.Constant.class.getName().replace('.', '/')
+        + ';';
+
+    @Override
+    public void write(Entrypoint _entryPoint) throws CodeGenException {
+        final List<String> thisStruct = new ArrayList<>();
+        final List<String> argLines = new ArrayList<>();
+        final List<String> assigns = new ArrayList<>();
+
+        entryPoint = _entryPoint;
+
+        final StringBuilder thisStructLine = new StringBuilder();
+        final StringBuilder argLine = new StringBuilder();
+        final StringBuilder assignLine = new StringBuilder();
+
+        for (final ClassModelField field : _entryPoint.getReferencedClassModelFields()) {
+            // Field field = _entryPoint.getClassModel().getField(f.getName());
+            thisStructLine.setLength(0);
+            argLine.setLength(0);
+            assignLine.setLength(0);
+
+            String signature = field.getDescriptor();
+
+            boolean isPointer = false;
+
+            int numDimensions = 0;
+
+            // check the suffix
+
+            String type = field.getName().endsWith(Kernel.LOCAL_SUFFIX) ? __local
+                : (field.getName().endsWith(Kernel.CONSTANT_SUFFIX) ? __constant : __global);
+            Integer privateMemorySize = null;
+            try {
+                privateMemorySize = _entryPoint.getClassModel().getPrivateMemorySize(field.getName());
+            } catch (ClassParseException e) {
+                throw new CodeGenException(e);
+            }
+
+            if (privateMemorySize != null) {
+                type = __private;
+            }
+            final RuntimeAnnotationsEntry visibleAnnotations = field.getAttributePool().getRuntimeVisibleAnnotationsEntry();
+
+            if (visibleAnnotations != null) {
+                for (final AnnotationInfo ai : visibleAnnotations) {
+                    final String typeDescriptor = ai.getTypeDescriptor();
+                    if (typeDescriptor.equals(LOCAL_ANNOTATION_NAME)) {
+                        type = __local;
+                    } else if (typeDescriptor.equals(CONSTANT_ANNOTATION_NAME)) {
+                        type = __constant;
+                    }
+                }
+            }
+
+            String argType = (__private.equals(type)) ? __constant : type;
+
+            //if we have a an array we want to mark the object as a pointer
+            //if we have a multiple dimensional array we want to remember the number of dimensions
+            while (signature.startsWith("[")) {
+                if (isPointer == false) {
+                    argLine.append(argType).append(' ');
+                    if (!(type.equals(__private) && IMPLICIT_PRIVATE_FIELDS)) {
+                        thisStructLine.append(type).append(' ');
+                    }
+                }
+                isPointer = true;
+                numDimensions++;
+                signature = signature.substring(1);
+            }
+
+            // If it is a converted array of objects, emit the struct param
+            String className = null;
+            if (signature.startsWith("L")) {
+                // Turn Lcom/codegen/javalabs/opencl/demo/DummyOOA; into com_amd_javalabs_opencl_demo_DummyOOA for example
+                className = (signature.substring(1, signature.length() - 1)).replace('/', '_');
+                // if (logger.isLoggable(Level.FINE)) {
+                // logger.fine("Examining object parameter: " + signature + " new: " + className);
+                // }
+                argLine.append(className);
+                thisStructLine.append(className);
             } else {
-               // Must be a library call like rsqrt
-               assert isMapped : _methodEntry + " should be mapped method!";
-               write(methodName);
-               isIntrinsic = true;
+                argLine.append(convertType(ClassModel.typeName(signature.charAt(0)), false, false));
+                thisStructLine.append(convertType(ClassModel.typeName(signature.charAt(0)), false, false));
             }
-         } else {
-            write(intrinsicMapping);
-         }
 
-         write("(");
+            argLine.append(' ');
+            thisStructLine.append(' ');
 
-         if ((intrinsicMapping == null) && (_methodCall instanceof VirtualMethodCall) && (!isIntrinsic)) {
-
-            final Instruction i = ((VirtualMethodCall) _methodCall).getInstanceReference();
-
-            if (i instanceof I_ALOAD_0) {
-               write("this");
-            } else if (i instanceof AccessArrayElement) {
-               final AccessArrayElement arrayAccess = (AccessArrayElement) ((VirtualMethodCall) _methodCall).getInstanceReference();
-               final Instruction refAccess = arrayAccess.getArrayRef();
-               //assert refAccess instanceof I_GETFIELD : "ref should come from getfield";
-               final String fieldName = ((AccessField) refAccess).getConstantPoolFieldEntry().getNameAndTypeEntry()
-                     .getNameUTF8Entry().getUTF8();
-               write(" &(this->" + fieldName);
-               write("[");
-               writeInstruction(arrayAccess.getArrayIndex());
-               write("])");
-            } else {
-               assert false : "unhandled call from: " + i;
+            if (isPointer) {
+                argLine.append('*');
+                if (privateMemorySize == null) {
+                    thisStructLine.append('*');
+                }
             }
-         }
-         for (int arg = 0; arg < argc; arg++) {
-            if (((intrinsicMapping == null) && (_methodCall instanceof VirtualMethodCall) && (!isIntrinsic)) || (arg != 0)) {
-               write(", ");
-            }
-            writeInstruction(_methodCall.getArg(arg));
-         }
-         write(")");
-      }
-   }
 
-   private boolean isThis(Instruction instruction) {
-      return instruction instanceof I_ALOAD_0;
-   }
-
-   private void writePragma(String _name, boolean _enable) {
-      write("#pragma OPENCL EXTENSION " + _name + " : " + (_enable ? "en" : "dis") + "able");
-      newLine();
-   }
-
-   private final static String __local = "__local";
-
-   private final static String __global = "__global";
-
-   private final static String __constant = "__constant";
-
-   private final static String __private = "__private";
-
-   private final static String LOCAL_ANNOTATION_NAME = 'L' + com.aparapi.Kernel.Local.class.getName().replace('.', '/') + ';';
-
-   private final static String CONSTANT_ANNOTATION_NAME = 'L' + com.aparapi.Kernel.Constant.class.getName().replace('.', '/')
-         + ';';
-
-   @Override public void write(Entrypoint _entryPoint) throws CodeGenException {
-      final List<String> thisStruct = new ArrayList<>();
-      final List<String> argLines = new ArrayList<>();
-      final List<String> assigns = new ArrayList<>();
-
-      entryPoint = _entryPoint;
-
-      for (final ClassModelField field : _entryPoint.getReferencedClassModelFields()) {
-         // Field field = _entryPoint.getClassModel().getField(f.getName());
-         final StringBuilder thisStructLine = new StringBuilder();
-         final StringBuilder argLine = new StringBuilder();
-         final StringBuilder assignLine = new StringBuilder();
-
-         String signature = field.getDescriptor();
-
-         boolean isPointer = false;
-
-         int numDimensions = 0;
-
-         // check the suffix
-
-         String type = field.getName().endsWith(Kernel.LOCAL_SUFFIX) ? __local
-               : (field.getName().endsWith(Kernel.CONSTANT_SUFFIX) ? __constant : __global);
-         Integer privateMemorySize = null;
-         try {
-            privateMemorySize = _entryPoint.getClassModel().getPrivateMemorySize(field.getName());
-         } catch (ClassParseException e) {
-            throw new CodeGenException(e);
-         }
-
-         if (privateMemorySize != null) {
-            type = __private;
-         }
-         final RuntimeAnnotationsEntry visibleAnnotations = field.getAttributePool().getRuntimeVisibleAnnotationsEntry();
-
-         if (visibleAnnotations != null) {
-            for (final AnnotationInfo ai : visibleAnnotations) {
-               final String typeDescriptor = ai.getTypeDescriptor();
-               if (typeDescriptor.equals(LOCAL_ANNOTATION_NAME)) {
-                  type = __local;
-               } else if (typeDescriptor.equals(CONSTANT_ANNOTATION_NAME)) {
-                  type = __constant;
-               }
-            }
-         }
-
-         String argType = (__private.equals(type)) ? __constant : type;
-
-         //if we have a an array we want to mark the object as a pointer
-         //if we have a multiple dimensional array we want to remember the number of dimensions
-         while (signature.startsWith("[")) {
-            if (isPointer == false) {
-               argLine.append(argType).append(' ');
-               if (!(type.equals(__private) && IMPLICIT_PRIVATE_FIELDS)) {
-                  thisStructLine.append(type).append(' ');
-               }
-            }
-            isPointer = true;
-            numDimensions++;
-            signature = signature.substring(1);
-         }
-
-         // If it is a converted array of objects, emit the struct param
-         String className = null;
-         if (signature.startsWith("L")) {
-            // Turn Lcom/codegen/javalabs/opencl/demo/DummyOOA; into com_amd_javalabs_opencl_demo_DummyOOA for example
-            className = (signature.substring(1, signature.length() - 1)).replace('/', '_');
-            // if (logger.isLoggable(Level.FINE)) {
-            // logger.fine("Examining object parameter: " + signature + " new: " + className);
-            // }
-            argLine.append(className);
-            thisStructLine.append(className);
-         } else {
-            argLine.append(convertType(ClassModel.typeName(signature.charAt(0)), false, false));
-            thisStructLine.append(convertType(ClassModel.typeName(signature.charAt(0)), false, false));
-         }
-
-         argLine.append(' ');
-         thisStructLine.append(' ');
-
-         if (isPointer) {
-            argLine.append('*');
             if (privateMemorySize == null) {
-               thisStructLine.append('*');
+                assignLine.append("this->");
+                assignLine.append(field.getName());
+                assignLine.append(" = ");
+                assignLine.append(field.getName());
             }
-         }
 
-         if (privateMemorySize == null) {
-            assignLine.append("this->");
-            assignLine.append(field.getName());
-            assignLine.append(" = ");
-            assignLine.append(field.getName());
-         }
-
-         argLine.append(field.getName());
-         thisStructLine.append(field.getName());
-         if (privateMemorySize == null) {
-            assigns.add(assignLine.toString());
-         }
-         argLines.add(argLine.toString());
-         if (privateMemorySize != null) {
-            thisStructLine.append('[').append(privateMemorySize).append(']');
-         }
-         thisStruct.add(thisStructLine.toString());
-
-         // Add int field into "this" struct for supporting java arraylength op
-         // named like foo__javaArrayLength
-         if (isPointer && _entryPoint.getArrayFieldArrayLengthUsed().contains(field.getName()) || isPointer && numDimensions > 1) {
-
-            for (int i = 0; i < numDimensions; i++) {
-               final StringBuilder lenStructLine = new StringBuilder();
-               final StringBuilder lenArgLine = new StringBuilder();
-               final StringBuilder lenAssignLine = new StringBuilder();
-
-               String suffix = numDimensions == 1 ? "" : Integer.toString(i);
-               String lenName = field.getName() + BlockWriter.arrayLengthMangleSuffix + suffix;
-
-               lenStructLine.append("int ").append(lenName);
-
-               lenAssignLine.append("this->");
-               lenAssignLine.append(lenName);
-               lenAssignLine.append(" = ");
-               lenAssignLine.append(lenName);
-
-               lenArgLine.append("int ").append(lenName);
-
-               assigns.add(lenAssignLine.toString());
-               argLines.add(lenArgLine.toString());
-               thisStruct.add(lenStructLine.toString());
-
-               if (numDimensions > 1) {
-                  final StringBuilder dimStructLine = new StringBuilder();
-                  final StringBuilder dimArgLine = new StringBuilder();
-                  final StringBuilder dimAssignLine = new StringBuilder();
-                  String dimName = field.getName() + BlockWriter.arrayDimMangleSuffix + suffix;
-
-                  dimStructLine.append("int ").append(dimName);
-
-                  dimAssignLine.append("this->");
-                  dimAssignLine.append(dimName);
-                  dimAssignLine.append(" = ");
-                  dimAssignLine.append(dimName);
-
-                  dimArgLine.append("int ").append(dimName);
-
-                  assigns.add(dimAssignLine.toString());
-                  argLines.add(dimArgLine.toString());
-                  thisStruct.add(dimStructLine.toString());
-               }
+            argLine.append(field.getName());
+            thisStructLine.append(field.getName());
+            if (privateMemorySize == null) {
+                assigns.add(assignLine.toString());
             }
-         }
-      }
+            argLines.add(argLine.toString());
+            if (privateMemorySize != null) {
+                thisStructLine.append('[').append(privateMemorySize).append(']');
+            }
+            thisStruct.add(thisStructLine.toString());
 
-      if (Config.enableByteWrites || _entryPoint.requiresByteAddressableStorePragma()) {
-         // Starting with OpenCL 1.1 (which is as far back as we support)
-         // this feature is part of the core, so we no longer need this pragma
-         if (false) {
-            writePragma("cl_khr_byte_addressable_store", true);
-            newLine();
-         }
-      }
+            // Add int field into "this" struct for supporting java arraylength op
+            // named like foo__javaArrayLength
+            if (isPointer && _entryPoint.getArrayFieldArrayLengthUsed().contains(field.getName()) || isPointer && numDimensions > 1) {
 
-      boolean usesAtomics = false;
-      if (Config.enableAtomic32 || _entryPoint.requiresAtomic32Pragma()) {
-         usesAtomics = true;
-         writePragma("cl_khr_global_int32_base_atomics", true);
-         writePragma("cl_khr_global_int32_extended_atomics", true);
-         writePragma("cl_khr_local_int32_base_atomics", true);
-         writePragma("cl_khr_local_int32_extended_atomics", true);
-      }
+                for (int i = 0; i < numDimensions; i++) {
+                    final StringBuilder lenStructLine = new StringBuilder();
+                    final StringBuilder lenArgLine = new StringBuilder();
+                    final StringBuilder lenAssignLine = new StringBuilder();
 
-      if (Config.enableAtomic64 || _entryPoint.requiresAtomic64Pragma()) {
-         usesAtomics = true;
-         writePragma("cl_khr_int64_base_atomics", true);
-         writePragma("cl_khr_int64_extended_atomics", true);
-      }
+                    String suffix = numDimensions == 1 ? "" : Integer.toString(i);
+                    String lenName = field.getName() + BlockWriter.arrayLengthMangleSuffix + suffix;
 
-      if (usesAtomics) {
-         write("int atomicAdd(__global int *_arr, int _index, int _delta){");
-         in();
-         {
-            newLine();
-            write("return atomic_add(&_arr[_index], _delta);");
-            out();
-            newLine();
-         }
-         write("}");
+                    lenStructLine.append("int ").append(lenName);
 
-         newLine();
-      }
+                    lenAssignLine.append("this->");
+                    lenAssignLine.append(lenName);
+                    lenAssignLine.append(" = ");
+                    lenAssignLine.append(lenName);
 
-      if (Config.enableDoubles || _entryPoint.requiresDoublePragma()) {
-         writePragma("cl_khr_fp64", true);
-         newLine();
-      }
+                    lenArgLine.append("int ").append(lenName);
 
-      // Emit structs for oop transformation accessors
-      for (final ClassModel cm : _entryPoint.getObjectArrayFieldsClasses().values()) {
-         final ArrayList<FieldEntry> fieldSet = cm.getStructMembers();
-         if (fieldSet.size() > 0) {
-            final String mangledClassName = cm.getClassWeAreModelling().getName().replace('.', '_');
-            newLine();
-            write("typedef struct " + mangledClassName + "_s{");
+                    assigns.add(lenAssignLine.toString());
+                    argLines.add(lenArgLine.toString());
+                    thisStruct.add(lenStructLine.toString());
+
+                    if (numDimensions > 1) {
+                        final StringBuilder dimStructLine = new StringBuilder();
+                        final StringBuilder dimArgLine = new StringBuilder();
+                        final StringBuilder dimAssignLine = new StringBuilder();
+                        String dimName = field.getName() + BlockWriter.arrayDimMangleSuffix + suffix;
+
+                        dimStructLine.append("int ").append(dimName);
+
+                        dimAssignLine.append("this->");
+                        dimAssignLine.append(dimName);
+                        dimAssignLine.append(" = ");
+                        dimAssignLine.append(dimName);
+
+                        dimArgLine.append("int ").append(dimName);
+
+                        assigns.add(dimAssignLine.toString());
+                        argLines.add(dimArgLine.toString());
+                        thisStruct.add(dimStructLine.toString());
+                    }
+                }
+            }
+        }
+
+        if (Config.enableByteWrites || _entryPoint.requiresByteAddressableStorePragma()) {
+            // Starting with OpenCL 1.1 (which is as far back as we support)
+            // this feature is part of the core, so we no longer need this pragma
+            if (false) {
+                writePragma("cl_khr_byte_addressable_store", true);
+                newLine();
+            }
+        }
+
+        boolean usesAtomics = false;
+        if (Config.enableAtomic32 || _entryPoint.requiresAtomic32Pragma()) {
+            usesAtomics = true;
+            writePragma("cl_khr_global_int32_base_atomics", true);
+            writePragma("cl_khr_global_int32_extended_atomics", true);
+            writePragma("cl_khr_local_int32_base_atomics", true);
+            writePragma("cl_khr_local_int32_extended_atomics", true);
+        }
+
+        if (Config.enableAtomic64 || _entryPoint.requiresAtomic64Pragma()) {
+            usesAtomics = true;
+            writePragma("cl_khr_int64_base_atomics", true);
+            writePragma("cl_khr_int64_extended_atomics", true);
+        }
+
+        if (usesAtomics) {
+            write("int atomicAdd(__global int *_arr, int _index, int _delta){");
             in();
+            {
+                newLine();
+                write("return atomic_add(&_arr[_index], _delta);");
+                out();
+                newLine();
+            }
+            write("}");
+
             newLine();
+        }
 
-            int totalSize = 0;
-            int alignTo = 0;
+        if (Config.enableDoubles || _entryPoint.requiresDoublePragma()) {
+            writePragma("cl_khr_fp64", true);
+            newLine();
+        }
 
-            for (FieldEntry field : fieldSet) {
-               final String fType = field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-               final int fSize = TypeSpec.valueOf(fType.equals("Z") ? "B" : fType).getSize();
+        // Emit structs for oop transformation accessors
+        for (final ClassModel cm : _entryPoint.getObjectArrayFieldsClasses().values()) {
+            final ArrayList<FieldEntry> fieldSet = cm.getStructMembers();
+            if (fieldSet.size() > 0) {
+                final String mangledClassName = cm.clazz.getName().replace('.', '_');
+                newLine();
+                write("typedef struct " + mangledClassName + "_s{");
+                in();
+                newLine();
 
-               if (fSize > alignTo) {
-                  alignTo = fSize;
-               }
-               totalSize += fSize;
+                int totalSize = 0;
+                int alignTo = 0;
 
-               final String cType = convertType(field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8(), true, false);
-               assert cType != null : "could not find type for " + field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-               writeln(cType + ' ' + field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8() + ';');
+                for (FieldEntry field : fieldSet) {
+                    final String fType = field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
+                    final int fSize = TypeSpec.valueOf(fType.equals("Z") ? "B" : fType).getSize();
+
+                    if (fSize > alignTo) {
+                        alignTo = fSize;
+                    }
+                    totalSize += fSize;
+
+                    final String cType = convertType(field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8(), true, false);
+                    assert cType != null : "could not find type for " + field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
+                    writeln(cType + ' ' + field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8() + ';');
+                }
+
+                // compute total size for OpenCL buffer
+                int totalStructSize = 0;
+                if ((totalSize % alignTo) == 0) {
+                    totalStructSize = totalSize;
+                } else {
+                    // Pad up if necessary
+                    totalStructSize = ((totalSize / alignTo) + 1) * alignTo;
+                }
+                if (totalStructSize > alignTo) {
+                    while (totalSize < totalStructSize) {
+                        // structBuffer.put((byte)-1);
+                        writeln("char _pad_" + totalSize + ';');
+                        totalSize++;
+                    }
+                }
+
+                out();
+                newLine();
+                write("} " + mangledClassName + ';');
+                newLine();
             }
+        }
 
-            // compute total size for OpenCL buffer
-            int totalStructSize = 0;
-            if ((totalSize % alignTo) == 0) {
-               totalStructSize = totalSize;
-            } else {
-               // Pad up if necessary
-               totalStructSize = ((totalSize / alignTo) + 1) * alignTo;
-            }
-            if (totalStructSize > alignTo) {
-               while (totalSize < totalStructSize) {
-                  // structBuffer.put((byte)-1);
-                  writeln("char _pad_" + totalSize + ';');
-                  totalSize++;
-               }
-            }
+        write("typedef struct This_s{");
 
+        in();
+        newLine();
+        for (final String line : thisStruct) {
+            write(line);
+            writeln(";");
+        }
+        write("int passid");
+        out();
+        writeln(";");
+        // out();
+        // newLine();
+        write("}This;");
+        newLine();
+        write("int get_pass_id(This *this){");
+        in();
+        {
+            newLine();
+            write("return this->passid;");
             out();
             newLine();
-            write("} " + mangledClassName + ';');
-            newLine();
-         }
-      }
+        }
+        write("}");
+        newLine();
 
-      write("typedef struct This_s{");
-
-      in();
-      newLine();
-      for (final String line : thisStruct) {
-         write(line);
-         writeln(";");
-      }
-      write("int passid");
-      out();
-      writeln(";");
-      // out();
-      // newLine();
-      write("}This;");
-      newLine();
-      write("int get_pass_id(This *this){");
-      in();
-      {
-         newLine();
-         write("return this->passid;");
-         out();
-         newLine();
-      }
-      write("}");
-      newLine();
-
-      for (final MethodModel mm : _entryPoint.getCalledMethods()) {
-         // write declaration :)
-         if (mm.isPrivateMemoryGetter()) {
-            continue;
-         }
-
-         final String returnType = mm.getReturnType();
-         // Arrays always map to __private or__global arrays
-         if (returnType.startsWith("[")) {
-            write(" __global ");
-         }
-         write(convertType(returnType, true, false));
-
-         write(mm.getName() + '(');
-
-         if (!mm.getMethod().isStatic()) {
-            if ((mm.getMethod().getClassModel() == _entryPoint.getClassModel())
-                  || mm.getMethod().getClassModel().isSuperClass(_entryPoint.getClassModel().getClassWeAreModelling())) {
-               write("This *this");
-            } else {
-               // Call to an object member or superclass of member
-               for (final ClassModel c : _entryPoint.getObjectArrayFieldsClasses().values()) {
-                  if (mm.getMethod().getClassModel() == c) {
-                     write("__global " + mm.getMethod().getClassModel().getClassWeAreModelling().getName().replace('.', '_')
-                           + " *this");
-                     break;
-                  } else if (mm.getMethod().getClassModel().isSuperClass(c.getClassWeAreModelling())) {
-                     write("__global " + c.getClassWeAreModelling().getName().replace('.', '_') + " *this");
-                     break;
-                  }
-               }
+        for (final MethodModel mm : _entryPoint.getCalledMethods()) {
+            // write declaration :)
+            if (mm.isPrivateMemoryGetter()) {
+                continue;
             }
-         }
 
-         boolean alreadyHasFirstArg = !mm.getMethod().isStatic();
-
-         final LocalVariableTableEntry<LocalVariableInfo> lvte = mm.getLocalVariableTableEntry();
-         for (final LocalVariableInfo lvi : lvte) {
-            if ((lvi.getStart() == 0) && ((lvi.getVariableIndex() != 0) || mm.getMethod().isStatic())) { // full scope but skip this
-               final String descriptor = lvi.getVariableDescriptor();
-               if (alreadyHasFirstArg) {
-                  write(", ");
-               }
-
-               if (descriptor.startsWith("[") && !lvi.getVariableName().endsWith(PRIVATE_SUFFIX)) {
-                  write(" __global ");
-               }
-
-               write(convertType(descriptor, true, false));
-               write(lvi.getVariableName());
-               alreadyHasFirstArg = true;
+            final String returnType = mm.getReturnType();
+            // Arrays always map to __private or__global arrays
+            if (returnType.startsWith("[")) {
+                write(" __global ");
             }
-         }
-         write(")");
-         writeMethodBody(mm);
-         newLine();
-      }
+            write(convertType(returnType, true, false));
 
-      write("__kernel void " + _entryPoint.getMethodModel().getSimpleName() + '(');
+            write(mm.getName() + '(');
 
-      in();
-      boolean first = true;
-      for (final String line : argLines) {
+            if (!mm.getMethod().isStatic()) {
+                if ((mm.getMethod().getClassModel() == _entryPoint.getClassModel())
+                    || mm.getMethod().getClassModel().isSuperClass(_entryPoint.getClassModel().clazz)) {
+                    write("This *this");
+                } else {
+                    // Call to an object member or superclass of member
+                    for (final ClassModel c : _entryPoint.getObjectArrayFieldsClasses().values()) {
+                        if (mm.getMethod().getClassModel() == c) {
+                            write("__global " + mm.getMethod().getClassModel().clazz.getName().replace('.', '_')
+                                + " *this");
+                            break;
+                        } else if (mm.getMethod().getClassModel().isSuperClass(c.clazz)) {
+                            write("__global " + c.clazz.getName().replace('.', '_') + " *this");
+                            break;
+                        }
+                    }
+                }
+            }
 
-         if (first) {
-            first = false;
-         } else {
-            write(", ");
-         }
+            boolean alreadyHasFirstArg = !mm.getMethod().isStatic();
 
-         newLine();
-         write(line);
-      }
+            final LocalVariableTableEntry<LocalVariableInfo> lvte = mm.getLocalVariableTableEntry();
+            for (final LocalVariableInfo lvi : lvte) {
+                if ((lvi.getStart() == 0) && ((lvi.getVariableIndex() != 0) || mm.getMethod().isStatic())) { // full scope but skip this
+                    final String descriptor = lvi.getVariableDescriptor();
+                    if (alreadyHasFirstArg) {
+                        write(", ");
+                    }
 
-      if (first) {
-         first = false;
-      } else {
-         write(", ");
-      }
-      newLine();
-      write("int passid");
-      out();
-      newLine();
-      write("){");
-      in();
-      newLine();
-      writeln("This thisStruct;");
-      writeln("This* this=&thisStruct;");
-      for (final String line : assigns) {
-         write(line);
-         writeln(";");
-      }
-      write("this->passid = passid");
-      writeln(";");
+                    if (descriptor.startsWith("[") && !lvi.getVariableName().endsWith(PRIVATE_SUFFIX)) {
+                        write(" __global ");
+                    }
 
-      writeMethodBody(_entryPoint.getMethodModel());
-      out();
-      newLine();
-      writeln("}");
-      out();
-   }
-
-   @Override public void writeThisRef() {
-      write("this->");
-   }
-
-   @Override public void writeInstruction(Instruction _instruction) throws CodeGenException {
-      if ((_instruction instanceof I_IUSHR) || (_instruction instanceof I_LUSHR)) {
-         final BinaryOperator binaryInstruction = (BinaryOperator) _instruction;
-         final Instruction parent = binaryInstruction.getParentExpr();
-         boolean needsParenthesis = true;
-
-         if (parent instanceof AssignToLocalVariable) {
-            needsParenthesis = false;
-         } else if (parent instanceof AssignToField) {
-            needsParenthesis = false;
-         } else if (parent instanceof AssignToArrayElement) {
-            needsParenthesis = false;
-         }
-         if (needsParenthesis) {
-            write("(");
-         }
-
-         if (binaryInstruction instanceof I_IUSHR) {
-            write("((unsigned int)");
-         } else {
-            write("((unsigned long)");
-         }
-         writeInstruction(binaryInstruction.getLhs());
-         write(")");
-         write(" >> ");
-         writeInstruction(binaryInstruction.getRhs());
-
-         if (needsParenthesis) {
+                    write(convertType(descriptor, true, false));
+                    write(lvi.getVariableName());
+                    alreadyHasFirstArg = true;
+                }
+            }
             write(")");
-         }
-      } else {
-         super.writeInstruction(_instruction);
-      }
-   }
+            writeMethodBody(mm);
+            newLine();
+        }
 
-   public static String writeToString(Entrypoint _entrypoint) throws CodeGenException {
-      final StringBuilder openCLStringBuilder = new StringBuilder();
-      final KernelWriter openCLWriter = new KernelWriter(){
-         @Override public void write(String _string) {
-            openCLStringBuilder.append(_string);
-         }
-      };
-      try {
-         openCLWriter.write(_entrypoint);
-      } catch (final CodeGenException codeGenException) {
-         throw codeGenException;
-      }/* catch (final Throwable t) {
-         throw new CodeGenException(t);
-       }*/
+        write("__kernel void " + _entryPoint.getMethodModel().getSimpleName() + '(');
 
-      return (openCLStringBuilder.toString());
-   }
+        in();
+        boolean first = true;
+        for (final String line : argLines) {
+
+            if (first) {
+                first = false;
+            } else {
+                write(", ");
+            }
+
+            newLine();
+            write(line);
+        }
+
+        if (first) {
+            first = false;
+        } else {
+            write(", ");
+        }
+        newLine();
+        write("int passid");
+        out();
+        newLine();
+        write("){");
+        in();
+        newLine();
+        writeln("This thisStruct;");
+        writeln("This* this=&thisStruct;");
+        for (final String line : assigns) {
+            write(line);
+            writeln(";");
+        }
+        write("this->passid = passid");
+        writeln(";");
+
+        writeMethodBody(_entryPoint.getMethodModel());
+        out();
+        newLine();
+        writeln("}");
+        out();
+    }
+
+    @Override
+    public void writeThisRef() {
+        write("this->");
+    }
+
+    @Override
+    public void writeInstruction(Instruction _instruction) throws CodeGenException {
+        if ((_instruction instanceof I_IUSHR) || (_instruction instanceof I_LUSHR)) {
+            final BinaryOperator binaryInstruction = (BinaryOperator) _instruction;
+            final Instruction parent = binaryInstruction.getParentExpr();
+            boolean needsParenthesis = true;
+
+            if (parent instanceof AssignToLocalVariable) {
+                needsParenthesis = false;
+            } else if (parent instanceof AssignToField) {
+                needsParenthesis = false;
+            } else if (parent instanceof AssignToArrayElement) {
+                needsParenthesis = false;
+            }
+            if (needsParenthesis) {
+                write("(");
+            }
+
+            if (binaryInstruction instanceof I_IUSHR) {
+                write("((unsigned int)");
+            } else {
+                write("((unsigned long)");
+            }
+            writeInstruction(binaryInstruction.getLhs());
+            write(")");
+            write(" >> ");
+            writeInstruction(binaryInstruction.getRhs());
+
+            if (needsParenthesis) {
+                write(")");
+            }
+        } else {
+            super.writeInstruction(_instruction);
+        }
+    }
+
+    public static String writeToString(Entrypoint _entrypoint) throws CodeGenException {
+        final StringBuilder openCLStringBuilder = new StringBuilder();
+        final KernelWriter openCLWriter = new KernelWriter() {
+            @Override
+            public void write(String _string) {
+                openCLStringBuilder.append(_string);
+            }
+        };
+        //try {
+            openCLWriter.write(_entrypoint);
+//        } catch (final CodeGenException codeGenException) {
+//            throw codeGenException;
+//        }/* catch (final Throwable t) {
+//         throw new CodeGenException(t);
+//       }*/
+
+        return (openCLStringBuilder.toString());
+    }
 }

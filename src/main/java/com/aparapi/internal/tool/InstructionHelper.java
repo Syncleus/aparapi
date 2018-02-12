@@ -79,7 +79,7 @@ public class InstructionHelper{
             return (text.size());
          }
 
-         String pad(String _s, int _width) {
+         static String pad(String _s, int _width) {
             final int length = _s.length();
             final int padWidth = _width - length;
             final String padded = _s + spaces.substring(0, padWidth);
@@ -502,12 +502,9 @@ public class InstructionHelper{
       return (table.toString());
    }
 
-   private static final Comparator<BranchVector> branchInfoComparator = new Comparator<BranchVector>(){
-      @Override public int compare(BranchVector left, BranchVector right) {
-         final int value = left.getFrom().compareTo(right.getFrom());
-         return (value);
-      }
-
+   private static final Comparator<BranchVector> branchInfoComparator = (left, right) -> {
+      final int value = left.getFrom().compareTo(right.getFrom());
+      return (value);
    };
 
    private static List<BranchVector> getBranches(MethodModel _methodModel) {
@@ -521,12 +518,12 @@ public class InstructionHelper{
          }
       }
       // Sort the branch vectors.  The natural order is essentially by from address. Note that this is not the same as start address.. back edges would be the exceptions
-      Collections.sort(branchVectors, branchInfoComparator);
+      branchVectors.sort(branchInfoComparator);
 
       return (branchVectors);
    }
 
-   private void edump(StringBuilder _sb, Instruction i, boolean clone) {
+   private static void edump(StringBuilder _sb, Instruction i, boolean clone) {
       final String label = InstructionHelper.getLabel(i, false, true, true);
 
       if (i instanceof CloneInstruction) {
@@ -549,7 +546,7 @@ public class InstructionHelper{
 
    }
 
-   private void fdump(int _depth, Instruction i, boolean clone) {
+   private static void fdump(int _depth, Instruction i, boolean clone) {
       final String label = i.getByteCode().getName();// InstructionHelper.getLabel(i, false, false, false);
 
       if (i instanceof CloneInstruction) {
@@ -587,7 +584,7 @@ public class InstructionHelper{
       }
    }
 
-   private void dump(String _indent, Instruction i, boolean clone) {
+   private static void dump(String _indent, Instruction i, boolean clone) {
       final String label = InstructionHelper.getLabel(i, true, false, false);
 
       if (i instanceof CloneInstruction) {

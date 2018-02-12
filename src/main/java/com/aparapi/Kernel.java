@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2017 Syncleus, Inc.
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -73,7 +73,9 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -163,6 +165,14 @@ import java.util.logging.Logger;
  * @version Alpha, 21/09/2010
  */
 public abstract class Kernel implements Cloneable {
+
+    final static AtomicInteger serials = new AtomicInteger();
+    final int serial = serials.getAndIncrement();
+
+    @Override
+    public int hashCode() {
+        return serial;
+    }
 
     private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
@@ -437,9 +447,11 @@ public abstract class Kernel implements Cloneable {
                 try {
                     LinkedHashSet<EXECUTION_MODE> requestedExecutionModes;
                     requestedExecutionModes = EXECUTION_MODE.getExecutionModeFromString(executionMode);
-                    logger.fine("requested execution mode =");
-                    for (final EXECUTION_MODE mode : requestedExecutionModes) {
-                        logger.fine(" " + mode);
+                    if (logger.isLoggable(Level.FINE)) {
+                        logger.fine("requested execution mode =");
+                        for (final EXECUTION_MODE mode : requestedExecutionModes) {
+                            logger.fine(" " + mode);
+                        }
                     }
                     if ((OpenCLLoader.isOpenCLAvailable() && EXECUTION_MODE.anyOpenCL(requestedExecutionModes))
                         || !EXECUTION_MODE.anyOpenCL(requestedExecutionModes)) {
@@ -2595,7 +2607,7 @@ public abstract class Kernel implements Cloneable {
             return getProperty(mappedMethodNamesCache, _methodReferenceEntry, null);
         String mappedName = null;
         final String name = _methodReferenceEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-        Class<?> currentClass = _methodReferenceEntry.getOwnerClassModel().getClassWeAreModelling();
+        Class<?> currentClass = _methodReferenceEntry.getOwnerClassModel().clazz;
         while (currentClass != Object.class) {
             for (final Method kernelMethod : currentClass.getDeclaredMethods()) {
                 if (kernelMethod.isAnnotationPresent(OpenCLMapping.class)) {
@@ -3244,30 +3256,24 @@ public abstract class Kernel implements Cloneable {
 
     private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> openCLDelegateMethodFlags = markedWith(OpenCLDelegate.class);
 
-    private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> atomic32Cache = cacheProperty(new ValueComputer<Class<?>, Map<String, Boolean>>() {
-        @Override
-        public Map<String, Boolean> compute(Class<?> key) {
-            Map<String, Boolean> properties = new HashMap<>();
-            for (final Method method : key.getDeclaredMethods()) {
-                if (isRelevant(method) && method.isAnnotationPresent(OpenCLMapping.class)) {
-                    properties.put(toSignature(method), method.getAnnotation(OpenCLMapping.class).atomic32());
-                }
+    private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> atomic32Cache = cacheProperty((ValueComputer<Class<?>, Map<String, Boolean>>) key -> {
+        Map<String, Boolean> properties = new HashMap<>();
+        for (final Method method : key.getDeclaredMethods()) {
+            if (isRelevant(method) && method.isAnnotationPresent(OpenCLMapping.class)) {
+                properties.put(toSignature(method), method.getAnnotation(OpenCLMapping.class).atomic32());
             }
-            return properties;
         }
+        return properties;
     });
 
-    private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> atomic64Cache = cacheProperty(new ValueComputer<Class<?>, Map<String, Boolean>>() {
-        @Override
-        public Map<String, Boolean> compute(Class<?> key) {
-            Map<String, Boolean> properties = new HashMap<>();
-            for (final Method method : key.getDeclaredMethods()) {
-                if (isRelevant(method) && method.isAnnotationPresent(OpenCLMapping.class)) {
-                    properties.put(toSignature(method), method.getAnnotation(OpenCLMapping.class).atomic64());
-                }
+    private static final ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> atomic64Cache = cacheProperty((ValueComputer<Class<?>, Map<String, Boolean>>) key -> {
+        Map<String, Boolean> properties = new HashMap<>();
+        for (final Method method : key.getDeclaredMethods()) {
+            if (isRelevant(method) && method.isAnnotationPresent(OpenCLMapping.class)) {
+                properties.put(toSignature(method), method.getAnnotation(OpenCLMapping.class).atomic64());
             }
-            return properties;
         }
+        return properties;
     });
 
     private static boolean getBoolean(ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> methodNamesCache,
@@ -3277,15 +3283,12 @@ public abstract class Kernel implements Cloneable {
 
     private static <A extends Annotation> ValueCache<Class<?>, Map<String, Boolean>, RuntimeException> markedWith(
         final Class<A> annotationClass) {
-        return cacheProperty(new ValueComputer<Class<?>, Map<String, Boolean>>() {
-            @Override
-            public Map<String, Boolean> compute(Class<?> key) {
-                Map<String, Boolean> markedMethodNames = new HashMap<>();
-                for (final Method method : key.getDeclaredMethods()) {
-                    markedMethodNames.put(toSignature(method), method.isAnnotationPresent(annotationClass));
-                }
-                return markedMethodNames;
+        return cacheProperty((ValueComputer<Class<?>, Map<String, Boolean>>) key -> {
+            Map<String, Boolean> markedMethodNames = new HashMap<>();
+            for (final Method method : key.getDeclaredMethods()) {
+                markedMethodNames.put(toSignature(method), method.isAnnotationPresent(annotationClass));
             }
+            return markedMethodNames;
         });
     }
 
@@ -3308,7 +3311,7 @@ public abstract class Kernel implements Cloneable {
 
     private static <V, T extends Throwable> V getProperty(ValueCache<Class<?>, Map<String, V>, T> cache,
                                                           MethodReferenceEntry methodReferenceEntry, V defaultValue) throws T {
-        Map<String, V> map = cache.computeIfAbsent(methodReferenceEntry.getOwnerClassModel().getClassWeAreModelling());
+        Map<String, V> map = cache.computeIfAbsent(methodReferenceEntry.getOwnerClassModel().clazz);
         String key = toSignature(methodReferenceEntry);
         if (map.containsKey(key))
             return map.get(key);
@@ -3320,42 +3323,36 @@ public abstract class Kernel implements Cloneable {
         return nameAndTypeEntry.getNameUTF8Entry().getUTF8() + nameAndTypeEntry.getDescriptorUTF8Entry().getUTF8();
     }
 
-    private static final ValueCache<Class<?>, Map<String, String>, RuntimeException> mappedMethodNamesCache = cacheProperty(new ValueComputer<Class<?>, Map<String, String>>() {
-        @Override
-        public Map<String, String> compute(Class<?> key) {
-            Map<String, String> properties = new HashMap<>();
-            for (final Method method : key.getDeclaredMethods()) {
-                if (isRelevant(method) && method.isAnnotationPresent(OpenCLMapping.class)) {
-                    // ultimately, need a way to constrain this based upon signature (to disambiguate abs(float) from abs(int);
-                    final OpenCLMapping annotation = method.getAnnotation(OpenCLMapping.class);
-                    final String mapTo = annotation.mapTo();
-                    if (mapTo != null && !mapTo.isEmpty()) {
-                        properties.put(toSignature(method), mapTo);
-                    }
+    private static final ValueCache<Class<?>, Map<String, String>, RuntimeException> mappedMethodNamesCache = cacheProperty((ValueComputer<Class<?>, Map<String, String>>) key -> {
+        Map<String, String> properties = new HashMap<>();
+        for (final Method method : key.getDeclaredMethods()) {
+            if (isRelevant(method) && method.isAnnotationPresent(OpenCLMapping.class)) {
+                // ultimately, need a way to constrain this based upon signature (to disambiguate abs(float) from abs(int);
+                final OpenCLMapping annotation = method.getAnnotation(OpenCLMapping.class);
+                final String mapTo = annotation.mapTo();
+                if (mapTo != null && !mapTo.isEmpty()) {
+                    properties.put(toSignature(method), mapTo);
                 }
             }
-            return properties;
         }
+        return properties;
     });
 
     private static <K, V, T extends Throwable> ValueCache<Class<?>, Map<K, V>, T> cacheProperty(
         final ThrowingValueComputer<Class<?>, Map<K, V>, T> throwingValueComputer) {
-        return ValueCache.on(new ThrowingValueComputer<Class<?>, Map<K, V>, T>() {
-            @Override
-            public Map<K, V> compute(Class<?> key) throws T {
-                Map<K, V> properties = new HashMap<>();
-                Deque<Class<?>> superclasses = new ArrayDeque<>();
-                Class<?> currentSuperClass = key;
-                do {
-                    superclasses.push(currentSuperClass);
-                    currentSuperClass = currentSuperClass.getSuperclass();
-                } while (currentSuperClass != Object.class);
-                for (Class<?> clazz : superclasses) {
-                    // Overwrite property values for shadowed/overriden methods
-                    properties.putAll(throwingValueComputer.compute(clazz));
-                }
-                return properties;
+        return ValueCache.on(key -> {
+            Map<K, V> properties = new HashMap<>();
+            Deque<Class<?>> superclasses = new ArrayDeque<>();
+            Class<?> currentSuperClass = key;
+            do {
+                superclasses.push(currentSuperClass);
+                currentSuperClass = currentSuperClass.getSuperclass();
+            } while (currentSuperClass != Object.class);
+            for (Class<?> clazz : superclasses) {
+                // Overwrite property values for shadowed/overriden methods
+                properties.putAll(throwingValueComputer.compute(clazz));
             }
+            return properties;
         });
     }
 

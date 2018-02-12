@@ -62,12 +62,8 @@ public class KernelProfile {
    KernelDeviceProfile start(Device device) {
       KernelDeviceProfile currentDeviceProfile;
       //synchronized (deviceProfiles) {
-         currentDeviceProfile = deviceProfiles.get(device);
-         if (currentDeviceProfile == null) {
-            currentDeviceProfile = new KernelDeviceProfile(kernelClass, device);
-            deviceProfiles.put(device, currentDeviceProfile);
-         }
-      //}
+       currentDeviceProfile = deviceProfiles.computeIfAbsent(device, d -> new KernelDeviceProfile(kernelClass, d));
+       //}
       currentDeviceProfile.on(ProfilingEvent.START);
       return currentDeviceProfile;
    }
