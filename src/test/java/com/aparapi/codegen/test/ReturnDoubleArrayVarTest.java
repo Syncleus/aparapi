@@ -40,7 +40,7 @@ public class ReturnDoubleArrayVarTest extends com.aparapi.codegen.CodeGenJUnitBa
             + "      com_aparapi_codegen_test_ReturnDoubleArrayVar__returnDoubleArrayVar(this);\n"
             + "      return;\n"
             + "   }\n"
-            + "}"
+            + '}'
     };
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 

@@ -22,7 +22,7 @@ public class FirstAssignInExpression2Test extends com.aparapi.codegen.CodeGenJUn
 
     private static final String[] expectedOpenCL = {
         "typedef struct This_s{\n"
-        + "\n"
+        + '\n'
         + " int passid;\n"
         + " }This;\n"
         + " int get_pass_id(This *this){\n"
@@ -48,7 +48,7 @@ public class FirstAssignInExpression2Test extends com.aparapi.codegen.CodeGenJUn
         + " return;\n"
         + " }\n"
         + " }\n"
-        + " "};
+        + ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Ignore

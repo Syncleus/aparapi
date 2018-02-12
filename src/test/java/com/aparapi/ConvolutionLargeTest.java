@@ -18,7 +18,6 @@ package com.aparapi;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
-import com.aparapi.Kernel;
 import com.aparapi.internal.model.CacheEnabler;
 import com.aparapi.internal.model.Supplier;
 import org.junit.Test;
@@ -62,21 +61,13 @@ public class ConvolutionLargeTest {
 
                 @Override
                 public Supplier<ImageConvolution> getSupplier() {
-                    return new Supplier<ImageConvolution>() {
-                        @Override
-                        public ImageConvolution get() {
-                            return convolution;
-                        }
-                    };
+                    return () -> convolution;
                 }
 
                 @Override
                 public Consumer<ImageConvolution> getDisposer() {
-                    return new Consumer<ImageConvolution>() {
-                        @Override
-                        public void accept(ImageConvolution k) {
-                            // Do nothing
-                        }
+                    return k -> {
+                        // Do nothing
                     };
                 }
 
@@ -93,22 +84,12 @@ public class ConvolutionLargeTest {
             testWithSupplier(new ImageConvolutionCreationContext() {
                 @Override
                 public Supplier<ImageConvolution> getSupplier() {
-                    return new Supplier<ImageConvolution>() {
-                        @Override
-                        public ImageConvolution get() {
-                            return new ImageConvolution();
-                        }
-                    };
+                    return ImageConvolution::new;
                 }
 
                 @Override
                 public Consumer<ImageConvolution> getDisposer() {
-                    return new Consumer<ImageConvolution>() {
-                        @Override
-                        public void accept(ImageConvolution k) {
-                            k.dispose();
-                        }
-                    };
+                    return Kernel::dispose;
                 }
 
                 @Override
@@ -160,7 +141,7 @@ public class ConvolutionLargeTest {
         long totalTime = 0;
         Supplier<ImageConvolution> imageConvolutionSupplier = imageConvolutionCreationContext.getSupplier();
         Consumer<ImageConvolution> disposer = imageConvolutionCreationContext.getDisposer();
-        System.out.print("\tTesting " + name + "[" + imageConvolutionCreationContext.getName() + "] (" + seconds + " seconds) ");
+        System.out.print("\tTesting " + name + '[' + imageConvolutionCreationContext.getName() + "] (" + seconds + " seconds) ");
         int calls = 0;
         long initialTime = System.nanoTime();
         long maxElapsedNs = TimeUnit.SECONDS.toNanos(seconds);

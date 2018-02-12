@@ -28,7 +28,7 @@ public class PostIncArrayItemAsParameterTest extends com.aparapi.codegen.CodeGen
         + " int get_pass_id(This *this){\n"
         + " return this->passid;\n"
         + " }\n"
-        + "\n"
+        + '\n'
         + " int com_aparapi_codegen_test_PostIncArrayItemAsParameter__actuallyDoIt(This *this, int a){\n"
         + " return(1);\n"
         + " }\n"
@@ -47,7 +47,7 @@ public class PostIncArrayItemAsParameterTest extends com.aparapi.codegen.CodeGen
         + " return;\n"
         + " }\n"
         + " }\n"
-        + " "};
+        + ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

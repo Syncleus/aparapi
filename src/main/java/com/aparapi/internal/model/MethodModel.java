@@ -69,7 +69,7 @@ import java.util.logging.*;
 
 public class MethodModel{
 
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
    private ExpressionList expressionList;
 
@@ -126,13 +126,9 @@ public class MethodModel{
       return accessorVariableFieldEntry;
    }
 
-   private final Set<MethodModel> calledMethods = new HashSet<MethodModel>();
+   public final Set<MethodModel> calledMethods = new HashSet<>();
 
-   public Set<MethodModel> getCalledMethods() {
-      return calledMethods;
-   }
-
-   public void checkForRecursion(Set<MethodModel> transitiveCalledMethods) throws AparapiException {
+    public void checkForRecursion(Set<MethodModel> transitiveCalledMethods) throws AparapiException {
 
       if (transitiveCalledMethods.contains(this)) {
          throw new ClassParseException(ClassParseException.TYPE.RECURSION, getName());
@@ -142,9 +138,7 @@ public class MethodModel{
       transitiveCalledMethods.add(this);
 
       // For each callee, send him a copy of the call chain up to this method
-      final Iterator<MethodModel> cmi = getCalledMethods().iterator();
-      while (cmi.hasNext()) {
-         final MethodModel next = cmi.next();
+        for (MethodModel next : calledMethods) {
          next.checkForRecursion(transitiveCalledMethods);
       }
 
@@ -165,7 +159,7 @@ public class MethodModel{
     * require pragmas to be used in the OpenCL source
     * 
     */
-   public void setRequiredPragmas(Instruction instruction) {
+   private void setRequiredPragmas(Instruction instruction) {
       final boolean setDouble = instruction.getByteCode().usesDouble();
       if (setDouble) {
          usesDoubles = true;
@@ -202,8 +196,8 @@ public class MethodModel{
     * 
     * @return Map<Integer, Instruction> the returned pc to Instruction map
     */
-   public Map<Integer, Instruction> createListOfInstructions() throws ClassParseException {
-      final Map<Integer, Instruction> pcMap = new LinkedHashMap<Integer, Instruction>();
+   private Map<Integer, Instruction> createListOfInstructions() throws ClassParseException {
+      final Map<Integer, Instruction> pcMap = new LinkedHashMap<>();
       final byte[] code = method.getCode();
 
       // We create a byteReader for reading the bytes from the code array
@@ -312,7 +306,7 @@ public class MethodModel{
     * 
     * @see InstructionSet.Branch#getTarget()
     */
-   public void buildBranchGraphs(Map<Integer, Instruction> pcMap) {
+   private void buildBranchGraphs(Map<Integer, Instruction> pcMap) {
       for (Instruction instruction = pcHead; instruction != null; instruction = instruction.getNextPC()) {
          if (instruction.isBranch()) {
             final Branch branch = instruction.asBranch();
@@ -334,7 +328,7 @@ public class MethodModel{
     * 
     * 
     */
-   public void deoptimizeReverseBranches() {
+   private void deoptimizeReverseBranches() {
 
       for (Instruction instruction = pcHead; instruction != null; instruction = instruction.getNextPC()) {
          if (instruction.isBranch()) {
@@ -441,7 +435,7 @@ public class MethodModel{
     * @param _instruction
     * @throws ClassParseException
     */
-   public void txFormDups(ExpressionList _expressionList, final Instruction _instruction) throws ClassParseException {
+   private void txFormDups(ExpressionList _expressionList, final Instruction _instruction) throws ClassParseException {
       if (_instruction instanceof I_DUP) {
          Instruction e = _expressionList.getTail();
          while (!e.producesStack()) {
@@ -541,7 +535,7 @@ public class MethodModel{
     * @throws ClassParseException
     */
 
-   void foldExpressions() throws ClassParseException {
+   private void foldExpressions() throws ClassParseException {
 
       // we also populate a second list of expressions held between headTail.head and headTail.tail
 
@@ -602,7 +596,7 @@ public class MethodModel{
       }
    }
 
-   InstructionTransformer[] transformers = new InstructionTransformer[] {
+   private final InstructionTransformer[] transformers = new InstructionTransformer[] {
 
          new InstructionTransformer("long hand post increment of field"){
 
@@ -932,7 +926,7 @@ public class MethodModel{
                   final AssignToLocalVariable assign = (AssignToLocalVariable) i.getNextExpr();
 
                   final InlineAssignInstruction inlineAssign = new InlineAssignInstruction(MethodModel.this, assign, cast);
-                  _expressionList.replaceInclusive((Instruction) cast, (Instruction) assign, inlineAssign);
+                  _expressionList.replaceInclusive(cast, (Instruction) assign, inlineAssign);
                   return (inlineAssign);
 
                }
@@ -1143,7 +1137,7 @@ public class MethodModel{
             }
 
          },
-         new InstructionTransformer("incline assign from constant (method call or logical expression)"){
+         new InstructionTransformer("inline assign from constant (method call or logical expression)"){
             /**
              * <pre>
              *                 A                                     A
@@ -1243,7 +1237,7 @@ public class MethodModel{
 
    };
 
-   void applyTransformations(ExpressionList _expressionList, final Instruction _instruction, final Instruction _operandStart)
+   private void applyTransformations(ExpressionList _expressionList, final Instruction _instruction, final Instruction _operandStart)
          throws ClassParseException {
 
       if (logger.isLoggable(Level.FINE)) {
@@ -1263,10 +1257,10 @@ public class MethodModel{
             && (_operandStart.getNextExpr() instanceof AssignToLocalVariable)) {
          final Instruction assignFirst = _operandStart.getNextExpr();
          Instruction assign = assignFirst;
-         int count = 0;
+//         int count = 0;
          while ((assign != null) && (assign instanceof AssignToLocalVariable)) {
             assign = assign.getNextExpr();
-            count++;
+//            count++;
          }
          if (assign == null) {
             final Instruction newOne = new MultiAssignInstruction(this, _operandStart, assignFirst, assign);
@@ -1309,7 +1303,7 @@ public class MethodModel{
    /**
     * Determine if this method is a getter and record the accessed field if so
     */
-   void checkForGetter(Map<Integer, Instruction> pcMap) throws ClassParseException {
+   private void checkForGetter(Map<Integer, Instruction> pcMap) throws ClassParseException {
       final String methodName = getMethod().getName();
       String rawVarNameCandidate = null;
       boolean mightBeGetter = true;
@@ -1337,7 +1331,7 @@ public class MethodModel{
                if ((instruction instanceof Return) && (expressionList.getHead() == expressionList.getTail())) {
                   instruction = instruction.getPrevPC();
                   if (instruction instanceof AccessInstanceField) {
-                     final FieldEntry field = ((AccessInstanceField) instruction).getConstantPoolFieldEntry();
+                     final FieldEntry field = ((FieldReference) instruction).getConstantPoolFieldEntry();
                      accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
                      if (accessedFieldName.equals(varNameCandidateCamelCased)) {
 
@@ -1395,7 +1389,7 @@ public class MethodModel{
    /**
     * Determine if this method is a setter and record the accessed field if so
     */
-   void checkForSetter(Map<Integer, Instruction> pcMap) throws ClassParseException {
+   private void checkForSetter(Map<Integer, Instruction> pcMap) throws ClassParseException {
       final String methodName = getMethod().getName();
       if (methodName.startsWith("set")) {
          final String rawVarNameCandidate = methodName.substring(3);
@@ -1409,7 +1403,7 @@ public class MethodModel{
          if ((instruction instanceof AssignToInstanceField) && (expressionList.getTail() instanceof Return) && (pcMap.size() == 4)) {
             final Instruction prev = instruction.getPrevPC();
             if (prev instanceof AccessLocalVariable) {
-               final FieldEntry field = ((AssignToInstanceField) instruction).getConstantPoolFieldEntry();
+               final FieldEntry field = ((FieldReference) instruction).getConstantPoolFieldEntry();
                accessedFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
                if (accessedFieldName.equals(varNameCandidateCamelCased)) {
 
@@ -1448,7 +1442,7 @@ public class MethodModel{
    }
 
    // The entrypoint is used to make checks on object accessors
-   Entrypoint entrypoint = null;
+   private Entrypoint entrypoint = null;
 
    MethodModel(ClassModelMethod _method, Entrypoint _entrypoint) throws AparapiException {
       entrypoint = _entrypoint;
@@ -1461,13 +1455,13 @@ public class MethodModel{
 
    public static class FakeLocalVariableTableEntry implements LocalVariableTableEntry<LocalVariableInfo>{
 
-      class Var implements LocalVariableInfo{
+      static class Var implements LocalVariableInfo{
 
          int startPc = 0;
 
          int endPc = 0;
 
-         String name = null;
+         final String name;
 
          boolean arg;
 
@@ -1483,7 +1477,7 @@ public class MethodModel{
                name = "arr_" + _slotIndex;
                descriptor = "/* arg */";
             } else {
-               name = _storeSpec.toString().toLowerCase() + "_" + _slotIndex;
+               name = _storeSpec.toString().toLowerCase() + '_' + _slotIndex;
                descriptor = _storeSpec.toString();
             }
          }
@@ -1493,11 +1487,16 @@ public class MethodModel{
          }
 
          @Override public boolean equals(Object object) {
-            return (object instanceof Var && ((object == this) || ((Var) object).name.equals(name)));
+            return this==object || (object instanceof Var && ((Var) object).name.equals(name));
          }
 
-         public String toString() {
-            return (name + "[" + startPc + "-" + endPc + "]");
+          @Override
+          public int hashCode() {
+              return name.hashCode();
+          }
+
+          public String toString() {
+            return (name + '[' + startPc + '-' + endPc + ']');
          }
 
          @Override public boolean isArray() {
@@ -1529,9 +1528,9 @@ public class MethodModel{
          }
       }
 
-      List<LocalVariableInfo> list = new ArrayList<LocalVariableInfo>();
+      final List<LocalVariableInfo> list = new ArrayList<>();
 
-      public FakeLocalVariableTableEntry(Map<Integer, Instruction> _pcMap, ClassModelMethod _method) {
+      FakeLocalVariableTableEntry(Map<Integer, Instruction> _pcMap, ClassModelMethod _method) {
          int numberOfSlots = _method.getCodeEntry().getMaxLocals();
 
          MethodDescription description = ClassModel.getMethodDescription(_method.getDescriptor());
@@ -1583,10 +1582,9 @@ public class MethodModel{
             vars[i].endPc = pc + instruction.getLength();
          }
 
-         Collections.sort(list, new Comparator<LocalVariableInfo>(){
-            @Override public int compare(LocalVariableInfo o1, LocalVariableInfo o2) {
-               return o1.getStart() - o2.getStart();
-            }
+         list.sort((o1, o2) -> {
+             if (o1 == o2) return 0;
+             return Integer.compare(o2.getStart(), o1.getStart()); //o1.getStart() - o2.getStart();
          });
 
          if (Config.enableShowFakeLocalVariableTable) {
@@ -1601,18 +1599,18 @@ public class MethodModel{
       }
 
       @Override public LocalVariableInfo getVariable(int _pc, int _index) {
-         LocalVariableInfo returnValue = null;
          //  System.out.println("pc = " + _pc + " index = " + _index);
          for (LocalVariableInfo localVariableInfo : list) {
             // System.out.println("   start=" + localVariableInfo.getStart() + " length=" + localVariableInfo.getLength()
             // + " varidx=" + localVariableInfo.getVariableIndex());
-            if (_pc >= localVariableInfo.getStart() - 1 && _pc <= (localVariableInfo.getStart() + localVariableInfo.getLength())
-                  && _index == localVariableInfo.getVariableIndex()) {
-               returnValue = localVariableInfo;
-               break;
+             int start = localVariableInfo.getStart();
+             if (_pc >= start - 1 &&
+                 _pc <= (start + localVariableInfo.getLength()) &&
+                 _index == localVariableInfo.getVariableIndex()) {
+               return localVariableInfo;
             }
          }
-         return (returnValue);
+         return null;
       }
 
       @Override public Iterator<LocalVariableInfo> iterator() {
@@ -1621,12 +1619,12 @@ public class MethodModel{
 
    }
 
-   private void init(ClassModelMethod _method) throws AparapiException {
-      try {
+   private void init(ClassModelMethod _method) throws ClassParseException {
+      //try {
          method = _method;
          expressionList = new ExpressionList(this);
          ClassModel owner = _method.getOwnerClassModel();
-         if (owner.getNoCLMethods().contains(method.getName())) {
+         if (owner.isNoCLMethod(method.getName())) {
              noCL = true;
          }
 
@@ -1650,10 +1648,12 @@ public class MethodModel{
          if (localVariableTableEntry == null) {
             localVariableTableEntry = new FakeLocalVariableTableEntry(pcMap, method);
             method.setLocalVariableTableEntry(localVariableTableEntry);
-            logger.warning("Method "
-                  + method.getName()
-                  + method.getDescriptor()
-                  + " does not contain a LocalVariableTable entry (source not compiled with -g) codegen will attempt to create a synthetic table based on bytecode. This is experimental!!");
+
+            if (logger.isLoggable(Level.WARNING))
+                logger.warning("Method "
+                      + method.getName()
+                      + method.getDescriptor()
+                      + " does not contain a LocalVariableTable entry (source not compiled with -g) codegen will attempt to create a synthetic table based on bytecode. This is experimental!!");
          }
 
          // pass #2 build branch graph
@@ -1686,14 +1686,14 @@ public class MethodModel{
          if (Config.instructionListener != null) {
             Config.instructionListener.showAndTell("end", expressionList.getHead(), null);
          }
-      } catch (final Throwable _t) {
-         if (_t instanceof ClassParseException) {
-            _t.printStackTrace();
-            throw (ClassParseException) _t;
-         }
-         throw new ClassParseException(_t);
-
-      }
+//      } catch (final Throwable _t) {
+//         if (_t instanceof ClassParseException) {
+//            _t.printStackTrace();
+//            throw (ClassParseException) _t;
+//         }
+//         throw new ClassParseException(_t);
+//
+//      }
    }
 
    public LocalVariableTableEntry<LocalVariableInfo> getLocalVariableTableEntry() {
@@ -1716,19 +1716,19 @@ public class MethodModel{
     * @return the fully qualified name such as "com_amd_javalabs_opencl_demo_PaternityTest$SimpleKernel__actuallyDoIt"
     */
    public String getName() {
-      return (method.getClassModel().getMethod(method.getName(), method.getDescriptor()).getClassModel().getClassWeAreModelling()
+       return (method.getClassModel().getMethod(method.getName(), method.getDescriptor()).getClassModel().clazz
             .getName().replace('.', '_')
             + "__" + method.getName());
    }
 
    public String getReturnType() {
       final String returnType = method.getDescriptorUTF8Entry().getUTF8();
-      final int index = returnType.indexOf(")");
+      final int index = returnType.indexOf(')');
       return (returnType.substring(index + 1));
    }
 
    public List<MethodCall> getMethodCalls() {
-      final List<MethodCall> methodCalls = new ArrayList<MethodCall>();
+      final List<MethodCall> methodCalls = new ArrayList<>();
 
       for (Instruction i = getPCHead(); i != null; i = i.getNextPC()) {
          if (i instanceof MethodCall) {

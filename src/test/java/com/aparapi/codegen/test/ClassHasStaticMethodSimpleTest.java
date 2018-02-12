@@ -39,7 +39,7 @@ public class ClassHasStaticMethodSimpleTest extends com.aparapi.codegen.CodeGenJ
 " return;\n" +
 " }\n" +
 " }\n" +
-" "};
+                ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

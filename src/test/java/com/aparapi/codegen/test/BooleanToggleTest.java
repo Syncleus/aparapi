@@ -36,7 +36,7 @@ public class BooleanToggleTest extends com.aparapi.codegen.CodeGenJUnitBase {
 "      pass = (pass==0)?1:0;\n" +
 "      return;\n" +
 "   }\n" +
-"}"};
+                '}'};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

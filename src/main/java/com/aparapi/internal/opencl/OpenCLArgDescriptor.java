@@ -99,7 +99,7 @@ public class OpenCLArgDescriptor{
       }
 
       if ((bits & ARG_ARRAY_BIT) == ARG_ARRAY_BIT) {
-         argBuilder.append("*");
+         argBuilder.append('*');
       }
 
       argBuilder.append(name);

@@ -59,7 +59,7 @@ public class While_If_IfElseElseTest extends com.aparapi.codegen.CodeGenJUnitBas
         + " g = g;\n"
         + " }\n"
         + " }\n"
-        + "\n"
+        + '\n'
         + " if (h==h && i==i){\n"
         + " if (j==j){\n"
         + " k = k;\n"
@@ -81,7 +81,7 @@ public class While_If_IfElseElseTest extends com.aparapi.codegen.CodeGenJUnitBas
         + " return;\n"
         + " }\n"
         + " }\n"
-        + " "};
+        + ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

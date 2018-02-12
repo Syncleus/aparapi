@@ -23,6 +23,7 @@ public class RightShifts extends Kernel {
 
     int i1, i2;
 
+    @Override
     public void run() {
         iout[1] = i1 >> i2;
         iout[2] = i1 >>> i2;

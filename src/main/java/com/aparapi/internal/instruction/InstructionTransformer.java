@@ -58,7 +58,7 @@ public abstract class InstructionTransformer{
 
    public abstract Instruction transform(final ExpressionList _expressionList, final Instruction i);
 
-   public InstructionTransformer(String _description) {
+   protected InstructionTransformer(String _description) {
       description = _description;
    }
 

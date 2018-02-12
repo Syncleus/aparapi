@@ -505,11 +505,11 @@ public class Test12x4_4x2 {
                         show = true;
                     }
                     if (show) {
-                        System.out.println("derived =>" + globalThreadId + " " + threadId + " " + x + "," + y + " " + lx + "," + ly + " "
-                            + w + "," + h);
-                        System.out.println("data    =>" + test[globalThreadId][0] + " " + test[globalThreadId][1] + " "
-                            + test[globalThreadId][2] + "," + test[globalThreadId][3] + " " + test[globalThreadId][4] + ","
-                            + test[globalThreadId][5] + " " + w + "," + h);
+                        System.out.println("derived =>" + globalThreadId + ' ' + threadId + ' ' + x + ',' + y + ' ' + lx + ',' + ly + ' '
+                            + w + ',' + h);
+                        System.out.println("data    =>" + test[globalThreadId][0] + ' ' + test[globalThreadId][1] + ' '
+                            + test[globalThreadId][2] + ',' + test[globalThreadId][3] + ' ' + test[globalThreadId][4] + ','
+                            + test[globalThreadId][5] + ' ' + w + ',' + h);
                     }
                 }
             }

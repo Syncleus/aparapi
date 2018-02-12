@@ -20,6 +20,8 @@ import com.aparapi.Range;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.junit.Assert.fail;
+
 public class Issue69Test {
 
     @Test
@@ -36,7 +38,7 @@ public class Issue69Test {
             System.out.printf("%3d free = %10d\n", loop, Runtime.getRuntime().freeMemory());
             kernel.execute(Range.create(512, 64), 1);
             for (int i = 0; i < globalArray.length; ++i) {
-                Assert.assertEquals("Wrong", i, globalArray[i]);
+                Assert.assertEquals(i, globalArray[i]);
             }
         }
         for (int loop = 0; loop < 100; loop++) {
@@ -44,7 +46,7 @@ public class Issue69Test {
             System.out.printf("%3d free = %10d\n", loop, Runtime.getRuntime().freeMemory());
             kernel.execute(Range.create(512, 64), 2);
             for (int i = 0; i < globalArray.length; ++i) {
-                Assert.assertEquals("Wrong", i, globalArray[i]);
+                Assert.assertEquals(i, globalArray[i]);
             }
         }
     }

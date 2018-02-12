@@ -32,7 +32,7 @@ public final class ValueCache<K, V, T extends Throwable> {
    }
 
    public static <K, V, T extends Throwable> ValueCache<K, V, T> on(ThrowingValueComputer<K, V, T> computer) {
-      return new ValueCache<K, V, T>(computer);
+      return new ValueCache<>(computer);
    }
 
    private final ConcurrentMap<K, SoftReference<V>> map = new ConcurrentHashMap<>();

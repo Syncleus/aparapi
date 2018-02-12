@@ -29,7 +29,7 @@ public class UseObjectArrayLengthTest extends com.aparapi.codegen.CodeGenJUnitBa
         + " int get_pass_id(This *this){\n"
         + " return this->passid;\n"
         + " }\n"
-        + "\n"
+        + '\n'
         + " __kernel void run(\n"
         + " __global int *out,\n"
         + " __global com_aparapi_codegen_test_UseObjectArrayLength$Dummy *dummy,\n"
@@ -47,7 +47,7 @@ public class UseObjectArrayLengthTest extends com.aparapi.codegen.CodeGenJUnitBa
         + " return;\n"
         + " }\n"
         + " }\n"
-        + " "};
+        + ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

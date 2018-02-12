@@ -53,7 +53,7 @@ public class AccessNested2DIntArrayTest extends com.aparapi.codegen.CodeGenJUnit
         "      return;\n" +
         "   }\n" +
         "}\n" +
-        "\n"};
+            '\n'};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

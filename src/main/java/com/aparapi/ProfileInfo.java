@@ -58,7 +58,7 @@ public class ProfileInfo{
       R,
       X,
       W
-   }; // 0 = write, 1 = execute, 2 = read
+   } // 0 = write, 1 = execute, 2 = read
 
    private final TYPE type;
 
@@ -116,7 +116,7 @@ public class ProfileInfo{
    }
 
    @Override public String toString() {
-      final StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder(512);
       sb.append("ProfileInfo[");
       sb.append(type);
       sb.append(" '");
@@ -131,7 +131,7 @@ public class ProfileInfo{
       sb.append(queued);
       sb.append(", duration=");
       sb.append((end - start));
-      sb.append("]");
+      sb.append(']');
 
       return sb.toString();
    }

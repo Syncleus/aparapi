@@ -54,6 +54,7 @@ package com.aparapi.codegen;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 
@@ -116,7 +117,7 @@ public class CodeGenJUnitBase {
                assertEquals(_class.getSimpleName(), Arrays.toString(expectedOpenCL), actual);
             }
          } else {
-            assertTrue("Expected exception " + _expectedExceptionType + " Instead we got {\n" + actual + "\n}", false);
+             fail("Expected exception " + _expectedExceptionType + " Instead we got {\n" + actual + "\n}");
          }
 
       } catch (AssertionError e) {

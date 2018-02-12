@@ -21,13 +21,13 @@ public class TernaryOrTest extends com.aparapi.codegen.CodeGenJUnitBase {
 
     private static final String[] expectedOpenCL = {
         "typedef struct This_s{\n"
-        + "\n"
+        + '\n'
         + " int passid;\n"
         + " }This;\n"
         + " int get_pass_id(This *this){\n"
         + " return this->passid;\n"
         + " }\n"
-        + "\n"
+        + '\n'
         + " float com_aparapi_codegen_test_TernaryOr__random(This *this){\n"
         + " return(0.1f);\n"
         + " }\n"
@@ -42,7 +42,7 @@ public class TernaryOrTest extends com.aparapi.codegen.CodeGenJUnitBase {
         + " return;\n"
         + " }\n"
         + " }\n"
-        + " "};
+        + ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

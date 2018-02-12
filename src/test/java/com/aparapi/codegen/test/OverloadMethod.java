@@ -20,6 +20,7 @@ import com.aparapi.Kernel;
 public class OverloadMethod extends Kernel {
     int out[] = new int[1];
 
+    @Override
     public void run() {
         out[0] = foo(2) + foo(2, 3);
     }

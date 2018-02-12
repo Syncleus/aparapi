@@ -40,9 +40,9 @@ public class OpenCLProgram extends OpenCLJNI{
    /**
     * FIXME Why are these not ConcurrentHashMaps or at least synchronized at a finer grain?
     */
-   private final Map<Object, OpenCLMem> instanceToMem = new HashMap<Object, OpenCLMem>();
+   private final Map<Object, OpenCLMem> instanceToMem = new HashMap<>();
 
-   private final Map<Long, OpenCLMem> addressToMem = new HashMap<Long, OpenCLMem>();
+   private final Map<Long, OpenCLMem> addressToMem = new HashMap<>();
 
    /**
     * Minimal constructor

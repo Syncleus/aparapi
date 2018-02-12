@@ -26,10 +26,12 @@ abstract class CallSuperBase extends Kernel {
 public class CallSuper extends CallSuperBase {
     int out[] = new int[1];
 
+    @Override
     public void run() {
         out[0] = foo(2);
     }
 
+    @Override
     int foo(int n) {
         return 1 + super.foo(n);
     }

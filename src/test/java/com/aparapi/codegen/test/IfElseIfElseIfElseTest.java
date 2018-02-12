@@ -22,12 +22,12 @@ public class IfElseIfElseIfElseTest extends com.aparapi.codegen.CodeGenJUnitBase
     private static final String[] expectedOpenCL = {
         "typedef struct This_s{\n"
         + " int passid;\n"
-        + "\n"
+        + '\n'
         + " }This;\n"
         + " int get_pass_id(This *this){\n"
         + " return this->passid;\n"
         + " }\n"
-        + "\n"
+        + '\n'
         + " __kernel void run(\n"
         + " int passid\n"
         + " ){\n"
@@ -54,7 +54,7 @@ public class IfElseIfElseIfElseTest extends com.aparapi.codegen.CodeGenJUnitBase
         + " return;\n"
         + " }\n"
         + " }\n"
-        + " "};
+        + ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

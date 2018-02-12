@@ -18,6 +18,7 @@ package com.aparapi.runtime;
 import com.aparapi.Kernel;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
@@ -50,8 +51,8 @@ public class Issue102Test {
 
         void validate() {
             for (int i = 0; i < SIZE; i++) {
-                System.out.println(target[i] + " ... " + objects[i].getValue());
-                assertTrue("target == objects", target[i] == objects[i].getValue());
+                //System.out.println(target[i] + " ... " + objects[i].getValue());
+                assertEquals(target[i], objects[i].getValue());
             }
         }
 

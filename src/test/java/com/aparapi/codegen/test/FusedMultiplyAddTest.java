@@ -44,7 +44,7 @@ public class FusedMultiplyAddTest extends com.aparapi.codegen.CodeGenJUnitBase {
         "      }\n" +
         "      return;\n" +
         "   }\n" +
-        "}"};
+            '}'};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

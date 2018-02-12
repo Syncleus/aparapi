@@ -19,7 +19,7 @@ import com.aparapi.*;
 import com.aparapi.device.*;
 
 import java.util.*;
-import java.util.logging.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Collects profiling information per kernel class per device. Not thread safe, it is necessary for client code to correctly synchronize on
@@ -28,83 +28,62 @@ import java.util.logging.*;
 public class KernelProfile {
 
    private static final double MILLION = 1000000d;
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   //private static Logger logger = Logger.getLogger(Config.getLoggerName());
    private final Class<? extends Kernel> kernelClass;
-   private LinkedHashMap<Device, KernelDeviceProfile> deviceProfiles = new LinkedHashMap<>();
-   private Device currentDevice;
-   private Device lastDevice;
-   private KernelDeviceProfile currentDeviceProfile;
+   public final Map<Device, KernelDeviceProfile> deviceProfiles = new ConcurrentHashMap<>();
 
    public KernelProfile(Class<? extends Kernel> _kernelClass) {
       kernelClass = _kernelClass;
    }
 
-   public double getLastExecutionTime() {
-      KernelDeviceProfile lastDeviceProfile = getLastDeviceProfile();
-      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getLastElapsedTime(ProfilingEvent.START, ProfilingEvent.EXECUTED) / MILLION;
+   public double getTotalExecutionTime() {
+      double sum = 0;
+      for (KernelDeviceProfile p : deviceProfiles.values())
+         sum += p.getLastElapsedTime(ProfilingEvent.START, ProfilingEvent.EXECUTED);
+      return sum / MILLION;
    }
 
-   public double getLastConversionTime() {
-      KernelDeviceProfile lastDeviceProfile = getLastDeviceProfile();
-      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getLastElapsedTime(ProfilingEvent.START, ProfilingEvent.PREPARE_EXECUTE) / MILLION;
+   public double getTotalConversionTime() {
+      double sum = 0;
+      for (KernelDeviceProfile p : deviceProfiles.values())
+         sum += p.getLastElapsedTime(ProfilingEvent.START, ProfilingEvent.PREPARE_EXECUTE);
+      return sum / MILLION;
    }
 
-   public double getAccumulatedTotalTime() {
-      KernelDeviceProfile lastDeviceProfile = getLastDeviceProfile();
-      if (lastDeviceProfile == null) {
-         return Double.NaN;
-      }
-      else {
-         return lastDeviceProfile.getCumulativeElapsedTimeAll() / MILLION;
-      }
+   public double getTotalTime() {
+      double sum = 0;
+      for (KernelDeviceProfile p : deviceProfiles.values())
+         sum += p.getCumulativeElapsedTimeAll();
+      return sum / MILLION;
    }
 
-   public KernelDeviceProfile getLastDeviceProfile() {
-      return deviceProfiles.get(currentDevice);
+
+
+   KernelDeviceProfile start(Device device) {
+      KernelDeviceProfile currentDeviceProfile;
+      //synchronized (deviceProfiles) {
+       currentDeviceProfile = deviceProfiles.computeIfAbsent(device, d -> new KernelDeviceProfile(kernelClass, d));
+       //}
+      currentDeviceProfile.on(ProfilingEvent.START);
+      return currentDeviceProfile;
    }
 
-   void onStart(Device device) {
-      currentDevice = device;
-      synchronized (deviceProfiles) {
-         currentDeviceProfile = deviceProfiles.get(device);
-         if (currentDeviceProfile == null) {
-            currentDeviceProfile = new KernelDeviceProfile(kernelClass, device);
-            deviceProfiles.put(device, currentDeviceProfile);
-         }
-      }
-      currentDeviceProfile.onEvent(ProfilingEvent.START);
-   }
-
-   void onEvent(ProfilingEvent event) {
-      switch (event) {
-         case CLASS_MODEL_BUILT: // fallthrough
-         case OPENCL_GENERATED:  // fallthrough
-         case INIT_JNI:          // fallthrough
-         case OPENCL_COMPILED:   // fallthrough
-         case PREPARE_EXECUTE:   // fallthrough
-         case EXECUTED:          // fallthrough
-         {
-            if (currentDeviceProfile == null) {
-               logger.log(Level.SEVERE, "Error in KernelProfile, no currentDevice (synchronization error?");
-            }
-            currentDeviceProfile.onEvent(event);
-            break;
-         }
-         case START:
-            throw new IllegalArgumentException("must use onStart(Device) to start profiling");
-         default:
-            throw new IllegalArgumentException("Unhandled event " + event);
-      }
-   }
-
-   void onFinishedExecution() {
-      reset();
-   }
-
-   private void reset() {
-      lastDevice = currentDevice;
-      currentDevice = null;
-      currentDeviceProfile = null;
+   public KernelDeviceProfile profiler(Device device) {
+//      switch (event) {
+//         case CLASS_MODEL_BUILT: // fallthrough
+//         case OPENCL_GENERATED:  // fallthrough
+//         case INIT_JNI:          // fallthrough
+//         case OPENCL_COMPILED:   // fallthrough
+//         case PREPARE_EXECUTE:   // fallthrough
+//         case EXECUTED:          // fallthrough
+//         {
+            return deviceProfiles.get(device);
+//         }
+//         case START:
+//            throw new IllegalArgumentException("must use onStart(Device) to start profiling");
+//         default:
+//            throw new IllegalArgumentException("Unhandled event " + event);
+//      }
    }
 
    public Collection<Device> getDevices() {
@@ -115,7 +94,4 @@ public class KernelProfile {
       return deviceProfiles.values();
    }
 
-   public KernelDeviceProfile getDeviceProfile(Device device) {
-      return deviceProfiles.get(device);
-   }
 }

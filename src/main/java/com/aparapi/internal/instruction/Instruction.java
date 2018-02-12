@@ -74,13 +74,13 @@ import com.aparapi.internal.reader.ByteReader;
  */
 public abstract class Instruction{
 
-   protected MethodModel method;
+   final MethodModel method;
 
    private final ByteCode byteCode;
 
    private int length;
 
-   protected int pc;
+   private final int pc;
 
    abstract String getDescription();
 
@@ -172,13 +172,13 @@ public abstract class Instruction{
       return (getFirstChild() == null ? pc : getFirstChild().getStartPC());
    }
 
-   protected Instruction(MethodModel _method, ByteCode _byteCode, int _pc) {
+   Instruction(MethodModel _method, ByteCode _byteCode, int _pc) {
       method = _method;
       pc = _pc;
       byteCode = _byteCode;
    }
 
-   protected Instruction(MethodModel _method, ByteCode _byteCode, ByteReader _byteReader, boolean _wide) {
+   Instruction(MethodModel _method, ByteCode _byteCode, ByteReader _byteReader, boolean _wide) {
       this(_method, _byteCode, _wide ? _byteReader.getOffset() - 2 : _byteReader.getOffset() - 1);
    }
 
@@ -187,7 +187,7 @@ public abstract class Instruction{
       return (byteCode.getPop().getStackAdjust());
    }
 
-   public int getStackProduceCount() {
+   int getStackProduceCount() {
       return (byteCode.getPush().getStackAdjust());
    }
 
@@ -247,7 +247,7 @@ public abstract class Instruction{
       return (prevPC);
    }
 
-   public void setParentExpr(Instruction _parentExpr) {
+   private void setParentExpr(Instruction _parentExpr) {
       parentExpr = _parentExpr;
    }
 
@@ -259,7 +259,7 @@ public abstract class Instruction{
       return (parentExpr == null ? this : parentExpr.getRootExpr());
    }
 
-   public boolean isReverseConditionalBranchTarget() {
+   private boolean isReverseConditionalBranchTarget() {
       return ((reverseConditionalBranchTargets != null) && (reverseConditionalBranchTargets.size() > 0));
    }
 
@@ -267,7 +267,7 @@ public abstract class Instruction{
       return ((forwardConditionalBranchTargets != null) && (forwardConditionalBranchTargets.size() > 0));
    }
 
-   public boolean isReverseUnconditionalBranchTarget() {
+   private boolean isReverseUnconditionalBranchTarget() {
       return ((reverseUnconditionalBranchTargets != null) && (reverseUnconditionalBranchTargets.size() > 0));
    }
 
@@ -275,7 +275,7 @@ public abstract class Instruction{
       return ((forwardUnconditionalBranchTargets != null) && (forwardUnconditionalBranchTargets.size() > 0));
    }
 
-   public boolean isReverseBranchTarget() {
+   private boolean isReverseBranchTarget() {
       return (isReverseConditionalBranchTarget() || isReverseUnconditionalBranchTarget());
    }
 
@@ -316,31 +316,31 @@ public abstract class Instruction{
       if (_branch.isReverse()) {
          if (_branch.isConditional()) {
             if (reverseConditionalBranchTargets == null) {
-               reverseConditionalBranchTargets = new LinkedList<ConditionalBranch>();
+               reverseConditionalBranchTargets = new LinkedList<>();
             }
             reverseConditionalBranchTargets.add((ConditionalBranch) _branch);
          } else {
             if (reverseUnconditionalBranchTargets == null) {
-               reverseUnconditionalBranchTargets = new LinkedList<Branch>();
+               reverseUnconditionalBranchTargets = new LinkedList<>();
             }
             reverseUnconditionalBranchTargets.add(_branch);
          }
       } else {
          if (_branch.isConditional()) {
             if (forwardConditionalBranchTargets == null) {
-               forwardConditionalBranchTargets = new LinkedList<ConditionalBranch>();
+               forwardConditionalBranchTargets = new LinkedList<>();
             }
             forwardConditionalBranchTargets.add((ConditionalBranch) _branch);
          } else {
             if (forwardUnconditionalBranchTargets == null) {
-               forwardUnconditionalBranchTargets = new LinkedList<Branch>();
+               forwardUnconditionalBranchTargets = new LinkedList<>();
             }
             forwardUnconditionalBranchTargets.add(_branch);
          }
       }
    }
 
-   public void removeBranchTarget(Branch _branch) {
+   void removeBranchTarget(Branch _branch) {
       if (_branch.isReverse()) {
          if (_branch.isConditional()) {
             if (reverseConditionalBranchTargets != null) {

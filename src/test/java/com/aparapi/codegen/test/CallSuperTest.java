@@ -26,7 +26,7 @@ public class CallSuperTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-"\n" +
+                '\n' +
 " int com_aparapi_codegen_test_CallSuperBase__foo(This *this, int n){\n" +
 " return((n * 2));\n" +
 " }\n" +
@@ -46,7 +46,7 @@ public class CallSuperTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " return;\n" +
 " }\n" +
 " }\n" +
-" "};
+                ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

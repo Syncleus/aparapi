@@ -52,7 +52,8 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 */
 package com.aparapi.internal.exception;
 
-@SuppressWarnings("serial") public class RangeException extends AparapiException{
+@SuppressWarnings("serial")
+class RangeException extends AparapiException{
 
    public RangeException(String msg) {
       super(msg);

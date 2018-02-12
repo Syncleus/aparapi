@@ -27,6 +27,7 @@ class CallRunSuperBase extends Kernel {
 }
 
 public class CallRunSuper extends CallRunSuperBase {
+    @Override
     public void run() {
         super.run();
         out[1] = 3;

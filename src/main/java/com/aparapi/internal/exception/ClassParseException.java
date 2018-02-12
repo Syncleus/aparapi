@@ -65,7 +65,7 @@ import com.aparapi.internal.instruction.Instruction;
  */
 @SuppressWarnings("serial") public class ClassParseException extends AparapiException{
 
-   public static enum TYPE {
+   public enum TYPE {
       NONE("none"), //
       ARRAY_RETURN("We don't support areturn instructions"), //
       PUTFIELD("We don't support putstatic instructions"), //
@@ -103,18 +103,18 @@ import com.aparapi.internal.instruction.Instruction;
       MISSINGLOCALVARIABLETABLE("Method does not contain a local variable table (recompile with -g?)"), //
       IMPROPERPRIVATENAMEMANGLING("Could not parse private array size from field name");
 
-      private String description;
+      private final String description;
 
       TYPE(final String _description) {
          description = _description;
       }
 
-      public String getDescription() {
+      String getDescription() {
          return (description);
       }
-   };
+   }
 
-   private Instruction instruction;
+    private Instruction instruction;
 
    private TYPE type;
 
@@ -125,13 +125,13 @@ import com.aparapi.internal.instruction.Instruction;
    }
 
    public ClassParseException(final Instruction _instruction, final TYPE _type) {
-      super("@" + _instruction.getThisPC() + " " + _instruction.getByteCode() + " " + _type.getDescription());
+      super("@" + _instruction.getThisPC() + ' ' + _instruction.getByteCode() + ' ' + _type.getDescription());
       type = _type;
       instruction = _instruction;
    }
 
    public ClassParseException(final TYPE _type, final String _methodName) {
-      super("@" + _methodName + " " + _type.getDescription());
+      super('@' + _methodName + ' ' + _type.getDescription());
       type = _type;
       instruction = null;
    }

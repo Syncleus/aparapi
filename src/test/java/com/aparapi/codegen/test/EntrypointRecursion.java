@@ -21,6 +21,7 @@ public class EntrypointRecursion extends Kernel {
 
     int[] values = new int[128];
 
+    @Override
     public void run() {
         int id = getGlobalId();
 

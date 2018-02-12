@@ -33,7 +33,7 @@ public class Atomic32PragmaTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-"\n" +
+            '\n' +
 " __kernel void run(\n" +
 " __global int *values,\n" +
 " int passid\n" +
@@ -47,7 +47,7 @@ public class Atomic32PragmaTest extends com.aparapi.codegen.CodeGenJUnitBase {
 " return;\n" +
 " }\n" +
 " }\n" +
-" "};
+            ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

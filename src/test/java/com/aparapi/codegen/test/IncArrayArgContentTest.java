@@ -26,7 +26,7 @@ public class IncArrayArgContentTest extends com.aparapi.codegen.CodeGenJUnitBase
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-"\n" +
+            '\n' +
 " void com_aparapi_codegen_test_IncArrayArgContent__incit(This *this,  __global int* arr){\n" +
 " arr[0]  = arr[0] + 1;\n" +
 " return;\n" +
@@ -44,7 +44,7 @@ public class IncArrayArgContentTest extends com.aparapi.codegen.CodeGenJUnitBase
 " return;\n" +
 " }\n" +
 " }\n" +
-" "};
+            ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

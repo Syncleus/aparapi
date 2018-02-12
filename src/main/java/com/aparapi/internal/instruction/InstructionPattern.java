@@ -68,7 +68,9 @@ import com.aparapi.internal.instruction.InstructionSet.MethodCall;
 
 public class InstructionPattern{
 
-   @SuppressWarnings("unused") private boolean compareSubTrees(Instruction _lhs, Instruction _rhs) {
+   @SuppressWarnings("unused") private static boolean compareSubTrees(Instruction _lhs, Instruction _rhs) {
+      if (_lhs == _rhs)
+         return true;
       _lhs = _lhs.getReal();
       _rhs = _rhs.getReal();
       boolean same = _lhs.sameAs(_rhs);
@@ -91,15 +93,15 @@ public class InstructionPattern{
    public static class InstructionMatch{
       public final boolean ok;
 
-      public static final InstructionMatch TRUE = new InstructionMatch(true);
+      static final InstructionMatch TRUE = new InstructionMatch(true);
 
-      public static final InstructionMatch FALSE = new InstructionMatch(false);
+      static final InstructionMatch FALSE = new InstructionMatch(false);
 
-      public InstructionMatch(boolean _ok) {
+      InstructionMatch(boolean _ok) {
          ok = _ok;
       }
 
-      public static InstructionMatch test(boolean _condition) {
+      static InstructionMatch test(boolean _condition) {
          return (_condition ? TRUE : FALSE);
       }
    }
@@ -120,7 +122,7 @@ public class InstructionPattern{
          return (InstructionMatch.FALSE);
       }
 
-      public InstructionMatcher(String _description) {
+      InstructionMatcher(String _description) {
          description = _description;
       }
 
@@ -129,7 +131,7 @@ public class InstructionPattern{
       }
    }
 
-   public class AssignableInstructionMatcher extends InstructionMatcher{
+   static class AssignableInstructionMatcher extends InstructionMatcher{
       private final Class<?>[] classes;
 
       public AssignableInstructionMatcher(Class<?>... _classes) {

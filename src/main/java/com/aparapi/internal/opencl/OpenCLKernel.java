@@ -56,7 +56,7 @@ public class OpenCLKernel extends OpenCLJNI{
     * @return
     */
    public static OpenCLKernel createKernel(OpenCLProgram _program, String _kernelName, List<OpenCLArgDescriptor> _args) {
-      final OpenCLArgDescriptor[] argArray = _args.toArray(new OpenCLArgDescriptor[0]);
+      final OpenCLArgDescriptor[] argArray = _args.toArray(new OpenCLArgDescriptor[_args.size()]);
       final OpenCLKernel oclk = new OpenCLKernel().createKernelJNI(_program, _kernelName, argArray);
       for (final OpenCLArgDescriptor arg : argArray) {
          arg.kernel = oclk;

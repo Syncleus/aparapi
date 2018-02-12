@@ -24,12 +24,13 @@ public class UseObject extends Kernel {
     int out[] = new int[2];
     int plainInt = -1;
 
+    @Override
     public void run() {
         out[0] = dummy.n;
         out[1] = plainInt;
     }
 
-    class Dummy {
+    static class Dummy {
         public int n;
     }
 

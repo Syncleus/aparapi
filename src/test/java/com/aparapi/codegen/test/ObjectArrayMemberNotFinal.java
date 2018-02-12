@@ -92,6 +92,7 @@ public class ObjectArrayMemberNotFinal extends Kernel {
         return -x;
     }
 
+    @Override
     public void run() {
         int myId = getGlobalId();
 

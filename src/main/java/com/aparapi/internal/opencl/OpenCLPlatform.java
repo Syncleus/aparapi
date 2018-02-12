@@ -32,7 +32,7 @@ public class OpenCLPlatform extends OpenCLJNI{
 
    private final String name;
 
-   private final List<OpenCLDevice> devices = new ArrayList<OpenCLDevice>();
+   private final List<OpenCLDevice> devices = new ArrayList<>();
 
    private static List<OpenCLPlatform> platforms;
 
@@ -73,7 +73,7 @@ public class OpenCLPlatform extends OpenCLJNI{
          if (OpenCLLoader.isOpenCLAvailable()) {
             platforms = getPlatforms();
          } else {
-            return (Collections.EMPTY_LIST);
+            return (Collections.emptyList());
          }
       }
       return platforms;

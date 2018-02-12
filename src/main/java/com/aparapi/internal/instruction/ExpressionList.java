@@ -83,7 +83,7 @@ import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
  */
 public class ExpressionList{
 
-   private static Logger logger = Logger.getLogger(Config.getLoggerName());
+   private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
    private final MethodModel methodModel;
 
@@ -124,12 +124,13 @@ public class ExpressionList{
     * @param _extent
     * @return
     */
-   public boolean doesNotContainContinueOrBreak(Instruction _start, Instruction _extent) {
+   private static boolean doesNotContainContinueOrBreak(Instruction _start, Instruction _extent) {
       boolean ok = true;
       boolean breakOrContinue = false;
       for (Instruction i = _start; i != null; i = i.getNextExpr()) {
          if (i.isBranch()) {
-            if (i.asBranch().isForwardUnconditional() && i.asBranch().getTarget().isAfter(_extent)) {
+             Branch br = i.asBranch();
+             if (br.isForwardUnconditional() && br.getTarget().isAfter(_extent)) {
                breakOrContinue = true;
             } else {
                ok = false;
@@ -149,7 +150,7 @@ public class ExpressionList{
       return (ok);
    }
 
-   public boolean doesNotContainCompositeOrBranch(Instruction _start, Instruction _exclusiveEnd) {
+   private static boolean doesNotContainCompositeOrBranch(Instruction _start, Instruction _exclusiveEnd) {
       boolean ok = true;
       for (Instruction i = _start; (i != null) && (i != _exclusiveEnd); i = i.getNextExpr()) {
          if (!(i instanceof CompositeInstruction) && (i.isBranch())) {
@@ -160,7 +161,7 @@ public class ExpressionList{
       return (ok);
    }
 
-   public void unwind() {
+   private void unwind() {
       if (parent != null) {
          if (instruction != null) {
             tail.setNextExpr(instruction);
@@ -481,7 +482,7 @@ public class ExpressionList{
 
                      loopTop = loopTop.getPrevExpr();
                      if (loopTop instanceof AssignToLocalVariable) {
-                        final LocalVariableInfo localVariableInfo = ((AssignToLocalVariable) loopTop).getLocalVariableInfo();
+                        final LocalVariableInfo localVariableInfo = ((InstructionSet.LocalVariableTableIndexAccessor) loopTop).getLocalVariableInfo();
                         if ((localVariableInfo.getStart() == loopTop.getNextExpr().getStartPC())
                               && (localVariableInfo.getEnd() == _instruction.getThisPC())) {
                            loopTop = loopTop.getPrevExpr(); // back up over the initialization
@@ -500,7 +501,7 @@ public class ExpressionList{
                            // looptop == the unconditional?
                            loopTop = loopTop.getPrevExpr();
                            if (loopTop instanceof AssignToLocalVariable) {
-                              final LocalVariableInfo localVariableInfo = ((AssignToLocalVariable) loopTop).getLocalVariableInfo();
+                              final LocalVariableInfo localVariableInfo = ((InstructionSet.LocalVariableTableIndexAccessor) loopTop).getLocalVariableInfo();
                               if ((localVariableInfo.getStart() == loopTop.getNextExpr().getStartPC())
                                     && (localVariableInfo.getEnd() == _instruction.getThisPC())) {
                                  loopTop = loopTop.getPrevExpr(); // back up over the initialization
@@ -618,7 +619,7 @@ public class ExpressionList{
 
                            Instruction loopTop = topOfRealLoop.getPrevExpr();
                            if (loopTop instanceof AssignToLocalVariable) {
-                              final LocalVariableInfo localVariableInfo = ((AssignToLocalVariable) loopTop).getLocalVariableInfo();
+                              final LocalVariableInfo localVariableInfo = ((InstructionSet.LocalVariableTableIndexAccessor) loopTop).getLocalVariableInfo();
                               if ((localVariableInfo.getStart() == loopTop.getNextExpr().getStartPC())
                                     && (localVariableInfo.getEnd() == _instruction.getThisPC())) {
                                  loopTop = loopTop.getPrevExpr(); // back up over the initialization
@@ -652,7 +653,7 @@ public class ExpressionList{
                         }
 
                         if (loopTop instanceof AssignToLocalVariable) {
-                           final LocalVariableInfo localVariableInfo = ((AssignToLocalVariable) loopTop).getLocalVariableInfo();
+                           final LocalVariableInfo localVariableInfo = ((InstructionSet.LocalVariableTableIndexAccessor) loopTop).getLocalVariableInfo();
                            if ((localVariableInfo.getStart() == loopTop.getNextExpr().getStartPC())
                                  && (localVariableInfo.getEnd() == _instruction.getThisPC())) {
                               loopTop = loopTop.getPrevExpr(); // back up over the initialization
@@ -802,19 +803,26 @@ public class ExpressionList{
 
             for (final LocalVariableInfo localVariableInfo : localVariableTable) {
                if (localVariableInfo.getEnd() == _instruction.getThisPC()) {
-                  logger.fine(localVariableInfo.getVariableName() + "  scope  " + localVariableInfo.getStart() + " ,"
-                        + localVariableInfo.getEnd());
+                   if (logger.isLoggable(Level.FINE)) {
+                       logger.fine(localVariableInfo.getVariableName() + "  scope  " + localVariableInfo.getStart() + " ,"
+                           + localVariableInfo.getEnd());
+                   }
                   if (localVariableInfo.getStart() < startPc) {
                      startPc = localVariableInfo.getStart();
                   }
                }
             }
             if (startPc < Short.MAX_VALUE) {
-               logger.fine("Scope block from " + startPc + " to  " + (tail.getThisPC() + tail.getLength()));
+
+                if (logger.isLoggable(Level.FINE))
+                    logger.fine("Scope block from " + startPc + " to  " + (tail.getThisPC() + tail.getLength()));
+
                for (Instruction i = head; i != null; i = i.getNextPC()) {
                   if (i.getThisPC() == startPc) {
                      final Instruction startInstruction = i.getRootExpr().getPrevExpr();
-                     logger.fine("Start = " + startInstruction);
+
+                     if (logger.isLoggable(Level.FINE))
+                          logger.fine("Start = " + startInstruction);
 
                      addAsComposites(ByteCode.COMPOSITE_ARBITRARY_SCOPE, startInstruction.getPrevExpr(), null);
                      handled = true;
@@ -830,8 +838,6 @@ public class ExpressionList{
             Config.instructionListener.showAndTell("after folding", head, _instruction);
          }
 
-      } catch (final ClassParseException _classParseException) {
-         throw new ClassParseException(_classParseException);
       } catch (final Throwable t) {
          throw new ClassParseException(t);
 
@@ -861,7 +867,7 @@ public class ExpressionList{
     */
    public String dumpDiagram(Instruction _instruction) {
       final StringBuilder sb = new StringBuilder();
-      final List<Instruction> list = new ArrayList<Instruction>();
+      final List<Instruction> list = new ArrayList<>();
 
       for (Instruction i = head; i != null; i = i.getNextExpr()) {
          list.add(i);
@@ -871,20 +877,20 @@ public class ExpressionList{
          list.add(i);
       }
 
-      final Instruction[] array = list.toArray(new Instruction[0]);
+      final Instruction[] array = list.toArray(new Instruction[list.size()]);
       boolean lastWasCursor = false;
 
-      final List<Branch> branches = new ArrayList<Branch>();
+      final List<Branch> branches = new ArrayList<>();
       for (final Instruction i : list) {
          sb.append(String.format(" %3d", i.getStartPC()));
       }
 
-      sb.append("\n");
+      sb.append('\n');
       for (final Instruction i : list) {
          sb.append(String.format(" %3d", i.getThisPC()));
       }
 
-      sb.append("\n");
+      sb.append('\n');
       for (final Instruction i : list) {
 
          if (i == _instruction) {

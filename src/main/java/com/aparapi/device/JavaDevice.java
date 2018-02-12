@@ -22,22 +22,16 @@ public class JavaDevice extends Device {
    public static final JavaDevice SEQUENTIAL = new JavaDevice(TYPE.SEQ, "Java Sequential", -1);
 
    private final String name;
-   private final long deviceId;
 
    private JavaDevice(TYPE _type, String _name, long deviceId) {
-      this.deviceId = deviceId;
-      this.type = _type;
+      super(deviceId);
+      setType(_type);
       this.name = _name;
    }
 
    @Override
    public String getShortDescription() {
       return name;
-   }
-
-   @Override
-   public long getDeviceId() {
-      return deviceId;
    }
 
    @Override

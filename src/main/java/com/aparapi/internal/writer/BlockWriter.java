@@ -55,14 +55,11 @@ package com.aparapi.internal.writer;
 import com.aparapi.*;
 import com.aparapi.internal.exception.*;
 import com.aparapi.internal.instruction.*;
-import com.aparapi.internal.instruction.BranchSet.LogicalExpressionNode;
-import com.aparapi.internal.instruction.InstructionSet.AccessInstanceField;
 import com.aparapi.internal.instruction.BranchSet.*;
 import com.aparapi.internal.instruction.InstructionSet.*;
 import com.aparapi.internal.model.ClassModel.ConstantPool.*;
 import com.aparapi.internal.model.ClassModel.*;
 import com.aparapi.internal.model.*;
-import com.aparapi.internal.model.ClassModel.ConstantPool.NameAndTypeEntry;
 
 import java.util.*;
 
@@ -76,35 +73,35 @@ import java.util.*;
 
 public abstract class BlockWriter{
 
-   public final static String arrayLengthMangleSuffix = "__javaArrayLength";
+   final static String arrayLengthMangleSuffix = "__javaArrayLength";
 
-   public final static String arrayDimMangleSuffix = "__javaArrayDimension";
+   final static String arrayDimMangleSuffix = "__javaArrayDimension";
 
-   public abstract void write(String _string);
+   protected abstract void write(String _string);
 
-   public void writeln(String _string) {
+   void writeln(String _string) {
       write(_string);
       newLine();
    }
 
-   public int indent = 0;
+   private int indent = 0;
 
-   public void in() {
+   void in() {
       indent++;
    }
 
-   public void out() {
+   void out() {
       indent--;
    }
 
-   public void newLine() {
+   void newLine() {
       write("\n");
       for (int i = 0; i < indent; i++) {
          write("   ");
       }
    }
 
-   public void writeConditionalBranch16(ConditionalBranch16 _branch16, boolean _invert) throws CodeGenException {
+   private void writeConditionalBranch16(ConditionalBranch16 _branch16, boolean _invert) throws CodeGenException {
 
       if (_branch16 instanceof If) {
          final If iff = (If) _branch16;
@@ -160,7 +157,7 @@ public abstract class BlockWriter{
       }
    }
 
-   public void writeComposite(CompositeInstruction instruction) throws CodeGenException {
+   private void writeComposite(CompositeInstruction instruction) throws CodeGenException {
       if (instruction instanceof CompositeArbitraryScopeInstruction) {
          newLine();
 
@@ -283,13 +280,13 @@ public abstract class BlockWriter{
          Instruction blockEnd = instruction.getLastChild();
          writeBlock(blockStart, blockEnd);
          write("while(");
-         writeConditional(((CompositeInstruction) instruction).getBranchSet(), true);
+         writeConditional(instruction.getBranchSet(), true);
          write(");");
          newLine();
       }
    }
 
-   public void writeSequence(Instruction _first, Instruction _last) throws CodeGenException {
+   private void writeSequence(Instruction _first, Instruction _last) throws CodeGenException {
 
       for (Instruction instruction = _first; instruction != _last; instruction = instruction.getNextExpr()) {
          if (instruction instanceof CompositeInstruction) {
@@ -304,7 +301,7 @@ public abstract class BlockWriter{
 
    }
 
-   protected void writeGetterBlock(FieldEntry accessorVariableFieldEntry) {
+   private void writeGetterBlock(FieldEntry accessorVariableFieldEntry) {
       write("{");
       in();
       newLine();
@@ -317,7 +314,7 @@ public abstract class BlockWriter{
       write("}");
    }
 
-   public void writeBlock(Instruction _first, Instruction _last) throws CodeGenException {
+   private void writeBlock(Instruction _first, Instruction _last) throws CodeGenException {
       write("{");
       in();
       writeSequence(_first, _last);
@@ -327,18 +324,18 @@ public abstract class BlockWriter{
       write("}");
    }
 
-   public Instruction writeConditional(BranchSet _branchSet) throws CodeGenException {
+   private Instruction writeConditional(BranchSet _branchSet) throws CodeGenException {
       return (writeConditional(_branchSet, false));
    }
 
-   public Instruction writeConditional(BranchSet _branchSet, boolean _invert) throws CodeGenException {
+   private Instruction writeConditional(BranchSet _branchSet, boolean _invert) throws CodeGenException {
 
       final LogicalExpressionNode logicalExpression = _branchSet.getLogicalExpression();
       write(_invert ? logicalExpression : logicalExpression.cloneInverted());
       return (_branchSet.getLast().getNextExpr());
    }
 
-   public void write(LogicalExpressionNode _node) throws CodeGenException {
+   private void write(LogicalExpressionNode _node) throws CodeGenException {
       if (_node instanceof SimpleLogicalExpressionNode) {
          final SimpleLogicalExpressionNode sn = (SimpleLogicalExpressionNode) _node;
 
@@ -366,15 +363,15 @@ public abstract class BlockWriter{
       }
    }
 
-   public String convertType(String _typeDesc, boolean useClassModel, boolean isLocal) {
+   String convertType(String _typeDesc, boolean useClassModel, boolean isLocal) {
       return (_typeDesc);
    }
 
-   public String convertCast(String _cast) {
+   private String convertCast(String _cast) {
       // Strip parens off cast
       //System.out.println("cast = " + _cast);
       final String raw = convertType(_cast.substring(1, _cast.length() - 1), false, false);
-      return ("(" + raw + ")");
+      return ('(' + raw + ')');
    }
 
    public void writeInstruction(Instruction _instruction) throws CodeGenException {
@@ -479,7 +476,7 @@ public abstract class BlockWriter{
                dim++;
             }
 
-            NameAndTypeEntry nameAndTypeEntry = ((AccessField) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
+            NameAndTypeEntry nameAndTypeEntry = ((FieldReference) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
             if (isMultiDimensionalArray(nameAndTypeEntry)) {
                String arrayName = nameAndTypeEntry.getNameUTF8Entry().getUTF8();
                write(" * this->" + arrayName + arrayDimMangleSuffix + dim);
@@ -497,7 +494,7 @@ public abstract class BlockWriter{
          if (accessField instanceof AccessInstanceField) {
             Instruction accessInstanceField = ((AccessInstanceField) accessField).getInstance();
             if (accessInstanceField instanceof CloneInstruction) {
-               accessInstanceField = ((CloneInstruction) accessInstanceField).getReal();
+               accessInstanceField = accessInstanceField.getReal();
             }
             if (!(accessInstanceField instanceof I_ALOAD_0)) {
                writeInstruction(accessInstanceField);
@@ -520,7 +517,7 @@ public abstract class BlockWriter{
             load = load.getFirstChild();
             dim++;
          }
-         NameAndTypeEntry nameAndTypeEntry = ((AccessInstanceField) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
+         NameAndTypeEntry nameAndTypeEntry = ((FieldReference) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
          final String arrayName = nameAndTypeEntry.getNameUTF8Entry().getUTF8();
          String dimSuffix = isMultiDimensionalArray(nameAndTypeEntry) ? Integer.toString(dim) : "";
          write("this->" + arrayName + arrayLengthMangleSuffix + dimSuffix);
@@ -608,7 +605,7 @@ public abstract class BlockWriter{
 
          writeInstruction(binaryInstruction.getLhs());
 
-         write(" " + binaryInstruction.getOperator().getText() + " ");
+         write(' ' + binaryInstruction.getOperator().getText() + ' ');
          writeInstruction(binaryInstruction.getRhs());
 
          if (needsParenthesis) {
@@ -672,7 +669,7 @@ public abstract class BlockWriter{
          AssignToLocalVariable from = (AssignToLocalVariable) multiAssignInstruction.getFrom();
          final AssignToLocalVariable last = (AssignToLocalVariable) multiAssignInstruction.getTo();
          final Instruction common = multiAssignInstruction.getCommon();
-         final Stack<AssignToLocalVariable> stack = new Stack<AssignToLocalVariable>();
+         final Stack<AssignToLocalVariable> stack = new Stack<>();
 
          while (from != last) {
             stack.push(from);
@@ -756,7 +753,7 @@ public abstract class BlockWriter{
 
    }
 
-   private boolean isNeedParenthesis(Instruction instruction){
+   private static boolean isNeedParenthesis(Instruction instruction){
         final Instruction parent = instruction.getParentExpr();
         boolean needsParenthesis = true;
 
@@ -797,7 +794,7 @@ public abstract class BlockWriter{
       return isObjectArray(accessInstanceField.getConstantPoolFieldEntry().getNameAndTypeEntry());
    }
 
-   private AccessField getUltimateInstanceFieldAccess(final AccessArrayElement arrayLoadInstruction) {
+   private static AccessField getUltimateInstanceFieldAccess(final AccessArrayElement arrayLoadInstruction) {
       Instruction load = arrayLoadInstruction.getArrayRef();
       while (load instanceof I_AALOAD) {
          load = load.getFirstChild();
@@ -806,9 +803,8 @@ public abstract class BlockWriter{
       return (AccessField) load;
    }
 
-   public void writeMethod(MethodCall _methodCall, MethodEntry _methodEntry) throws CodeGenException {
-      boolean noCL = _methodEntry.getOwnerClassModel().getNoCLMethods()
-            .contains(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
+   void writeMethod(MethodCall _methodCall, MethodEntry _methodEntry) throws CodeGenException {
+      boolean noCL = _methodEntry.getOwnerClassModel().isNoCLMethod(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
       if (noCL) {
          return;
       }
@@ -836,7 +832,7 @@ public abstract class BlockWriter{
 
    }
 
-   public void writeThisRef() {
+   void writeThisRef() {
       write("this.");
    }
 

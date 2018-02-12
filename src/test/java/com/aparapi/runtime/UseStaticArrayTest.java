@@ -16,11 +16,9 @@
 package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
-import com.aparapi.device.Device;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
 
 public class UseStaticArrayTest {
     @Test

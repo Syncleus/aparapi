@@ -20,13 +20,13 @@ import org.junit.Test;
 public class If_While_Else_WhileTest extends com.aparapi.codegen.CodeGenJUnitBase {
     private static final String[] expectedOpenCL = {
     "typedef struct This_s{\n" +
-"\n" +
+            '\n' +
 " int passid;\n" +
 " }This;\n" +
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-"\n" +
+            '\n' +
 " __kernel void run(\n" +
 " int passid\n" +
 " ){\n" +
@@ -45,7 +45,7 @@ public class If_While_Else_WhileTest extends com.aparapi.codegen.CodeGenJUnitBas
 " return;\n" +
 " }\n" +
 " }\n" +
-" "};
+            ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

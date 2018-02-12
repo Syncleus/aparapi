@@ -27,7 +27,7 @@ public class ImplementsInterfaceTest extends com.aparapi.codegen.CodeGenJUnitBas
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-"\n" +
+            '\n' +
 " int com_aparapi_codegen_test_ImplementsInterface__bar(This *this, int n){\n" +
 " return((n + this->ival));\n" +
 " }\n" +
@@ -47,7 +47,7 @@ public class ImplementsInterfaceTest extends com.aparapi.codegen.CodeGenJUnitBas
 " return;\n" +
 " }\n" +
 " }\n" +
-" "};
+            ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

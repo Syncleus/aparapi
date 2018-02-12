@@ -27,7 +27,7 @@ public class PreIncArrayIndexAndElementTest extends com.aparapi.codegen.CodeGenJ
         + " int get_pass_id(This *this){\n"
         + " return this->passid;\n"
         + " }\n"
-        + "\n"
+        + '\n'
         + " __kernel void run(\n"
         + " __global int *array,\n"
         + " int passid\n"
@@ -42,7 +42,7 @@ public class PreIncArrayIndexAndElementTest extends com.aparapi.codegen.CodeGenJ
         + " return;\n"
         + " }\n"
         + " }\n"
-        + " "};
+        + ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

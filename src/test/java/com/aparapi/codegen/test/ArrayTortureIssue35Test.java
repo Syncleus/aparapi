@@ -27,7 +27,7 @@ public class ArrayTortureIssue35Test extends com.aparapi.codegen.CodeGenJUnitBas
 " int get_pass_id(This *this){\n" +
 " return this->passid;\n" +
 " }\n" +
-"\n" +
+                '\n' +
 " __kernel void run(\n" +
 " __global int *a,\n" +
 " __global int *b,\n" +

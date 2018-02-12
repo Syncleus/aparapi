@@ -49,7 +49,7 @@ public class ClassHasStaticMethodTest extends com.aparapi.codegen.CodeGenJUnitBa
 " return;\n" +
 " }\n" +
 " }\n" +
-" "};
+                ' '};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test

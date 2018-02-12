@@ -37,6 +37,7 @@ public class ObjectArrayCallHierarchy extends Kernel {
         return -x;
     }
 
+    @Override
     public void run() {
         int myId = getGlobalId();
         dummy[myId].intField = bar(2) + dummy[myId].funnyGet();

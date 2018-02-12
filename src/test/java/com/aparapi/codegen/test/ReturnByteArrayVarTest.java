@@ -40,7 +40,7 @@ public class ReturnByteArrayVarTest extends com.aparapi.codegen.CodeGenJUnitBase
             + "      com_aparapi_codegen_test_ReturnByteArrayVar__returnByteArrayVar(this);\n"
             + "      return;\n"
             + "   }\n"
-            + "}"
+            + '}'
     };
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 

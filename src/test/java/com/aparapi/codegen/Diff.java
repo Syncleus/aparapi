@@ -69,7 +69,7 @@ public class Diff{
    static void costDiag(List<Point>[][] flags, int x, int y) {
       if (x == 0 || y == 0 || flags[x - 1][y - 1] == null) {
          if (x < (flags.length - 2) && y < (flags[0].length - 2)) {
-            flags[x][y] = new ArrayList<Point>();
+            flags[x][y] = new ArrayList<>();
             flags[x][y].add(new Point(x, y));
          }
       } else {
@@ -117,22 +117,22 @@ public class Diff{
 
          public String toString(String[] _lhs, String[] _rhs) {
             StringBuilder sb = new StringBuilder();
-            sb.append(type).append("\n");
+            sb.append(type).append('\n');
 
             switch (type) {
                case SAME:
                   for (int i = lhsFrom; i <= lhsTo; i++) {
-                     sb.append("  ==" + _lhs[i]).append("\n");
+                     sb.append("  ==").append(_lhs[i]).append('\n');
                   }
                   break;
                case LEFT:
                   for (int i = lhsFrom; i <= lhsTo; i++) {
-                     sb.append("  <" + _lhs[i]).append("\n");
+                     sb.append("  <").append(_lhs[i]).append('\n');
                   }
                   break;
                case RIGHT:
                   for (int i = rhsFrom; i <= rhsTo; i++) {
-                     sb.append("  >" + _rhs[i]).append("\n");
+                     sb.append("  >").append(_rhs[i]).append('\n');
                   }
                   break;
             }
@@ -141,7 +141,7 @@ public class Diff{
 
       }
 
-      List<Block> blocks = new ArrayList<Block>();
+      List<Block> blocks = new ArrayList<>();
 
       private String[] rhs;
 
@@ -179,7 +179,7 @@ public class Diff{
       public String toString() {
          StringBuilder sb = new StringBuilder();
          for (Block block : blocks) {
-            sb.append(block.toString(lhs, rhs)).append("\n");
+            sb.append(block.toString(lhs, rhs)).append('\n');
          }
          return (sb.toString());
       }

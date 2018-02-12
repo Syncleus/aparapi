@@ -34,7 +34,8 @@ public abstract class ConfigJNI{
     * Usage -Dcom.codegen.enableProfiling={true|false}
     * 
     */
-   @UsedByJNICode public static final boolean enableProfiling = Boolean.getBoolean(propPkgName + ".enableProfiling");
+   @UsedByJNICode
+   protected static final boolean enableProfiling = Boolean.getBoolean(propPkgName + ".enableProfiling");
 
    /**
     * Allows the user to turn on OpenCL profiling for the JNI/OpenCL layer, this information will be written to CSV file
@@ -42,7 +43,8 @@ public abstract class ConfigJNI{
     * Usage -Dcom.codegen.enableProfiling={true|false}
     * 
     */
-   @UsedByJNICode public static final boolean enableProfilingCSV = Boolean.getBoolean(propPkgName + ".enableProfilingCSV");
+   @UsedByJNICode
+   protected static final boolean enableProfilingCSV = Boolean.getBoolean(propPkgName + ".enableProfilingCSV");
 
    /**
     * Allows the user to request that verbose JNI messages be dumped to stderr.
@@ -50,7 +52,8 @@ public abstract class ConfigJNI{
     * Usage -Dcom.codegen.enableVerboseJNI={true|false}
     * 
     */
-   @UsedByJNICode public static final boolean enableVerboseJNI = Boolean.getBoolean(propPkgName + ".enableVerboseJNI");
+   @UsedByJNICode
+   protected static final boolean enableVerboseJNI = Boolean.getBoolean(propPkgName + ".enableVerboseJNI");
 
    /**
     * Allows the user to request tracking of opencl resources.
@@ -60,7 +63,8 @@ public abstract class ConfigJNI{
     * Usage -Dcom.codegen.enableOpenCLResourceTracking={true|false}
     * 
     */
-   @UsedByJNICode public static final boolean enableVerboseJNIOpenCLResourceTracking = Boolean.getBoolean(propPkgName
+   @UsedByJNICode
+   protected static final boolean enableVerboseJNIOpenCLResourceTracking = Boolean.getBoolean(propPkgName
          + ".enableVerboseJNIOpenCLResourceTracking");
 
 }

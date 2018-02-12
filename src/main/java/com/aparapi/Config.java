@@ -56,6 +56,7 @@ import com.aparapi.internal.instruction.*;
 import com.aparapi.internal.jni.*;
 import com.aparapi.internal.tool.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.logging.*;
 
 /**
@@ -141,7 +142,7 @@ public class Config extends ConfigJNI{
    // Debugging related flags
    public static final boolean verboseComparitor = Boolean.getBoolean(propPkgName + ".verboseComparitor");
 
-   public static final boolean dumpFlags = Boolean.getBoolean(propPkgName + ".dumpFlags");
+   private static final boolean dumpFlags = Boolean.getBoolean(propPkgName + ".dumpFlags");
 
    // Individual bytecode support related flags
    public static final boolean enablePUTFIELD = Boolean.getBoolean(propPkgName + ".enable.PUTFIELD");
@@ -169,11 +170,11 @@ public class Config extends ConfigJNI{
 
    public static final boolean enableSWITCH = Boolean.getBoolean(propPkgName + ".enable.SWITCH");
 
-   public static boolean enableShowFakeLocalVariableTable = Boolean.getBoolean(propPkgName + ".enableShowFakeLocalVariableTable");
+   public static final boolean enableShowFakeLocalVariableTable = Boolean.getBoolean(propPkgName + ".enableShowFakeLocalVariableTable");
 
-   public static final boolean enableInstructionDecodeViewer = Boolean.getBoolean(propPkgName + ".enableInstructionDecodeViewer");
+   private static final boolean enableInstructionDecodeViewer = Boolean.getBoolean(propPkgName + ".enableInstructionDecodeViewer");
 
-   public static String instructionListenerClassName = System.getProperty(propPkgName + ".instructionListenerClass");
+   private static String instructionListenerClassName = System.getProperty(propPkgName + ".instructionListenerClass");
 
    public static InstructionListener instructionListener = null;
 
@@ -195,24 +196,18 @@ public class Config extends ConfigJNI{
          System.out.println("Exception " + e + " in Aparapi logging setup");
          e.printStackTrace();
       }
-   };
+   }
 
-   static {
-      if (enableInstructionDecodeViewer && ((instructionListenerClassName == null) || instructionListenerClassName.equals(""))) {
+    static {
+      if (enableInstructionDecodeViewer && ((instructionListenerClassName == null) || instructionListenerClassName.isEmpty())) {
          instructionListenerClassName = InstructionViewer.class.getName();
       }
 
-      if ((instructionListenerClassName != null) && !instructionListenerClassName.equals("")) {
+      if ((instructionListenerClassName != null) && !instructionListenerClassName.isEmpty()) {
          try {
             final Class<?> instructionListenerClass = Class.forName(instructionListenerClassName);
-            instructionListener = (InstructionListener) instructionListenerClass.newInstance();
-         } catch (final ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         } catch (final InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         } catch (final IllegalAccessException e) {
+            instructionListener = (InstructionListener) instructionListenerClass.getConstructor().newInstance();
+         } catch (final ClassNotFoundException | IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
          }

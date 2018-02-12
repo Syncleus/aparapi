@@ -111,6 +111,7 @@ public class ObjectArrayMemberGetterSetter extends Kernel {
         return -x;
     }
 
+    @Override
     public void run() {
         int myId = getGlobalId();
 

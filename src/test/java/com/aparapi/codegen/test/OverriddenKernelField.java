@@ -25,6 +25,7 @@ class OverriddenKernelFieldParent extends Kernel {
         return out[0];
     }
 
+    @Override
     public void run() {
         out[0] = foo(3);
     }
@@ -33,10 +34,12 @@ class OverriddenKernelFieldParent extends Kernel {
 public class OverriddenKernelField extends OverriddenKernelFieldParent {
     int out[] = new int[1];
 
+    @Override
     public void run() {
         out[0] = foo(2);
     }
 
+    @Override
     int foo(int n) {
         return super.foo(n + 1);
     }

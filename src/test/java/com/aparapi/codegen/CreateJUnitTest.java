@@ -72,7 +72,7 @@ public class CreateJUnitTest {
         File testDir = new File(sourceDir, testPackageName.replace(".", "/"));
         System.out.println(testDir.getCanonicalPath());
 
-        List<String> classNames = new ArrayList<String>();
+        List<String> classNames = new ArrayList<>();
         for (File sourceFile : testDir.listFiles(new FilenameFilter() {
 
             @Override
@@ -91,7 +91,7 @@ public class CreateJUnitTest {
 
         for (String className : classNames) {
 
-            Source source = new Source(Class.forName(testPackageName + "." + className), sourceDir);
+            Source source = new Source(Class.forName(testPackageName + '.' + className), sourceDir);
 
             final String testName = className + "Test";
 
@@ -104,7 +104,7 @@ public class CreateJUnitTest {
                 sb.append(doc);
                 sb.append("\n */\n");
             }
-            sb.append("public class " + testName + " extends com.codegen.CodeGenJUnitBase{\n");
+            sb.append("public class ").append(testName).append(" extends com.codegen.CodeGenJUnitBase{\n");
             appendExpectedOpenCL(source, sb);
             appendExpectedExceptions(source, sb);
             appendTest(testPackageName, testName, "", sb);
@@ -122,8 +122,8 @@ public class CreateJUnitTest {
     }
 
     private static void appendTest(String testPackageName, String className, String suffix, StringBuilder sb) {
-        sb.append("   @Test public void " + className + suffix + "(){\n");
-        sb.append("       test(" + testPackageName + "." + className + ".class, expectedException, expectedOpenCL);\n");
+        sb.append("   @Test public void ").append(className).append(suffix).append("(){\n");
+        sb.append("       test(").append(testPackageName).append('.').append(className).append(".class, expectedException, expectedOpenCL);\n");
         sb.append("   }\n");
     }
 
@@ -132,7 +132,7 @@ public class CreateJUnitTest {
         if (exceptions.length() > 0) {
             sb.append("   private static final Class<? extends com.codegen.internal.exception.AparapiException> expectedException = ");
 
-            sb.append("com.codegen.internal.exception." + exceptions + ".class");
+            sb.append("com.codegen.internal.exception.").append(exceptions).append(".class");
             sb.append(";\n");
         } else {
             sb.append("   private static final Class<? extends com.codegen.internal.exception.AparapiException> expectedException = null;\n");
@@ -146,7 +146,7 @@ public class CreateJUnitTest {
             for (List<String> opencl : source.getOpenCL()) {
                 sb.append("   \"\"\n");
                 for (String line : opencl) {
-                    sb.append("   +\"" + line + "\\n\"\n");
+                    sb.append("   +\"").append(line).append("\\n\"\n");
                 }
                 sb.append("   ,\n");
             }

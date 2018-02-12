@@ -43,24 +43,24 @@ import com.aparapi.internal.writer.BlockWriter;
 
 public class InstructionHelper{
 
-   public static class Table{
+   static class Table{
 
       final static String spaces = "                                                                                                                        ";
 
-      private final List<Table.Col> cols = new ArrayList<Table.Col>();
+      private final List<Table.Col> cols = new ArrayList<>();
 
       private int size = 0;
 
       private int col = 0;
 
-      public static class Col{
-         private final List<String> text = new ArrayList<String>();
+      static class Col{
+         private final List<String> text = new ArrayList<>();
 
          private int width;
 
          private String format = "%s";
 
-         public Col(String _format) {
+         Col(String _format) {
             format = _format;
          }
 
@@ -68,7 +68,7 @@ public class InstructionHelper{
             this("%s");
          }
 
-         public void format(Object... args) {
+         void format(Object... args) {
             final String s = String.format(format, args);
 
             width = Math.max(s.length(), width);
@@ -79,7 +79,7 @@ public class InstructionHelper{
             return (text.size());
          }
 
-         public String pad(String _s, int _width) {
+         static String pad(String _s, int _width) {
             final int length = _s.length();
             final int padWidth = _width - length;
             final String padded = _s + spaces.substring(0, padWidth);
@@ -87,24 +87,24 @@ public class InstructionHelper{
 
          }
 
-         public String get(int _i) {
+         String get(int _i) {
 
             return (pad(text.get(_i), width));
          }
 
-         public void header(String _header) {
+         void header(String _header) {
             text.add(_header);
             width = _header.length();
          }
       }
 
-      public Table(String... _formats) {
+      Table(String... _formats) {
          for (final String format : _formats) {
             cols.add(new Col(format));
          }
       }
 
-      public void data(Object... args) {
+      void data(Object... args) {
          cols.get(col++).format(args);
          if (col == cols.size()) {
             col = 0;
@@ -119,13 +119,13 @@ public class InstructionHelper{
             for (final Table.Col col : cols) {
                sb.append(col.get(i));
             }
-            sb.append("\n");
+            sb.append('\n');
          }
 
          return (sb.toString());
       }
 
-      public void header(String... _headers) {
+      void header(String... _headers) {
          for (int i = 0; i < _headers.length; i++) {
             cols.get(i).header(_headers[i]);
          }
@@ -137,11 +137,11 @@ public class InstructionHelper{
    public static class StringWriter extends BlockWriter{
       private StringBuilder sb = null;
 
-      public StringWriter(StringBuilder _sb) {
+      StringWriter(StringBuilder _sb) {
          sb = _sb;
       }
 
-      public StringWriter() {
+      StringWriter() {
          sb = new StringBuilder();
       }
 
@@ -167,23 +167,20 @@ public class InstructionHelper{
          // TODO Auto-generated method stub
       }
 
-      @Override public void writeMethodBody(MethodModel _methodModel) throws CodeGenException {
-         super.writeMethodBody(_methodModel);
-      }
    }
 
-   public static class BranchVector{
-      protected Instruction from;
+   static class BranchVector{
+      final Instruction from;
 
-      protected Instruction to;
+      final Instruction to;
 
-      protected Instruction start;
+      final Instruction start;
 
-      protected Instruction end;
+      final Instruction end;
 
       private boolean forward = false;
 
-      public BranchVector(Instruction _from, Instruction _to) {
+      BranchVector(Instruction _from, Instruction _to) {
          from = _from;
          to = _to;
          if (from.getThisPC() > to.getThisPC()) {
@@ -211,23 +208,23 @@ public class InstructionHelper{
          return (to);
       }
 
-      public Instruction getFrom() {
+      Instruction getFrom() {
          return (from);
       }
 
-      public int getStartPC() {
+      int getStartPC() {
          return (start.getThisPC());
       }
 
-      public int getEndPC() {
+      int getEndPC() {
          return (end.getThisPC());
       }
 
-      public Instruction getStart() {
+      Instruction getStart() {
          return (start);
       }
 
-      public Instruction getEnd() {
+      Instruction getEnd() {
          return (end);
       }
 
@@ -241,7 +238,7 @@ public class InstructionHelper{
 
       }
 
-      public boolean isForward() {
+      boolean isForward() {
          return (forward);
       }
 
@@ -252,7 +249,7 @@ public class InstructionHelper{
          return ("backward from " + getEnd() + " to " + getStart());
       }
 
-      public boolean isConditionalBranch() {
+      boolean isConditionalBranch() {
          return (getFrom().isBranch() && getFrom().asBranch().isConditional());
       }
 
@@ -260,19 +257,19 @@ public class InstructionHelper{
          return (!isForward());
       }
 
-      public static final String NONE = " ";
+      static final String NONE = " ";
 
-      public static final String THROUGH = "|";
+      static final String THROUGH = "|";
 
-      public static final String CONDITIONAL_START = "?";
+      static final String CONDITIONAL_START = "?";
 
-      public static final String UNCONDITIONAL_START = "-";
+      static final String UNCONDITIONAL_START = "-";
 
-      public static final String TOP_ARROW = "^";
+      static final String TOP_ARROW = "^";
 
-      public static final String BOTTOM_ARROW = "v";
+      static final String BOTTOM_ARROW = "v";
 
-      public String render(int _pc) {
+      String render(int _pc) {
          String returnString = NONE;
 
          if (isForward()) {
@@ -295,7 +292,7 @@ public class InstructionHelper{
          return returnString;
       }
 
-      public String render(int _startPC, int _thisPC) {
+      String render(int _startPC, int _thisPC) {
          String returnString = NONE;
          if (isForward()) {
             if (_startPC == getStartPC()) {
@@ -345,11 +342,11 @@ public class InstructionHelper{
             } else if (instruction instanceof MethodCall) {
                final MethodCall methodCall = (MethodCall) instruction;
                label.append(methodCall.getConstantPoolMethodEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
-               label.append(" ");
+               label.append(' ');
                label.append(methodCall.getConstantPoolMethodEntry().getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8());
             } else if (instruction instanceof OperatorInstruction) {
                final OperatorInstruction operatorInstruction = (OperatorInstruction) instruction;
-               label.append(operatorInstruction.getOperator().getText() + "(" + byteCodeName + ")");
+               label.append(operatorInstruction.getOperator().getText()).append('(').append(byteCodeName).append(')');
             } else if (instruction instanceof FieldReference) {
                final FieldReference field = (FieldReference) instruction;
                label.append(field.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
@@ -376,7 +373,7 @@ public class InstructionHelper{
                }
 
                label.append(info == null ? "?" : info.getVariableName());
-               label.append("=");
+               label.append('=');
 
             } else if (instruction instanceof LocalVariableTableIndexAccessor) {
                final LocalVariableTableIndexAccessor localVariableAccessor = (LocalVariableTableIndexAccessor) instruction;
@@ -386,8 +383,8 @@ public class InstructionHelper{
             } else if (instruction instanceof I_IINC) {
 
                label.append(instruction.getByteCode());
-               label.append(" " + ((I_IINC) instruction).getDelta());
-               label.append(" " + ((I_IINC) instruction).getLocalVariableInfo().getVariableName());
+               label.append(' ').append(((I_IINC) instruction).getDelta());
+               label.append(' ').append(((I_IINC) instruction).getLocalVariableInfo().getVariableName());
             } else if (instruction instanceof CompositeInstruction) {
                label.append("composite ");
                label.append(instruction.getByteCode());
@@ -467,7 +464,7 @@ public class InstructionHelper{
             sb.append(branchInfo.render(root.getThisPC(), root.getStartPC()));
          }
          table.data(root.getStartPC(), root.getThisPC());
-         table.data(" " + label);
+         table.data(' ' + label);
          table.data(sb);
          table.data(_pcForwardBranchTargetCounts[root.getStartPC()]);
       }
@@ -477,7 +474,7 @@ public class InstructionHelper{
          sb.append(branchInfo.render(_tail.getThisPC(), _tail.getStartPC()));
       }
       table.data(_tail.getStartPC(), _tail.getThisPC());
-      table.data("[" + label + "]");
+      table.data('[' + label + ']');
       table.data(sb);
       table.data(_pcForwardBranchTargetCounts[_tail.getStartPC()]);
       return (_msg + "{\n" + table.toString() + "}\n");
@@ -505,16 +502,13 @@ public class InstructionHelper{
       return (table.toString());
    }
 
-   private static Comparator<BranchVector> branchInfoComparator = new Comparator<BranchVector>(){
-      @Override public int compare(BranchVector left, BranchVector right) {
-         final int value = left.getFrom().compareTo(right.getFrom());
-         return (value);
-      }
-
+   private static final Comparator<BranchVector> branchInfoComparator = (left, right) -> {
+      final int value = left.getFrom().compareTo(right.getFrom());
+      return (value);
    };
 
-   static List<BranchVector> getBranches(MethodModel _methodModel) {
-      final List<BranchVector> branchVectors = new ArrayList<BranchVector>();
+   private static List<BranchVector> getBranches(MethodModel _methodModel) {
+      final List<BranchVector> branchVectors = new ArrayList<>();
 
       for (Instruction instruction = _methodModel.getPCHead(); instruction != null; instruction = instruction.getNextPC()) {
          if (instruction.isBranch()) {
@@ -524,16 +518,16 @@ public class InstructionHelper{
          }
       }
       // Sort the branch vectors.  The natural order is essentially by from address. Note that this is not the same as start address.. back edges would be the exceptions
-      Collections.sort(branchVectors, branchInfoComparator);
+      branchVectors.sort(branchInfoComparator);
 
       return (branchVectors);
    }
 
-   void edump(StringBuilder _sb, Instruction i, boolean clone) {
+   private static void edump(StringBuilder _sb, Instruction i, boolean clone) {
       final String label = InstructionHelper.getLabel(i, false, true, true);
 
       if (i instanceof CloneInstruction) {
-         edump(_sb, ((CloneInstruction) i).getReal(), true);
+         edump(_sb, i.getReal(), true);
       } else {
 
          if (i.producesStack()) {
@@ -543,20 +537,20 @@ public class InstructionHelper{
          }
 
          if (clone) {
-            _sb.append("*");
+            _sb.append('*');
          } else {
-            _sb.append(" ");
+            _sb.append(' ');
          }
-         _sb.append(i.getThisPC() + ":" + label);
+         _sb.append(i.getThisPC()).append(':').append(label);
       }
 
    }
 
-   void fdump(int _depth, Instruction i, boolean clone) {
+   private static void fdump(int _depth, Instruction i, boolean clone) {
       final String label = i.getByteCode().getName();// InstructionHelper.getLabel(i, false, false, false);
 
       if (i instanceof CloneInstruction) {
-         fdump(_depth, ((CloneInstruction) i).getReal(), true);
+         fdump(_depth, i.getReal(), true);
       } else {
          if (_depth == 0) {
             if (i.producesStack()) {
@@ -590,11 +584,11 @@ public class InstructionHelper{
       }
    }
 
-   void dump(String _indent, Instruction i, boolean clone) {
+   private static void dump(String _indent, Instruction i, boolean clone) {
       final String label = InstructionHelper.getLabel(i, true, false, false);
 
       if (i instanceof CloneInstruction) {
-         dump(_indent, ((CloneInstruction) i).getReal(), true);
+         dump(_indent, i.getReal(), true);
       } else {
          System.out.println(_indent + (clone ? "*" : " ") + label);
       }

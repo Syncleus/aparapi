@@ -21,6 +21,7 @@ public class DirectRecursion extends Kernel {
 
     int intout[] = new int[1];
 
+    @Override
     public void run() {
         intout[0] = fact(10);
         @SuppressWarnings("unused") boolean pass = false;
