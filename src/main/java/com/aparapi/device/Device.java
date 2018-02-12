@@ -115,7 +115,7 @@ public abstract class Device {
         return type;
     }
 
-    public void setType(TYPE type) {
+    protected final void setType(TYPE type) {
         this.type = type;
     }
 

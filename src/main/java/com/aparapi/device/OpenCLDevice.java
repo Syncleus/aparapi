@@ -68,7 +68,7 @@ public class OpenCLDevice extends Device {
     public OpenCLDevice(OpenCLPlatform _platform, long _deviceId, TYPE _type) {
         super(_deviceId);
         platform = _platform;
-        type = _type;
+        setType(_type);
     }
 
     public OpenCLPlatform getOpenCLPlatform() {

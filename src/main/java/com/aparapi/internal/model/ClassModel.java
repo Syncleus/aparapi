@@ -884,11 +884,12 @@ public class ClassModel {
 
             @Override
             public String toString() {
-                final StringBuilder sb = new StringBuilder();
+                final StringBuilder sb = new StringBuilder(256);
                 sb.append(getClassEntry().getNameUTF8Entry().getUTF8());
                 sb.append('.');
-                sb.append(getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
-                sb.append(getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8());
+                NameAndTypeEntry nte = getNameAndTypeEntry();
+                sb.append(nte.getNameUTF8Entry().getUTF8());
+                sb.append(nte.getDescriptorUTF8Entry().getUTF8());
                 return (sb.toString());
             }
         }
@@ -2109,110 +2110,109 @@ public class ClassModel {
             public class AnnotationInfo {
                 private final int typeIndex;
 
-                private final int elementValuePairCount;
-
-                public class ElementValuePair {
-                    class Value {
-                        Value(int _tag) {
-                            tag = _tag;
-                        }
-
-                        final int tag;
-
-                    }
-
-                    class PrimitiveValue extends Value {
-                        private final int typeNameIndex;
-
-                        private final int constNameIndex;
-
-                        PrimitiveValue(int _tag, ByteReader _byteReader) {
-                            super(_tag);
-                            typeNameIndex = _byteReader.u2();
-                            //constNameIndex = _byteReader.u2();
-                            constNameIndex = 0;
-                        }
-
-                        public int getConstNameIndex() {
-                            return (constNameIndex);
-                        }
-
-                        public int getTypeNameIndex() {
-                            return (typeNameIndex);
-                        }
-                    }
-
-                    class EnumValue extends Value {
-                        EnumValue(int _tag, ByteReader _byteReader) {
-                            super(_tag);
-                        }
-                    }
-
-                    class ArrayValue extends Value {
-                        ArrayValue(int _tag, ByteReader _byteReader) {
-                            super(_tag);
-                        }
-                    }
-
-                    class ClassValue extends Value {
-                        ClassValue(int _tag, ByteReader _byteReader) {
-                            super(_tag);
-                        }
-                    }
-
-                    class AnnotationValue extends Value {
-                        AnnotationValue(int _tag, ByteReader _byteReader) {
-                            super(_tag);
-                        }
-                    }
-
-                    @SuppressWarnings("unused")
-                    private final int elementNameIndex;
-
-                    @SuppressWarnings("unused")
-                    private Value value;
-
-                    ElementValuePair(ByteReader _byteReader) {
-                        elementNameIndex = _byteReader.u2();
-                        final int tag = _byteReader.u1();
-
-                        switch (tag) {
-                            case SIGC_BYTE:
-                            case SIGC_CHAR:
-                            case SIGC_INT:
-                            case SIGC_LONG:
-                            case SIGC_DOUBLE:
-                            case SIGC_FLOAT:
-                            case SIGC_SHORT:
-                            case SIGC_BOOLEAN:
-                            case 's': // special for String
-                                value = new PrimitiveValue(tag, _byteReader);
-                                break;
-                            case 'e': // special for Enum
-                                value = new EnumValue(tag, _byteReader);
-                                break;
-                            case 'c': // special for class
-                                value = new ClassValue(tag, _byteReader);
-                                break;
-                            case '@': // special for Annotation
-                                value = new AnnotationValue(tag, _byteReader);
-                                break;
-                            case 'a': // special for array
-                                value = new ArrayValue(tag, _byteReader);
-                                break;
-                        }
-                    }
-                }
-
-                private final ElementValuePair[] elementValuePairs;
+//                private final int elementValuePairCount;
+//
+//                public class ElementValuePair {
+//                    class Value {
+//                        Value(int _tag) {
+//                            tag = _tag;
+//                        }
+//
+//                        final int tag;
+//
+//                    }
+//
+//                    class PrimitiveValue extends Value {
+//                        private final int typeNameIndex;
+//
+//                        private final int constNameIndex;
+//
+//                        PrimitiveValue(int _tag, ByteReader _byteReader) {
+//                            super(_tag);
+//                            typeNameIndex = _byteReader.u2();
+//                            //constNameIndex = _byteReader.u2();
+//                            constNameIndex = 0;
+//                        }
+//
+//                        public int getConstNameIndex() {
+//                            return (constNameIndex);
+//                        }
+//
+//                        public int getTypeNameIndex() {
+//                            return (typeNameIndex);
+//                        }
+//                    }
+//
+//                    class EnumValue extends Value {
+//                        EnumValue(int _tag, ByteReader _byteReader) {
+//                            super(_tag);
+//                        }
+//                    }
+//
+//                    class ArrayValue extends Value {
+//                        ArrayValue(int _tag, ByteReader _byteReader) {
+//                            super(_tag);
+//                        }
+//                    }
+//
+//                    class ClassValue extends Value {
+//                        ClassValue(int _tag, ByteReader _byteReader) {
+//                            super(_tag);
+//                        }
+//                    }
+//
+//                    class AnnotationValue extends Value {
+//                        AnnotationValue(int _tag, ByteReader _byteReader) {
+//                            super(_tag);
+//                        }
+//                    }
+//
+//                    @SuppressWarnings("unused")
+//                    private final int elementNameIndex;
+//
+//                    @SuppressWarnings("unused")
+//                    private Value value;
+//
+//                    ElementValuePair(ByteReader _byteReader) {
+//                        elementNameIndex = _byteReader.u2();
+//                        final int tag = _byteReader.u1();
+//
+//                        switch (tag) {
+//                            case SIGC_BYTE:
+//                            case SIGC_CHAR:
+//                            case SIGC_INT:
+//                            case SIGC_LONG:
+//                            case SIGC_DOUBLE:
+//                            case SIGC_FLOAT:
+//                            case SIGC_SHORT:
+//                            case SIGC_BOOLEAN:
+//                            case 's': // special for String
+//                                value = new PrimitiveValue(tag, _byteReader);
+//                                break;
+//                            case 'e': // special for Enum
+//                                value = new EnumValue(tag, _byteReader);
+//                                break;
+//                            case 'c': // special for class
+//                                value = new ClassValue(tag, _byteReader);
+//                                break;
+//                            case '@': // special for Annotation
+//                                value = new AnnotationValue(tag, _byteReader);
+//                                break;
+//                            case 'a': // special for array
+//                                value = new ArrayValue(tag, _byteReader);
+//                                break;
+//                        }
+//                    }
+//                }
+//                private final ElementValuePair[] elementValuePairs;
 
                 AnnotationInfo(ByteReader _byteReader) {
                     typeIndex = _byteReader.u2();
-                    elementValuePairCount = _byteReader.u2();
-                    elementValuePairs = new ElementValuePair[elementValuePairCount];
-                    for (int i = 0; i < elementValuePairCount; i++) {
-                        elementValuePairs[i] = new ElementValuePair(_byteReader);
-                    }
+//                    elementValuePairCount = _byteReader.u2();
+//                    elementValuePairs = new ElementValuePair[elementValuePairCount];
+//                    for (int i = 0; i < elementValuePairCount; i++) {
+//                        elementValuePairs[i] = new ElementValuePair(_byteReader);
+//                    }
                 }
 
                 public int getTypeIndex() {
@@ -2826,8 +2826,7 @@ public class ClassModel {
     }
 
     private MethodModel computeMethodModel(MethodKey methodKey) throws AparapiException {
-        final ClassModelMethod method = getMethod(methodKey.getName(), methodKey.getSignature());
-        return new MethodModel(method);
+        return new MethodModel(getMethod(methodKey.getName(), methodKey.getSignature()));
     }
 
     // These fields use for accessor conversion

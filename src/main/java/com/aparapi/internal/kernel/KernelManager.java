@@ -37,7 +37,7 @@ public class KernelManager {
     private final Map<Class<? extends Kernel>, KernelProfile> profiles = new ConcurrentHashMap<>();
     private final Map<Class<? extends Kernel>, Kernel> sharedInstances = new ConcurrentHashMap<>();
 
-    private KernelPreferences defaultPreferences;
+    public final KernelPreferences defaultPreferences;
 
     protected KernelManager() {
         defaultPreferences = createDefaultPreferences();
@@ -97,14 +97,14 @@ public class KernelManager {
             Class<? extends Kernel> klass = wrapper.getKernelClass();
             KernelProfile profile = withProfilingInfo ? profiles.get(klass) : null;
             builder.append(klass.getName()).append(":\n\tusing ").append(preferences.getPreferredDevice(null).getShortDescription());
-            List<Device> failedDevices = preferences.getFailedDevices();
+            Collection<Device> failedDevices = preferences.failedDevices;
             if (failedDevices.size() > 0) {
                 builder.append(", failed devices = ");
-                for (int i = 0; i < failedDevices.size(); ++i) {
-                    builder.append(failedDevices.get(i).getShortDescription());
-                    if (i < failedDevices.size() - 1) {
+                for (Device failure : failedDevices) {
+                    builder.append(failure.getShortDescription());
+                    //if (i < failedDevices.size() - 1) {
                         builder.append(" | ");
-                    }
+                    //}
                 }
             }
             if (profile != null) {
@@ -143,31 +143,30 @@ public class KernelManager {
 
 
     public KernelPreferences getPreferences(Kernel kernel) {
-        synchronized (preferences) {
-            PreferencesWrapper wrapper = preferences.get(kernel.hashCode());
-            KernelPreferences kernelPreferences;
-            if (wrapper == null) {
-                kernelPreferences = new KernelPreferences(this, kernel.getClass());
-                preferences.put(kernel.hashCode(), new PreferencesWrapper(kernel.getClass(), kernelPreferences));
-            } else {
-                kernelPreferences = preferences.get(kernel.hashCode()).getPreferences();
-            }
-            return kernelPreferences;
-        }
+        //synchronized (preferences) {
+
+        return preferences.computeIfAbsent(kernel.hashCode(), (kHash)->
+            new PreferencesWrapper(kernel.getClass(),
+                new KernelPreferences(KernelManager.this, kernel.getClass()))
+        ).getPreferences();
+
+//            PreferencesWrapper wrapper = preferences.get(kernel.hashCode());
+//            KernelPreferences kernelPreferences;
+//            if (wrapper == null) {
+//            } else {
+//                kernelPreferences = preferences.get(kernel.hashCode()).getPreferences();
+//            }
+//            return kernelPreferences;
+//        //}
     }
 
     public void setPreferredDevices(Kernel _kernel, LinkedHashSet<Device> _devices) {
-        KernelPreferences kernelPreferences = getPreferences(_kernel);
-        kernelPreferences.setPreferredDevices(_devices);
+        getPreferences(_kernel).setPreferredDevices(_devices);
     }
 
-    public KernelPreferences getDefaultPreferences() {
-        return defaultPreferences;
-    }
-
-    public void setDefaultPreferredDevices(LinkedHashSet<Device> _devices) {
-        defaultPreferences.setPreferredDevices(_devices);
-    }
+//    public void setDefaultPreferredDevices(LinkedHashSet<Device> _devices) {
+//        defaultPreferences.setPreferredDevices(_devices);
+//    }
 
     private KernelPreferences createDefaultPreferences() {
         KernelPreferences preferences = new KernelPreferences(this, null);
@@ -176,20 +175,25 @@ public class KernelManager {
     }
 
     private <T extends Kernel> T getSharedKernelInstance(Class<T> kernelClass) {
-        synchronized (sharedInstances) {
-            T shared = (T) sharedInstances.get(kernelClass);
-            if (shared == null) {
-                try {
-                    Constructor<T> constructor = kernelClass.getConstructor();
-                    constructor.setAccessible(true);
-                    shared = constructor.newInstance();
-                    sharedInstances.put(kernelClass, shared);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+        return (T)sharedInstances.computeIfAbsent(kernelClass, (k)->{
+            try {
+                Constructor<T> ctor = kernelClass.getConstructor();
+                ctor.setAccessible(true);
+                return ctor.newInstance();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
             }
-            return shared;
-        }
+        });
+//        synchronized (sharedInstances) {
+//            T shared = (T) sharedInstances.get(kernelClass);
+//            if (shared == null) {
+//                try {
+//                } catch (Exception e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//            return shared;
+//        }
     }
 
     private LinkedHashSet<Device> createDefaultPreferredDevices() {
@@ -250,11 +254,11 @@ public class KernelManager {
      * NB, returns -ve for the better device.
      */
     private static final Comparator<OpenCLDevice> defaultGPUComparator = (left, right) ->
-        selectLhs(left, right) ? -1 : 1;
+        left==right? 0 : (selectLhs(left, right) ? -1 : 1);
 
 
     public Device bestDevice() {
-        return getDefaultPreferences().getPreferredDevice(null);
+        return defaultPreferences.getPreferredDevice(null);
     }
 
     private static boolean selectLhs(OpenCLDevice _deviceLhs, OpenCLDevice _deviceRhs) {
@@ -286,10 +290,9 @@ public class KernelManager {
     }
 
     public KernelProfile getProfile(Class<? extends Kernel> kernelClass) {
-        synchronized (profiles) {
-            KernelProfile profile = profiles.computeIfAbsent(kernelClass, k -> new KernelProfile(kernelClass));
-            return profile;
-        }
+        //synchronized (profiles) {
+            return profiles.computeIfAbsent(kernelClass, k -> new KernelProfile(kernelClass));
+        //}
     }
 
     /**
@@ -299,7 +302,7 @@ public class KernelManager {
 
         @Deprecated
         public static Device firstDevice(Device.TYPE _type) {
-            List<Device> devices = instance().getDefaultPreferences().getPreferredDevices(null);
+            List<Device> devices = instance().defaultPreferences.getPreferredDevices(null);
             for (Device device : devices) {
                 if (device.getType() == _type) {
                     return device;

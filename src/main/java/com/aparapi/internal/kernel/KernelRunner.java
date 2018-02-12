@@ -171,8 +171,8 @@ public class KernelRunner extends KernelRunnerJNI {
 
     private static final Map<Class<? extends Kernel>, String> openCLCache = new ConcurrentHashMap<>();
     private static final Set<String> seenBinaryKeys =
-        new LinkedHashSet<>();
-        //Collections.newSetFromMap(new ConcurrentHashMap<>());
+        //new LinkedHashSet<>();
+        Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     /**
      * Create a KernelRunner for a specific Kernel instance.
@@ -1085,7 +1085,7 @@ public class KernelRunner extends KernelRunnerJNI {
 
         // native side will reallocate array buffers if necessary
         int returnValue;
-        synchronized (kernel) {
+        //synchronized (kernel) {
             // Read the array refs after kernel may have changed them
             // We need to do this as input to computing the localSize
             final boolean needSync = updateKernelArrayRefs();
@@ -1095,7 +1095,7 @@ public class KernelRunner extends KernelRunnerJNI {
             }
 
             returnValue = runKernelJNI(jniContextHandle, _settings.range, needSync, _settings.passes, inBufferRemote, outBufferRemote);
-        }
+        //}
         if (returnValue != 0) {
             String reason = "OpenCL execution seems to have failed (runKernelJNI returned " + returnValue + ')';
             return fallBackToNextDevice(_settings, new AparapiException(reason));
@@ -1113,7 +1113,7 @@ public class KernelRunner extends KernelRunnerJNI {
     }
 
     @SuppressWarnings("deprecation")
-    synchronized private Kernel fallBackByExecutionMode(ExecutionSettings _settings) {
+    private Kernel fallBackByExecutionMode(ExecutionSettings _settings) {
         isFallBack = true;
         if (kernel.hasNextExecutionMode()) {
             kernel.tryNextExecutionMode();
@@ -1180,12 +1180,12 @@ public class KernelRunner extends KernelRunnerJNI {
     }
 
     @SuppressWarnings("deprecation")
-    synchronized private Kernel fallBackToNextDevice(ExecutionSettings _settings, Exception _exception) {
+    private Kernel fallBackToNextDevice(ExecutionSettings _settings, Exception _exception) {
         return fallBackToNextDevice(_settings, _exception, false);
     }
 
     @SuppressWarnings("deprecation")
-    synchronized private Kernel fallBackToNextDevice(final ExecutionSettings _settings, Exception _exception, boolean _silently) {
+    private Kernel fallBackToNextDevice(final ExecutionSettings _settings, Exception _exception, boolean _silently) {
         isFallBack = true;
 
         final KernelDeviceProfile profiler = _settings.profile.profiler(_settings.device());
@@ -1298,8 +1298,8 @@ public class KernelRunner extends KernelRunnerJNI {
                     }
 
                     if ((entryPoint != null)) {
-                        //synchronized (Kernel.class) { // This seems to be needed because of a race condition uncovered with issue #68 http://code.google.com/p/aparapi/issues/detail?id=68
-                        synchronized (kernel) {
+
+                        //synchronized (kernel) {
 
                             //  jniFlags |= (Config.enableProfiling ? JNI_FLAG_ENABLE_PROFILING : 0);
                             //  jniFlags |= (Config.enableProfilingCSV ? JNI_FLAG_ENABLE_PROFILING_CSV | JNI_FLAG_ENABLE_PROFILING : 0);
@@ -1309,7 +1309,7 @@ public class KernelRunner extends KernelRunnerJNI {
                             // Init the device to check capabilities before emitting the
                             // code that requires the capabilities.
                             jniContextHandle = initJNI(kernel, openCLDevice, _settings.jniFlags); // openCLDevice will not be null here
-                        } // end of synchronized! issue 68
+                        //} // end of synchronized! issue 68
                         profiler.on(ProfilingEvent.INIT_JNI);
 
                         if (jniContextHandle == 0) {
@@ -1317,12 +1317,12 @@ public class KernelRunner extends KernelRunnerJNI {
                         }
 
                         final String extensions;
-                        synchronized (kernel) {
+                        //synchronized (kernel) {
                             extensions = getExtensionsJNI(jniContextHandle);
-                        }
-                        capabilitiesSet = new HashSet<>();
+                        //}
 
                         final StringTokenizer strTok = new StringTokenizer(extensions);
+                        capabilitiesSet = new HashSet<>();
                         while (strTok.hasMoreTokens()) {
                             capabilitiesSet.add(strTok.nextToken());
                         }
@@ -1350,7 +1350,7 @@ public class KernelRunner extends KernelRunnerJNI {
 
                         String openCL;
                         boolean isInfoLogging = logger.isLoggable(Level.INFO);
-                        synchronized (openCLCache) {
+                        //synchronized (openCLCache) {
                             openCL = openCLCache.get(kernelClass);
                             if (openCL == null) {
                                 try {
@@ -1374,34 +1374,34 @@ public class KernelRunner extends KernelRunnerJNI {
                                     return fallBackToNextDevice(_settings, null, silently);
                                 }
                             }
-                        }
+                        //}
 
                         // Send the string to OpenCL to compile it, or if the compiled binary is already cached on JNI side just empty string to use cached binary
                         long handle;
                         if (BINARY_CACHING_DISABLED) {
-                            synchronized (kernel) {
+                            //synchronized (kernel) {
                                 handle = buildProgramJNI(jniContextHandle, openCL, "");
-                            }
+                            //}
                         } else {
-                            synchronized (seenBinaryKeys) {
+                            //synchronized (seenBinaryKeys) {
                                 String binaryKey = kernelClass.getName() + ':' + device.getDeviceId();
                                 if (seenBinaryKeys.contains(binaryKey)) {
                                     // use cached binary
                                     if (isInfoLogging)
                                         logger.log(Level.INFO, "reusing cached binary for " + binaryKey);
-                                    synchronized (kernel) {
+                                    //synchronized (kernel) {
                                         handle = buildProgramJNI(jniContextHandle, "", binaryKey);
-                                    }
+                                    //}
                                 } else {
                                     // create and cache binary
                                     if (isInfoLogging)
                                         logger.log(Level.INFO, "compiling new binary for " + binaryKey);
-                                    synchronized (kernel) {
+                                    //synchronized (kernel) {
                                         handle = buildProgramJNI(jniContextHandle, openCL, binaryKey);
-                                    }
+                                    //}
                                     seenBinaryKeys.add(binaryKey);
                                 }
-                            }
+                            //}
                         }
                         profiler.on(ProfilingEvent.OPENCL_COMPILED);
                         if (handle == 0) {
@@ -1416,42 +1416,40 @@ public class KernelRunner extends KernelRunnerJNI {
 
                         for (final Field field : referencedFields) {
                             KernelArg ai;
-                            int aiType;
                             try {
                                 field.setAccessible(true);
                                 args[i] = ai = new KernelArg();
-                                aiType = ai.getType();
                                 ai.setName(field.getName());
                                 ai.setField(field);
                                 if ((field.getModifiers() & Modifier.STATIC) == Modifier.STATIC) {
-                                    ai.setType(aiType | ARG_STATIC);
+                                    ai.setType(ai.getType() | ARG_STATIC);
                                 }
 
                                 final Class<?> type = field.getType();
                                 if (type.isArray()) {
 
                                     if (field.getAnnotation(Local.class) != null || ai.getName().endsWith(Kernel.LOCAL_SUFFIX)) {
-                                        ai.setType(aiType | ARG_LOCAL);
+                                        ai.setType(ai.getType() | ARG_LOCAL);
                                     } else if ((field.getAnnotation(Constant.class) != null)
                                             || ai.getName().endsWith(Kernel.CONSTANT_SUFFIX)) {
-                                        ai.setType(aiType | ARG_CONSTANT);
+                                        ai.setType(ai.getType() | ARG_CONSTANT);
                                     } else {
-                                        ai.setType(aiType | ARG_GLOBAL);
+                                        ai.setType(ai.getType() | ARG_GLOBAL);
                                     }
                                     if (isExplicit()) {
-                                        ai.setType(aiType | ARG_EXPLICIT);
+                                        ai.setType(ai.getType() | ARG_EXPLICIT);
                                     }
                                     // for now, treat all write arrays as read-write, see bugzilla issue 4859
                                     // we might come up with a better solution later
-                                    ai.setType(aiType
+                                    ai.setType(ai.getType()
                                             | (entryPoint.getArrayFieldAssignments().contains(field.getName()) ? (ARG_WRITE | ARG_READ) : 0));
-                                    ai.setType(aiType
+                                    ai.setType(ai.getType()
                                             | (entryPoint.getArrayFieldAccesses().contains(field.getName()) ? ARG_READ : 0));
                                     // args[i].type |= ARG_GLOBAL;
 
                                     if (type.getName().startsWith("[L")) {
                                         ai.setArray(null); // will get updated in updateKernelArrayRefs
-                                        ai.setType(aiType
+                                        ai.setType(ai.getType()
                                                 | (ARG_ARRAY | ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ));
 
                                         if (logger.isLoggable(Level.FINE)) {
@@ -1468,25 +1466,25 @@ public class KernelRunner extends KernelRunnerJNI {
                                     } else {
 
                                         ai.setArray(null); // will get updated in updateKernelArrayRefs
-                                        ai.setType(aiType | ARG_ARRAY);
+                                        ai.setType(ai.getType() | ARG_ARRAY);
 
-                                        ai.setType(aiType | (type.isAssignableFrom(float[].class) ? ARG_FLOAT : 0));
-                                        ai.setType(aiType | (type.isAssignableFrom(int[].class) ? ARG_INT : 0));
-                                        ai.setType(aiType | (type.isAssignableFrom(boolean[].class) ? ARG_BOOLEAN : 0));
-                                        ai.setType(aiType | (type.isAssignableFrom(byte[].class) ? ARG_BYTE : 0));
-                                        ai.setType(aiType | (type.isAssignableFrom(char[].class) ? ARG_CHAR : 0));
-                                        ai.setType(aiType | (type.isAssignableFrom(double[].class) ? ARG_DOUBLE : 0));
-                                        ai.setType(aiType | (type.isAssignableFrom(long[].class) ? ARG_LONG : 0));
-                                        ai.setType(aiType | (type.isAssignableFrom(short[].class) ? ARG_SHORT : 0));
+                                        ai.setType(ai.getType() | (type.isAssignableFrom(float[].class) ? ARG_FLOAT : 0));
+                                        ai.setType(ai.getType() | (type.isAssignableFrom(int[].class) ? ARG_INT : 0));
+                                        ai.setType(ai.getType() | (type.isAssignableFrom(boolean[].class) ? ARG_BOOLEAN : 0));
+                                        ai.setType(ai.getType() | (type.isAssignableFrom(byte[].class) ? ARG_BYTE : 0));
+                                        ai.setType(ai.getType() | (type.isAssignableFrom(char[].class) ? ARG_CHAR : 0));
+                                        ai.setType(ai.getType() | (type.isAssignableFrom(double[].class) ? ARG_DOUBLE : 0));
+                                        ai.setType(ai.getType() | (type.isAssignableFrom(long[].class) ? ARG_LONG : 0));
+                                        ai.setType(ai.getType() | (type.isAssignableFrom(short[].class) ? ARG_SHORT : 0));
 
                                         // arrays whose length is used will have an int arg holding
                                         // the length as a kernel param
                                         if (entryPoint.getArrayFieldArrayLengthUsed().contains(ai.getName())) {
-                                            ai.setType(aiType | ARG_ARRAYLENGTH);
+                                            ai.setType(ai.getType() | ARG_ARRAYLENGTH);
                                         }
 
                                         if (type.getName().startsWith("[L")) {
-                                            ai.setType(aiType | (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ));
+                                            ai.setType(ai.getType() | (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ));
                                             if (logger.isLoggable(Level.FINE)) {
                                                 logger.fine("tagging " + ai.getName()
                                                         + " as (ARG_OBJ_ARRAY_STRUCT | ARG_WRITE | ARG_READ)");
@@ -1494,36 +1492,36 @@ public class KernelRunner extends KernelRunnerJNI {
                                         }
                                     }
                                 } else if (type.isAssignableFrom(float.class)) {
-                                    ai.setType(aiType | ARG_PRIMITIVE);
-                                    ai.setType(aiType | ARG_FLOAT);
+                                    ai.setType(ai.getType() | ARG_PRIMITIVE);
+                                    ai.setType(ai.getType() | ARG_FLOAT);
                                 } else if (type.isAssignableFrom(int.class)) {
-                                    ai.setType(aiType | ARG_PRIMITIVE);
-                                    ai.setType(aiType | ARG_INT);
+                                    ai.setType(ai.getType() | ARG_PRIMITIVE);
+                                    ai.setType(ai.getType() | ARG_INT);
                                 } else if (type.isAssignableFrom(double.class)) {
-                                    ai.setType(aiType | ARG_PRIMITIVE);
-                                    ai.setType(aiType | ARG_DOUBLE);
+                                    ai.setType(ai.getType() | ARG_PRIMITIVE);
+                                    ai.setType(ai.getType() | ARG_DOUBLE);
                                 } else if (type.isAssignableFrom(long.class)) {
-                                    ai.setType(aiType | ARG_PRIMITIVE);
-                                    ai.setType(aiType | ARG_LONG);
+                                    ai.setType(ai.getType() | ARG_PRIMITIVE);
+                                    ai.setType(ai.getType() | ARG_LONG);
                                 } else if (type.isAssignableFrom(boolean.class)) {
-                                    ai.setType(aiType | ARG_PRIMITIVE);
-                                    ai.setType(aiType | ARG_BOOLEAN);
+                                    ai.setType(ai.getType() | ARG_PRIMITIVE);
+                                    ai.setType(ai.getType() | ARG_BOOLEAN);
                                 } else if (type.isAssignableFrom(byte.class)) {
-                                    ai.setType(aiType | ARG_PRIMITIVE);
-                                    ai.setType(aiType | ARG_BYTE);
+                                    ai.setType(ai.getType() | ARG_PRIMITIVE);
+                                    ai.setType(ai.getType() | ARG_BYTE);
                                 } else if (type.isAssignableFrom(char.class)) {
-                                    ai.setType(aiType | ARG_PRIMITIVE);
-                                    ai.setType(aiType | ARG_CHAR);
+                                    ai.setType(ai.getType() | ARG_PRIMITIVE);
+                                    ai.setType(ai.getType() | ARG_CHAR);
                                 } else if (type.isAssignableFrom(short.class)) {
-                                    ai.setType(aiType | ARG_PRIMITIVE);
-                                    ai.setType(aiType | ARG_SHORT);
+                                    ai.setType(ai.getType() | ARG_PRIMITIVE);
+                                    ai.setType(ai.getType() | ARG_SHORT);
                                 }
                                 // System.out.printf("in execute, arg %d %s %08x\n", i,args[i].name,args[i].type );
 
-                                ai.setPrimitiveSize(getPrimitiveSize(aiType));
+                                ai.setPrimitiveSize(getPrimitiveSize(ai.getType()));
 
                                 if (logger.isLoggable(Level.FINE)) {
-                                    logger.fine("arg " + i + ", " + ai.getName() + ", type=" + Integer.toHexString(aiType)
+                                    logger.fine("arg " + i + ", " + ai.getName() + ", type=" + Integer.toHexString(ai.getType())
                                         + ", primitiveSize=" + ai.getPrimitiveSize());
                                 }
 

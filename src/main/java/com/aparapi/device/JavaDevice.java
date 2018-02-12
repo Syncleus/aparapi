@@ -25,7 +25,7 @@ public class JavaDevice extends Device {
 
    private JavaDevice(TYPE _type, String _name, long deviceId) {
       super(deviceId);
-      this.type = _type;
+      setType(_type);
       this.name = _name;
    }
 

@@ -174,6 +174,11 @@ public abstract class Kernel implements Cloneable {
         return serial;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return this==obj;
+    }
+
     private static final Logger logger = Logger.getLogger(Config.getLoggerName());
 
     public Kernel clone(Range range) {

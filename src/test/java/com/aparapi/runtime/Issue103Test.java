@@ -22,17 +22,17 @@ import static org.junit.Assert.assertArrayEquals;
 
 
 public class Issue103Test {
+    
     @Test
     public void test() {
-        Issue103Kernel b = new Issue103Kernel();
-        b.test();
+        new Issue103Kernel().test();
     }
 
     public static class Issue103Kernel extends Kernel {
         static final int size = 32;
 
-        static int[] source = new int[size];
-        static int[] target = new int[size];
+        /* static */ int[] source = new int[size];
+        /* static */ int[] target = new int[size];
 
         public Issue103Kernel() {
             for (int i = 0; i < size; ++i) {

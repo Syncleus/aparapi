@@ -116,7 +116,7 @@ public class ProfileInfo{
    }
 
    @Override public String toString() {
-      final StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder(512);
       sb.append("ProfileInfo[");
       sb.append(type);
       sb.append(" '");

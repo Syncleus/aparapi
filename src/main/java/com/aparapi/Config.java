@@ -207,13 +207,9 @@ public class Config extends ConfigJNI{
          try {
             final Class<?> instructionListenerClass = Class.forName(instructionListenerClassName);
             instructionListener = (InstructionListener) instructionListenerClass.getConstructor().newInstance();
-         } catch (final ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+         } catch (final ClassNotFoundException | IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-         } catch (NoSuchMethodException e) {
-             e.printStackTrace();
-         } catch (InvocationTargetException e) {
-             e.printStackTrace();
          }
       }
 

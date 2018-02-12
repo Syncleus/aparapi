@@ -59,8 +59,8 @@ public class Issue55Test {
 	@Test
 	public void testUseJtpOnly() {
 		KernelManager.setKernelManager(KernelManagers.JTP_ONLY);
-		
-		Device device = KernelManager.instance().getDefaultPreferences().getPreferredDevice(testKernel);
+
+        Device device = KernelManager.instance().defaultPreferences.getPreferredDevice(testKernel);
 
 		assertThat(device.getType(), is(Device.TYPE.JTP));
 	}
@@ -69,7 +69,7 @@ public class Issue55Test {
 	public void testUseSequentialOnly() {
 		KernelManager.setKernelManager(KernelManagers.SEQUENTIAL_ONLY);
 
-		Device device = KernelManager.instance().getDefaultPreferences().getPreferredDevice(testKernel);
+        Device device = KernelManager.instance().defaultPreferences.getPreferredDevice(testKernel);
 
 		assertThat(device.getType(), is(Device.TYPE.SEQ));
 	}

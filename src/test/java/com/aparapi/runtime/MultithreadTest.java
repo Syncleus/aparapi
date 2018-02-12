@@ -17,6 +17,7 @@ package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
 import com.aparapi.Range;
+import com.aparapi.internal.tool.ABCCKernel;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -37,18 +38,33 @@ public class MultithreadTest {
         test(1, 2);
     }
     @Test
-    public void testN() throws InterruptedException {
-        for (int t = 2; t< Math.max(3,Runtime.getRuntime().availableProcessors()); t++) {
-            test(t, t/2);
-            test(t, t);
-            test(t, t*2);
-            test(t, t*2+1); //odd
-        }
+    public void test4() throws InterruptedException {
+        test(4, 1);
+        test(4, 2);
     }
+    @Test
+    public void test7() throws InterruptedException {
+        test(7, 1);
+    }
+    @Test
+    public void test9() throws InterruptedException {
+        test(9, 1);
+    }
+
+//    @Test
+//    public void testN() throws InterruptedException {
+//        int granularity = 3;
+//        for (int t = 2; t< Math.max(granularity,Runtime.getRuntime().availableProcessors())+ granularity; t+= granularity) {
+////            test(t, t/2);
+//            test(t, t);
+////            test(t, t*2);
+////            test(t, t*2+1); //odd
+//        }
+//    }
 
     static void test(int THREADS, int KERNELS) throws InterruptedException {
 
-        final int E = (KERNELS * 100); //10000;
+        final int E = (KERNELS * 8); //10000;
 
         final List<ABCCKernel> kernels = new ArrayList(KERNELS);
         for (int i = 0; i < KERNELS; i++) {
@@ -74,65 +90,65 @@ public class MultithreadTest {
             k.dispose();
     }
 
-    static class ABCCKernel extends Kernel {
-        public static final int FI = 0, GI = 1, HI = 2, YI = 3, FI2 = 4, FIGI = 5, GI2 = 6, YIFI = 7, YIGI = 8, FIHI = 9, GIHI = 10, HI2 = 11, YIHI = 12;
-        public static final int v = 13;
-        private static final int TC = 0, M = 1, W = 2;
-        private float[] T, p;
-        private float[] tcmw = new float[3];
-        private float[] result;
-        //public final int N;
-
-        public ABCCKernel(float[] t, float[] p) {
-            setExplicit(true);
-            this.T = t;
-            this.p = p;
-            this.result = new float[t.length * v];
-            put(this.T).put(this.p).put(result);
-        }
-
-        public void setNewTandP(float[] t, float[] p) {
-            this.T = t;
-            this.p = p;
-            this.result = new float[t.length * v];
-            put(this.T).put(this.p).put(result);
-        }
-
-        public void set_tcmw(float tc, float m, float w) {
-            this.tcmw = new float[]{tc, m, w};
-            put(this.tcmw);
-        }
-
-        @Override
-        public void run() {
-            int i = getGlobalId();
-            int j = i * v;
-            int fi = FI + j, gi = GI + j, hi = HI + j, yi = YI + j, fi2 = FI2 + j, figi = FIGI + j, gi2 = GI2 + j, yifi = YIFI + j, yigi = YIGI + j, fihi = FIHI + j, gihi = GIHI + j, hi2 = HI2 + j, yihi = YIHI + j;
-            float tc = tcmw[TC];
-            float w = tcmw[W];
-            float m = tcmw[M];
-
-            float[] r = this.result;
-
-            r[fi] = pow((tc - T[i]), m);
-            r[gi] = r[fi] * cos(w * log(tc - T[i])); //TODO check if this inner log is computed once and shared
-            r[hi] = r[fi] * sin(w * log(tc - T[i]));
-            r[yi] = p[i];
-            r[fi2] = r[fi] * r[fi];
-            r[figi] = r[fi] * r[gi];
-            r[gi2] = r[gi] * r[gi];
-            r[yifi] = r[yi] * r[fi];
-            r[yigi] = r[yi] * r[gi];
-            r[fihi] = r[fi] * r[hi];
-            r[gihi] = r[gi] * r[hi];
-            r[hi2] = r[hi] * r[hi];
-            r[yihi] = r[yi] * r[hi];
-        }
-
-        public float[] getResult() {
-            get(result);
-            return result;
-        }
-    }
+//    static class ABCCKernel extends Kernel {
+//        public static final int FI = 0, GI = 1, HI = 2, YI = 3, FI2 = 4, FIGI = 5, GI2 = 6, YIFI = 7, YIGI = 8, FIHI = 9, GIHI = 10, HI2 = 11, YIHI = 12;
+//        public static final int v = 13;
+//        private static final int TC = 0, M = 1, W = 2;
+//        private float[] T, p;
+//        private float[] tcmw = new float[3];
+//        private float[] result;
+//        //public final int N;
+//
+//        public ABCCKernel(float[] t, float[] p) {
+//            setExplicit(true);
+//            this.T = t;
+//            this.p = p;
+//            this.result = new float[t.length * v];
+//            put(this.T).put(this.p).put(result);
+//        }
+//
+//        public void setNewTandP(float[] t, float[] p) {
+//            this.T = t;
+//            this.p = p;
+//            this.result = new float[t.length * v];
+//            put(this.T).put(this.p).put(result);
+//        }
+//
+//        public void set_tcmw(float tc, float m, float w) {
+//            this.tcmw = new float[]{tc, m, w};
+//            put(this.tcmw);
+//        }
+//
+//        @Override
+//        public void run() {
+//            int i = getGlobalId();
+//            int j = i * v;
+//            int fi = FI + j, gi = GI + j, hi = HI + j, yi = YI + j, fi2 = FI2 + j, figi = FIGI + j, gi2 = GI2 + j, yifi = YIFI + j, yigi = YIGI + j, fihi = FIHI + j, gihi = GIHI + j, hi2 = HI2 + j, yihi = YIHI + j;
+//            float tc = tcmw[TC];
+//            float w = tcmw[W];
+//            float m = tcmw[M];
+//
+//            float[] r = this.result;
+//
+//            r[fi] = pow((tc - T[i]), m);
+//            r[gi] = r[fi] * cos(w * log(tc - T[i])); //TODO check if this inner log is computed once and shared
+//            r[hi] = r[fi] * sin(w * log(tc - T[i]));
+//            r[yi] = p[i];
+//            r[fi2] = r[fi] * r[fi];
+//            r[figi] = r[fi] * r[gi];
+//            r[gi2] = r[gi] * r[gi];
+//            r[yifi] = r[yi] * r[fi];
+//            r[yigi] = r[yi] * r[gi];
+//            r[fihi] = r[fi] * r[hi];
+//            r[gihi] = r[gi] * r[hi];
+//            r[hi2] = r[hi] * r[hi];
+//            r[yihi] = r[yi] * r[hi];
+//        }
+//
+//        public float[] getResult() {
+//            get(result);
+//            return result;
+//        }
+//    }
 
 }
