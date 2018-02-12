@@ -1,5 +1,7 @@
 # Aparapi Changelog
 
+## 1.5.1
+
 ## 1.5.0
 
 * Support for OpenCL 2.1 added.
@@ -11,7 +13,7 @@
 
 ## 1.4.1
 
-* Fixed NullPointerException when using KernelManger from the KernelManagers class 
+* Fixed NullPointerException when using KernelManger from the KernelManagers class
 * Now requires maven 3.0.4 or later.
 * Bumped parent pom version to 4.
 * Removed explicit versions from several plugins in the pom as these are defined in the parent.
