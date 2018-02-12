@@ -1,24 +1,26 @@
 # Aparapi Changelog
 
+## 1.5.1
+
 ## 1.5.0
 
 * Support for OpenCL 2.1 added.
 * Support inline array creation in the kernel, which is implemented in the GPU in private memory.
-* Updated parent pon to v6.
+* Updated parent pom to v6.
 * createProgram had the wrong signature producing a unsatisfied link exception that is now fixed.
 * Build now requires version 3.5.0 of maven due to changes in surefire plugin.
 * Added the functions popcount and clz
 
 ## 1.4.1
 
-* Fixed NullPointerException when using KernelManger from the KernelManagers class 
+* Fixed NullPointerException when using KernelManger from the KernelManagers class
 * Now requires maven 3.0.4 or later.
 * Bumped parent pom version to 4.
 * Removed explicit versions from several plugins in the pom as these are defined in the parent.
 
 ## 1.4.0
 
-* Updated nexus stagin plugin: 1.6.7 -> 1.6.8
+* Updated nexus staging plugin: 1.6.7 -> 1.6.8
 * Added Fused Multiply Add support.
 * Fixed a bug whereby the library failed to load if OpenCL implementation isnt present, system now loads and falls back to native Java.
 * Fixed several mistakes and typos in the various examples.
