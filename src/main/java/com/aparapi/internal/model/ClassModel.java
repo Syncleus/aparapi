@@ -2240,6 +2240,161 @@ public class ClassModel {
 
       }
 
+      public class RuntimeParameterAnnotationsEntry extends PoolEntry<RuntimeParameterAnnotationsEntry.ParameterInfo>{
+    	  public class ParameterInfo {
+    		  private final int methodArgumentIndex;
+    		  private final List<AnnotationInfo> annotations;
+    		  
+	          public class AnnotationInfo {  	  
+	             private final int typeIndex;
+	             private final int elementValuePairCount;
+	             private final int methodArgumentIndex;
+	
+	             public class ElementValuePair{
+	                class Value {
+	                   Value(int _tag) {
+	                      tag = _tag;
+	                   }
+	
+	                   int tag;
+	                }
+	
+	                public class PrimitiveValue extends Value{
+	                   private final int typeNameIndex;
+	
+	                   private final int constNameIndex;
+	
+	                   public PrimitiveValue(int _tag, ByteReader _byteReader) {
+	                      super(_tag);
+	                      typeNameIndex = _byteReader.u2();
+	                      //constNameIndex = _byteReader.u2();
+	                      constNameIndex = 0;
+	                   }
+	
+	                   public int getConstNameIndex() {
+	                      return (constNameIndex);
+	                   }
+	
+	                   public int getTypeNameIndex() {
+	                      return (typeNameIndex);
+	                   }
+	                }
+	
+	                public class EnumValue extends Value{
+	                   EnumValue(int _tag, ByteReader _byteReader) {
+	                      super(_tag);
+	                   }
+	                }
+	
+	                public class ArrayValue extends Value{
+	                   ArrayValue(int _tag, ByteReader _byteReader) {
+	                      super(_tag);
+	                   }
+	                }
+	
+	                public class ClassValue extends Value{
+	                   ClassValue(int _tag, ByteReader _byteReader) {
+	                      super(_tag);
+	                   }
+	                }
+	
+	                public class AnnotationValue extends Value{
+	                   AnnotationValue(int _tag, ByteReader _byteReader) {
+	                      super(_tag);
+	                   }
+	                }
+	
+	                @SuppressWarnings("unused")
+	                private final int elementNameIndex;
+	
+	                @SuppressWarnings("unused")
+	                private Value value;
+	
+	                public ElementValuePair(ByteReader _byteReader) {
+	                   elementNameIndex = _byteReader.u2();
+	                   final int tag = _byteReader.u1();
+	
+	                   switch (tag) {
+	                      case SIGC_BYTE:
+	                      case SIGC_CHAR:
+	                      case SIGC_INT:
+	                      case SIGC_LONG:
+	                      case SIGC_DOUBLE:
+	                      case SIGC_FLOAT:
+	                      case SIGC_SHORT:
+	                      case SIGC_BOOLEAN:
+	                      case 's': // special for String
+	                         value = new PrimitiveValue(tag, _byteReader);
+	                         break;
+	                      case 'e': // special for Enum
+	                         value = new EnumValue(tag, _byteReader);
+	                         break;
+	                      case 'c': // special for class
+	                         value = new ClassValue(tag, _byteReader);
+	                         break;
+	                      case '@': // special for Annotation
+	                         value = new AnnotationValue(tag, _byteReader);
+	                         break;
+	                      case 'a': // special for array
+	                         value = new ArrayValue(tag, _byteReader);
+	                         break;
+	                   }
+	                }
+	             }
+	
+	             private final ElementValuePair[] elementValuePairs;
+	
+	             public AnnotationInfo(ByteReader _byteReader, int argumentIndex) {
+	            	methodArgumentIndex = argumentIndex;
+	                typeIndex = _byteReader.u2();
+	                elementValuePairCount = _byteReader.u2();
+	                elementValuePairs = new ElementValuePair[elementValuePairCount];
+	                for (int i = 0; i < elementValuePairCount; i++) {
+	                   elementValuePairs[i] = new ElementValuePair(_byteReader);
+	                }
+	             }
+	
+	             public int getMethodArgumentIndex() {
+	            	 return methodArgumentIndex;
+	             }
+	             
+	             public int getTypeIndex() {
+	                return (typeIndex);
+	             }
+	
+	             public String getTypeDescriptor() {
+	                return (constantPool.getUTF8Entry(typeIndex).getUTF8());
+	             }
+	          }
+	          
+	          public ParameterInfo(ByteReader _byteReader, int argumentIndex) {
+	        	  methodArgumentIndex = argumentIndex;
+	        	  final int numberOfAnnotations = _byteReader.u2();
+	        	  annotations = new ArrayList<AnnotationInfo>(numberOfAnnotations);
+		          for (int i = 0; i < numberOfAnnotations; i++) {
+		        	  annotations.add(new AnnotationInfo(_byteReader, argumentIndex));
+			      }
+	          }
+	          
+              public int getMethodArgumentIndex() {
+             	 return methodArgumentIndex;
+              }
+ 
+              public List<AnnotationInfo> getAnnotations() {
+            	  return annotations;
+              }
+    	  }
+
+    	  //See https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.18
+          public RuntimeParameterAnnotationsEntry(ByteReader _byteReader, int _nameIndex, int _length) {
+             super(_byteReader, _nameIndex, _length);
+             final int numberOfParameters = _byteReader.u1();
+             for (int paramIndex = 0; paramIndex < numberOfParameters; paramIndex++) {
+	             getPool().add(new ParameterInfo(_byteReader, paramIndex));
+             }
+          }
+      }
+      
       private CodeEntry codeEntry = null;
 
       private EnclosingMethodEntry enclosingMethodEntry = null;
@@ -2253,6 +2408,8 @@ public class ClassModel {
       private LocalVariableTableEntry localVariableTableEntry = null;
 
       private RuntimeAnnotationsEntry runtimeVisibleAnnotationsEntry;
+      
+      private RuntimeParameterAnnotationsEntry runtimeVisibleParameterAnnotationsEntry;
 
       private RuntimeAnnotationsEntry runtimeInvisibleAnnotationsEntry;
 
@@ -2285,6 +2442,8 @@ public class ClassModel {
       private final static String SIGNATURE_TAG = "Signature";
 
       private final static String RUNTIMEINVISIBLEANNOTATIONS_TAG = "RuntimeInvisibleAnnotations";
+      
+      private final static String RUNTIMEVISIBLEPARAMETERANNOTATIONS_TAG = "RuntimeVisibleParameterAnnotations";
 
       private final static String RUNTIMEVISIBLEANNOTATIONS_TAG = "RuntimeVisibleAnnotations";
 
@@ -2341,6 +2500,9 @@ public class ClassModel {
             } else if (attributeName.equals(RUNTIMEVISIBLEANNOTATIONS_TAG)) {
                runtimeVisibleAnnotationsEntry = new RuntimeAnnotationsEntry(_byteReader, attributeNameIndex, length);
                entry = runtimeVisibleAnnotationsEntry;
+            } else if (attributeName.equals(RUNTIMEVISIBLEPARAMETERANNOTATIONS_TAG)) {
+               runtimeVisibleParameterAnnotationsEntry = new RuntimeParameterAnnotationsEntry(_byteReader, attributeNameIndex, length);
+               entry = runtimeVisibleParameterAnnotationsEntry;               
             } else if (attributeName.equals(BOOTSTRAPMETHODS_TAG)) {
                bootstrapMethodsEntry = new BootstrapMethodsEntry(_byteReader, attributeNameIndex, length);
                entry = bootstrapMethodsEntry;
@@ -2393,6 +2555,10 @@ public class ClassModel {
          return (runtimeInvisibleAnnotationsEntry);
       }
 
+      public RuntimeParameterAnnotationsEntry getRuntimeVisibleParameterAnnotationsEntry() {
+     	 return (runtimeVisibleParameterAnnotationsEntry);
+      }
+      
       public RuntimeAnnotationsEntry getRuntimeVisibleAnnotationsEntry() {
          return (runtimeVisibleAnnotationsEntry);
       }
