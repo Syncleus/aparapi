@@ -23,7 +23,8 @@ import com.aparapi.device.Device;
 import com.aparapi.device.OpenCLDevice;
 import com.aparapi.internal.kernel.KernelManager;
 import static org.junit.Assume.*;
-import org.junit.BeforeClass;
+
+import org.junit.Before;
 import org.junit.Test;
 
 public class LocalArrayArgsIssue79Test {
@@ -31,8 +32,8 @@ public class LocalArrayArgsIssue79Test {
     private static final int SIZE = 32;
     private int[] targetArray;
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
+    @Before
+    public void setUpBeforeClass() throws Exception {
         Device device = KernelManager.instance().bestDevice();
         assumeTrue (device != null && device instanceof OpenCLDevice);
         openCLDevice = (OpenCLDevice) device;
@@ -71,23 +72,30 @@ public class LocalArrayArgsIssue79Test {
         	expected[threadId] *= threadId;
         }
         
-        assertArrayEquals("destArray", expected, targetArray);
+        assertArrayEquals("targetArray", expected, targetArray);
     }
 
     public static class LocalArrayArgsKernel extends Kernel {
-        private int[] destArray;
+        private int[] resultArray;
         
         @Local
         private int[] myArray = new int[SIZE];
+        
+        @PrivateMemorySpace(SIZE)
+        private int[] other_$private$ = new int[SIZE];
 
         public LocalArrayArgsKernel() {
         }
         
         @NoCL
         public void setArray(int[] target) {
-            destArray = target;
+            resultArray = target;
         }
 
+        private void doInitialCopy(@Local int[] target, int[] source, int id) {
+        	target[id] = source[id];
+        }
+        
         private void doComputation1(@Local int[] arr, int id) {
             for (int i = 0; i < SIZE; i++) {
                 arr[id] += i + id;
@@ -97,17 +105,22 @@ public class LocalArrayArgsIssue79Test {
         private void doComputation2(int[] arr_$local$, int id) {
             arr_$local$[id] *= id;
         }
+        
+        private void doComputation3(int[] arr_$local$, int[] arr_$private$, int id) {
+        	arr_$private$[id] = arr_$local$[id];
+        }
 
         @Override
         public void run() {
-            int id = getLocalId();
+            int id = getLocalId();                
             
-            myArray[id] = destArray[id];
-
+            
+            doInitialCopy(myArray, resultArray, id);
             doComputation1(myArray, id);
             doComputation2(myArray, id);
+            doComputation3(myArray, other_$private$, id);
             
-            destArray[id] = myArray[id];            
+            resultArray[id] = myArray[id];            
         }
     }
 }
