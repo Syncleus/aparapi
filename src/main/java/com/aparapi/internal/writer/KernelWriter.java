@@ -194,8 +194,8 @@ public abstract class KernelWriter extends BlockWriter{
          return isLocal ? (cvtLongArrayToLong) : (cvtLongArrayToLongStar);
       } else if (_typeDesc.equals("[S") || _typeDesc.equals("short[]")) {
          return isLocal ? (cvtShortArrayToShort) : (cvtShortArrayToShortStar);
-      } else if (_typeDesc.equals("[Ljava/util/concurrent/atomic/AtomicInteger;") ||
-    		  _typeDesc.equals("[Ljava.util.concurrent.atomic.AtomicInteger;")) {
+      } else if ("[Ljava/util/concurrent/atomic/AtomicInteger;".equals(_typeDesc) ||
+    		  "[Ljava.util.concurrent.atomic.AtomicInteger;".equals(_typeDesc)) {
     	 return (cvtIntArrayToIntStar);
       }
       // if we get this far, we haven't matched anything yet
@@ -297,7 +297,7 @@ public abstract class KernelWriter extends BlockWriter{
             }
 
             Arg methodArg = _methodEntry.getArgs()[arg];
-            if (!methodArg.isArray() && methodArg.getType().equals("Ljava/util/concurrent/atomic/AtomicInteger;")) {
+            if (!methodArg.isArray() && "Ljava/util/concurrent/atomic/AtomicInteger;".equals(methodArg.getType())) {
             	write("&");
             }
  
