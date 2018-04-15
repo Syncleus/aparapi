@@ -9,7 +9,6 @@
 [![Build Status](https://travis-ci.org/Syncleus/aparapi.svg?branch=master)](https://travis-ci.org/Syncleus/aparapi)
 [![codecov](https://codecov.io/gh/Syncleus/aparapi/branch/master/graph/badge.svg)](https://codecov.io/gh/Syncleus/aparapi)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8c0efbe275f44369d9959b5ded14bfd)](https://www.codacy.com/app/freemo/aparapi?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Syncleus/aparapi&amp;utm_campaign=badger)
-[![Dependency Status](https://www.versioneye.com/user/projects/5855deafad9aa2003738a08b/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/5855deafad9aa2003738a08b)
 
 A framework for executing native Java code on the GPU.
 
