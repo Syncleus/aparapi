@@ -61,6 +61,7 @@ import com.aparapi.internal.instruction.InstructionSet.*;
 import com.aparapi.internal.model.*;
 import com.aparapi.internal.model.ClassModel.AttributePool.*;
 import com.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEntry.*;
+import com.aparapi.internal.model.ClassModel.AttributePool.RuntimeParameterAnnotationsEntry.ParameterInfo;
 import com.aparapi.internal.model.ClassModel.*;
 import com.aparapi.internal.model.ClassModel.ConstantPool.*;
 
@@ -628,7 +629,10 @@ public abstract class KernelWriter extends BlockWriter{
 
          boolean alreadyHasFirstArg = !mm.getMethod().isStatic();
 
+         final RuntimeParameterAnnotationsEntry parameterAnnotations = 
+        		 	mm.getMethod().getAttributePool().getRuntimeVisibleParameterAnnotationsEntry();
          final LocalVariableTableEntry<LocalVariableInfo> lvte = mm.getLocalVariableTableEntry();
+         int localVariableIndex = 0;
          for (final LocalVariableInfo lvi : lvte) {
             if ((lvi.getStart() == 0) && ((lvi.getVariableIndex() != 0) || mm.getMethod().isStatic())) { // full scope but skip this
                final String descriptor = lvi.getVariableDescriptor();
@@ -636,13 +640,36 @@ public abstract class KernelWriter extends BlockWriter{
                   write(", ");
                }
 
-               if (descriptor.startsWith("[") && !lvi.getVariableName().endsWith(PRIVATE_SUFFIX)) {
-                  write(" __global ");
+               if (descriptor.startsWith("[")) {
+                  boolean isPrivate = false;
+                  boolean isLocal = false;
+                  if(lvi.getVariableName().endsWith(PRIVATE_SUFFIX)) {
+                     isPrivate = true;
+                  } else if (lvi.getVariableName().endsWith(Kernel.LOCAL_SUFFIX)) {
+                     isLocal = true;
+                  } else if (parameterAnnotations != null) {
+                     ParameterInfo paramInfo = parameterAnnotations.getPool().get(localVariableIndex);
+                     List<ParameterInfo.AnnotationInfo> paramAnnotations = paramInfo.getAnnotations();
+                     for (ParameterInfo.AnnotationInfo annotation : paramAnnotations) {
+                        if (annotation.getTypeDescriptor().equals(LOCAL_ANNOTATION_NAME)) {
+                            isLocal = true;
+                            break;
+                        }
+                     }
+                  }
+                  
+	           	   if (isLocal) {
+	        		   write(" __local "); 
+	        	   } else if (!isPrivate) {
+	        		   write(" __global ");
+	        	   }
                }
-
+               
                write(convertType(descriptor, true, false));
                write(lvi.getVariableName());
                alreadyHasFirstArg = true;
+               
+               localVariableIndex++;
             }
          }
          write(")");

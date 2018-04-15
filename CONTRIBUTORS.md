@@ -21,6 +21,7 @@
 * AMD Corporation
 * Dmitriy Shabanov <shabanovd@gmail.com>
 * Toon Baeyens <toon.baeyens@gmail.com>
+* Luis Mendes <luis.p.mendes@gmail.com>
 
 # Details
 
@@ -40,3 +41,4 @@ Below are some of the specific details of various contributions.
 * lgalluci for his fix for issue #121 (incorrect toString for 3D ranges) July 6th 2013
 * George Vinokhodov submited a fix for a bug regarding forward references.
 * Dmitriy Shabanov submited PR for inline array feature.
+* Luis Mendes submited PR to support passing functions arguments containing Local arrays - issue #79
