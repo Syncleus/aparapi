@@ -45,6 +45,7 @@ This particular repository only represents the core Java library. There are seve
 * [Aparapi Examples](https://github.com/Syncleus/aparapi-examples) - A collection of Java examples to showcase the Aparapi library and help developers get started.
 * [Aparapi JNI](https://github.com/Syncleus/aparapi-jni) - A java JAR which embeds and loads the native components at runtime. This prevents the need to seperately install the Aparapi Native library.
 * [Aparapi Native](https://github.com/Syncleus/aparapi-native) - The native library component. Without this the Java library can't talk to the graphics card. This is not a java project but rather a C/C++ project.
+* [Aparapi Vagrant](https://github.com/Syncleus/aparapi-vagrant) - A vagrant environment for compiling aparapi native libraries for linux, both x86 an x64.
 
 ## Prerequisites
 
