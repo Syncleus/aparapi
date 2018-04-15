@@ -79,6 +79,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntBinaryOperator;
 import java.util.logging.Logger;
 
 import com.aparapi.device.Device;
@@ -2307,6 +2309,110 @@ public abstract class Kernel implements Cloneable {
       }
    }
 
+   @OpenCLMapping(atomic32 = true)
+   protected final int atomicGet(AtomicInteger p) {
+	   return p.get();
+   }
+   
+   @OpenCLMapping(atomic32 = true)
+   protected final void atomicSet(AtomicInteger p, int val) {
+	   p.set(val);
+   }
+
+   @OpenCLMapping(atomic32 = true, mapTo = "atomic_add")
+   protected final int atomicAdd(AtomicInteger p, int val) {
+	   return p.getAndAdd(val);
+   }
+
+   @OpenCLMapping(atomic32 = true, mapTo = "atomic_sub")
+   protected final int atomicSub(AtomicInteger p, int val) {
+	   return p.getAndAdd(-val);
+   }
+
+   @OpenCLMapping(atomic32 = true, mapTo = "atomic_xchg")
+   protected final int atomicXchg(AtomicInteger p, int newVal) {
+	   return p.getAndSet(newVal);
+   }
+
+   @OpenCLMapping(atomic32 = true, mapTo = "atomic_inc")
+   protected final int atomicInc(AtomicInteger p) {
+	   return p.getAndIncrement();
+   }
+   
+   @OpenCLMapping(atomic32 = true, mapTo = "atomic_dec")
+   protected final int atomicDec(AtomicInteger p) {
+	   return p.getAndDecrement();
+   }
+   
+   @OpenCLMapping(atomic32 = true, mapTo = "atomic_cmpxchg")
+   protected final int atomicCmpXchg(AtomicInteger p, int expectedVal, int newVal) {
+	   if (p.compareAndSet(expectedVal, newVal)) {
+		   return expectedVal;
+	   } else {
+		   return p.get();
+	   }
+   }
+ 
+   private static final IntBinaryOperator minOperator = new IntBinaryOperator() {
+	  @Override
+	  public int applyAsInt(int oldVal, int newVal) {
+	  	 return Math.min(oldVal, newVal);
+	  }
+   };
+
+   @OpenCLMapping(atomic32 = true, mapTo = "atomic_min")
+   protected final int atomicMin(AtomicInteger p, int val) {
+	   return p.getAndAccumulate(val, minOperator);
+   }
+
+   private static final IntBinaryOperator maxOperator = new IntBinaryOperator() {
+	  @Override
+	  public int applyAsInt(int oldVal, int newVal) {
+		 return Math.max(oldVal, newVal);
+	  }	   
+   };
+
+   @OpenCLMapping(atomic32 = true, mapTo = "atomic_max")
+   protected final int atomicMax(AtomicInteger p, int val) {
+	   return p.getAndAccumulate(val, maxOperator);
+   }
+
+   private static final IntBinaryOperator andOperator = new IntBinaryOperator() {
+	  @Override
+	  public int applyAsInt(int oldVal, int newVal) {
+		 return oldVal & newVal;
+	  }	   
+   };
+
+   @OpenCLMapping(atomic32 = true, mapTo = "atomic_and")
+   protected final int atomicAnd(AtomicInteger p, int val) {
+	   return p.getAndAccumulate(val, andOperator);
+   }
+
+   private static final IntBinaryOperator orOperator = new IntBinaryOperator() {
+	  @Override
+	  public int applyAsInt(int oldVal, int newVal) {
+		 return oldVal | newVal;
+	  }	   
+   };
+   
+   @OpenCLMapping(atomic32 = true, mapTo = "atomic_or")
+   protected final int atomicOr(AtomicInteger p, int val) {
+	   return p.getAndAccumulate(val, orOperator);
+   }
+
+   private static final IntBinaryOperator xorOperator = new IntBinaryOperator() {
+	  @Override
+	  public int applyAsInt(int oldVal, int newVal) {
+		 return oldVal ^ newVal;
+	  }	   
+   };
+   
+   @OpenCLMapping(atomic32 = true, mapTo = "atomic_xor")
+   protected final int atomicXor(AtomicInteger p, int val) {
+	   return p.getAndAccumulate(val, xorOperator);
+   }
+
    /**
     * Wait for all kernels in the current group to rendezvous at this call before continuing execution.
     *
@@ -2661,8 +2767,13 @@ public abstract class Kernel implements Cloneable {
       final String strRetClass = retClass.toString();
       final String mapping = typeToLetterMap.get(strRetClass);
       // System.out.println("strRetClass = <" + strRetClass + ">, mapping = " + mapping);
-      if (mapping == null)
-         return "[" + retClass.getName() + ";";
+      if (mapping == null) {
+	  if (retClass.isArray()) {
+             return "[" + retClass.getName() + ";";
+    	  } else {
+             return "L" + retClass.getName() + ";";
+    	  }
+      }
       return mapping;
    }
 
@@ -3348,7 +3459,7 @@ public abstract class Kernel implements Cloneable {
 
    private static String toSignature(MethodReferenceEntry methodReferenceEntry) {
       NameAndTypeEntry nameAndTypeEntry = methodReferenceEntry.getNameAndTypeEntry();
-      return nameAndTypeEntry.getNameUTF8Entry().getUTF8() + nameAndTypeEntry.getDescriptorUTF8Entry().getUTF8();
+      return nameAndTypeEntry.getNameUTF8Entry().getUTF8().replace('/', '.') + nameAndTypeEntry.getDescriptorUTF8Entry().getUTF8().replace('/', '.');
    }
 
    private static final ValueCache<Class<?>, Map<String, String>, RuntimeException> mappedMethodNamesCache = cacheProperty(new ValueComputer<Class<?>, Map<String, String>>() {

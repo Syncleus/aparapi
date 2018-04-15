@@ -70,6 +70,7 @@ import java.nio.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.ForkJoinPool.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.*;
 
 /**
@@ -943,9 +944,146 @@ public class KernelRunner extends KernelRunnerJNI{
    private void restoreObjects() throws AparapiException {
       for (int i = 0; i < argc; i++) {
          final KernelArg arg = args[i];
-         if ((arg.getType() & ARG_OBJ_ARRAY_STRUCT) != 0) {
+         if (arg.getField().getType() == AtomicInteger[].class) {
+            extractAtomicIntegerConversionBuffer(arg); 
+         } else if ((arg.getType() & ARG_OBJ_ARRAY_STRUCT) != 0) {
             extractOopConversionBuffer(arg);
          }
+      }
+   }
+
+   private boolean prepareAtomicIntegerConversionBuffer(KernelArg arg) throws AparapiException {
+      usesOopConversion = true;
+      final Class<?> arrayClass = arg.getField().getType();
+      ClassModel c = null;
+      boolean didReallocate = false;
+
+      if (arg.getObjArrayElementModel() == null) {
+         final String tmp = arrayClass.getName().substring(2).replace('/', '.');
+         final String arrayClassInDotForm = tmp.substring(0, tmp.length() - 1);
+
+         if (logger.isLoggable(Level.FINE)) {
+            logger.fine("looking for type = " + arrayClassInDotForm);
+         }
+
+         // get ClassModel of obj array from entrypt.objectArrayFieldsClasses
+         c = entryPoint.getObjectArrayFieldsClasses().get(arrayClassInDotForm);
+         arg.setObjArrayElementModel(c);
+      } else {
+         c = arg.getObjArrayElementModel();
+      }
+      assert c != null : "should find class for elements " + arrayClass.getName();
+
+      if (logger.isLoggable(Level.FINEST)) {
+         logger.finest("Syncing obj array type = " + arrayClass + " cvtd= " + c.getClassWeAreModelling().getName());
+      }
+
+      int objArraySize = 0;
+      Object newRef = null;
+      try {
+         newRef = arg.getField().get(kernel);
+         objArraySize = Array.getLength(newRef);
+      } catch (final IllegalAccessException e) {
+         throw new AparapiException(e);
+      }
+
+      assert (newRef != null) && (objArraySize != 0) : "no data";
+
+      final int totalStructSize = Integer.BYTES;
+      final int totalBufferSize = objArraySize * totalStructSize;
+
+      // allocate ByteBuffer if first time or array changed
+      if ((arg.getObjArrayBuffer() == null) || (newRef != arg.getArray())) {
+         final ByteBuffer structBuffer = ByteBuffer.allocate(totalBufferSize);
+         arg.setObjArrayByteBuffer(structBuffer.order(ByteOrder.LITTLE_ENDIAN));
+         arg.setObjArrayBuffer(arg.getObjArrayByteBuffer().array());
+         didReallocate = true;
+         if (logger.isLoggable(Level.FINEST)) {
+            logger.finest("objArraySize = " + objArraySize + " totalStructSize= " + totalStructSize + " totalBufferSize="
+                  + totalBufferSize);
+         }
+      } else {
+         arg.getObjArrayByteBuffer().clear();
+      }
+
+      AtomicInteger[] atomic = (AtomicInteger[])newRef;
+      
+      // copy the fields that the JNI uses
+      arg.setJavaArray(arg.getObjArrayBuffer());
+      arg.setNumElements(objArraySize);
+      arg.setSizeInBytes(totalBufferSize);
+
+      int sizeWritten = 0;
+      for (int j = 0; j < objArraySize; j++) {
+         arg.getObjArrayByteBuffer().putInt(atomic[j].get());
+         sizeWritten += Integer.BYTES;
+
+         // add padding here if needed
+         if (logger.isLoggable(Level.FINEST)) {
+            logger.finest("sizeWritten = " + sizeWritten + " totalStructSize= " + totalStructSize);
+         }
+      }
+      assert sizeWritten <= totalBufferSize : "wrote too much into buffer";
+
+      while (sizeWritten < totalBufferSize) {
+         if (logger.isLoggable(Level.FINEST)) {
+            logger.finest(arg.getName() + " struct pad byte = " + sizeWritten + " totalStructSize= " + totalStructSize);
+          }
+          arg.getObjArrayByteBuffer().put((byte) -1);
+          sizeWritten++;
+      }
+
+      assert arg.getObjArrayByteBuffer().arrayOffset() == 0 : "should be zero";
+
+      return didReallocate;	
+   }
+
+   private void extractAtomicIntegerConversionBuffer(KernelArg arg) throws AparapiException {
+      final Class<?> arrayClass = arg.getField().getType();
+      final ClassModel c = arg.getObjArrayElementModel();
+      assert c != null : "should find class for elements: " + arrayClass.getName();
+      assert arg.getArray() != null : "array is null";
+
+      if (logger.isLoggable(Level.FINEST)) {
+         logger.finest("Syncing field:" + arg.getName() + ", bb=" + arg.getObjArrayByteBuffer() + ", type = " + arrayClass);
+      }
+
+      int objArraySize = 0;
+      try {
+         objArraySize = Array.getLength(arg.getField().get(kernel));
+      } catch (final IllegalAccessException e) {
+         throw new AparapiException(e);
+      }
+
+      assert objArraySize > 0 : "should be > 0";
+
+      final int totalStructSize = Integer.BYTES;
+      final int totalBufferSize = objArraySize * totalStructSize;
+      // assert arg.objArrayBuffer.length == totalBufferSize : "size should match";
+
+      arg.getObjArrayByteBuffer().rewind();
+      
+      AtomicInteger[] atomics = (AtomicInteger[])arg.getArray();
+
+      int sizeWritten = 0;
+      for (int j = 0; j < objArraySize; j++) {
+         // read int value from buffer and store into obj in the array
+         final int x = arg.getObjArrayByteBuffer().getInt();
+         atomics[j].set(x);
+         
+         sizeWritten += Integer.BYTES;
+
+         // add padding here if needed
+         if (logger.isLoggable(Level.FINEST)) {
+            logger.finest("sizeWritten = " + sizeWritten + " totalStructSize= " + totalStructSize);
+         }
+      }
+      assert sizeWritten <= totalBufferSize : "wrote too much into buffer";
+
+      while (sizeWritten < totalBufferSize) {
+         // skip over pad bytes
+         arg.getObjArrayByteBuffer().get();
+         sizeWritten++;
       }
    }
 
@@ -976,7 +1114,9 @@ public class KernelRunner extends KernelRunnerJNI{
                   }
                }
 
-               if ((arg.getType() & ARG_OBJ_ARRAY_STRUCT) != 0) {
+               if (arg.getField().getType() == AtomicInteger[].class) {
+            	  prepareAtomicIntegerConversionBuffer(arg);
+               } else if ((arg.getType() & ARG_OBJ_ARRAY_STRUCT) != 0) {
                   prepareOopConversionBuffer(arg);
                } else {
                   // set up JNI fields for normal arrays
