@@ -15,20 +15,20 @@
  */
 package com.aparapi.runtime;
 
-import static org.junit.Assert.assertArrayEquals;
-
 import com.aparapi.Kernel;
 import com.aparapi.Range;
 import com.aparapi.device.Device;
 import com.aparapi.device.OpenCLDevice;
 import com.aparapi.internal.kernel.KernelManager;
+
+import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-public class LocalArrayArgsIssue79Test {
-    static OpenCLDevice openCLDevice = null;
+public class Issue79LocalArrayArgsTest {
+    private static OpenCLDevice openCLDevice = null;
     private static final int SIZE = 32;
     private int[] targetArray;
 
@@ -42,28 +42,36 @@ public class LocalArrayArgsIssue79Test {
     @Test
     public void test() {
         final LocalArrayArgsKernel kernel = new LocalArrayArgsKernel();
-        final Range range = openCLDevice.createRange(SIZE, SIZE);
-        targetArray = new int[SIZE];
-        kernel.setExplicit(false);
-        kernel.setArray(targetArray);
-        kernel.execute(range);
-        validate();
+        try {
+	        final Range range = openCLDevice.createRange(SIZE, SIZE);
+	        targetArray = new int[SIZE];
+	        kernel.setExplicit(false);
+	        kernel.setArray(targetArray);
+	        kernel.execute(range);
+	        assertTrue(validate());
+        } finally {
+        	kernel.dispose();
+        }
     }
     
     @Test
     public void testExplicit() {
         final LocalArrayArgsKernel kernel = new LocalArrayArgsKernel();
-        final Range range = openCLDevice.createRange(SIZE, SIZE);
-        targetArray = new int[SIZE];
-        kernel.setExplicit(true);
-        kernel.setArray(targetArray);
-        kernel.put(targetArray);
-        kernel.execute(range);
-        kernel.get(targetArray);
-        validate();
+        try {
+	        final Range range = openCLDevice.createRange(SIZE, SIZE);
+	        targetArray = new int[SIZE];
+	        kernel.setExplicit(true);
+	        kernel.setArray(targetArray);
+	        kernel.put(targetArray);
+	        kernel.execute(range);
+	        kernel.get(targetArray);
+	        assertTrue(validate());
+        } finally {
+        	kernel.dispose();
+        }
     }
 
-    void validate() {
+    private boolean validate() {
         int[] expected = new int[SIZE];
         for (int threadId = 0; threadId < SIZE; threadId++) {
             for (int i = 0; i < SIZE; i++) {
@@ -73,6 +81,8 @@ public class LocalArrayArgsIssue79Test {
         }
         
         assertArrayEquals("targetArray", expected, targetArray);
+        
+        return true;
     }
 
     public static class LocalArrayArgsKernel extends Kernel {
@@ -84,9 +94,6 @@ public class LocalArrayArgsIssue79Test {
         @PrivateMemorySpace(SIZE)
         private int[] other_$private$ = new int[SIZE];
 
-        public LocalArrayArgsKernel() {
-        }
-        
         @NoCL
         public void setArray(int[] target) {
             resultArray = target;

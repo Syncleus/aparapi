@@ -17,7 +17,6 @@
 package com.aparapi.runtime;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import java.util.Arrays;
@@ -35,15 +34,13 @@ import com.aparapi.device.JavaDevice;
 import com.aparapi.device.OpenCLDevice;
 import com.aparapi.internal.kernel.KernelManager;
 
+/**
+ * Base tests for validation of the correctness of the atomics function computations, both on Java and on OpenCL.
+ * @author CodeRasurae
+ */
 public class Issue81AtomicsSupportTest {
 
     private static OpenCLDevice openCLDevice = null;
-
-    private static final int SIZE = 100;
-	private final static int LOCK_IDX = 3;
-	private final static int MAX_VAL_IDX = 0;
-	private final static int MAX_POS_LEFT_IDX = 1;
-	private final static int MAX_POS_RIGHT_IDX = 2;
 
     private class CLKernelManager extends KernelManager {
     	@Override
@@ -71,140 +68,9 @@ public class Issue81AtomicsSupportTest {
         assumeTrue (device != null && device instanceof OpenCLDevice);
         openCLDevice = (OpenCLDevice) device;
     }
-
-    @Test
-    public void issue81OpenCLExplicit() {
-    	final int in[] = new int[SIZE];
-    	
-    	final int[] out = new int[3];
-    	for (int i = 0; i < SIZE/2; i++) {
-    		in[i] = i;
-    		in[i + SIZE/2] = SIZE - i;
-    	}
-    	in[10] = SIZE;
-    	
-        final AtomicKernel kernel = new AtomicKernel(in, out);
-        try {
-	        final Range range = openCLDevice.createRange(SIZE/2, SIZE/2);
-	        kernel.setExplicit(true);
-	        kernel.put(in);
-	        kernel.execute(range);
-	        kernel.get(out);
-        } finally {
-        	kernel.dispose();
-        }
-
-        assertEquals("Max value doesn't match", 100, out[0]);
-        assertTrue("Left max found at unexpected position: " + out[MAX_POS_LEFT_IDX], out[MAX_POS_LEFT_IDX] == 10 || out[MAX_POS_LEFT_IDX] == 50);
-        assertTrue("Right max found at unexpected position: " + out[MAX_POS_RIGHT_IDX], out[MAX_POS_RIGHT_IDX] == 100-10 || out[MAX_POS_RIGHT_IDX] == 100-50);
-    }
-    
-    @Test
-    public void issue81OpenCL() {
-    	final int in[] = new int[SIZE];
-    	
-    	final int[] out = new int[3];
-    	for (int i = 0; i < SIZE/2; i++) {
-    		in[i] = i;
-    		in[i + SIZE/2] = SIZE - i;
-    	}
-    	in[10] = SIZE;
-    	
-        final AtomicKernel kernel = new AtomicKernel(in, out);
-        try {
-	        final Range range = openCLDevice.createRange(SIZE/2, SIZE/2);
-	        kernel.execute(range);
-        } finally {
-        	kernel.dispose();
-        }
-
-        assertEquals("Max value doesn't match", 100, out[0]);
-        assertTrue("Left max found at unexpected position: " + out[MAX_POS_LEFT_IDX], out[MAX_POS_LEFT_IDX] == 10 || out[MAX_POS_LEFT_IDX] == 50);
-        assertTrue("Right max found at unexpected position: " + out[MAX_POS_RIGHT_IDX], out[MAX_POS_RIGHT_IDX] == 100-10 || out[MAX_POS_RIGHT_IDX] == 100-50);
-    }
-    
-    @Test
-    public void issue81JTP() {
-    	KernelManager.setKernelManager(new JTPKernelManager());
-    	Device device = KernelManager.instance().bestDevice();
-    	final int in[] = new int[SIZE];
-    	
-    	final int[] out = new int[3];
-    	for (int i = 0; i < SIZE/2; i++) {
-    		in[i] = i;
-    		in[i + SIZE/2] = SIZE - i;
-    	}
-    	in[10] = SIZE;
-    	
-        final AtomicKernel kernel = new AtomicKernel(in, out);
-        try {
-	        final Range range = device.createRange(SIZE/2, SIZE/2);
-	        kernel.execute(range);
-        } finally {
-        	kernel.dispose();
-        }
-        assertEquals("Max value doesn't match", 100, out[0]);
-        assertTrue("Left max found at unexpected position: " + out[MAX_POS_LEFT_IDX], out[MAX_POS_LEFT_IDX] == 10 || out[MAX_POS_LEFT_IDX] == 50);
-        assertTrue("Right max found at unexpected position: " + out[MAX_POS_RIGHT_IDX], out[MAX_POS_RIGHT_IDX] == 100-10 || out[MAX_POS_RIGHT_IDX] == 100-50);
-    }
-    
-    @Test
-    public void issue81BOpenCL() {
-    	final int in[] = new int[SIZE];
-    	final AtomicInteger[] out = new AtomicInteger[3];
-    	for (int i = 0; i < out.length; i++) {
-    		out[i] = new AtomicInteger(0);
-    	}
-    	for (int i = 0; i < SIZE/2; i++) {
-    		in[i] = i;
-    		in[i + SIZE/2] = SIZE - i;
-    	}
-    	in[10] = SIZE;
-    	
-        final AtomicBKernel kernel = new AtomicBKernel(in, out);
-        try {
-	        final Range range = openCLDevice.createRange(SIZE/2, SIZE/2);
-	        kernel.execute(range);
-        } finally {
-        	kernel.dispose();
-        }
-
-        assertEquals("Max value doesn't match", 100, out[0].get());
-        assertTrue("Left max found at unexpected position: " + out[MAX_POS_LEFT_IDX], out[MAX_POS_LEFT_IDX].get() == 10 || out[MAX_POS_LEFT_IDX].get() == 50);
-        assertTrue("Right max found at unexpected position: " + out[MAX_POS_RIGHT_IDX], out[MAX_POS_RIGHT_IDX].get() == 100-10 || out[MAX_POS_RIGHT_IDX].get() == 100-50);
-    }
-        
-    @Test
-    public void issue81BJTP() {
-    	KernelManager.setKernelManager(new JTPKernelManager());
-    	Device device = KernelManager.instance().bestDevice();
-    	final int in[] = new int[SIZE];
-    	final AtomicInteger[] out = new AtomicInteger[3];
-    	for (int i = 0; i < out.length; i++) {
-    		out[i] = new AtomicInteger(0);
-    	}
-    	for (int i = 0; i < SIZE/2; i++) {
-    		in[i] = i;
-    		in[i + SIZE/2] = SIZE - i;
-    	}
-    	in[10] = SIZE;
-    	
-        final AtomicBKernel kernel = new AtomicBKernel(in, out);
-        try {
-	        final Range range = device.createRange(SIZE/2, SIZE/2);
-	        kernel.execute(range);
-        } finally {
-        	kernel.dispose();
-        }
-        assertEquals("Max value doesn't match", 100, out[0].get());
-        assertTrue("Left max found at unexpected position: " + out[MAX_POS_LEFT_IDX], out[MAX_POS_LEFT_IDX].get() == 10 || out[MAX_POS_LEFT_IDX].get() == 50);
-        assertTrue("Right max found at unexpected position: " + out[MAX_POS_RIGHT_IDX], out[MAX_POS_RIGHT_IDX].get() == 100-10 || out[MAX_POS_RIGHT_IDX].get() == 100-50);
-    }    
-
     
     @Test
     public void issue81AtomicAddOpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 10;
@@ -226,7 +92,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicAddOpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 10;
@@ -272,6 +137,9 @@ public class Issue81AtomicsSupportTest {
     private static final class AtomicAdd extends Kernel {
     	private int in[];
     	private int out[];
+
+    	@Local
+    	private AtomicInteger atomicValues[];
     	
     	public AtomicAdd(int[] in, int out[]) {
     		this.in = in;
@@ -280,9 +148,6 @@ public class Issue81AtomicsSupportTest {
     		atomicValues[0] = new AtomicInteger(0);
     		atomicValues[1] = new AtomicInteger(0);
     	}
-
-    	@Local
-    	private AtomicInteger atomicValues[];
     	
 		@Override
 		public void run() {
@@ -294,7 +159,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicSubOpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 10;
@@ -316,7 +180,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicSubOpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 10;
@@ -362,7 +225,10 @@ public class Issue81AtomicsSupportTest {
     private static final class AtomicSub extends Kernel {
     	private int in[];
     	private int out[];
-    	
+
+    	@Local
+    	private AtomicInteger atomicValues[];
+
     	public AtomicSub(int[] in, int out[]) {
     		this.in = in;
     		this.out = out;
@@ -370,9 +236,6 @@ public class Issue81AtomicsSupportTest {
     		atomicValues[0] = new AtomicInteger(0);
     		atomicValues[1] = new AtomicInteger(0);
     	}
-
-    	@Local
-    	private AtomicInteger atomicValues[];
     	
 		@Override
 		public void run() {
@@ -385,7 +248,7 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicXchgOpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
+    	
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 10;
@@ -407,7 +270,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicXchgOpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 10;
@@ -453,7 +315,10 @@ public class Issue81AtomicsSupportTest {
     private static final class AtomicXchg extends Kernel {
     	private int in[];
     	private int out[];
-    	
+
+    	@Local
+    	private AtomicInteger atomicValues[];
+
     	public AtomicXchg(int[] in, int out[]) {
     		this.in = in;
     		this.out = out;
@@ -461,9 +326,6 @@ public class Issue81AtomicsSupportTest {
     		atomicValues[0] = new AtomicInteger(0);
     		atomicValues[1] = new AtomicInteger(0);
     	}
-
-    	@Local
-    	private AtomicInteger atomicValues[];
     	
 		@Override
 		public void run() {
@@ -476,7 +338,6 @@ public class Issue81AtomicsSupportTest {
     
     @Test
     public void issue81AtomicIncOpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[1];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -497,7 +358,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicIncOpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[1];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -541,6 +401,9 @@ public class Issue81AtomicsSupportTest {
     private static final class AtomicInc extends Kernel {
     	private int in[];
     	private int out[];
+
+    	@Local
+    	private AtomicInteger atomicValues[];
     	
     	public AtomicInc(int[] in, int out[]) {
     		this.in = in;
@@ -549,9 +412,6 @@ public class Issue81AtomicsSupportTest {
     		atomicValues[0] = new AtomicInteger(0);
     		atomicValues[1] = new AtomicInteger(0);
     	}
-
-    	@Local
-    	private AtomicInteger atomicValues[];
     	
 		@Override
 		public void run() {
@@ -564,7 +424,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicDecOpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[1];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -585,7 +444,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicDecOpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[1];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -629,7 +487,10 @@ public class Issue81AtomicsSupportTest {
     private static final class AtomicDec extends Kernel {
     	private int in[];
     	private int out[];
-    	
+
+    	@Local
+    	private AtomicInteger atomicValues[];
+
     	public AtomicDec(int[] in, int out[]) {
     		this.in = in;
     		this.out = out;
@@ -637,9 +498,6 @@ public class Issue81AtomicsSupportTest {
     		atomicValues[0] = new AtomicInteger(0);
     		atomicValues[1] = new AtomicInteger(0);
     	}
-
-    	@Local
-    	private AtomicInteger atomicValues[];
     	
 		@Override
 		public void run() {
@@ -652,7 +510,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicCmpXchg1OpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[3];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -675,7 +532,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicCmpXchg1OpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[3];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -716,7 +572,7 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicCmpXchg2OpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
+    	
     	final int in[] = new int[3];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -739,7 +595,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicCmpXchg2OpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[3];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -788,6 +643,9 @@ public class Issue81AtomicsSupportTest {
     	private int in[];
     	private int out[];
     	
+    	@Local
+    	private AtomicInteger atomicValues[];
+
     	public AtomicCmpXchg(int[] in, int out[]) {
     		this.in = in;
     		this.out = out;
@@ -795,9 +653,6 @@ public class Issue81AtomicsSupportTest {
     		atomicValues[0] = new AtomicInteger(0);
     		atomicValues[1] = new AtomicInteger(0);
     	}
-
-    	@Local
-    	private AtomicInteger atomicValues[];
     	
 		@Override
 		public void run() {
@@ -810,7 +665,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicMin1OpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -832,7 +686,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicMin1OpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -871,7 +724,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicMin2OpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -893,7 +745,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicMin2OpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -939,7 +790,10 @@ public class Issue81AtomicsSupportTest {
     private static final class AtomicMin extends Kernel {
     	private int in[];
     	private int out[];
-    	
+
+    	@Local
+    	private AtomicInteger atomicValues[];
+
     	public AtomicMin(int[] in, int out[]) {
     		this.in = in;
     		this.out = out;
@@ -947,9 +801,6 @@ public class Issue81AtomicsSupportTest {
     		atomicValues[0] = new AtomicInteger(0);
     		atomicValues[1] = new AtomicInteger(0);
     	}
-
-    	@Local
-    	private AtomicInteger atomicValues[];
     	
 		@Override
 		public void run() {
@@ -962,7 +813,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicMax1OpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -984,7 +834,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicMax1OpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -1023,7 +872,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicMax2OpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -1045,7 +893,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicMax2OpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -1091,7 +938,10 @@ public class Issue81AtomicsSupportTest {
     private static final class AtomicMax extends Kernel {
     	private int in[];
     	private int out[];
-    	
+
+    	@Local
+    	private AtomicInteger atomicValues[];
+
     	public AtomicMax(int[] in, int out[]) {
     		this.in = in;
     		this.out = out;
@@ -1099,9 +949,6 @@ public class Issue81AtomicsSupportTest {
     		atomicValues[0] = new AtomicInteger(0);
     		atomicValues[1] = new AtomicInteger(0);
     	}
-
-    	@Local
-    	private AtomicInteger atomicValues[];
     	
 		@Override
 		public void run() {
@@ -1114,7 +961,7 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicAndOpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
+    	
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 0xf1;
@@ -1136,7 +983,7 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicAndOpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
+    	
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 0xf1;
@@ -1182,7 +1029,10 @@ public class Issue81AtomicsSupportTest {
     private static final class AtomicAnd extends Kernel {
     	private int in[];
     	private int out[];
-    	
+
+    	@Local
+    	private AtomicInteger atomicValues[];
+
     	public AtomicAnd(int[] in, int out[]) {
     		this.in = in;
     		this.out = out;
@@ -1190,9 +1040,6 @@ public class Issue81AtomicsSupportTest {
     		atomicValues[0] = new AtomicInteger(0);
     		atomicValues[1] = new AtomicInteger(0);
     	}
-
-    	@Local
-    	private AtomicInteger atomicValues[];
     	
 		@Override
 		public void run() {
@@ -1205,7 +1052,7 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicOrOpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
+    	
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 0x80;
@@ -1227,7 +1074,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicOrOpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 0x80;
@@ -1273,7 +1119,10 @@ public class Issue81AtomicsSupportTest {
     private static final class AtomicOr extends Kernel {
     	private int in[];
     	private int out[];
-    	
+
+    	@Local
+    	private AtomicInteger atomicValues[];
+
     	public AtomicOr(int[] in, int out[]) {
     		this.in = in;
     		this.out = out;
@@ -1281,9 +1130,6 @@ public class Issue81AtomicsSupportTest {
     		atomicValues[0] = new AtomicInteger(0);
     		atomicValues[1] = new AtomicInteger(0);
     	}
-
-    	@Local
-    	private AtomicInteger atomicValues[];
     	
 		@Override
 		public void run() {
@@ -1296,7 +1142,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicXorOpenCLExplicit() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 0xf1;
@@ -1318,7 +1163,6 @@ public class Issue81AtomicsSupportTest {
 
     @Test
     public void issue81AtomicXorOpenCL() {
-    	Device openCLDevice = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 0xf1;
@@ -1364,7 +1208,10 @@ public class Issue81AtomicsSupportTest {
     private static final class AtomicXor extends Kernel {
     	private int in[];
     	private int out[];
-    	
+
+    	@Local
+    	private AtomicInteger atomicValues[];
+
     	public AtomicXor(int[] in, int out[]) {
     		this.in = in;
     		this.out = out;
@@ -1372,9 +1219,6 @@ public class Issue81AtomicsSupportTest {
     		atomicValues[0] = new AtomicInteger(0);
     		atomicValues[1] = new AtomicInteger(0);
     	}
-
-    	@Local
-    	private AtomicInteger atomicValues[];
     	
 		@Override
 		public void run() {
@@ -1382,132 +1226,5 @@ public class Issue81AtomicsSupportTest {
 			out[0] = atomicXor(atomicValues[0], in[1]);
 			out[1] = atomicGet(atomicValues[0]);
 		}
-    }
-
-
-    
-    private static final class AtomicKernel extends Kernel {    	
-    	private int in[];
-    	private int out[];
-    	
-    	@Local
-    	private final AtomicInteger maxs[] = new AtomicInteger[4];
-    	    	
-    	public AtomicKernel(int[] in, int[] out) {
-    		this.in = in;
-    		this.out = out;
-    		for (int idx = 0; idx < 4; idx++) {
-    			maxs[idx] = new AtomicInteger(0);
-    		}
-    	}
-    	
-        @Override
-        public void run() {
-        	final int localId = getLocalId(0);
-        	
-        	//Ensure that initial values are initialized... this must be enforced for OpenCL, otherwise they may contain
-        	//random values, as for Java, it is not needed, as they are already initialized in AtomicInteger constructor.
-        	//Since this is Aparapi, it must be initialized on both platforms. 
-        	if (localId == 0) {
-	        	atomicSet(maxs[MAX_VAL_IDX], 0);
-	        	atomicSet(maxs[LOCK_IDX], 0);
-        	}
-        	//Ensure all threads start with the initialized atomic max value and lock.
-        	localBarrier();
-        	
-        	final int offset = localId * 2;
-    		int localMaxVal = 0;
-    		int localMaxPosFromLeft = 0;
-    		int localMaxPosFromRight = 0;
-    		for (int i = 0; i < 2; i++) {
-    			localMaxVal = max(in[offset + i], localMaxVal);
-    			if (localMaxVal == in[offset + i]) {
-    				localMaxPosFromLeft = offset + i;
-    				localMaxPosFromRight = SIZE - (offset + i);
-    			}
-    		}
-    		
-        	atomicMax(maxs[MAX_VAL_IDX], localMaxVal);
-    		//Ensure all threads have updated the atomic maxs[MAX_VAL_IDX]
-        	localBarrier();
-        	
-        	int maxValue = atomicGet(maxs[MAX_VAL_IDX]);
-        	if (maxValue == localMaxVal) {
-        		//Only the threads that have the max value will reach this point, however the max value, may
-        		//occur at multiple indices of the input array.
-        		if (atomicXchg(maxs[LOCK_IDX], 0xff) == 0) {
-        			//Only one of the threads with the max value will get here, thus ensuring consistent update of
-        			//maxPosFromRight and maxPosFromLeft.
-        			atomicSet(maxs[MAX_POS_LEFT_IDX], localMaxPosFromLeft);
-        			atomicSet(maxs[MAX_POS_RIGHT_IDX], localMaxPosFromRight);
-        			out[MAX_VAL_IDX] = maxValue;
-        			out[MAX_POS_LEFT_IDX] = atomicGet(maxs[MAX_POS_LEFT_IDX]);
-        			out[MAX_POS_RIGHT_IDX] = localMaxPosFromRight;
-        		}
-        	}
-        }
-    }
-    
-    private static final class AtomicBKernel extends Kernel {    	
-    	private int in[];
-    	private AtomicInteger out[];
-    	
-    	@Local
-    	private final AtomicInteger maxs[] = new AtomicInteger[4];
-    	    	
-    	public AtomicBKernel(int[] in, AtomicInteger[] out) {
-    		this.in = in;
-    		this.out = out;
-    		for (int idx = 0; idx < 4; idx++) {
-    			maxs[idx] = new AtomicInteger(0);
-    		}
-    	}
-    	
-        @Override
-        public void run() {
-        	final int localId = getLocalId(0);
-        	
-        	//Ensure that initial values are initialized... this must be enforced for OpenCL, otherwise they may contain
-        	//random values, as for Java, it is not needed, as they are already initialized in AtomicInteger constructor.
-        	//Since this is Aparapi, it must be initialized on both platforms. 
-        	if (localId == 0) {
-	        	atomicSet(maxs[MAX_VAL_IDX], 0);
-	        	atomicSet(maxs[LOCK_IDX], 0);
-        	}
-        	//Ensure all threads start with the initialized atomic max value and lock.
-        	localBarrier();
-        	
-        	final int offset = localId * 2;
-    		int localMaxVal = 0;
-    		int localMaxPosFromLeft = 0;
-    		int localMaxPosFromRight = 0;
-    		for (int i = 0; i < 2; i++) {
-    			localMaxVal = max(in[offset + i], localMaxVal);
-    			if (localMaxVal == in[offset + i]) {
-    				localMaxPosFromLeft = offset + i;
-    				localMaxPosFromRight = SIZE - (offset + i);
-    			}
-    		}
-    		
-        	atomicMax(maxs[MAX_VAL_IDX], localMaxVal);
-    		//Ensure all threads have updated the atomic maxs[MAX_VAL_IDX]
-        	localBarrier();
-        	
-        	int maxValue = atomicGet(maxs[MAX_VAL_IDX]);
-        	if (maxValue == localMaxVal) {
-        		//Only the threads that have the max value will reach this point, however the max value, may
-        		//occur at multiple indices of the input array.
-        		if (atomicXchg(maxs[LOCK_IDX], 0xff) == 0) {
-        			//Only one of the threads with the max value will get here, thus ensuring consistent update of
-        			//maxPosFromRight and maxPosFromLeft.
-        			atomicSet(maxs[MAX_POS_LEFT_IDX], localMaxPosFromLeft);
-        			atomicSet(maxs[MAX_POS_RIGHT_IDX], localMaxPosFromRight);
-        			atomicSet(out[MAX_VAL_IDX], maxValue);
-        			atomicSet(out[MAX_POS_LEFT_IDX], atomicGet(maxs[MAX_POS_LEFT_IDX]));
-        			atomicSet(out[MAX_POS_RIGHT_IDX], localMaxPosFromRight);
-        		}
-        	}
-        }
-    }
-
+    }    
 }

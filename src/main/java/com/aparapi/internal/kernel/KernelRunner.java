@@ -693,6 +693,64 @@ public class KernelRunner extends KernelRunnerJNI{
    private boolean usesOopConversion = false;
 
    /**
+    * Helper method to retrieve the class model from a kernel argument. 
+    * @param arg the kernel argument
+    * @param arrayClass the array Java class for the argument 
+    * @return the Aparapi ClassModel instance.
+    */
+   private ClassModel getClassModelFromArg(KernelArg arg, final Class<?> arrayClass) {
+	  ClassModel c = null;
+      if (arg.getObjArrayElementModel() == null) {
+          final String tmp = arrayClass.getName().substring(2).replace('/', '.');
+          final String arrayClassInDotForm = tmp.substring(0, tmp.length() - 1);
+
+          if (logger.isLoggable(Level.FINE)) {
+             logger.fine("looking for type = " + arrayClassInDotForm);
+          }
+
+          // get ClassModel of obj array from entrypt.objectArrayFieldsClasses
+          c = entryPoint.getObjectArrayFieldsClasses().get(arrayClassInDotForm);
+          arg.setObjArrayElementModel(c);
+       } else {
+          c = arg.getObjArrayElementModel();
+       }
+       assert c != null : "should find class for elements " + arrayClass.getName();
+       
+       return c;
+   }
+   
+   /**
+    * Helper method that manages the memory allocation for storing the kernel argument data,
+    * so that the data can be exchanged between the host and the OpenCL device.  
+    * @param arg the kernel argument
+    * @param newRef the actual Java data instance
+    * @param objArraySize the number of elements in the Java array
+    * @param totalStructSize  the size of each target array element
+    * @param totalBufferSize the total buffer size including memory alignment
+    * @return <ul><li>true, if internal buffer had to be allocated or reallocated holding the data</li>
+    * <li>false, if buffer didn't change and is already allocated</li></ul>
+    */
+   public boolean allocateArrayBufferIfFirstTimeOrArrayChanged(KernelArg arg, Object newRef, 
+		   			final int objArraySize, final int totalStructSize, final int totalBufferSize) {
+	   boolean didReallocate = false;
+	   
+	   if ((arg.getObjArrayBuffer() == null) || (newRef != arg.getArray())) {
+	      final ByteBuffer structBuffer = ByteBuffer.allocate(totalBufferSize);
+	      arg.setObjArrayByteBuffer(structBuffer.order(ByteOrder.LITTLE_ENDIAN));
+	      arg.setObjArrayBuffer(arg.getObjArrayByteBuffer().array());
+	      didReallocate = true;
+	      if (logger.isLoggable(Level.FINEST)) {
+	         logger.finest("objArraySize = " + objArraySize + " totalStructSize= " + totalStructSize + " totalBufferSize="
+	               + totalBufferSize);
+	      }
+	   } else {
+	      arg.getObjArrayByteBuffer().clear();
+	   }
+	   
+	   return didReallocate;
+   }
+
+   /**
     * 
     * @param arg
     * @return
@@ -701,24 +759,7 @@ public class KernelRunner extends KernelRunnerJNI{
    private boolean prepareOopConversionBuffer(KernelArg arg) throws AparapiException {
       usesOopConversion = true;
       final Class<?> arrayClass = arg.getField().getType();
-      ClassModel c = null;
-      boolean didReallocate = false;
-
-      if (arg.getObjArrayElementModel() == null) {
-         final String tmp = arrayClass.getName().substring(2).replace('/', '.');
-         final String arrayClassInDotForm = tmp.substring(0, tmp.length() - 1);
-
-         if (logger.isLoggable(Level.FINE)) {
-            logger.fine("looking for type = " + arrayClassInDotForm);
-         }
-
-         // get ClassModel of obj array from entrypt.objectArrayFieldsClasses
-         c = entryPoint.getObjectArrayFieldsClasses().get(arrayClassInDotForm);
-         arg.setObjArrayElementModel(c);
-      } else {
-         c = arg.getObjArrayElementModel();
-      }
-      assert c != null : "should find class for elements " + arrayClass.getName();
+      ClassModel c = getClassModelFromArg(arg, arrayClass);
 
       final int arrayBaseOffset = UnsafeWrapper.arrayBaseOffset(arrayClass);
       final int arrayScale = UnsafeWrapper.arrayIndexScale(arrayClass);
@@ -743,18 +784,7 @@ public class KernelRunner extends KernelRunnerJNI{
       final int totalBufferSize = objArraySize * totalStructSize;
 
       // allocate ByteBuffer if first time or array changed
-      if ((arg.getObjArrayBuffer() == null) || (newRef != arg.getArray())) {
-         final ByteBuffer structBuffer = ByteBuffer.allocate(totalBufferSize);
-         arg.setObjArrayByteBuffer(structBuffer.order(ByteOrder.LITTLE_ENDIAN));
-         arg.setObjArrayBuffer(arg.getObjArrayByteBuffer().array());
-         didReallocate = true;
-         if (logger.isLoggable(Level.FINEST)) {
-            logger.finest("objArraySize = " + objArraySize + " totalStructSize= " + totalStructSize + " totalBufferSize="
-                  + totalBufferSize);
-         }
-      } else {
-         arg.getObjArrayByteBuffer().clear();
-      }
+      boolean didReallocate = allocateArrayBufferIfFirstTimeOrArrayChanged(arg, newRef, objArraySize, totalStructSize, totalBufferSize);
 
       // copy the fields that the JNI uses
       arg.setJavaArray(arg.getObjArrayBuffer());
@@ -951,28 +981,12 @@ public class KernelRunner extends KernelRunnerJNI{
          }
       }
    }
-
+   
    private boolean prepareAtomicIntegerConversionBuffer(KernelArg arg) throws AparapiException {
       usesOopConversion = true;
       final Class<?> arrayClass = arg.getField().getType();
-      ClassModel c = null;
-      boolean didReallocate = false;
+      ClassModel c = getClassModelFromArg(arg, arrayClass);
 
-      if (arg.getObjArrayElementModel() == null) {
-         final String tmp = arrayClass.getName().substring(2).replace('/', '.');
-         final String arrayClassInDotForm = tmp.substring(0, tmp.length() - 1);
-
-         if (logger.isLoggable(Level.FINE)) {
-            logger.fine("looking for type = " + arrayClassInDotForm);
-         }
-
-         // get ClassModel of obj array from entrypt.objectArrayFieldsClasses
-         c = entryPoint.getObjectArrayFieldsClasses().get(arrayClassInDotForm);
-         arg.setObjArrayElementModel(c);
-      } else {
-         c = arg.getObjArrayElementModel();
-      }
-      assert c != null : "should find class for elements " + arrayClass.getName();
 
       if (logger.isLoggable(Level.FINEST)) {
          logger.finest("Syncing obj array type = " + arrayClass + " cvtd= " + c.getClassWeAreModelling().getName());
@@ -993,18 +1007,7 @@ public class KernelRunner extends KernelRunnerJNI{
       final int totalBufferSize = objArraySize * totalStructSize;
 
       // allocate ByteBuffer if first time or array changed
-      if ((arg.getObjArrayBuffer() == null) || (newRef != arg.getArray())) {
-         final ByteBuffer structBuffer = ByteBuffer.allocate(totalBufferSize);
-         arg.setObjArrayByteBuffer(structBuffer.order(ByteOrder.LITTLE_ENDIAN));
-         arg.setObjArrayBuffer(arg.getObjArrayByteBuffer().array());
-         didReallocate = true;
-         if (logger.isLoggable(Level.FINEST)) {
-            logger.finest("objArraySize = " + objArraySize + " totalStructSize= " + totalStructSize + " totalBufferSize="
-                  + totalBufferSize);
-         }
-      } else {
-         arg.getObjArrayByteBuffer().clear();
-      }
+      boolean didReallocate = allocateArrayBufferIfFirstTimeOrArrayChanged(arg, newRef, objArraySize, totalStructSize, totalBufferSize);
 
       AtomicInteger[] atomic = (AtomicInteger[])newRef;
       
