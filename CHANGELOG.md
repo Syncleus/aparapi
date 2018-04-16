@@ -1,8 +1,8 @@
 # Aparapi Changelog
 
 ## 1.6.0
-
 * Add support for Local arguments in kernel functions
+* Add full support for OpenCL 1.2 atomic operations on arrays of integers.
 * Parent pom no longer points to a snapshot.
 
 ## 1.5.0

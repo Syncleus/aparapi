@@ -2769,7 +2769,12 @@ public class ClassModel {
    public void parse(Class<?> _class) throws ClassParseException {
 
       clazz = _class;
-      parse(_class.getClassLoader(), _class.getName());
+      //It is needed to load AtomicInteger class and Should also fix Issue #6 - NPE while getting Math.class
+      ClassLoader loader = _class.getClassLoader();
+      if (loader == null) {
+    	  loader = ClassLoader.getSystemClassLoader().getParent();
+      }
+      parse(loader, _class.getName());
    }
 
    /**

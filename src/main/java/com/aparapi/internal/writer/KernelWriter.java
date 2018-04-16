@@ -64,6 +64,7 @@ import com.aparapi.internal.model.ClassModel.AttributePool.RuntimeAnnotationsEnt
 import com.aparapi.internal.model.ClassModel.AttributePool.RuntimeParameterAnnotationsEntry.ParameterInfo;
 import com.aparapi.internal.model.ClassModel.*;
 import com.aparapi.internal.model.ClassModel.ConstantPool.*;
+import com.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry.Arg;
 
 import java.util.*;
 
@@ -193,6 +194,9 @@ public abstract class KernelWriter extends BlockWriter{
          return isLocal ? (cvtLongArrayToLong) : (cvtLongArrayToLongStar);
       } else if (_typeDesc.equals("[S") || _typeDesc.equals("short[]")) {
          return isLocal ? (cvtShortArrayToShort) : (cvtShortArrayToShortStar);
+      } else if ("[Ljava/util/concurrent/atomic/AtomicInteger;".equals(_typeDesc) ||
+    		  "[Ljava.util.concurrent.atomic.AtomicInteger;".equals(_typeDesc)) {
+    	 return (cvtIntArrayToIntStar);
       }
       // if we get this far, we haven't matched anything yet
       if (useClassModel) {
@@ -291,6 +295,12 @@ public abstract class KernelWriter extends BlockWriter{
             if (((intrinsicMapping == null) && (_methodCall instanceof VirtualMethodCall) && (!isIntrinsic)) || (arg != 0)) {
                write(", ");
             }
+
+            Arg methodArg = _methodEntry.getArgs()[arg];
+            if (!methodArg.isArray() && "Ljava/util/concurrent/atomic/AtomicInteger;".equals(methodArg.getType())) {
+            	write("&");
+            }
+ 
             writeInstruction(_methodCall.getArg(arg));
          }
          write(")");
@@ -383,7 +393,10 @@ public abstract class KernelWriter extends BlockWriter{
 
          // If it is a converted array of objects, emit the struct param
          String className = null;
-         if (signature.startsWith("L")) {
+	 if (signature.equals("Ljava/util/concurrent/atomic/AtomicInteger;")) {
+            argLine.append("int");
+            thisStructLine.append("int");
+         } else if (signature.startsWith("L")) {
             // Turn Lcom/codegen/javalabs/opencl/demo/DummyOOA; into com_amd_javalabs_opencl_demo_DummyOOA for example
             className = (signature.substring(1, signature.length() - 1)).replace('/', '_');
             // if (logger.isLoggable(Level.FINE)) {
@@ -497,6 +510,12 @@ public abstract class KernelWriter extends BlockWriter{
       }
 
       if (usesAtomics) {
+         write("#define atomicGet(p) (*p)");
+         newLine();
+         
+         write("#define atomicSet(p, val) (*p=val)");
+         newLine();
+
          write("int atomicAdd(__global int *_arr, int _index, int _delta){");
          in();
          {

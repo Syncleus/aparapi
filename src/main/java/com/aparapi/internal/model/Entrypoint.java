@@ -63,6 +63,7 @@ import com.aparapi.internal.util.*;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.*;
 
 public class Entrypoint implements Cloneable {
@@ -174,7 +175,7 @@ public class Entrypoint implements Cloneable {
       try {
          field = _clazz.getDeclaredField(_name);
          final Class<?> type = field.getType();
-         if (type.isPrimitive() || type.isArray()) {
+         if (type.isPrimitive() || type.isArray() || type.equals(AtomicInteger.class)) {
             return field;
          }
          if (field.getAnnotation(Kernel.NoCL.class) != null) {
@@ -608,7 +609,7 @@ public class Entrypoint implements Cloneable {
                   if (arrayFieldModel != null) {
                      final Class<?> memberClass = arrayFieldModel.getClassWeAreModelling();
                      final int modifiers = memberClass.getModifiers();
-                     if (!Modifier.isFinal(modifiers)) {
+                     if (memberClass != AtomicInteger.class && !Modifier.isFinal(modifiers)) {
                         throw new ClassParseException(ClassParseException.TYPE.ACCESSEDOBJECTNONFINAL);
                      }
 
