@@ -3,6 +3,7 @@
 ## 1.6.0
 
 * Add support for Local arguments in kernel functions
+* Parent pom no longer points to a snapshot.
 
 ## 1.5.0
 
