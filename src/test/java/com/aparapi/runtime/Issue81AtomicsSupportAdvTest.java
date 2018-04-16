@@ -251,18 +251,16 @@ public class Issue81AtomicsSupportAdvTest {
         	localBarrier();
         	
         	int maxValue = atomicGet(maxs[MAX_VAL_IDX]);
-        	if (maxValue == localMaxVal) {
-        		//Only the threads that have the max value will reach this point, however the max value, may
-        		//occur at multiple indices of the input array.
-        		if (atomicXchg(maxs[LOCK_IDX], 0xff) == 0) {
-        			//Only one of the threads with the max value will get here, thus ensuring consistent update of
-        			//maxPosFromRight and maxPosFromLeft.
-        			atomicSet(maxs[MAX_POS_LEFT_IDX], localMaxPosFromLeft);
-        			atomicSet(maxs[MAX_POS_RIGHT_IDX], localMaxPosFromRight);
-        			out[MAX_VAL_IDX] = maxValue;
-        			out[MAX_POS_LEFT_IDX] = atomicGet(maxs[MAX_POS_LEFT_IDX]);
-        			out[MAX_POS_RIGHT_IDX] = localMaxPosFromRight;
-        		}
+    		//Only the threads that have the max value will reach this point, however the max value, may
+    		//occur at multiple indices of the input array.
+        	if (maxValue == localMaxVal && atomicXchg(maxs[LOCK_IDX], 0xff) == 0) {
+    			//Only one of the threads with the max value will get here, thus ensuring consistent update of
+    			//maxPosFromRight and maxPosFromLeft.
+    			atomicSet(maxs[MAX_POS_LEFT_IDX], localMaxPosFromLeft);
+    			atomicSet(maxs[MAX_POS_RIGHT_IDX], localMaxPosFromRight);
+    			out[MAX_VAL_IDX] = maxValue;
+    			out[MAX_POS_LEFT_IDX] = atomicGet(maxs[MAX_POS_LEFT_IDX]);
+    			out[MAX_POS_RIGHT_IDX] = localMaxPosFromRight;
         	}
         }
     }
@@ -313,18 +311,16 @@ public class Issue81AtomicsSupportAdvTest {
         	localBarrier();
         	
         	int maxValue = atomicGet(maxs[MAX_VAL_IDX]);
-        	if (maxValue == localMaxVal) {
-        		//Only the threads that have the max value will reach this point, however the max value, may
-        		//occur at multiple indices of the input array.
-        		if (atomicXchg(maxs[LOCK_IDX], 0xff) == 0) {
-        			//Only one of the threads with the max value will get here, thus ensuring consistent update of
-        			//maxPosFromRight and maxPosFromLeft.
-        			atomicSet(maxs[MAX_POS_LEFT_IDX], localMaxPosFromLeft);
-        			atomicSet(maxs[MAX_POS_RIGHT_IDX], localMaxPosFromRight);
-        			atomicSet(out[MAX_VAL_IDX], maxValue);
-        			atomicSet(out[MAX_POS_LEFT_IDX], atomicGet(maxs[MAX_POS_LEFT_IDX]));
-        			atomicSet(out[MAX_POS_RIGHT_IDX], localMaxPosFromRight);
-        		}
+    		//Only the threads that have the max value will reach this point, however the max value, may
+    		//occur at multiple indices of the input array.
+        	if (maxValue == localMaxVal && atomicXchg(maxs[LOCK_IDX], 0xff) == 0) {
+    			//Only one of the threads with the max value will get here, thus ensuring consistent update of
+    			//maxPosFromRight and maxPosFromLeft.
+    			atomicSet(maxs[MAX_POS_LEFT_IDX], localMaxPosFromLeft);
+    			atomicSet(maxs[MAX_POS_RIGHT_IDX], localMaxPosFromRight);
+    			atomicSet(out[MAX_VAL_IDX], maxValue);
+    			atomicSet(out[MAX_POS_LEFT_IDX], atomicGet(maxs[MAX_POS_LEFT_IDX]));
+    			atomicSet(out[MAX_POS_RIGHT_IDX], localMaxPosFromRight);
         	}
         }
     }
