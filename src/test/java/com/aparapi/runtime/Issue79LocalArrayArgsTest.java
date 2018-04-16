@@ -15,13 +15,13 @@
  */
 package com.aparapi.runtime;
 
-import static org.junit.Assert.assertArrayEquals;
-
 import com.aparapi.Kernel;
 import com.aparapi.Range;
 import com.aparapi.device.Device;
 import com.aparapi.device.OpenCLDevice;
 import com.aparapi.internal.kernel.KernelManager;
+
+import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 
 import org.junit.Before;
@@ -48,6 +48,7 @@ public class Issue79LocalArrayArgsTest {
 	        kernel.setExplicit(false);
 	        kernel.setArray(targetArray);
 	        kernel.execute(range);
+	        assertTrue(validate());
         } finally {
         	kernel.dispose();
         }
@@ -64,13 +65,13 @@ public class Issue79LocalArrayArgsTest {
 	        kernel.put(targetArray);
 	        kernel.execute(range);
 	        kernel.get(targetArray);
-	        validate();
+	        assertTrue(validate());
         } finally {
         	kernel.dispose();
         }
     }
 
-    void validate() {
+    private boolean validate() {
         int[] expected = new int[SIZE];
         for (int threadId = 0; threadId < SIZE; threadId++) {
             for (int i = 0; i < SIZE; i++) {
@@ -80,6 +81,8 @@ public class Issue79LocalArrayArgsTest {
         }
         
         assertArrayEquals("targetArray", expected, targetArray);
+        
+        return true;
     }
 
     public static class LocalArrayArgsKernel extends Kernel {
@@ -91,9 +94,6 @@ public class Issue79LocalArrayArgsTest {
         @PrivateMemorySpace(SIZE)
         private int[] other_$private$ = new int[SIZE];
 
-        public LocalArrayArgsKernel() {
-        }
-        
         @NoCL
         public void setArray(int[] target) {
             resultArray = target;
