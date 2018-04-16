@@ -393,7 +393,7 @@ public abstract class KernelWriter extends BlockWriter{
 
          // If it is a converted array of objects, emit the struct param
          String className = null;
-	 if (signature.equals("Ljava/util/concurrent/atomic/AtomicInteger;")) {
+         if ("Ljava/util/concurrent/atomic/AtomicInteger;".equals(signature)) {
             argLine.append("int");
             thisStructLine.append("int");
          } else if (signature.startsWith("L")) {

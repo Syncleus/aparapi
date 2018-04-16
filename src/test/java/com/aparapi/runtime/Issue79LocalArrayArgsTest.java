@@ -27,8 +27,8 @@ import static org.junit.Assume.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class LocalArrayArgsIssue79Test {
-    static OpenCLDevice openCLDevice = null;
+public class Issue79LocalArrayArgsTest {
+    private static OpenCLDevice openCLDevice = null;
     private static final int SIZE = 32;
     private int[] targetArray;
 
@@ -42,25 +42,32 @@ public class LocalArrayArgsIssue79Test {
     @Test
     public void test() {
         final LocalArrayArgsKernel kernel = new LocalArrayArgsKernel();
-        final Range range = openCLDevice.createRange(SIZE, SIZE);
-        targetArray = new int[SIZE];
-        kernel.setExplicit(false);
-        kernel.setArray(targetArray);
-        kernel.execute(range);
-        validate();
+        try {
+	        final Range range = openCLDevice.createRange(SIZE, SIZE);
+	        targetArray = new int[SIZE];
+	        kernel.setExplicit(false);
+	        kernel.setArray(targetArray);
+	        kernel.execute(range);
+        } finally {
+        	kernel.dispose();
+        }
     }
     
     @Test
     public void testExplicit() {
         final LocalArrayArgsKernel kernel = new LocalArrayArgsKernel();
-        final Range range = openCLDevice.createRange(SIZE, SIZE);
-        targetArray = new int[SIZE];
-        kernel.setExplicit(true);
-        kernel.setArray(targetArray);
-        kernel.put(targetArray);
-        kernel.execute(range);
-        kernel.get(targetArray);
-        validate();
+        try {
+	        final Range range = openCLDevice.createRange(SIZE, SIZE);
+	        targetArray = new int[SIZE];
+	        kernel.setExplicit(true);
+	        kernel.setArray(targetArray);
+	        kernel.put(targetArray);
+	        kernel.execute(range);
+	        kernel.get(targetArray);
+	        validate();
+        } finally {
+        	kernel.dispose();
+        }
     }
 
     void validate() {
