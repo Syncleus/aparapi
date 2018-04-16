@@ -159,6 +159,8 @@ public class Config extends ConfigJNI{
 
    public static final boolean enableARRAY = !Boolean.getBoolean(propPkgName + ".disable.ARRAY");
 
+   public static final boolean enableVECTOR = !Boolean.getBoolean(propPkgName + ".disable.VECTOR");
+
    public static final boolean enableNEW = Boolean.getBoolean(propPkgName + ".enable.NEW");
 
    public static final boolean enableATHROW = Boolean.getBoolean(propPkgName + ".enable.ATHROW");

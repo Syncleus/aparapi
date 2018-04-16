@@ -329,6 +329,14 @@ public abstract class Kernel implements Cloneable {
       boolean atomic64() default false;
    }
 
+    /**
+     * This annotation is for internal use only
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface OpenCLMappingPattern {
+        String mapTo() default "";
+    }
+
    public abstract class Entry {
       public abstract void run();
 
@@ -2662,7 +2670,7 @@ public abstract class Kernel implements Cloneable {
       final String mapping = typeToLetterMap.get(strRetClass);
       // System.out.println("strRetClass = <" + strRetClass + ">, mapping = " + mapping);
       if (mapping == null)
-         return "[" + retClass.getName() + ";";
+         return "L" + retClass.getName() + ";";
       return mapping;
    }
 
@@ -2736,6 +2744,38 @@ public abstract class Kernel implements Cloneable {
          }
       }
       return (isMapped);
+   }
+
+   public static String getMethodMappedPattern(MethodReferenceEntry _methodReferenceEntry) {
+       final String name = _methodReferenceEntry.getClassEntry().getNameUTF8Entry().getUTF8().replace("/",".");
+
+       final Class<?> currentClass;
+       try {
+           currentClass = Class.forName(name);
+       } catch (ClassNotFoundException e) {
+           return null;
+       }
+
+       String methodSignature = toSignature(_methodReferenceEntry).replace("/", ".");
+
+       //System.out.println("? - "+methodSignature);
+
+       for (final Method method : currentClass.getMethods()) {
+           if (method.isAnnotationPresent(OpenCLMappingPattern.class)) {
+
+               //System.out.println(toSignature(method));
+
+               if (methodSignature.equals(toSignature(method))) {
+                   final OpenCLMappingPattern annotation = method.getAnnotation(OpenCLMappingPattern.class);
+                   final String mapTo = annotation.mapTo();
+                   if (!mapTo.equals("")) {
+                       return mapTo;
+                   }
+               }
+           }
+       }
+
+       return null;
    }
 
    public static boolean usesAtomic32(MethodReferenceEntry methodReferenceEntry) {

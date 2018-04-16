@@ -236,13 +236,63 @@ public abstract class KernelRunnerJNI{
 
    /**
     * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>static</code> field (array or primitive).
-    * 
-    * 
+    *
+    *
     * @see com.aparapi.internal.annotation.UsedByJNICode
-    * 
+    *
     * @author gfrost
     */
    @UsedByJNICode protected static final int ARG_STATIC = 1 << 22;
+
+   /**
+    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>vector2</code> field (array or primitive).
+    *
+    *
+    * @see com.aparapi.internal.annotation.UsedByJNICode
+    *
+    * @author gfrost
+    */
+   @UsedByJNICode protected static final int ARG_VECTOR_2 = 1 << 25;
+
+   /**
+    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>vector3</code> field (array or primitive).
+    *
+    *
+    * @see com.aparapi.internal.annotation.UsedByJNICode
+    *
+    * @author gfrost
+    */
+   @UsedByJNICode protected static final int ARG_VECTOR_3 = 1 << 26;
+
+   /**
+    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>vector4</code> field (array or primitive).
+    *
+    *
+    * @see com.aparapi.internal.annotation.UsedByJNICode
+    *
+    * @author gfrost
+    */
+   @UsedByJNICode protected static final int ARG_VECTOR_4 = 1 << 27;
+
+   /**
+    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>vector8</code> field (array or primitive).
+    *
+    *
+    * @see com.aparapi.internal.annotation.UsedByJNICode
+    *
+    * @author gfrost
+    */
+   @UsedByJNICode protected static final int ARG_VECTOR_8 = 1 << 28;
+
+   /**
+    * This 'bit' indicates that a particular <code>KernelArg</code> represents a <code>vector16</code> field (array or primitive).
+    *
+    *
+    * @see com.aparapi.internal.annotation.UsedByJNICode
+    *
+    * @author gfrost
+    */
+   @UsedByJNICode protected static final int ARG_VECTOR_16 = 1 << 29;
 
    /**
     * This 'bit' indicates that we wish to enable profiling from the JNI code.

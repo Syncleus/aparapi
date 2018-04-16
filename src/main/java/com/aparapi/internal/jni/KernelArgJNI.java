@@ -46,6 +46,11 @@ public abstract class KernelArgJNI{
     * @see KernelRunnerJNI#ARG_EXPLICIT
     * @see KernelRunnerJNI#ARG_EXPLICIT_WRITE
     * @see KernelRunnerJNI#ARG_OBJ_ARRAY_STRUCT
+    * @see KernelRunnerJNI#ARG_VECTOR_2
+    * @see KernelRunnerJNI#ARG_VECTOR_3
+    * @see KernelRunnerJNI#ARG_VECTOR_4
+    * @see KernelRunnerJNI#ARG_VECTOR_8
+    * @see KernelRunnerJNI#ARG_VECTOR_16
     */
    @UsedByJNICode protected int type;
 
