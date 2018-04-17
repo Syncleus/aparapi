@@ -160,6 +160,8 @@ public abstract class KernelWriter extends BlockWriter{
       javaToCLIdentifierMap.put("localBarrier()V", "barrier(CLK_LOCAL_MEM_FENCE)");
 
       javaToCLIdentifierMap.put("globalBarrier()V", "barrier(CLK_GLOBAL_MEM_FENCE)");
+      
+      javaToCLIdentifierMap.put("localGlobalBarrier()V", "barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE)");
    }
 
    /**

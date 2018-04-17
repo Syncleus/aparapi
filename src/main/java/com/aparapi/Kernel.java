@@ -2414,7 +2414,17 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
-    * Wait for all kernels in the current group to rendezvous at this call before continuing execution.
+    * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.<br/> 
+    * It will also enforce memory ordering, such that modifications made by each thread in the work-group, to the memory,
+    * before entering into this barrier call will be visible by all threads leaving the barrier.
+    * <br/>
+    * <br/><b>Note1: </b>In OpenCL will execute as barrier(CLK_LOCAL_MEM_FENCE), which will have a different behavior than in Java,
+    * because it will only guarantee visibility of modifications made to <b>local memory space</b> to all threads leaving the barrier.
+    * <br/>
+    * <br/><b>Note2: </b>In OpenCL it is required that all threads must enter the same if blocks and must iterate
+    * the same number of times in all loops (for, while, ...).
+    * <br/>
+    * <br/><b>Note3: </b> Java version is identical to localBarrier(), globalBarrier() and localGlobalBarrier()
     *
     * @annotion Experimental
     */
@@ -2425,20 +2435,50 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
-    * Wait for all kernels in the current group to rendezvous at this call before continuing execution.
-    *
-    *
-    * Java version is identical to localBarrier()
+    * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.<br/> 
+    * It will also enforce memory ordering, such that modifications made by each thread in the work-group, to the memory,
+    * before entering into this barrier call will be visible by all threads leaving the barrier.
+    * <br/> 
+    * <br/><b>Note1: </b>In OpenCL will execute as barrier(CLK_GLOBAL_MEM_FENCE), which will have a different behavior than in Java,
+    * because it will only guarantee visibility of modifications made to <b>global memory space</b> to all threads,
+    * in the work group, leaving the barrier.
+    * <br/>
+    * <br/><b>Note2: </b>In OpenCL it is required that all threads must enter the same if blocks and must iterate
+    * the same number of times in all loops (for, while, ...).
+    * <br/>
+    * <br/><b>Note3: </b> Java version is identical to localBarrier(), globalBarrier() and localGlobalBarrier()
     *
     * @annotion Experimental
-    * @deprecated
     */
    @OpenCLDelegate
    @Experimental
-   @Deprecated
-   protected final void globalBarrier() throws DeprecatedException {
-      throw new DeprecatedException(
-            "Kernel.globalBarrier() has been deprecated. It was based an incorrect understanding of OpenCL functionality.");
+   protected final void globalBarrier() {
+	   kernelState.awaitOnLocalBarrier();
+   }
+
+   /**
+    * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.<br/> 
+    * It will also enforce memory ordering, such that modifications made by each thread in the work-group, to the memory,
+    * before entering into this barrier call will be visible by all threads leaving the barrier.
+    * <br/> 
+    * <br/><b>Note1: </b>When in doubt, use this barrier instead of localBarrier() or globalBarrier(), despite the possible
+    * performance loss.
+    * <br/>
+    * <br/><b>Note2: </b>In OpenCL will execute as barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE), which will 
+    * have the same behavior than in Java, because it will guarantee the visibility of modifications made to 
+    * <b>any of the memory spaces</b> to all threads, in the work group, leaving the barrier.
+    * <br/>
+    * <br/><b>Note3: </b>In OpenCL it is required that all threads must enter the same if blocks and must iterate
+    * the same number of times in all loops (for, while, ...).
+    * <br/>
+    * <br/><b>Note4: </b> Java version is identical to localBarrier(), globalBarrier() and localGlobalBarrier()
+    *
+    * @annotion Experimental
+    */
+   @OpenCLDelegate
+   @Experimental
+   protected final void localGlobalBarrier() {
+	   kernelState.awaitOnLocalBarrier();
    }
 
    @OpenCLMapping(mapTo = "hypot")
