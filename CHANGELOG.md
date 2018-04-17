@@ -1,6 +1,7 @@
 # Aparapi Changelog
 
-## 1.6.1
+## 1.7.0
+* Fully support OpenCL 1.2 barrier() - localBarrier(),  globalBarrier() and localGlobalBarrier()
 
 ## 1.6.0
 

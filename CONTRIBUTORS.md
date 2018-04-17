@@ -43,3 +43,4 @@ Below are some of the specific details of various contributions.
 * Dmitriy Shabanov submited PR for inline array feature.
 * Luis Mendes submited PR to support passing functions arguments containing Local arrays - issue #79
 * Luis Mendes submited PR for issue #81 - Full OpenCL 1.2 atomics support with AtomicInteger 
+* Luis Mendes submited PR for issue #84 - Fully support OpenCL 1.2 barrier() - localBarrier(),  globalBarrier() and localGlobalBarrier()
