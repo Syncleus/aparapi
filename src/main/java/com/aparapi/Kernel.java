@@ -2418,7 +2418,7 @@ public abstract class Kernel implements Cloneable {
     * It will also enforce memory ordering, such that modifications made by each thread in the work-group, to the memory,
     * before entering into this barrier call will be visible by all threads leaving the barrier.
     * <br/>
-    * <br/><b>Note1: </b>In OpenCL will execute as barrier(CLK_LOCAL_MEM_FENCE), which will have a different behavior than in Java,
+    * <br/><b>Note1: </b>In OpenCL will execute as barrier(CLK_LOCAL_MEM_FENCE), which will have a different behaviour than in Java,
     * because it will only guarantee visibility of modifications made to <b>local memory space</b> to all threads leaving the barrier.
     * <br/>
     * <br/><b>Note2: </b>In OpenCL it is required that all threads must enter the same if blocks and must iterate
@@ -2439,7 +2439,7 @@ public abstract class Kernel implements Cloneable {
     * It will also enforce memory ordering, such that modifications made by each thread in the work-group, to the memory,
     * before entering into this barrier call will be visible by all threads leaving the barrier.
     * <br/> 
-    * <br/><b>Note1: </b>In OpenCL will execute as barrier(CLK_GLOBAL_MEM_FENCE), which will have a different behavior than in Java,
+    * <br/><b>Note1: </b>In OpenCL will execute as barrier(CLK_GLOBAL_MEM_FENCE), which will have a different behaviour; than in Java,
     * because it will only guarantee visibility of modifications made to <b>global memory space</b> to all threads,
     * in the work group, leaving the barrier.
     * <br/>
@@ -2465,7 +2465,7 @@ public abstract class Kernel implements Cloneable {
     * performance loss.
     * <br/>
     * <br/><b>Note2: </b>In OpenCL will execute as barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE), which will 
-    * have the same behavior than in Java, because it will guarantee the visibility of modifications made to 
+    * have the same behaviour than in Java, because it will guarantee the visibility of modifications made to 
     * <b>any of the memory spaces</b> to all threads, in the work group, leaving the barrier.
     * <br/>
     * <br/><b>Note3: </b>In OpenCL it is required that all threads must enter the same if blocks and must iterate
