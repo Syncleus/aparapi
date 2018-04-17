@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package pt.ist.ceris.vipivist.tests;
+package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
 import com.aparapi.Range;
