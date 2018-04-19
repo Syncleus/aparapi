@@ -49,7 +49,8 @@ public class MultiplePassesMemoryConsumptionTest {
                 Assert.assertEquals("Wrong", i, globalArray[i]);
             }
         }
-        Assert.assertTrue("Too much memory consumed", (baseFree - testFree) < 1000);
+        long extraMemory = baseFree - testFree;
+        Assert.assertTrue("Too much memory consumed: " + extraMemory, extraMemory < 1000);
     }
 
 }
