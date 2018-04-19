@@ -27,7 +27,7 @@ import static org.junit.Assume.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class Issue79LocalArrayArgsTest {
+public class LocalArrayArgsTest {
     private static OpenCLDevice openCLDevice = null;
     private static final int SIZE = 32;
     private int[] targetArray;

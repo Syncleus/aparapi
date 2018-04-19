@@ -38,7 +38,7 @@ import com.aparapi.internal.kernel.KernelManager;
  * Base tests for validation of the correctness of the atomics function computations, both on Java and on OpenCL.
  * @author CodeRasurae
  */
-public class Issue81AtomicsSupportTest {
+public class AtomicsSupportTest {
 
     private static OpenCLDevice openCLDevice = null;
 

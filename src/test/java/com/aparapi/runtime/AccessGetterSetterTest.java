@@ -21,7 +21,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 
 
-public class Issue102Test {
+public class AccessGetterSetterTest {
 
     @Test
     public void test() {

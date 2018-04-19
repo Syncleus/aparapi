@@ -20,7 +20,7 @@ import com.aparapi.Range;
 import com.aparapi.device.Device;
 import org.junit.Test;
 
-public class Test12x4_4x2 {
+public class Matrix12x4_4x2Test {
     @SuppressWarnings("deprecation")
     @Test
     public void test() {

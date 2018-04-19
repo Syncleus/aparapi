@@ -17,13 +17,15 @@ package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
 import com.aparapi.device.Device;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
-public class UseStaticArrayTest {
+public class StaticArrayAssignmentTest {
     @Test
+    @Ignore("Solution not implemented yet, will pass on cpu but not gpu")
     public void test() {
         UseStaticArrayKernel k = new UseStaticArrayKernel();
         k.test();
@@ -54,9 +56,6 @@ public class UseStaticArrayTest {
             execute(size);
 
             assertArrayEquals("results == fooBar", results, values);
-//      for (int i = 0; i < size; i++) {
-//         assertTrue("results == fooBar", results[i] == values[i]);
-//      }
         }
     }
 }

@@ -28,7 +28,7 @@ import com.aparapi.device.Device;
 import com.aparapi.internal.kernel.KernelManager;
 import com.aparapi.internal.kernel.KernelManagers;
 
-public class Issue55Test {
+public class KernelManagerPreferredDeviceTest {
 	private Kernel testKernel;
 
 	@Before

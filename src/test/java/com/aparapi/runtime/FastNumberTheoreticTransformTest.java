@@ -19,14 +19,14 @@ import com.aparapi.Kernel;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class Issue68Test {
-    @Ignore("Ported over but not working yet")
+public class FastNumberTheoreticTransformTest {
+    @Ignore("No solution found yet")
     @Test
     public void test() {
         final int SQRT_LENGTH = 1024;
         final int LENGTH = SQRT_LENGTH * SQRT_LENGTH;
         final ArrayAccess arrayAccess = new IntMemoryArrayAccess(new int[LENGTH], 0, LENGTH);
-        new Issue68Test().transformColumns(SQRT_LENGTH, SQRT_LENGTH, false, arrayAccess, new int[SQRT_LENGTH], null);
+        new FastNumberTheoreticTransformTest().transformColumns(SQRT_LENGTH, SQRT_LENGTH, false, arrayAccess, new int[SQRT_LENGTH], null);
     }
 
     private void transformColumns(final int length, final int count, final boolean isInverse, final ArrayAccess arrayAccess,

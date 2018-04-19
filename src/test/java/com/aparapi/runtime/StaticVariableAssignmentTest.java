@@ -24,7 +24,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 public class StaticVariableAssignmentTest {
     @Test
-    @Ignore
+    @Ignore("Solution not implemented yet, will pass on cpu but not gpu")
     public void test() {
         Issue103Kernel b = new Issue103Kernel();
         b.test();

@@ -32,7 +32,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-public class Issue84BarrierSupportTest {
+public class BarrierSupportTest {
     private static OpenCLDevice openCLDevice = null;
     private static int SIZE;
     private int[] targetArray;

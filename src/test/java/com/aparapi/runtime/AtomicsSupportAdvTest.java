@@ -39,7 +39,7 @@ import com.aparapi.internal.kernel.KernelManager;
  * Advanced tests for validation of the correctness of the atomics implementation both on Java and on OpenCL.
  * @author CodeRasurae
  */
-public class Issue81AtomicsSupportAdvTest {
+public class AtomicsSupportAdvTest {
 
     private static OpenCLDevice openCLDevice = null;
 
