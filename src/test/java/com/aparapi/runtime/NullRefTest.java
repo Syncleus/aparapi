@@ -19,24 +19,24 @@ import com.aparapi.Kernel;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class UseBooleanTest {
-    @Ignore("Known bug not currently fixed on GPU, works on CPU")
+public class NullRefTest {
+    @Ignore("Known bug, runs on CPU but not GPU.")
     @Test
     public void test() {
-        new UseBooleanTest().executeTest();
+        new NullRefTest().doTest();
     }
 
-    private void executeTest() {
-        final Kernel kernel = new BooleanKernel();
+    private void doTest() {
+        final Kernel kernel = new NullRefKernel();
         kernel.execute(1);
     }
 
-    private class BooleanKernel extends Kernel {
-        private boolean isInverse = true;
+    private class NullRefKernel extends Kernel {
+        private final int[] nullArray = null;
 
         @Override
         public void run() {
-            if (isInverse) {
+            if(nullArray == null) {
                 noop();
             }
         }
