@@ -50,7 +50,6 @@ public class AccessGetterSetterTest {
 
         void validate() {
             for (int i = 0; i < SIZE; i++) {
-                System.out.println(target[i] + " ... " + objects[i].getValue());
                 assertTrue("target == objects", target[i] == objects[i].getValue());
             }
         }
