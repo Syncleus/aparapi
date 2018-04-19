@@ -70,7 +70,7 @@ public class AtomicsSupportTest {
     }
     
     @Test
-    public void issue81AtomicAddOpenCLExplicit() {
+    public void testAtomicAddOpenCLExplicit() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 10;
@@ -91,7 +91,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicAddOpenCL() {
+    public void testAtomicAddOpenCL() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 10;
@@ -109,7 +109,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicAddJTP() {
+    public void testAtomicAddJTP() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
@@ -158,7 +158,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicSubOpenCLExplicit() {
+    public void testAtomicSubOpenCLExplicit() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 10;
@@ -179,7 +179,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicSubOpenCL() {
+    public void testAtomicSubOpenCL() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 10;
@@ -197,7 +197,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicSubJTP() {
+    public void testAtomicSubJTP() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
@@ -247,7 +247,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicXchgOpenCLExplicit() {
+    public void testAtomicXchgOpenCLExplicit() {
     	
     	final int in[] = new int[2];
     	final int[] out = new int[2];
@@ -269,7 +269,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicXchgOpenCL() {
+    public void testAtomicXchgOpenCL() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 10;
@@ -287,7 +287,7 @@ public class AtomicsSupportTest {
     }
     
     @Test
-    public void issue81AtomicXchgJTP() {
+    public void testAtomicXchgJTP() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
@@ -337,7 +337,7 @@ public class AtomicsSupportTest {
     }
     
     @Test
-    public void issue81AtomicIncOpenCLExplicit() {
+    public void testAtomicIncOpenCLExplicit() {
     	final int in[] = new int[1];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -357,7 +357,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicIncOpenCL() {
+    public void testAtomicIncOpenCL() {
     	final int in[] = new int[1];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -374,7 +374,7 @@ public class AtomicsSupportTest {
     }
     
     @Test
-    public void issue81AtomicInc() {
+    public void testAtomicInc() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[1];
@@ -423,7 +423,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicDecOpenCLExplicit() {
+    public void testAtomicDecOpenCLExplicit() {
     	final int in[] = new int[1];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -443,7 +443,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicDecOpenCL() {
+    public void testAtomicDecOpenCL() {
     	final int in[] = new int[1];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -460,7 +460,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicDecJTP() {
+    public void testAtomicDecJTP() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[1];
@@ -509,7 +509,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicCmpXchg1OpenCLExplicit() {
+    public void testAtomicCmpXchg1OpenCLExplicit() {
     	final int in[] = new int[3];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -531,7 +531,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicCmpXchg1OpenCL() {
+    public void testAtomicCmpXchg1OpenCL() {
     	final int in[] = new int[3];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -550,7 +550,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicCmpXchg1JTP() {
+    public void testAtomicCmpXchg1JTP() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[3];
@@ -571,7 +571,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicCmpXchg2OpenCLExplicit() {
+    public void testAtomicCmpXchg2OpenCLExplicit() {
     	
     	final int in[] = new int[3];
     	final int[] out = new int[2];
@@ -594,7 +594,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicCmpXchg2OpenCL() {
+    public void testAtomicCmpXchg2OpenCL() {
     	final int in[] = new int[3];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -613,7 +613,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicCmpXchg2JTP() {
+    public void testAtomicCmpXchg2JTP() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[3];
@@ -664,7 +664,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicMin1OpenCLExplicit() {
+    public void testAtomicMin1OpenCLExplicit() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -685,7 +685,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicMin1OpenCL() {
+    public void testAtomicMin1OpenCL() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -703,7 +703,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicMin1JTP() {
+    public void testAtomicMin1JTP() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
@@ -723,7 +723,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicMin2OpenCLExplicit() {
+    public void testAtomicMin2OpenCLExplicit() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -744,7 +744,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicMin2OpenCL() {
+    public void testAtomicMin2OpenCL() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -762,7 +762,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicMin2JTP() {
+    public void testAtomicMin2JTP() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
@@ -812,7 +812,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicMax1OpenCLExplicit() {
+    public void testAtomicMax1OpenCLExplicit() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -833,7 +833,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicMax1OpenCL() {
+    public void testAtomicMax1OpenCL() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -851,7 +851,7 @@ public class AtomicsSupportTest {
     }
     
     @Test
-    public void issue81AtomicMax1JTP() {
+    public void testAtomicMax1JTP() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
@@ -871,7 +871,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicMax2OpenCLExplicit() {
+    public void testAtomicMax2OpenCLExplicit() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -892,7 +892,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicMax2OpenCL() {
+    public void testAtomicMax2OpenCL() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 50;
@@ -910,7 +910,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicMax2JTP() {
+    public void testAtomicMax2JTP() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
@@ -960,7 +960,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicAndOpenCLExplicit() {
+    public void testAtomicAndOpenCLExplicit() {
     	
     	final int in[] = new int[2];
     	final int[] out = new int[2];
@@ -982,7 +982,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicAndOpenCL() {
+    public void testAtomicAndOpenCL() {
     	
     	final int in[] = new int[2];
     	final int[] out = new int[2];
@@ -1001,7 +1001,7 @@ public class AtomicsSupportTest {
     }
     
     @Test
-    public void issue81AtomicAndJTP() {
+    public void testAtomicAndJTP() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
@@ -1051,7 +1051,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicOrOpenCLExplicit() {
+    public void testAtomicOrOpenCLExplicit() {
     	
     	final int in[] = new int[2];
     	final int[] out = new int[2];
@@ -1073,7 +1073,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicOrOpenCL() {
+    public void testAtomicOrOpenCL() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 0x80;
@@ -1091,7 +1091,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicOrJTP() {
+    public void testAtomicOrJTP() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];
@@ -1141,7 +1141,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicXorOpenCLExplicit() {
+    public void testAtomicXorOpenCLExplicit() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 0xf1;
@@ -1162,7 +1162,7 @@ public class AtomicsSupportTest {
     }
 
     @Test
-    public void issue81AtomicXorOpenCL() {
+    public void testAtomicXorOpenCL() {
     	final int in[] = new int[2];
     	final int[] out = new int[2];
     	in[0] = 0xf1;
@@ -1180,7 +1180,7 @@ public class AtomicsSupportTest {
     }
     
     @Test
-    public void issue81AtomicXorJTP() {
+    public void testAtomicXorJTP() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
     	final int in[] = new int[2];

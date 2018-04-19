@@ -42,7 +42,7 @@ public class BufferTransferTest {
     }
 
     @Test
-    public void inOutOnce() {
+    public void testInOutOnce() {
 
         final int SIZE = 1024;
         final InOutKernel kernel = new InOutKernel();
@@ -63,7 +63,7 @@ public class BufferTransferTest {
     }
 
     @Test
-    public void auto() {
+    public void testAuto() {
 
         final int SIZE = 1024;
         final AddKernel kernel = new AddKernel();
@@ -111,7 +111,7 @@ public class BufferTransferTest {
     }
 
     @Test
-    public void explicit() {
+    public void testExplicit() {
 
         final int SIZE = 1024;
         final AddKernel kernel = new AddKernel();
@@ -171,7 +171,7 @@ public class BufferTransferTest {
     }
 
     @Test
-    public void issue60Explicit() {
+    public void testExplicitSimple() {
 
         TestKernel kernel = new TestKernel();
         kernel.setExplicit(true);
@@ -180,7 +180,7 @@ public class BufferTransferTest {
     }
 
     @Test
-    public void issue60Auto() {
+    public void testAutoSimple() {
         TestKernel kernel = new TestKernel();
         kernel.step();
 
