@@ -27,6 +27,7 @@
 
 Below are some of the specific details of various contributions.
 
+* Jeffrey Phillips Freeman has acted as Lead Developer, daily contributor, and Project Owner since 2016 to present.
 * AMD Corporation for being the founder of the project and contributing most of the code that originally got the project off the ground
 * Witold Bolt provided patch for issue #5. Added and tested Mac OS support. Oct 12th 2011
 * Kenneth Skovhede provided patch for issue #11 (Correcting conversion of Java Nan and Infinity values to OpenCL equiv). Oct 28th 2011
