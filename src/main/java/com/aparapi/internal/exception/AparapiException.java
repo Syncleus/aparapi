@@ -65,7 +65,8 @@ package com.aparapi.internal.exception;
  * @author gfrost
  *
  */
-@SuppressWarnings("serial") public class AparapiException extends Exception{
+@SuppressWarnings("serial")
+public class AparapiException extends Exception{
 
    public AparapiException(String _msg) {
       super(_msg);

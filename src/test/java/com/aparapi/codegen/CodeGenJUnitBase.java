@@ -121,9 +121,8 @@ public class CodeGenJUnitBase {
 
       } catch (AssertionError e) {
          throw e;
-      } catch (Throwable t) {
+      } catch (Exception t) {
          if (_expectedExceptionType == null || !t.getClass().isAssignableFrom(_expectedExceptionType)) {
-            t.printStackTrace();
             throw new AssertionError("Unexpected exception " + t, t);
          }
       }
