@@ -23,10 +23,10 @@ public class UseBooleanTest {
     @Ignore("Known bugm noy currently fixed on GPU, works on CPU")
     @Test
     public void test() {
-        new UseBooleanTest().transformColumns();
+        new UseBooleanTest().executeTest();
     }
 
-    private void transformColumns() {
+    private void executeTest() {
         final Kernel kernel = new BooleanKernel();
         kernel.execute(1);
     }
