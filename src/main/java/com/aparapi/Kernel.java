@@ -442,20 +442,16 @@ public abstract class Kernel implements Cloneable {
          final String executionMode = Config.executionMode;
 
          if (executionMode != null) {
-            try {
-               LinkedHashSet<EXECUTION_MODE> requestedExecutionModes;
-               requestedExecutionModes = EXECUTION_MODE.getExecutionModeFromString(executionMode);
-               logger.fine("requested execution mode =");
-               for (final EXECUTION_MODE mode : requestedExecutionModes) {
-                  logger.fine(" " + mode);
-               }
-               if ((OpenCLLoader.isOpenCLAvailable() && EXECUTION_MODE.anyOpenCL(requestedExecutionModes))
-                     || !EXECUTION_MODE.anyOpenCL(requestedExecutionModes)) {
-                  defaultExecutionModes = requestedExecutionModes;
-               }
-            } catch (final Throwable t) {
-               // we will take the default
-            }
+           LinkedHashSet<EXECUTION_MODE> requestedExecutionModes;
+           requestedExecutionModes = EXECUTION_MODE.getExecutionModeFromString(executionMode);
+           logger.fine("requested execution mode =");
+           for (final EXECUTION_MODE mode : requestedExecutionModes) {
+              logger.fine(" " + mode);
+           }
+           if ((OpenCLLoader.isOpenCLAvailable() && EXECUTION_MODE.anyOpenCL(requestedExecutionModes))
+                 || !EXECUTION_MODE.anyOpenCL(requestedExecutionModes)) {
+              defaultExecutionModes = requestedExecutionModes;
+           }
          }
 
          logger.info("default execution modes = " + defaultExecutionModes);

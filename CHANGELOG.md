@@ -2,6 +2,7 @@
 
 ## 1.7.0
 * Fully support OpenCL 1.2 barrier() - localBarrier(),  globalBarrier() and localGlobalBarrier()
+* Improved exception handling, stack traces no longer double print and Error and other throwables are never caught.
 
 ## 1.6.0
 

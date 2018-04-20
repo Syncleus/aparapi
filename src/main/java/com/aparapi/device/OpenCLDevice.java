@@ -152,7 +152,7 @@ public class OpenCLDevice extends Device{
          disposed = false;
       }
 
-      @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+      @Override public Object invoke(Object proxy, Method method, Object[] args) {
          if (disposed){
             throw new IllegalStateException("bound interface already disposed");
          }
