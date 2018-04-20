@@ -2,6 +2,8 @@
 
 ## 1.7.0
 * Fully support OpenCL 1.2 barrier() - localBarrier(),  globalBarrier() and localGlobalBarrier()
+* Fix issue #62 - SEVERE log messages on Aparapi kernel profiling under multithreading 
+* Provide new interfaces for thread safe kernel profiling (mutiple threads calling same kernel class on same device)
 
 ## 1.6.0
 

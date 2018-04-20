@@ -20,6 +20,8 @@ import com.aparapi.device.*;
 
 import java.text.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.*;
 
 /**
@@ -29,17 +31,22 @@ public class KernelDeviceProfile {
 
    private static Logger logger = Logger.getLogger(Config.getLoggerName());
    private static final double MILLION = 1000 * 1000;
+   private static final long NO_THREAD = -1;
    private static final int TABLE_COLUMN_HEADER_WIDTH = 21;
    private static final int TABLE_COLUMN_COUNT_WIDTH = 8;
    private static final int TABLE_COLUMN_WIDTH;
    private static String tableHeader = null;
+   private final Object lock = new Object();
+   private final KernelProfile parentKernelProfile;
    private final Class<? extends Kernel> kernel;
    private final Device device;
+   private long threadId = NO_THREAD;
    private long[] currentTimes = new long[ProfilingEvent.values().length];
    private long[] accumulatedTimes = new long[ProfilingEvent.values().length];
    private ProfilingEvent lastEvent = null;
    private final DecimalFormat format;
    private long invocationCount = 0;
+   private volatile ProfileReport lastReport;
 
    static {
       assert ProfilingEvent.START.ordinal() == 0 : "ProfilingEvent.START.ordinal() != 0";
@@ -50,7 +57,8 @@ public class KernelDeviceProfile {
       TABLE_COLUMN_WIDTH = max + 1;
    }
 
-   public KernelDeviceProfile(Class<? extends Kernel> kernel, Device device) {
+   public KernelDeviceProfile(KernelProfile parentProfile, Class<? extends Kernel> kernel, Device device) {
+	  this.parentKernelProfile = parentProfile;
       this.kernel = kernel;
       this.device = device;
       this.format = (DecimalFormat) DecimalFormat.getNumberInstance();
@@ -58,8 +66,24 @@ public class KernelDeviceProfile {
       format.setMaximumFractionDigits(3);
    }
 
-   public void onEvent(ProfilingEvent event) {
-      if (event == ProfilingEvent.START) {
+   public boolean onEvent(ProfilingEvent event) {
+	  final long currentThreadId = Thread.currentThread().getId();
+
+	  synchronized (lock) {
+		 if (event == ProfilingEvent.START && threadId == NO_THREAD) {
+			 //A new profile report can be started at each new start event, however
+			 //a new thread can only be allowed if currently there is no thread assigned, indicating
+			 //no reports are in progress.
+			 threadId = currentThreadId;
+		 } else if (threadId != currentThreadId) {
+			 //If a report is in progress by another thread, the current cannot start in the middle 
+			 return false;
+		 }
+		 //Otherwise if thread is the same that is already authorized or has a report in progress,
+		 //it is allowed to proceed - this also guarantees backwards compatibility.
+	  }
+					
+      if (event == ProfilingEvent.START) {		 
          if (lastEvent != null) {
             logger.log(Level.SEVERE, "ProfilingEvent.START encountered without ProfilingEvent.EXECUTED");
          } else if (lastEvent == ProfilingEvent.START) {
@@ -91,28 +115,61 @@ public class KernelDeviceProfile {
       }
       lastEvent = event;
       if (event == ProfilingEvent.EXECUTED) {
+    	 lastReport = createProfileReport();
+    	 IProfileReportObserver observer = parentKernelProfile.getReportObserver();
          lastEvent = null;
+    	 if (observer != null) {
+    		 observer.receiveReport(kernel, device, lastReport);
+    		 acknowledgeLastReport(); 
+    	 }
       }
+      
+      return true;
    }
 
-   /** Elapsed time for a single event only, i.e. since the previous stage rather than from the start. */
-   public double getLastElapsedTime(ProfilingEvent stage) {
-      if (stage == ProfilingEvent.START) {
-         return 0;
-      }
-      return (currentTimes[stage.ordinal()] - currentTimes[stage.ordinal() - 1]) / MILLION;
+   /**
+    * Acknowledges last profile report, so that a new one can be generated.<br/>
+    * <b>Note: </b>Only needed if multiple threads executes the same Aparapi kernel on the same Aparapi device,
+    * concurrently or not.
+    * After calling this method the last report data will be invalidated.
+    */
+   public void acknowledgeLastReport() {
+	   if (lastReport != null) {
+		   synchronized (lock) {
+			   lastReport = null;
+			   threadId = NO_THREAD;
+		   }
+	   }
+   }
+   
+   private ProfileReport createProfileReport() {
+	   final ProfileReport report = new ProfileReport(invocationCount, kernel, device, threadId, currentTimes);
+	   
+	   return report;
    }
 
+   public double getLastElapsedTime(int stage) {
+	   return lastReport == null ? Double.NaN : lastReport.getElapsedTime(stage);
+   }
+   
    /** Elapsed time for all events {@code from} through {@code to}.*/
-   public double getLastElapsedTime(ProfilingEvent from, ProfilingEvent to) {
-      return (currentTimes[to.ordinal()] - currentTimes[from.ordinal()]) / MILLION;
+   public double getLastElapsedTime(int from, int to) {
+	   return lastReport == null ? Double.NaN : lastReport.getElapsedTime(from, to);
+   }
+   
+   public long getLastThreadId() {
+	  return lastReport == null  ? NO_THREAD : lastReport.getThreadId();
    }
 
+   public ProfileReport getLastReport() {
+		return lastReport;
+   }
+   
    /** Elapsed time for a single event only, i.e. since the previous stage rather than from the start, summed over all executions. */
    public double getCumulativeElapsedTime(ProfilingEvent stage) {
       return (accumulatedTimes[stage.ordinal()]) / MILLION;
    }
-
+   
    /** Elapsed time of entire execution, summed over all executions. */
    public double getCumulativeElapsedTimeAll() {
       double sum = 0;
@@ -144,7 +201,7 @@ public class KernelDeviceProfile {
       appendRowHeaders(builder, device.getShortDescription(), String.valueOf(invocationCount));
       for (int i = 1; i < currentTimes.length; ++i) {
          ProfilingEvent stage = ProfilingEvent.values()[i];
-         double time = getLastElapsedTime(stage);
+         double time = getLastElapsedTime(stage.ordinal());
          total += time;
          String formatted = format.format(time);
          appendCell(builder, formatted);
