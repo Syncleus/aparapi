@@ -22,7 +22,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class Matrix12x4_4x2Test {
+public class JtpRangeIdsTest {
     // globalThreadId, threadId, globalX, globalY, localX, localY
     final int[][] test = new int[][]{
         {
