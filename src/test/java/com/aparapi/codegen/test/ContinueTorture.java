@@ -49,4 +49,4 @@ public class ContinueTorture {
         }
     }
 }
-//**{Throws{ClassParseException}Throws}**/
+//**{Throws{CodeGenException}Throws}**/

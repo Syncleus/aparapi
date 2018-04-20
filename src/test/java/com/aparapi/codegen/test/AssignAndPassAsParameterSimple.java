@@ -26,4 +26,4 @@ public class AssignAndPassAsParameterSimple {
         actuallyDoIt(z = 1);
     }
 }
-/**{Throws{ClassParseException}Throws}**/
+/**{Throws{CodeGenException}Throws}**/

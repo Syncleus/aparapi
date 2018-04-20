@@ -22,4 +22,3 @@ public class Assign2DIntArray {
         ints[0][0] = 1;
     }
 }
-/**{Throws{ClassParseException}Throws}**/

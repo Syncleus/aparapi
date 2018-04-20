@@ -15,45 +15,20 @@
  */
 package com.aparapi.codegen.test;
 
+import com.aparapi.internal.exception.CodeGenException;
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class NonNullCheckTest extends com.aparapi.codegen.CodeGenJUnitBase {
 
-    private static final String[] expectedOpenCL = {
-        "typedef struct This_s{\n"
-        + " __global int *ints;\n"
-        + " int passid;\n"
-        + " }This;\n"
-        + " int get_pass_id(This *this){\n"
-        + " return this->passid;\n"
-        + " }\n"
-        + "\n"
-        + " __kernel void run(\n"
-        + " __global int *ints,\n"
-        + " int passid\n"
-        + " ){\n"
-        + " This thisStruct;\n"
-        + " This* this=&thisStruct;\n"
-        + " this->ints = ints;\n"
-        + " this->passid = passid;\n"
-        + " {\n"
-        + " if (this->ints != NULL){\n"
-        + " int value = this->ints[0];\n"
-        + " }\n"
-        + " return;\n"
-        + " }\n"
-        + " }\n"
-        + " "};
-    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
+    private static final String[] expectedOpenCL = null;
+    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = CodeGenException.class;
 
-    @Ignore
     @Test
     public void NonNullCheckTest() {
         test(com.aparapi.codegen.test.NonNullCheck.class, expectedException, expectedOpenCL);
     }
 
-    @Ignore
     @Test
     public void NonNullCheckTestWorksWithCaching() {
         test(com.aparapi.codegen.test.NonNullCheck.class, expectedException, expectedOpenCL);
