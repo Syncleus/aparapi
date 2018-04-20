@@ -26,7 +26,7 @@ import org.junit.Test;
 public class MultiDimensionalLocalArrayTest
 {
     @Test
-    public void passingTest()
+    public void singleDimensionTest()
     {
         final int SIZE = 16;
         final float[] RESULT = new float[] {1};
@@ -59,7 +59,7 @@ public class MultiDimensionalLocalArrayTest
 
     @Ignore("Known bug, ignoring until fixed")
     @Test
-    public void crashingTest()
+    public void twoDimensionTest()
     {
         final int SIZE = 16;
         final float[] RESULT = new float[] {1};
