@@ -26,7 +26,7 @@ public class ArbitraryScopeTest
 {
     @Ignore("Known bug, ignoring test")
     @Test
-    public void UnusedInScopeTest()
+    public void UnusedInArbitraryScopeTest()
     {
         Kernel kernel = new Kernel()
         {
@@ -35,6 +35,23 @@ public class ArbitraryScopeTest
                 {
                     @SuppressWarnings("unused") int value = count + 1;
                 }
+            }
+        };
+        kernel.execute(1);
+    }
+
+    @Ignore("Known bug, ignoring test")
+    @Test
+    public void UnusedInNormalScopeTest()
+    {
+        Kernel kernel = new Kernel() {
+            int[] ints = new int[1024];
+
+            public void run() {
+                if (ints != null) {
+                    int value = ints[0];
+                }
+
             }
         };
         kernel.execute(1);
