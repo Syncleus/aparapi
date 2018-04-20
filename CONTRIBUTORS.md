@@ -1,6 +1,7 @@
 # Contributors
 
 * Jeffrey Phillips Freeman <jeffrey.freeman@syncleus.com>
+* Gary Frost <frost.gary@gmail.com>
 * Nicholas Wright - https://github.com/seeker
 * Veselin Yordanov <vesko935@gmail.com>
 * Automenta - https://github.com/automenta

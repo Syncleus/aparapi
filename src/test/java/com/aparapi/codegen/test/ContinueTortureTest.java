@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 - 2017 Syncleus, Inc.
+ * Copyright (c) 2016 - 2018 Syncleus, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,19 @@
 package com.aparapi.codegen.test;
 
 import com.aparapi.internal.exception.ClassParseException;
+import com.aparapi.internal.exception.CodeGenException;
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class ContinueTortureTest extends com.aparapi.codegen.CodeGenJUnitBase {
     private static final String[] expectedOpenCL = null;
-    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = ClassParseException.class;
+    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = CodeGenException.class;
 
-    @Ignore
     @Test
     public void ContinueTortureTest() {
         test(com.aparapi.codegen.test.ContinueTorture.class, expectedException, expectedOpenCL);
     }
 
-    @Ignore
     @Test
     public void ContinueTortureTestWorksWithCaching() {
         test(com.aparapi.codegen.test.ContinueTorture.class, expectedException, expectedOpenCL);

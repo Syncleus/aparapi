@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 - 2017 Syncleus, Inc.
+ * Copyright (c) 2016 - 2018 Syncleus, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1622,78 +1622,69 @@ public class MethodModel{
    }
 
    private void init(ClassModelMethod _method) throws AparapiException {
-      try {
-         method = _method;
-         expressionList = new ExpressionList(this);
-         ClassModel owner = _method.getOwnerClassModel();
-         if (owner.getNoCLMethods().contains(method.getName())) {
-             noCL = true;
-         }
+     method = _method;
+     expressionList = new ExpressionList(this);
+     ClassModel owner = _method.getOwnerClassModel();
+     if (owner.getNoCLMethods().contains(method.getName())) {
+         noCL = true;
+     }
 
-         // check if we have any exception handlers
-         final int exceptionsSize = method.getCodeEntry().getExceptionPoolEntries().size();
-         if (exceptionsSize > 0) {
-            if (logger.isLoggable(Level.FINE)) {
-               logger.fine("exception size for " + method + " = " + exceptionsSize);
-            }
-            throw new ClassParseException(ClassParseException.TYPE.EXCEPTION);
-         }
+     // check if we have any exception handlers
+     final int exceptionsSize = method.getCodeEntry().getExceptionPoolEntries().size();
+     if (exceptionsSize > 0) {
+        if (logger.isLoggable(Level.FINE)) {
+           logger.fine("exception size for " + method + " = " + exceptionsSize);
+        }
+        throw new ClassParseException(ClassParseException.TYPE.EXCEPTION);
+     }
 
-         // check if we have any local variables which are arrays.  This is an attempt to avoid aliasing field arrays
+     // check if we have any local variables which are arrays.  This is an attempt to avoid aliasing field arrays
 
-         // We are going to make 4 passes.
+     // We are going to make 4 passes.
 
-         // Pass #1 create a linked list of instructions from head to tail
-         final Map<Integer, Instruction> pcMap = createListOfInstructions();
+     // Pass #1 create a linked list of instructions from head to tail
+     final Map<Integer, Instruction> pcMap = createListOfInstructions();
 
-         LocalVariableTableEntry<LocalVariableInfo> localVariableTableEntry = method.getLocalVariableTableEntry();
-         if (localVariableTableEntry == null) {
-            localVariableTableEntry = new FakeLocalVariableTableEntry(pcMap, method);
-            method.setLocalVariableTableEntry(localVariableTableEntry);
-            logger.warning("Method "
-                  + method.getName()
-                  + method.getDescriptor()
-                  + " does not contain a LocalVariableTable entry (source not compiled with -g) codegen will attempt to create a synthetic table based on bytecode. This is experimental!!");
-         }
+     LocalVariableTableEntry<LocalVariableInfo> localVariableTableEntry = method.getLocalVariableTableEntry();
+     if (localVariableTableEntry == null) {
+        localVariableTableEntry = new FakeLocalVariableTableEntry(pcMap, method);
+        method.setLocalVariableTableEntry(localVariableTableEntry);
+        logger.warning("Method "
+              + method.getName()
+              + method.getDescriptor()
+              + " does not contain a LocalVariableTable entry (source not compiled with -g) codegen will attempt to create a synthetic table based on bytecode. This is experimental!!");
+     }
 
-         // pass #2 build branch graph
-         buildBranchGraphs(pcMap);
+     // pass #2 build branch graph
+     buildBranchGraphs(pcMap);
 
-         // pass #3 build branch graph
-         deoptimizeReverseBranches();
+     // pass #3 build branch graph
+     deoptimizeReverseBranches();
 
-         // pass #4
+     // pass #4
 
-         foldExpressions();
+     foldExpressions();
 
-         // Accessor conversion only works on member object arrays
-         if (isNoCL() || (entrypoint != null) && (_method.getClassModel() != entrypoint.getClassModel())) {
-            if (logger.isLoggable(Level.FINE)) {
-               logger.fine("Considering accessor call: " + getName());
-            }
-            checkForGetter(pcMap);
-            checkForSetter(pcMap);
-         }
+     // Accessor conversion only works on member object arrays
+     if (isNoCL() || (entrypoint != null) && (_method.getClassModel() != entrypoint.getClassModel())) {
+        if (logger.isLoggable(Level.FINE)) {
+           logger.fine("Considering accessor call: " + getName());
+        }
+        checkForGetter(pcMap);
+        checkForSetter(pcMap);
+     }
 
-         // In order to allow inline access of object member fields, postpone this check
-         //if ((!Config.enablePUTFIELD) && usesPutfield && !isSetter()) {
-         //   throw new ClassParseException("We don't support putfield instructions beyond simple setters");
-         //}
+     // In order to allow inline access of object member fields, postpone this check
+     //if ((!Config.enablePUTFIELD) && usesPutfield && !isSetter()) {
+     //   throw new ClassParseException("We don't support putfield instructions beyond simple setters");
+     //}
 
-         if (logger.isLoggable(Level.FINE)) {
-            logger.fine("end \n" + expressionList.dumpDiagram(null));
-         }
-         if (Config.instructionListener != null) {
-            Config.instructionListener.showAndTell("end", expressionList.getHead(), null);
-         }
-      } catch (final Throwable _t) {
-         if (_t instanceof ClassParseException) {
-            _t.printStackTrace();
-            throw (ClassParseException) _t;
-         }
-         throw new ClassParseException(_t);
-
-      }
+     if (logger.isLoggable(Level.FINE)) {
+        logger.fine("end \n" + expressionList.dumpDiagram(null));
+     }
+     if (Config.instructionListener != null) {
+        Config.instructionListener.showAndTell("end", expressionList.getHead(), null);
+     }
    }
 
    public LocalVariableTableEntry<LocalVariableInfo> getLocalVariableTableEntry() {

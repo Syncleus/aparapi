@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 - 2017 Syncleus, Inc.
+ * Copyright (c) 2016 - 2018 Syncleus, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,6 @@ public class AccessGetterSetterTest {
 
         void validate() {
             for (int i = 0; i < SIZE; i++) {
-                System.out.println(target[i] + " ... " + objects[i].getValue());
                 assertTrue("target == objects", target[i] == objects[i].getValue());
             }
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 - 2017 Syncleus, Inc.
+ * Copyright (c) 2016 - 2018 Syncleus, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,6 @@ public class BarrierSupportTest {
 
     @Test
     public void testBarrier1() {
-    	System.out.println("Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
         final Barrrier1Kernel kernel = new Barrrier1Kernel(SIZE);
         try {
 	        final Range range = openCLDevice.createRange(SIZE, SIZE);
@@ -83,7 +82,6 @@ public class BarrierSupportTest {
     
     @Test
     public void testBarrier1Explicit() {
-    	System.out.println("Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
         final Barrrier1Kernel kernel = new Barrrier1Kernel(SIZE);
         try {
 	        final Range range = openCLDevice.createRange(SIZE, SIZE);
@@ -104,7 +102,6 @@ public class BarrierSupportTest {
     	SIZE = 256;
     	KernelManager.setKernelManager(new JTPKernelManager());
         Device device = KernelManager.instance().bestDevice();
-        System.out.println("Executing on device: " + device.getShortDescription());
         assumeTrue (device != null && device instanceof JavaDevice);
 
         final Barrrier1Kernel kernel = new Barrrier1Kernel(SIZE);
@@ -122,7 +119,6 @@ public class BarrierSupportTest {
 
     @Test
     public void testBarrier2() {
-    	System.out.println("Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
         final Barrrier2Kernel kernel = new Barrrier2Kernel(SIZE);
         try {
 	        final Range range = openCLDevice.createRange(SIZE, SIZE);
@@ -138,7 +134,6 @@ public class BarrierSupportTest {
     
     @Test
     public void testBarrier2Explicit() {
-    	System.out.println("Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
         final Barrrier2Kernel kernel = new Barrrier2Kernel(SIZE);
         try {
 	        final Range range = openCLDevice.createRange(SIZE, SIZE);
@@ -159,7 +154,6 @@ public class BarrierSupportTest {
     	SIZE = 256;
     	KernelManager.setKernelManager(new JTPKernelManager());
         Device device = KernelManager.instance().bestDevice();
-        System.out.println("Executing on device: " + device.getShortDescription());
         assumeTrue (device != null && device instanceof JavaDevice);
 
         final Barrrier2Kernel kernel = new Barrrier2Kernel(SIZE);

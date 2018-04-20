@@ -4,7 +4,7 @@ This file contains all attributions and other notices that are required by law.
 
 The following are the list of all recognized copyright notices added by contributors to this project:
 
-Copyright (c) 2016 - 2017, Syncleus, Inc. All rights reserved.
+Copyright (c) 2016 - 2018, Syncleus, Inc. All rights reserved.
 
 Copyright (c) 2010-2011, Advanced Micro Devices, Inc. All rights reserved.
 

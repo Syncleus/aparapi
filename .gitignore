@@ -38,3 +38,6 @@ hs_err_pid*
 
 #logs
 *.log
+
+#project specific
+/src/genjava

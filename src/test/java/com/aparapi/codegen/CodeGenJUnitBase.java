@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 - 2017 Syncleus, Inc.
+ * Copyright (c) 2016 - 2018 Syncleus, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,9 +121,8 @@ public class CodeGenJUnitBase {
 
       } catch (AssertionError e) {
          throw e;
-      } catch (Throwable t) {
+      } catch (Exception t) {
          if (_expectedExceptionType == null || !t.getClass().isAssignableFrom(_expectedExceptionType)) {
-            t.printStackTrace();
             throw new AssertionError("Unexpected exception " + t, t);
          }
       }
