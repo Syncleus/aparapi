@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) 2016 - 2018 Syncleus, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.aparapi.runtime;
 
 import static org.junit.Assume.assumeTrue;
@@ -57,7 +72,6 @@ public class ProfileReportBackwardsCompatTest {
     	}
     }
     
-    @Before
     public void setUpBefore() throws Exception {
     	KernelManager.setKernelManager(new CLKernelManager());
         Device device = KernelManager.instance().bestDevice();
@@ -72,9 +86,11 @@ public class ProfileReportBackwardsCompatTest {
     /**
      * This integration test validates that previous Kernel methods for retrieving profiling data
      * are still consistent in the new implementation and with the new profile reports. 
+     * @throws Exception 
      */
     @Test
-    public void sequentialSingleThreadOpenCLTest() {
+    public void sequentialSingleThreadOpenCLTest() throws Exception {
+    	setUpBefore();
     	System.out.println("Test " + name.getMethodName() + " - Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
     	assertTrue(sequentialSingleThreadTestHelper(openCLDevice, 128));
     }
@@ -137,9 +153,11 @@ public class ProfileReportBackwardsCompatTest {
     
     /**
      * This test executes two threads one for each kernel on an OpenCL device and checks that the traditional Aparapi profiling interfaces work. 
+     * @throws Exception 
      */
     @Test
-    public void threadedSingleThreadPerKernelOpenCLTest() {
+    public void threadedSingleThreadPerKernelOpenCLTest() throws Exception {
+    	setUpBefore();
     	System.out.println("Test " + name.getMethodName() + " - Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
     	assertTrue(threadedSingleThreadPerKernelTestHelper(openCLDevice, 128));
     }

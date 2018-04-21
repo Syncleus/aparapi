@@ -20,8 +20,6 @@ import com.aparapi.device.*;
 
 import java.text.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.*;
 
 /**
@@ -57,6 +55,39 @@ public class KernelDeviceProfile {
       TABLE_COLUMN_WIDTH = max + 1;
    }
 
+   private void parseStartEventHelper(final ProfilingEvent event) {
+      if (event == ProfilingEvent.START) {		 
+          if (lastEvent != null) {
+             logger.log(Level.SEVERE, "ProfilingEvent.START encountered without ProfilingEvent.EXECUTED");
+          } else if (lastEvent == ProfilingEvent.START) {
+             logger.log(Level.SEVERE, "Duplicate event ProfilingEvent.START");
+          }
+          Arrays.fill(currentTimes, 0L);
+          ++invocationCount;
+       } else {
+          if (lastEvent == null) {
+             if (event != ProfilingEvent.EXECUTED) {
+                logger.log(Level.SEVERE, "ProfilingEvent.START was not invoked prior to ProfilingEvent." + event);
+             }
+          } else {
+             for (int i = lastEvent.ordinal() + 1; i < event.ordinal(); ++i) {
+                currentTimes[i] = currentTimes[i - 1];
+             }
+          }
+       }
+       currentTimes[event.ordinal()] = System.nanoTime();
+       if (event == ProfilingEvent.EXECUTED) {
+          for (int i = 1; i < currentTimes.length; ++i) {
+             long elapsed = currentTimes[i] - currentTimes[i - 1];
+             if (elapsed < 0) {
+                logger.log(Level.SEVERE, "negative elapsed time for event " + event);
+                break;
+             }
+             accumulatedTimes[i] += elapsed;
+          }
+       }
+   }
+   
    public KernelDeviceProfile(KernelProfile parentProfile, Class<? extends Kernel> kernel, Device device) {
 	  this.parentKernelProfile = parentProfile;
       this.kernel = kernel;
@@ -82,37 +113,9 @@ public class KernelDeviceProfile {
 		 //Otherwise if thread is the same that is already authorized or has a report in progress,
 		 //it is allowed to proceed - this also guarantees backwards compatibility.
 	  }
+	  
+	  parseStartEventHelper(event);
 					
-      if (event == ProfilingEvent.START) {		 
-         if (lastEvent != null) {
-            logger.log(Level.SEVERE, "ProfilingEvent.START encountered without ProfilingEvent.EXECUTED");
-         } else if (lastEvent == ProfilingEvent.START) {
-            logger.log(Level.SEVERE, "Duplicate event ProfilingEvent.START");
-         }
-         Arrays.fill(currentTimes, 0L);
-         ++invocationCount;
-      } else {
-         if (lastEvent == null) {
-            if (event != ProfilingEvent.EXECUTED) {
-               logger.log(Level.SEVERE, "ProfilingEvent.START was not invoked prior to ProfilingEvent." + event);
-            }
-         } else {
-            for (int i = lastEvent.ordinal() + 1; i < event.ordinal(); ++i) {
-               currentTimes[i] = currentTimes[i - 1];
-            }
-         }
-      }
-      currentTimes[event.ordinal()] = System.nanoTime();
-      if (event == ProfilingEvent.EXECUTED) {
-         for (int i = 1; i < currentTimes.length; ++i) {
-            long elapsed = currentTimes[i] - currentTimes[i - 1];
-            if (elapsed < 0) {
-               logger.log(Level.SEVERE, "negative elapsed time for event " + event);
-               break;
-            }
-            accumulatedTimes[i] += elapsed;
-         }
-      }
       lastEvent = event;
       if (event == ProfilingEvent.EXECUTED) {
     	 lastReport = createProfileReport();
