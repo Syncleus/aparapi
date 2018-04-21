@@ -17,13 +17,13 @@ package com.aparapi.runtime;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
@@ -48,51 +48,47 @@ public class ProfileReportUnitTest {
 
 		@Override
 		public void run() {
-			//This method is intended to be empty
 		}		
 	}
 		
 	/**
-	 * This test validates that no thread can start a profiling process at any stage after another thread
+	 * This test validates that all threads can start a profiling process after another thread
 	 * that has already started profiling.
 	 * @throws Exception 
 	 */
 	@Test
-	public void testNoThreadCanStartPass() throws Exception {
+	public void testAllThreadCanStartPass() throws Exception {
 		final int javaThreads = ProfilingEvent.values().length;
-		final int runs = 100;
 		final KernelProfile kernelProfile = new KernelProfile(SimpleKernel.class);
 		final KernelDeviceProfile kernelDeviceProfile = new KernelDeviceProfile(kernelProfile, SimpleKernel.class, JavaDevice.THREAD_POOL);
-		final AtomicBoolean receivedReport = new AtomicBoolean(false);
-		final AtomicBoolean[] onEventAccepted = new AtomicBoolean[javaThreads];
-		final AtomicInteger idx = new AtomicInteger(0);
-		for (int i = 0; i < javaThreads; i++) {
-			onEventAccepted[i] = new AtomicBoolean(false);
-		}
+		final AtomicInteger receivedReports = new AtomicInteger(0);
+		final ConcurrentSkipListSet<Long> onEventAccepted = new ConcurrentSkipListSet<Long>();
+		final AtomicInteger index = new AtomicInteger(0);
+		final long[] threadIds = new long[javaThreads + 1];
 		
 		kernelProfile.setReportObserver(new IProfileReportObserver() {
 			@Override
-			public void receiveReport(Class<? extends Kernel> kernelClass, Device device, ProfileReport profileInfo) {
-				receivedReport.set(true);
+			public void receiveReport(Class<? extends Kernel> kernelClass, Device device, WeakReference<ProfileReport> profileInfo) {
+				receivedReports.incrementAndGet();
+				onEventAccepted.add(profileInfo.get().getThreadId());
 			}
 		});
 		
-		
-		//This is the only thread that should start an event in this test
-		assertTrue(kernelDeviceProfile.onEvent(ProfilingEvent.START));
-		
+		//Ensure that the first thread as started profiling, before testing the others
+		kernelDeviceProfile.onEvent(ProfilingEvent.START);
 		
 		List<ProfilingEvent> events = Arrays.asList(ProfilingEvent.values());
 		
 		ExecutorService executorService = Executors.newFixedThreadPool(javaThreads);
 		try {
-			events.forEach(evt -> executorService.submit(() -> {
-				for (int i = 0; i < runs; i++) {
-					if (kernelDeviceProfile.onEvent(evt)) {
-						onEventAccepted[idx.getAndIncrement()].set(true);
-					}
-				}
-			}));
+			events.forEach(evt -> {
+				final int idx = index.getAndIncrement();
+				executorService.submit(() -> {
+					threadIds[idx] = Thread.currentThread().getId();
+					kernelDeviceProfile.onEvent(ProfilingEvent.START);
+					kernelDeviceProfile.onEvent(ProfilingEvent.EXECUTED);
+				});
+			});
 		} finally {
 			executorService.shutdown();
 			if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
@@ -101,183 +97,65 @@ public class ProfileReportUnitTest {
 			}
 		}
 		
+		threadIds[index.get()] = Thread.currentThread().getId();
 		for (int i = 0; i < javaThreads; i++) {
-			assertFalse("Event was accepted for thread with index " + i, onEventAccepted[i].get());
+			assertTrue("Report wasn't received for thread with index " + i, onEventAccepted.contains(threadIds[i]));
 		}
-		assertFalse("No report should have been received", receivedReport.get());
+		assertFalse("Report was received for main thread", onEventAccepted.contains(threadIds[javaThreads]));
+		assertEquals("Reports from all threads should have been received", javaThreads, receivedReports.get());
+		
+		//Only after this event should the main thread have received a report
+		kernelDeviceProfile.onEvent(ProfilingEvent.EXECUTED);
+		
+		assertTrue("Report wasn't received for main thread", onEventAccepted.contains(threadIds[javaThreads]));
+		assertEquals("Reports from all threads should have been received", javaThreads + 1, receivedReports.get());
 	}
 	
-
-	/**
-	 * This test validates that only a single thread can start, after being acknowledged, and that report is received.
-	 * @throws Exception
-	 */
 	@Test
-	public void testNoThreadStartsBeforeAckPass() throws Exception {
-		final int javaThreads = ProfilingEvent.values().length + 1;
-		final int runs = 100;
-		final KernelProfile kernelProfile = new KernelProfile(SimpleKernel.class);
-		final KernelDeviceProfile kernelDeviceProfile = new KernelDeviceProfile(kernelProfile, SimpleKernel.class, JavaDevice.THREAD_POOL);
-		final AtomicBoolean receivedReport = new AtomicBoolean(false);
-		final AtomicBoolean[] onEventAccepted = new AtomicBoolean[javaThreads];
-		final AtomicInteger index = new AtomicInteger(0);
-		for (int i = 0; i < javaThreads; i++) {
-			onEventAccepted[i] = new AtomicBoolean(false);
+	public void testGetProfilingEventsNames() {
+		String[] stages = ProfilingEvent.getStagesNames();
+		int i = 0;
+		for (String stage : stages) {
+			assertNotNull("Stage is null at index " + i, stage);
+			assertFalse("Stage name is empty at index " + i, stage.isEmpty());
+			ProfilingEvent event = ProfilingEvent.valueOf(stage);
+			assertTrue("Stage name does not translate to an event", event != null);
+			assertEquals("Stage name does match correct order", i, event.ordinal());
+			i++;
 		}
-		
-		kernelProfile.setReportObserver(new IProfileReportObserver() {
-			@Override
-			public void receiveReport(Class<? extends Kernel> kernelClass, Device device, ProfileReport profileInfo) {
-				receivedReport.set(true);
-				for (int i = 0; i < javaThreads; i++) {
-					assertFalse("Event was accepted earlier for thread with index " + i, onEventAccepted[i].get());
-				}				
-			}
-		});
-		
-		
-		//This is the only thread that should start an event in this test
-		assertTrue(kernelDeviceProfile.onEvent(ProfilingEvent.START));
-		assertTrue(kernelDeviceProfile.onEvent(ProfilingEvent.EXECUTED));
-
-		List<ProfilingEvent> events = new ArrayList<>(ProfilingEvent.values().length + 1);
-		events.addAll(Arrays.asList(ProfilingEvent.values()));
-		events.add(ProfilingEvent.START);
-		
-		ExecutorService executorService = Executors.newFixedThreadPool(javaThreads);
-		try {
-			events.forEach(evt -> { 
-				final int idx = index.getAndIncrement(); 
-				executorService.submit(() -> {
-					for (int i = 0; i < runs; i++) {
-						if (kernelDeviceProfile.onEvent(evt)) {
-							if (!onEventAccepted[idx].get()) {
-								onEventAccepted[idx].set(true);
-							}
-						}
-					}
-				});
-			});
-		} finally {
-			executorService.shutdown();
-			if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
-				executorService.shutdownNow();
-				throw new Exception("ExecutorService terminated abnormaly");
-			}
-		}
-		
-		boolean accepted = false;
-		for (int i = 0; i < javaThreads; i++) {
-			if (i == 0) {
-				accepted = onEventAccepted[i].get();
-			} else if (i == ProfilingEvent.values().length-1) {
-				if (accepted == false) {
-					assertTrue("Event should have been accepted", onEventAccepted[i].get());
-				} else {
-					assertFalse("Event shouldn't have been accepted", onEventAccepted[i].get());
-				}
-			} else {
-				assertFalse("Event was accepted on wrong event stage for thread with index " + i, onEventAccepted[i].get());
-			}
-		}
-		assertTrue("Event should have been accepted by another thread", accepted);
-		assertTrue("Report should have been received", receivedReport.get());
 	}
-
-	/**
-	 * This test validates that another thread cannot start a profile, before the current being acknowledged, when
-	 * no observer is registered.
-	 * @throws Exception
-	 */
+	
 	@Test
-	public void testAcknowledgeAllowsOtherThreadToRunPass() throws Exception {
-		final int javaThreads = ProfilingEvent.values().length + 1;
-		final int runs = 100;
-		final KernelProfile kernelProfile = new KernelProfile(SimpleKernel.class);
-		final KernelDeviceProfile kernelDeviceProfile = new KernelDeviceProfile(kernelProfile, SimpleKernel.class, JavaDevice.THREAD_POOL);
-		final AtomicBoolean[] onEventAccepted = new AtomicBoolean[javaThreads];
-		final AtomicInteger index = new AtomicInteger(0);
-		for (int i = 0; i < javaThreads; i++) {
-			onEventAccepted[i] = new AtomicBoolean(false);
-		}
-				
-		//This is the only thread that should start an event in this test
-		assertTrue(kernelDeviceProfile.onEvent(ProfilingEvent.START));
-		assertTrue(kernelDeviceProfile.onEvent(ProfilingEvent.EXECUTED));
-
-		List<ProfilingEvent> events = new ArrayList<>(ProfilingEvent.values().length + 1);
-		events.addAll(Arrays.asList(ProfilingEvent.values()));
-		events.add(ProfilingEvent.START);
-		
-		final ExecutorService executorService = Executors.newFixedThreadPool(javaThreads);
-		try {
-			events.forEach(evt -> { 
-				final int idx = index.getAndIncrement(); 
-				executorService.submit(() -> {
-					for (int i = 0; i < runs; i++) {
-						if (kernelDeviceProfile.onEvent(evt)) {
-							onEventAccepted[idx].set(true);
-						}
-					}
-				});
-			});
-		} finally {
-			executorService.shutdown();
-			if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
-				executorService.shutdownNow();
-				throw new Exception("ExecutorService terminated abnormaly");
-			}
-		}
-
-		for (int i = 0; i < javaThreads; i++) {
-			assertFalse("Event was accepted for thread with index " + i, onEventAccepted[i].get());
-		}
-
-		ProfileReport report = kernelDeviceProfile.getLastReport();
-		assertNotNull("Profile report shouldn't be null", report);
-		assertEquals("Thread Id doesn't match the expected", Thread.currentThread().getId(), report.getThreadId());
-		assertEquals("Device doesn't match", report.getDevice(), JavaDevice.THREAD_POOL);
-		assertEquals("Class doesn't match", report.getKernelClass(), SimpleKernel.class);
-		
-		kernelDeviceProfile.acknowledgeLastReport();
-		
-		index.set(0);
-		final ExecutorService executorServiceB = Executors.newFixedThreadPool(javaThreads);
-		try {
-			events.forEach(evt -> { 
-				final int idx = index.getAndIncrement(); 
-				executorServiceB.submit(() -> {
-					for (int i = 0; i < runs; i++) {
-						if (kernelDeviceProfile.onEvent(evt)) {
-							if (!onEventAccepted[idx].get()) {
-								onEventAccepted[idx].set(true);
-							}
-						}
-					}
-				});
-			});
-		} finally {
-			executorServiceB.shutdown();
-			if (!executorServiceB.awaitTermination(1, TimeUnit.MINUTES)) {
-				executorServiceB.shutdownNow();
-				throw new Exception("ExecutorService terminated abnormaly");
-			}
+	public void testProfileReportClone() {
+		final int reportId = 101;
+		final int threadId = 192;
+		final long[] values = new long[ProfilingEvent.values().length];
+		for (int i = 0; i < values.length; i++) {
+			values[i] = 900 + i;
 		}
 		
-		boolean accepted = false;
-		for (int i = 0; i < javaThreads; i++) {
-			if (i == 0) {
-				accepted = onEventAccepted[i].get();
-			} else if (i == ProfilingEvent.values().length-1) {
-				if (accepted == false) {
-					assertTrue("Event should have been accepted", onEventAccepted[i].get());
-				} else {
-					assertFalse("Event shouldn't have been accepted", onEventAccepted[i].get());
-				}
-			} else {
-				assertFalse("Event was accepted on wrong event stage for thread with index " + i, onEventAccepted[i].get());
-			}
+		ProfileReport report = new ProfileReport(threadId, SimpleKernel.class, JavaDevice.THREAD_POOL);
+		report.setProfileReport(reportId, values);
+		
+		ProfileReport clonedReport = report.clone();
+		assertTrue("Object references shouldn't be the same", report != clonedReport);
+		assertEquals("Report Id doesn't match", reportId, clonedReport.getReportId());
+		assertEquals("Class doesn't match", SimpleKernel.class, clonedReport.getKernelClass());
+		assertEquals("Device doesn't match", JavaDevice.THREAD_POOL, clonedReport.getDevice());
+		
+		for (int i = 0; i < values.length; i++) {
+			assertEquals("Values don't match for index " + i, report.getElapsedTime(i), clonedReport.getElapsedTime(i), 1e-10);
 		}
-		assertTrue("Event should have been accepted by another thread", accepted);
+		
+		long[] valuesB = new long[ProfilingEvent.values().length];
+		for (int i = 0; i < valuesB.length; i++) {
+			valuesB[i] = 100 + i*100;
+		}
+		report.setProfileReport(reportId + 1, valuesB);
+		
+		for (int i = 1; i < values.length; i++) {
+			assertNotEquals("Values match after new assingment for index " + i, report.getElapsedTime(i), clonedReport.getElapsedTime(i), 1e-10);
+		}
+		
 	}
 }

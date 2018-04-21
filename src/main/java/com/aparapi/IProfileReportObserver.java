@@ -15,6 +15,8 @@
  */
 package com.aparapi;
 
+import java.lang.ref.WeakReference;
+
 import com.aparapi.device.Device;
 
 /**
@@ -37,6 +39,6 @@ public interface IProfileReportObserver {
 	 * @param device the device on which the kernel ran, producing the profile report
 	 * @param profileInfo the profile report for the given Aparapi kernel and device pair
 	 */
-	public void receiveReport(final Class<? extends Kernel> kernelClass, final Device device, final ProfileReport profileInfo);
+	public void receiveReport(final Class<? extends Kernel> kernelClass, final Device device, final WeakReference<ProfileReport> profileInfo);
 
 }

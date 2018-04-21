@@ -17,6 +17,7 @@ package com.aparapi.runtime;
 
 import static org.junit.Assume.assumeTrue;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -26,7 +27,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -128,7 +128,8 @@ public class ProfileReportBackwardsCompatTest {
     			lastConversionTime = kernel.getConversionTime();
     		}
     		long runTime = System.currentTimeMillis() - startOfExecution;
-    		ProfileReport report = kernel.getProfileReport(device);
+    		WeakReference<ProfileReport> reportRef = kernel.getProfileReportLastThread(device);
+    		ProfileReport report = reportRef.get();
     		assertEquals("Number of profiling reports doesn't match the expected", runs, report.getReportId());
     		assertEquals("Aparapi Accumulated execution time doesn't match", accumulatedExecutionTime, kernel.getAccumulatedExecutionTime(), 1e-10);
     		assertEquals("Aparapi last execution time doesn't match last report", lastExecutionTime, report.getExecutionTime(), 1e-10);
@@ -218,7 +219,8 @@ public class ProfileReportBackwardsCompatTest {
 	    	assertTrue(terminatedOk);
 	 
 	    	//Validate kernel1 reports
-    		ProfileReport report = kernel1.getProfileReport(device);
+    		WeakReference<ProfileReport> reportRef = kernel1.getProfileReportLastThread(device);
+    		ProfileReport report = reportRef.get();
     		assertEquals("Number of profiling reports doesn't match the expected", runs, report.getReportId());
     		assertEquals("Aparapi Accumulated execution time doesn't match", results[0].accumulatedExecutionTime, kernel1.getAccumulatedExecutionTime(), 1e-10);
     		assertEquals("Aparapi last execution time doesn't match last report", results[0].lastExecutionTime, report.getExecutionTime(), 1e-10);
@@ -227,7 +229,8 @@ public class ProfileReportBackwardsCompatTest {
     		assertTrue(validateBasic1Kernel(inputArray, results[0].outputArray));
     		
     		//Validate kernel2 reports
-    		report = kernel2.getProfileReport(device);
+    		reportRef = kernel2.getProfileReportLastThread(device);
+    		report = reportRef.get();
     		assertEquals("Number of profiling reports doesn't match the expected", runs, report.getReportId());
     		assertEquals("Aparapi Accumulated execution time doesn't match", results[1].accumulatedExecutionTime, kernel2.getAccumulatedExecutionTime(), 1e-10);
     		assertEquals("Aparapi last execution time doesn't match last report", results[1].lastExecutionTime, report.getExecutionTime(), 1e-10);

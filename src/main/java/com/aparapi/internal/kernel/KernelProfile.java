@@ -28,7 +28,6 @@ import java.util.logging.*;
 public class KernelProfile {
 
    public static final double MILLION = 1000000d;
-   private static final long NO_THREAD = -1;
    private static Logger logger = Logger.getLogger(Config.getLoggerName());
    private final Class<? extends Kernel> kernelClass;
    private LinkedHashMap<Device, KernelDeviceProfile> deviceProfiles = new LinkedHashMap<>();
@@ -41,19 +40,14 @@ public class KernelProfile {
       kernelClass = _kernelClass;
    }
 
-   public long getLastThreadId() {
-	   KernelDeviceProfile lastDeviceProfile = getLastDeviceProfile();
-	   return lastDeviceProfile == null ? NO_THREAD : lastDeviceProfile.getLastThreadId();
-   }
-   
    public double getLastExecutionTime() {
       KernelDeviceProfile lastDeviceProfile = getLastDeviceProfile();
-      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getLastElapsedTime(ProfilingEvent.START.ordinal(), ProfilingEvent.EXECUTED.ordinal());
+      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getElapsedTimeLastThread(ProfilingEvent.START.ordinal(), ProfilingEvent.EXECUTED.ordinal());
    }
 
    public double getLastConversionTime() {
       KernelDeviceProfile lastDeviceProfile = getLastDeviceProfile();
-      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getLastElapsedTime(ProfilingEvent.START.ordinal(), ProfilingEvent.PREPARE_EXECUTE.ordinal());
+      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getElapsedTimeLastThread(ProfilingEvent.START.ordinal(), ProfilingEvent.PREPARE_EXECUTE.ordinal());
    }
 
    public double getAccumulatedTotalTime() {
@@ -62,7 +56,7 @@ public class KernelProfile {
          return Double.NaN;
       }
       else {
-         return lastDeviceProfile.getCumulativeElapsedTimeAll() / MILLION;
+         return lastDeviceProfile.getCumulativeElapsedTimeAllGlobal() / MILLION;
       }
    }
 
@@ -78,9 +72,9 @@ public class KernelProfile {
             deviceProfiles.put(device, currentDeviceProfile);
          }
       }
-      if (currentDeviceProfile.onEvent(ProfilingEvent.START)) {
-    	  currentDevice = device;
-      }
+      
+      currentDeviceProfile.onEvent(ProfilingEvent.START);
+      currentDevice = device;
    }
 
    void onEvent(ProfilingEvent event) {

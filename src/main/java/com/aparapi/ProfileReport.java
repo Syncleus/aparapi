@@ -23,31 +23,36 @@ import com.aparapi.device.Device;
 import com.aparapi.internal.kernel.ProfilingEvent;
 
 public final class ProfileReport {
+	private static final int NUM_EVENTS = ProfilingEvent.values().length;
 	private static final double MILLION = 1000000d;
-	private final long id;
+	private long id;
 	private final Class<? extends Kernel> kernelClass;
 	private final long threadId;
 	private final Device device;
-	private final long currentTimes[];
+	private final long currentTimes[] = new long[NUM_EVENTS];
 	private final String[] stagesNames;
 
 	/**
-	 * Creates a new ProfileReport bean with profiling information for a given kernel that ran on the given device,
-	 * for the given thread.
+	 * Creates a profile report pertaining to a given thread that executed kernel class on the specified device.
+	 * @param _threadId the id of thread that executed the kernel
+	 * @param clazz the class of the executed kernel
+	 * @param _device the device where the kernel executed
+	 */
+	public ProfileReport(final long _threadId, final Class<? extends Kernel> clazz, final Device _device) {
+		threadId = _threadId;
+		kernelClass = clazz;
+		device = _device;
+		stagesNames = ProfilingEvent.getStagesNames();
+	}
+	
+	/**
+	 * Sets specific report data.
 	 * @param reportId the unique identifier for this report (the identifier is unique within the <kernel,device> tuple) 
-	 * @param clazz the kernel class that this report pertains to
-	 * @param _device the device where the kernel ran
-	 * @param _threadId the id of the thread that called the kernel.execute(...)
 	 * @param _currentTimes the profiling data
 	 */
-	public ProfileReport(final long reportId, final Class<? extends Kernel> clazz, final Device _device, final long _threadId,
-			final long[] _currentTimes) {
+	public void setProfileReport(final long reportId, final long[] _currentTimes) {
 		id = reportId;
-		kernelClass = clazz;
-		threadId = _threadId;
-		device = _device;
-		currentTimes = Arrays.copyOf(_currentTimes, _currentTimes.length);
-		stagesNames = ProfilingEvent.getStagesNames();
+		System.arraycopy(_currentTimes, 0, currentTimes, 0, NUM_EVENTS);
 	}
 	
 	/**
@@ -138,5 +143,12 @@ public final class ProfileReport {
      */
     public double getConversionTime() {
        return getElapsedTime(ProfilingEvent.START.ordinal(), ProfilingEvent.PREPARE_EXECUTE.ordinal());
+    }
+    
+    @Override
+    public ProfileReport clone() {
+    	ProfileReport r = new ProfileReport(threadId, kernelClass, device);
+    	r.setProfileReport(id, currentTimes);
+    	return r;
     }
 }

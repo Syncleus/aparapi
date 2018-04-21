@@ -15,25 +15,27 @@
  */
 package com.aparapi.runtime;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -113,44 +115,48 @@ public class ProfileReportNewAPITest {
     	assertTrue(singleThreadedSingleKernelReportObserverTestHelper(device, 16));
     }
 
-    private class ReportObserverNoConcurrentCalls implements IProfileReportObserver {
-    	private final ConcurrentSkipListSet<Long> expectedThreadsIds = new ConcurrentSkipListSet<>();
-    	private final ConcurrentSkipListSet<Long> observedThreadsIds = new ConcurrentSkipListSet<>();
-    	private final AtomicInteger atomicSimultaneousCalls = new AtomicInteger(0);
-    	private final Device device;
-    	private long receivedReportsCount = 0;
+    private class ThreadTestState {
     	private double accumulatedElapsedTime = 0.0;
+    	private long receivedReportsCount = 0;
+    }
+    
+    private class ReportObserver implements IProfileReportObserver {
+    	private final ConcurrentSkipListSet<Long> expectedThreadsIds = new ConcurrentSkipListSet<>();
+    	private final ConcurrentSkipListMap<Long, ThreadTestState> observedThreadsIds = new ConcurrentSkipListMap<>();
+    	private final Device device;
+    	private final int threads;
+    	private final int runs;
+    	private final boolean[] receivedReportIds;
     	
-    	private ReportObserverNoConcurrentCalls(Device _device) {
+    	private ReportObserver(Device _device, int _threads, int _runs) {
     		device = _device;
+    		threads = _threads;
+    		runs = _runs;
+    	
+    		receivedReportIds = new boolean[threads * runs];
     	}
     	
     	private void addAcceptedThreadId(long threadId) {
     		expectedThreadsIds.add(threadId);
     	}
     	
-    	private double getAccumulatedElapsedTime() {
-    		return accumulatedElapsedTime;
+    	private ConcurrentSkipListMap<Long, ThreadTestState> getObservedThreadsIds() {
+    		return observedThreadsIds;
     	}
-    	
-    	private long getReceivedReportsCount() {
-    		return receivedReportsCount;
-    	}
-    	
+    	    	
 		@Override
-		public void receiveReport(Class<? extends Kernel> kernelClass, Device _device, ProfileReport profileInfo) {
-			int currentSimultaneousCalls = atomicSimultaneousCalls.incrementAndGet();
-			assertTrue("Observer was called concurrently", currentSimultaneousCalls == 1);
-			accumulatedElapsedTime += profileInfo.getExecutionTime();
+		public void receiveReport(Class<? extends Kernel> kernelClass, Device _device, WeakReference<ProfileReport> profileInfoRef) {
+			ProfileReport profileInfo = profileInfoRef.get();
 			assertEquals("Kernel class does not match", Basic1Kernel.class, kernelClass);
 			assertEquals("Device does not match", device, _device);
 			boolean isThreadAccepted = expectedThreadsIds.contains(profileInfo.getThreadId());
 			assertTrue("Thread generating the report (" + profileInfo.getThreadId() + 
 					") is not among the accepted ones: " + expectedThreadsIds.toString(), isThreadAccepted);
-			++receivedReportsCount;
-			assertEquals("Received report count doesn't match current ID - reports were lost", receivedReportsCount, profileInfo.getReportId());
-			observedThreadsIds.add(profileInfo.getThreadId());
-			atomicSimultaneousCalls.decrementAndGet();
+			Long threadId = profileInfo.getThreadId();
+			ThreadTestState state = observedThreadsIds.computeIfAbsent(threadId, k -> new ThreadTestState());
+			state.accumulatedElapsedTime += profileInfo.getExecutionTime();
+			state.receivedReportsCount++;
+			receivedReportIds[(int)profileInfo.getReportId() - 1] = true;
 		}
     }
     
@@ -162,9 +168,13 @@ public class ProfileReportNewAPITest {
     	int[] outputArray = null;
     	Range range = device.createRange(size, size);
     	
-    	ReportObserverNoConcurrentCalls observer = new ReportObserverNoConcurrentCalls(device);
+    	ReportObserver observer = new ReportObserver(device, 1, runs);
     	observer.addAcceptedThreadId(Thread.currentThread().getId());
     	kernel.registerProfileReportObserver(observer);
+
+		for (int i = 0; i < runs; i++) {
+			assertFalse("Report with id " + i + " shouldn't have been received yet", observer.receivedReportIds[i]);
+		}
     	
     	long startOfExecution = System.currentTimeMillis();
     	try {
@@ -173,11 +183,17 @@ public class ProfileReportNewAPITest {
     			kernel.setInputOuputArray(outputArray);
     			kernel.execute(range);
     		}
-    		
     		long runTime = System.currentTimeMillis() - startOfExecution;
-    		assertEquals("Number of profiling reports doesn't match the expected", runs, observer.getReceivedReportsCount());
-    		assertEquals("Aparapi Accumulated execution time doesn't match", kernel.getAccumulatedExecutionTime(device), observer.getAccumulatedElapsedTime(), 1e-10);
-    		assertEquals("Test estimated accumulated time doesn't match within 100ms window", runTime, kernel.getAccumulatedExecutionTime(device), 100);
+    		ConcurrentSkipListMap<Long, ThreadTestState> results = observer.getObservedThreadsIds();
+    		ThreadTestState state = results.get(Thread.currentThread().getId());
+    		assertNotNull("Reports should have been received for thread", state);
+
+    		assertEquals("Number of profiling reports doesn't match the expected", runs, state.receivedReportsCount);
+    		assertEquals("Aparapi Accumulated execution time doesn't match", kernel.getAccumulatedExecutionTimeAllThreads(device), state.accumulatedElapsedTime, 1e-10);
+    		assertEquals("Test estimated accumulated time doesn't match within 200ms window", runTime, kernel.getAccumulatedExecutionTimeAllThreads(device), 200);
+    		for (int i = 0; i < runs; i++) {
+    			assertTrue("Report with id " + i + " wasn't received", observer.receivedReportIds[i]);
+    		}
     		assertTrue(validateBasic1Kernel(inputArray, outputArray));
     	} finally {
     		kernel.dispose();
@@ -213,33 +229,16 @@ public class ProfileReportNewAPITest {
     	private long runTime;
     	private long threadId;
     	private int kernelCalls;
+    	private double accumulatedExecutionTime;
     	private int[] outputArray;
     }
     
     @SuppressWarnings("unchecked")
-	public boolean multiThreadedSingleKernelReportObserverTestHelper(Device device, int size) throws InterruptedException, ExecutionException {
-    	final int runs = 100;
-    	final int javaThreads = 10;
-    	final int inputArray[] = new int[size];
+    public boolean multiThreadedSingleKernelReportObserverTestRunner(final ExecutorService executorService, 
+    		final List<Basic1Kernel> kernels, final ThreadResults[] results, int[] inputArray, int runs, int javaThreads,
+    		final Device device, final ReportObserver observer, int size) throws InterruptedException, ExecutionException {
     	final AtomicInteger atomicResultId = new AtomicInteger(0);
-    	final CyclicBarrier barrier = new CyclicBarrier(javaThreads);
-    	ExecutorService executorService = Executors.newFixedThreadPool(javaThreads);
-    	
-    	final ReportObserverNoConcurrentCalls observer = new ReportObserverNoConcurrentCalls(device);
-    	
-    	final List<Basic1Kernel> kernels = new ArrayList<Basic1Kernel>(javaThreads);
-    	for (int i = 0; i < javaThreads; i++) {
-        	final Basic1Kernel kernel = new Basic1Kernel();
-        	kernel.registerProfileReportObserver(observer);
-        	kernels.add(kernel);
-    	}
-    	
-    	final ThreadResults[] results = new ThreadResults[javaThreads];
-    	for (int i = 0; i < results.length; i++) {
-    		results[i] = new ThreadResults();
-    	}
-    	
-    	boolean terminatedOk = false;
+      	boolean terminatedOk = false;
     	try {
     		List<Future<Runnable>> futures = new ArrayList<>(javaThreads); 
     		for (Basic1Kernel k : kernels) {
@@ -256,24 +255,9 @@ public class ProfileReportNewAPITest {
 							k.setInputOuputArray(results[id].outputArray);
 		    				k.execute(Range.create(device, size, size));
 		    				results[id].kernelCalls++;
-		    				if (i == 0) {
-		    					//Ensure that each thread sends at least one report
-		    					boolean retry = true;
-		    					while (retry) {
-			    					try {
-										barrier.await(10, TimeUnit.SECONDS);
-										retry = false;
-									} catch (InterruptedException e) {
-										retry = true;
-									} catch (BrokenBarrierException e) {
-										throw new RuntimeException("Failed on barrier", e);
-									} catch (TimeoutException e) {
-										throw new RuntimeException("Failed on barrier", e);
-									}
-		    					}
-		    				}
 						}
-						results[id].runTime = System.currentTimeMillis() - results[id].startOfExecution;					
+						results[id].runTime = System.currentTimeMillis() - results[id].startOfExecution;
+						results[id].accumulatedExecutionTime = k.getAccumulatedExecutionTimeCurrentThread(device);
 					}
 				}));
     		}
@@ -292,32 +276,56 @@ public class ProfileReportNewAPITest {
             	executorService.shutdownNow();
             }
     	}
+    	
+    	return terminatedOk;
+    }
+    
+	public boolean multiThreadedSingleKernelReportObserverTestHelper(Device device, int size) throws InterruptedException, ExecutionException {
+    	final int runs = 100;
+    	final int javaThreads = 10;
+    	final int inputArray[] = new int[size];
+    	ExecutorService executorService = Executors.newFixedThreadPool(javaThreads);
+    	
+    	final ReportObserver observer = new ReportObserver(device, javaThreads, runs);
 
+		for (int i = 0; i < runs; i++) {
+			assertFalse("Report with id " + i + " shouldn't have been received yet", observer.receivedReportIds[i]);
+		}
+    	
+    	final List<Basic1Kernel> kernels = new ArrayList<Basic1Kernel>(javaThreads);
+    	for (int i = 0; i < javaThreads; i++) {
+        	final Basic1Kernel kernel = new Basic1Kernel();
+        	kernel.registerProfileReportObserver(observer);
+        	kernels.add(kernel);
+    	}
+    	
+    	final ThreadResults[] results = new ThreadResults[javaThreads];
+    	for (int i = 0; i < results.length; i++) {
+    		results[i] = new ThreadResults();
+    	}
+    	
+  
+    	boolean terminatedOk = multiThreadedSingleKernelReportObserverTestRunner(executorService, kernels, results, 
+    			inputArray, runs, javaThreads, device, observer, size);
+    	
     	assertTrue("Threads did not terminate correctly", terminatedOk);
     
-    	int totalNumberOfCalls = 0;
-    	double minExecutionTime = Double.MAX_VALUE;
-    	double maxExecutionTime = 0;
+    	double allThreadsAccumulatedTime = 0;
+    	ConcurrentSkipListMap<Long, ThreadTestState> states = observer.getObservedThreadsIds();
+    	assertEquals("Number of Java threads sending profile reports should match the number of JavaThreads", javaThreads, states.values().size());
     	for (int i = 0; i < javaThreads; i++) {
-    		totalNumberOfCalls += results[i].kernelCalls;
-    		maxExecutionTime = Math.max(maxExecutionTime, results[i].runTime);
-    		minExecutionTime = Math.min(minExecutionTime, results[i].runTime);
+    		ThreadTestState state = states.get(results[i].threadId);
+    		assertNotNull("Report should have been received for thread with index " + i, state);
+    		assertEquals("Number of total iteration should match number of runs for thread with index " + i, runs, results[i].kernelCalls);
+        	assertEquals("Number of received reports should match total number of calls for thread with index " + i, runs, state.receivedReportsCount);
+        	assertEquals("Overall elapsed time received in reports doesn't match KernelDeviceProfile.Accumulator for threa with index " + i,
+        			results[i].accumulatedExecutionTime, state.accumulatedElapsedTime, 1e-10);
+        	allThreadsAccumulatedTime += state.accumulatedElapsedTime;
+        	assertTrue("Thread index " + i + " kernel computation doesn't match the expected", validateBasic1Kernel(inputArray, results[i].outputArray));
     	}
-
-    	//Sometimes on slower machines, it may happen that the observer doesn't receive as many reports as the number of kernel runs.
-    	assertTrue("Number of total reports must be more than the iteration count", observer.getReceivedReportsCount() >= runs);
-    	assertTrue("Number of reports is less than the total number of calls", observer.getReceivedReportsCount() <= totalNumberOfCalls);
-    	assertTrue("Number of Java threads sending profile reports should be at least 1", observer.observedThreadsIds.size() >= 1);
-    	if (device instanceof OpenCLDevice) {
-    		//It is expected that the observer accumulated elapsed time is less than the estimated execution time, which includes additional test execution overhead.
-    		//On JTP this difference can become bigger, so Java devices are excluded from this check.
-	    	assertEquals("Report execution time doesn't match within 300ms of real min. kernel execution time", minExecutionTime, observer.getAccumulatedElapsedTime(), 300);
-	    	assertEquals("Report execution time doesn't match within 300ms of real max. kernel execution time", maxExecutionTime, observer.getAccumulatedElapsedTime(), 300);
-    	}
-    	for (int i = 0; i < javaThreads; i++) {
-    		assertEquals("Thread index " + i + " didn't make the expected number of kernel runs", runs, results[i].kernelCalls);
-    		assertTrue("Thread index " + i + " kernel computation doesn't match the expected", validateBasic1Kernel(inputArray, results[i].outputArray));
-    	}
+    	
+    	assertEquals("Overall kernel execution time doesn't match", 
+    			kernels.get(0).getAccumulatedExecutionTimeAllThreads(device), allThreadsAccumulatedTime, 1e10);
     	
     	return true;
     }
@@ -341,7 +349,7 @@ public class ProfileReportNewAPITest {
     		workArray = array;
     	}
 
-    	@NoCL
+		@NoCL
     	public int getId() {
     		return 1;
     	}
