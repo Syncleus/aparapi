@@ -35,11 +35,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import com.aparapi.Config;
 import com.aparapi.IProfileReportObserver;
 import com.aparapi.Kernel;
 import com.aparapi.ProfileReport;
@@ -58,6 +61,8 @@ import com.aparapi.internal.kernel.KernelManager;
 public class ProfileReportNewAPITest {
 
 	private static OpenCLDevice openCLDevice;
+	
+	private static Logger logger = Logger.getLogger(Config.getLoggerName());
 	
 	@Rule 
 	public TestName name = new TestName();
@@ -86,7 +91,7 @@ public class ProfileReportNewAPITest {
     	KernelManager.setKernelManager(new CLKernelManager());
         Device device = KernelManager.instance().bestDevice();
         if (device == null || !(device instanceof OpenCLDevice)) {
-        	System.out.println("!!!No OpenCLDevice available for running the integration test - test will be skipped");
+        	logger.log(Level.WARNING, "!!!No OpenCLDevice available for running the integration test - test will be skipped");
         }
         assumeTrue (device != null && device instanceof OpenCLDevice);
         openCLDevice = (OpenCLDevice) device;
@@ -100,7 +105,7 @@ public class ProfileReportNewAPITest {
     @Test
     public void singleThreadedSingleKernelObserverOpenCLTest() throws Exception {
     	setUpBefore();
-    	System.out.println("Test " + name.getMethodName() + " - Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
+    	logger.log(Level.INFO, "Test " + name.getMethodName() + " - Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
     	assertTrue(singleThreadedSingleKernelReportObserverTestHelper(openCLDevice, 128));
     }
 
@@ -209,7 +214,7 @@ public class ProfileReportNewAPITest {
     @Test
     public void multiThreadedSingleKernelObserverOpenCLTest() throws Exception {
     	setUpBefore();
-    	System.out.println("Test " + name.getMethodName() + " - Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
+    	logger.log(Level.INFO, "Test " + name.getMethodName() + " - Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
     	assertTrue(multiThreadedSingleKernelReportObserverTestHelper(openCLDevice, 128));
     }
 

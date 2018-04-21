@@ -25,12 +25,15 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import com.aparapi.Config;
 import com.aparapi.Kernel;
 import com.aparapi.ProfileReport;
 import com.aparapi.Range;
@@ -48,6 +51,8 @@ import com.aparapi.internal.kernel.KernelManager;
  */
 public class ProfileReportBackwardsCompatTest {
 	private static OpenCLDevice openCLDevice;
+	
+	private static Logger logger = Logger.getLogger(Config.getLoggerName());
 	
 	@Rule 
 	public TestName name = new TestName();
@@ -76,7 +81,7 @@ public class ProfileReportBackwardsCompatTest {
     	KernelManager.setKernelManager(new CLKernelManager());
         Device device = KernelManager.instance().bestDevice();
         if (device == null || !(device instanceof OpenCLDevice)) {
-        	System.out.println("!!!No OpenCLDevice available for running the integration test - test will be skipped");
+        	logger.log(Level.WARNING, "!!!No OpenCLDevice available for running the integration test - test will be skipped");
         }
         assumeTrue (device != null && device instanceof OpenCLDevice);
         openCLDevice = (OpenCLDevice) device;
@@ -91,7 +96,7 @@ public class ProfileReportBackwardsCompatTest {
     @Test
     public void sequentialSingleThreadOpenCLTest() throws Exception {
     	setUpBefore();
-    	System.out.println("Test " + name.getMethodName() + " - Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
+    	logger.log(Level.INFO, "Test " + name.getMethodName() + " - Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
     	assertTrue(sequentialSingleThreadTestHelper(openCLDevice, 128));
     }
 
@@ -103,7 +108,7 @@ public class ProfileReportBackwardsCompatTest {
     public void sequentialSingleThreadJTPTest() {
     	KernelManager.setKernelManager(new JTPKernelManager());
     	Device device = KernelManager.instance().bestDevice();
-    	assertTrue(sequentialSingleThreadTestHelper(device, 32));
+    	assertTrue(sequentialSingleThreadTestHelper(device, 16));
     }
 
     
@@ -159,7 +164,7 @@ public class ProfileReportBackwardsCompatTest {
     @Test
     public void threadedSingleThreadPerKernelOpenCLTest() throws Exception {
     	setUpBefore();
-    	System.out.println("Test " + name.getMethodName() + " - Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
+    	logger.log(Level.INFO, "Test " + name.getMethodName() + " - Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
     	assertTrue(threadedSingleThreadPerKernelTestHelper(openCLDevice, 128));
     }
     
