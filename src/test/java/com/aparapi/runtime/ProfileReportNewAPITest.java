@@ -225,7 +225,6 @@ public class ProfileReportNewAPITest {
     }
 
     private class ThreadResults {
-    	private long startOfExecution;
     	private long runTime;
     	private long threadId;
     	private int kernelCalls;
@@ -248,7 +247,7 @@ public class ProfileReportNewAPITest {
 						int id = atomicResultId.getAndIncrement();
 						results[id].threadId = Thread.currentThread().getId();
 						observer.addAcceptedThreadId(results[id].threadId);
-						results[id].startOfExecution = System.currentTimeMillis();
+						long startOfExecution = System.currentTimeMillis();
 						results[id].kernelCalls = 0;
 						for (int i = 0; i < runs; i++) {
 							results[id].outputArray = Arrays.copyOf(inputArray, inputArray.length);
@@ -256,7 +255,7 @@ public class ProfileReportNewAPITest {
 		    				k.execute(Range.create(device, size, size));
 		    				results[id].kernelCalls++;
 						}
-						results[id].runTime = System.currentTimeMillis() - results[id].startOfExecution;
+						results[id].runTime = System.currentTimeMillis() - startOfExecution;
 						results[id].accumulatedExecutionTime = k.getAccumulatedExecutionTimeCurrentThread(device);
 					}
 				}));

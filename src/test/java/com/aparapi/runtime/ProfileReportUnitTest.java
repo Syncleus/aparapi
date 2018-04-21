@@ -15,7 +15,11 @@
  */
 package com.aparapi.runtime;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -27,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
-import org.junit.runners.model.TestTimedOutException;
 
 import com.aparapi.IProfileReportObserver;
 import com.aparapi.Kernel;
