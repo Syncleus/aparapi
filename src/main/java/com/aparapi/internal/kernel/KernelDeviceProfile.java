@@ -46,6 +46,12 @@ public class KernelDeviceProfile {
    private final DecimalFormat format;
    private final AtomicLong invocationCountGlobal = new AtomicLong(0);
    private final AtomicReference<Accumulator> lastAccumulator = new AtomicReference<Accumulator>(null);
+
+   private final GlobalAccumulator globalAcc = new GlobalAccumulator();
+
+   private final Map<Thread,Accumulator> accs = Collections.synchronizedMap(
+           new WeakHashMap<Thread,Accumulator>(Runtime.getRuntime().availableProcessors()*2, 0.95f)
+   );
    
    static {
       assert ProfilingEvent.START.ordinal() == 0 : "ProfilingEvent.START.ordinal() != 0";
@@ -155,12 +161,6 @@ public class KernelDeviceProfile {
 	      }		   
 	   }
    }
-
-   private final GlobalAccumulator globalAcc = new GlobalAccumulator();
-
-   private final Map<Thread,Accumulator> accs = Collections.synchronizedMap(
-           new WeakHashMap<Thread,Accumulator>(Runtime.getRuntime().availableProcessors()*2, 0.95f)
-   );
 
    private Accumulator getAccForThreadPutIfAbsent() {
        Thread t = Thread.currentThread();

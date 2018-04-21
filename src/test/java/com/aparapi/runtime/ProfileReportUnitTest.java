@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
+import org.junit.runners.model.TestTimedOutException;
 
 import com.aparapi.IProfileReportObserver;
 import com.aparapi.Kernel;
@@ -48,16 +49,18 @@ public class ProfileReportUnitTest {
 
 		@Override
 		public void run() {
+			//Empty method intended
 		}		
 	}
 		
 	/**
 	 * This test validates that all threads can start a profiling process after another thread
 	 * that has already started profiling.
+	 * @throws InterruptedException 
 	 * @throws Exception 
 	 */
 	@Test
-	public void testAllThreadCanStartPass() throws Exception {
+	public void testAllThreadCanStartPass() throws IllegalStateException, InterruptedException {
 		final int javaThreads = ProfilingEvent.values().length;
 		final KernelProfile kernelProfile = new KernelProfile(SimpleKernel.class);
 		final KernelDeviceProfile kernelDeviceProfile = new KernelDeviceProfile(kernelProfile, SimpleKernel.class, JavaDevice.THREAD_POOL);
@@ -93,7 +96,7 @@ public class ProfileReportUnitTest {
 			executorService.shutdown();
 			if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
 				executorService.shutdownNow();
-				throw new Exception("ExecutorService terminated abnormaly");
+				throw new IllegalStateException("ExecutorService terminated abnormaly");
 			}
 		}
 		
@@ -138,7 +141,7 @@ public class ProfileReportUnitTest {
 		report.setProfileReport(reportId, values);
 		
 		ProfileReport clonedReport = report.clone();
-		assertTrue("Object references shouldn't be the same", report != clonedReport);
+		assertNotEquals("Object references shouldn't be the same", report, clonedReport);
 		assertEquals("Report Id doesn't match", reportId, clonedReport.getReportId());
 		assertEquals("Class doesn't match", SimpleKernel.class, clonedReport.getKernelClass());
 		assertEquals("Device doesn't match", JavaDevice.THREAD_POOL, clonedReport.getDevice());

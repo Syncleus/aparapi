@@ -322,6 +322,7 @@ public class ProfileReportNewAPITest {
         			results[i].accumulatedExecutionTime, state.accumulatedElapsedTime, 1e-10);
         	allThreadsAccumulatedTime += state.accumulatedElapsedTime;
         	assertTrue("Thread index " + i + " kernel computation doesn't match the expected", validateBasic1Kernel(inputArray, results[i].outputArray));
+        	assertEquals("Runtime is not within 600ms of the kernel estimated", results[i].runTime, state.accumulatedElapsedTime, 600);
     	}
     	
     	assertEquals("Overall kernel execution time doesn't match", 
