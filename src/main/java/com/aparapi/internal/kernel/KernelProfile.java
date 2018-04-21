@@ -27,13 +27,14 @@ import java.util.logging.*;
  */
 public class KernelProfile {
 
-   private static final double MILLION = 1000000d;
+   public static final double MILLION = 1000000d;
    private static Logger logger = Logger.getLogger(Config.getLoggerName());
    private final Class<? extends Kernel> kernelClass;
    private LinkedHashMap<Device, KernelDeviceProfile> deviceProfiles = new LinkedHashMap<>();
    private Device currentDevice;
    private Device lastDevice;
    private KernelDeviceProfile currentDeviceProfile;
+   private IProfileReportObserver observer;
 
    public KernelProfile(Class<? extends Kernel> _kernelClass) {
       kernelClass = _kernelClass;
@@ -41,12 +42,12 @@ public class KernelProfile {
 
    public double getLastExecutionTime() {
       KernelDeviceProfile lastDeviceProfile = getLastDeviceProfile();
-      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getLastElapsedTime(ProfilingEvent.START, ProfilingEvent.EXECUTED) / MILLION;
+      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getElapsedTimeLastThread(ProfilingEvent.START.ordinal(), ProfilingEvent.EXECUTED.ordinal());
    }
 
    public double getLastConversionTime() {
       KernelDeviceProfile lastDeviceProfile = getLastDeviceProfile();
-      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getLastElapsedTime(ProfilingEvent.START, ProfilingEvent.PREPARE_EXECUTE) / MILLION;
+      return lastDeviceProfile == null ? Double.NaN : lastDeviceProfile.getElapsedTimeLastThread(ProfilingEvent.START.ordinal(), ProfilingEvent.PREPARE_EXECUTE.ordinal());
    }
 
    public double getAccumulatedTotalTime() {
@@ -55,7 +56,7 @@ public class KernelProfile {
          return Double.NaN;
       }
       else {
-         return lastDeviceProfile.getCumulativeElapsedTimeAll() / MILLION;
+         return lastDeviceProfile.getCumulativeElapsedTimeAllGlobal() / MILLION;
       }
    }
 
@@ -64,15 +65,16 @@ public class KernelProfile {
    }
 
    void onStart(Device device) {
-      currentDevice = device;
       synchronized (deviceProfiles) {
          currentDeviceProfile = deviceProfiles.get(device);
          if (currentDeviceProfile == null) {
-            currentDeviceProfile = new KernelDeviceProfile(kernelClass, device);
+            currentDeviceProfile = new KernelDeviceProfile(this, kernelClass, device);
             deviceProfiles.put(device, currentDeviceProfile);
          }
       }
+      
       currentDeviceProfile.onEvent(ProfilingEvent.START);
+      currentDevice = device;
    }
 
    void onEvent(ProfilingEvent event) {
@@ -117,5 +119,13 @@ public class KernelProfile {
 
    public KernelDeviceProfile getDeviceProfile(Device device) {
       return deviceProfiles.get(device);
+   }
+
+   public void setReportObserver(IProfileReportObserver _observer) {
+	  observer = _observer;
+   }
+   
+   public IProfileReportObserver getReportObserver() {
+	   return observer;
    }
 }
