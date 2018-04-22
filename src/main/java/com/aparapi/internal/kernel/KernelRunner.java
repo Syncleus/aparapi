@@ -685,7 +685,7 @@ public class KernelRunner extends KernelRunnerJNI{
                   
                   long deathCount = handler.threadsDiedCounter.get() - deadThreadCount;
                   if (deathCount > 0) {
-                	  logger.log(Level.SEVERE, deathCount + "Pool threads died during execution of kernel: " + kernel.getClass().getName() + " at pass: " + passId);
+                	  logger.log(Level.SEVERE, "(" + deathCount + ") Pool threads died during execution of kernel: " + kernel.getClass().getName() + " at pass: " + passId);
                   }
                }
                passId = PASS_ID_COMPLETED_EXECUTION;
