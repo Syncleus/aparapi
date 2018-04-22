@@ -46,5 +46,5 @@ Below are some of the specific details of various contributions.
 * Luis Mendes submited PR to support passing functions arguments containing Local arrays - issue #79
 * Luis Mendes submited PR for issue #81 - Full OpenCL 1.2 atomics support with AtomicInteger 
 * Luis Mendes submited PR for issue #84 - Fully support OpenCL 1.2 barrier() - localBarrier(),  globalBarrier() and localGlobalBarrier()
-* Luis Mendes with suggestions by Automenta submited PR for issue #62 and implemented new thread-sage API for Kernel profiling
+* Luis Mendes with suggestions by Automenta submited PR for issue #62 and implemented new thread-safe API for Kernel profiling
 * Luis Mendes submited PR for issue #101 - Possible deadlock in JTP mode
