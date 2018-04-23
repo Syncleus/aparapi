@@ -31,8 +31,10 @@ public class MultiplePassesMemoryConsumptionTest {
                 globalArray[getGlobalId()] = getGlobalId();
             }
         };
+        System.gc();
         long baseFree = Runtime.getRuntime().freeMemory();
         for (int loop = 0; loop < 100; loop++) {
+            System.gc();
             if( baseFree > Runtime.getRuntime().freeMemory())
                 baseFree = Runtime.getRuntime().freeMemory();
             kernel.execute(Range.create(512, 64), 1);
@@ -40,8 +42,11 @@ public class MultiplePassesMemoryConsumptionTest {
                 Assert.assertEquals("Wrong", i, globalArray[i]);
             }
         }
+
+        System.gc();
         long testFree = Runtime.getRuntime().freeMemory();
         for (int loop = 0; loop < 100; loop++) {
+            System.gc();
             if( testFree > Runtime.getRuntime().freeMemory())
                 testFree = Runtime.getRuntime().freeMemory();
             kernel.execute(Range.create(512, 64), 2);
