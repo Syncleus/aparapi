@@ -1,11 +1,11 @@
 # Aparapi Changelog
 
 ## 1.7.0
-* Fully support OpenCL 1.2 barrier() - localBarrier(),  globalBarrier() and localGlobalBarrier()
+* Fully support barrier() - localBarrier(),  globalBarrier() and localGlobalBarrier() on OpenCL 1.2 and later.
 * Improved exception handling, stack traces no longer double print and Error and other throwables are never caught.
-* Fix issue #62 - SEVERE log messages on Aparapi kernel profiling under multithreading 
+* Fix issue causing SEVERE log messages on Aparapi kernel profiling under multithreading 
 * Provide new interfaces for thread safe kernel profiling (mutiple threads calling same kernel class on same device)
-* Fix issue #101 - Possible deadlock in JTP execution mode
+* Fixed occasional deadlock in JTP execution mode
 
 ## 1.6.0
 
