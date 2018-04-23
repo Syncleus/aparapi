@@ -84,10 +84,12 @@ public class KernelPreferences {
    }
 
    private void maybeSetUpDefaultPreferredDevices() {
-	   preferredDevices.compareAndSet(null, new LinkedList<>(manager.getDefaultPreferences().getPreferredDevices(null)));
+	   if (preferredDevices.get() == null) {
+		   preferredDevices.compareAndSet(null, new LinkedList<>(manager.getDefaultPreferences().getPreferredDevices(null)));
+	   }
    }
 
-   public List<Device> getFailedDevices() {
+   public synchronized List<Device> getFailedDevices() {
       return new ArrayList<>(failedDevices);
    }
 }
