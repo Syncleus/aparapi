@@ -63,42 +63,6 @@ public class JtpRangeIdsTest {
         },
         {
             4,//globalThreadId
-            4,//threadId
-            0,//globalX
-            1,//globalY
-            0,//localX
-            1
-            //localY
-        },
-        {
-            5,//globalThreadId
-            5,//threadId
-            1,//globalX
-            1,//globalY
-            1,//localX
-            1
-            //localY
-        },
-        {
-            6,//globalThreadId
-            6,//threadId
-            2,//globalX
-            1,//globalY
-            2,//localX
-            1
-            //localY
-        },
-        {
-            7,//globalThreadId
-            7,//threadId
-            3,//globalX
-            1,//globalY
-            3,//localX
-            1
-            //localY
-        },
-        {
-            8,//globalThreadId
             0,//threadId
             4,//globalX
             0,//globalY
@@ -107,7 +71,7 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            9,//globalThreadId
+            5,//globalThreadId
             1,//threadId
             5,//globalX
             0,//globalY
@@ -116,7 +80,7 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            10,//globalThreadId
+            6,//globalThreadId
             2,//threadId
             6,//globalX
             0,//globalY
@@ -125,7 +89,7 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            11,//globalThreadId
+            7,//globalThreadId
             3,//threadId
             7,//globalX
             0,//globalY
@@ -134,43 +98,7 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            12,//globalThreadId
-            4,//threadId
-            4,//globalX
-            1,//globalY
-            0,//localX
-            1
-            //localY
-        },
-        {
-            13,//globalThreadId
-            5,//threadId
-            5,//globalX
-            1,//globalY
-            1,//localX
-            1
-            //localY
-        },
-        {
-            14,//globalThreadId
-            6,//threadId
-            6,//globalX
-            1,//globalY
-            2,//localX
-            1
-            //localY
-        },
-        {
-            15,//globalThreadId
-            7,//threadId
-            7,//globalX
-            1,//globalY
-            3,//localX
-            1
-            //localY
-        },
-        {
-            16,//globalThreadId
+            8,//globalThreadId
             0,//threadId
             8,//globalX
             0,//globalY
@@ -179,7 +107,7 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            17,//globalThreadId
+            9,//globalThreadId
             1,//threadId
             9,//globalX
             0,//globalY
@@ -188,7 +116,7 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            18,//globalThreadId
+            10,//globalThreadId
             2,//threadId
             10,//globalX
             0,//globalY
@@ -197,12 +125,84 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            19,//globalThreadId
+            11,//globalThreadId
             3,//threadId
             11,//globalX
             0,//globalY
             3,//localX
             0
+            //localY
+        },
+        {
+            12,//globalThreadId
+            4,//threadId
+            0,//globalX
+            1,//globalY
+            0,//localX
+            1
+            //localY
+        },
+        {
+            13,//globalThreadId
+            5,//threadId
+            1,//globalX
+            1,//globalY
+            1,//localX
+            1
+            //localY
+        },
+        {
+            14,//globalThreadId
+            6,//threadId
+            2,//globalX
+            1,//globalY
+            2,//localX
+            1
+            //localY
+        },
+        {
+            15,//globalThreadId
+            7,//threadId
+            3,//globalX
+            1,//globalY
+            3,//localX
+            1
+            //localY
+        },
+        {
+            16,//globalThreadId
+            4,//threadId
+            4,//globalX
+            1,//globalY
+            0,//localX
+            1
+            //localY
+        },
+        {
+            17,//globalThreadId
+            5,//threadId
+            5,//globalX
+            1,//globalY
+            1,//localX
+            1
+            //localY
+        },
+        {
+            18,//globalThreadId
+            6,//threadId
+            6,//globalX
+            1,//globalY
+            2,//localX
+            1
+            //localY
+        },
+        {
+            19,//globalThreadId
+            7,//threadId
+            7,//globalX
+            1,//globalY
+            3,//localX
+            1
             //localY
         },
 
@@ -280,42 +280,6 @@ public class JtpRangeIdsTest {
         },
         {
             28,//globalThreadId
-            4,//threadId
-            0,//globalX
-            3,//globalY
-            0,//localX
-            1
-            //localY
-        },
-        {
-            29,//globalThreadId
-            5,//threadId
-            1,//globalX
-            3,//globalY
-            1,//localX
-            1
-            //localY
-        },
-        {
-            30,//globalThreadId
-            6,//threadId
-            2,//globalX
-            3,//globalY
-            2,//localX
-            1
-            //localY
-        },
-        {
-            31,//globalThreadId
-            7,//threadId
-            3,//globalX
-            3,//globalY
-            3,//localX
-            1
-            //localY
-        },
-        {
-            32,//globalThreadId
             0,//threadId
             4,//globalX
             2,//globalY
@@ -324,7 +288,7 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            33,//globalThreadId
+            29,//globalThreadId
             1,//threadId
             5,//globalX
             2,//globalY
@@ -333,7 +297,7 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            34,//globalThreadId
+            30,//globalThreadId
             2,//threadId
             6,//globalX
             2,//globalY
@@ -342,7 +306,7 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            35,//globalThreadId
+            31,//globalThreadId
             3,//threadId
             7,//globalX
             2,//globalY
@@ -351,43 +315,7 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            36,//globalThreadId
-            4,//threadId
-            4,//globalX
-            3,//globalY
-            0,//localX
-            1
-            //localY
-        },
-        {
-            37,//globalThreadId
-            5,//threadId
-            5,//globalX
-            3,//globalY
-            1,//localX
-            1
-            //localY
-        },
-        {
-            38,//globalThreadId
-            6,//threadId
-            6,//globalX
-            3,//globalY
-            2,//localX
-            1
-            //localY
-        },
-        {
-            39,//globalThreadId
-            7,//threadId
-            7,//globalX
-            3,//globalY
-            3,//localX
-            1
-            //localY
-        },
-        {
-            40,//globalThreadId
+            32,//globalThreadId
             0,//threadId
             8,//globalX
             2,//globalY
@@ -396,7 +324,7 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            41,//globalThreadId
+            33,//globalThreadId
             1,//threadId
             9,//globalX
             2,//globalY
@@ -405,7 +333,7 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            42,//globalThreadId
+            34,//globalThreadId
             2,//threadId
             10,//globalX
             2,//globalY
@@ -414,12 +342,84 @@ public class JtpRangeIdsTest {
             //localY
         },
         {
-            43,//globalThreadId
+            35,//globalThreadId
             3,//threadId
             11,//globalX
             2,//globalY
             3,//localX
             0
+            //localY
+        },
+        {
+            36,//globalThreadId
+            4,//threadId
+            0,//globalX
+            3,//globalY
+            0,//localX
+            1
+            //localY
+        },
+        {
+            37,//globalThreadId
+            5,//threadId
+            1,//globalX
+            3,//globalY
+            1,//localX
+            1
+            //localY
+        },
+        {
+            38,//globalThreadId
+            6,//threadId
+            2,//globalX
+            3,//globalY
+            2,//localX
+            1
+            //localY
+        },
+        {
+            39,//globalThreadId
+            7,//threadId
+            3,//globalX
+            3,//globalY
+            3,//localX
+            1
+            //localY
+        },
+        {
+            40,//globalThreadId
+            4,//threadId
+            4,//globalX
+            3,//globalY
+            0,//localX
+            1
+            //localY
+        },
+        {
+            41,//globalThreadId
+            5,//threadId
+            5,//globalX
+            3,//globalY
+            1,//localX
+            1
+            //localY
+        },
+        {
+            42,//globalThreadId
+            6,//threadId
+            6,//globalX
+            3,//globalY
+            2,//localX
+            1
+            //localY
+        },
+        {
+            43,//globalThreadId
+            7,//threadId
+            7,//globalX
+            3,//globalY
+            3,//localX
+            1
             //localY
         },
 
@@ -461,7 +461,6 @@ public class JtpRangeIdsTest {
         },
     };
 
-    @Ignore("Known bug, ignoring until fixed.")
     @Test
     public void test() {
         MatrixKernel kernel = new MatrixKernel();
