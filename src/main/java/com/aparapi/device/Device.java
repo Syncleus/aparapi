@@ -18,7 +18,7 @@ package com.aparapi.device;
 import com.aparapi.*;
 import com.aparapi.internal.kernel.*;
 
-public abstract class Device{
+public abstract class Device implements Comparable<Device> {
 
    public static enum TYPE {
       UNKNOWN(Integer.MAX_VALUE),
@@ -178,5 +178,21 @@ public abstract class Device{
    @Override
    public int hashCode() {
       return Long.valueOf(getDeviceId()).hashCode();
+   }
+   
+   public int compareTo(Device other) {
+	   if (type.rank < other.type.rank) {
+		   return -1;
+	   } else if (type.rank > other.type.rank) {
+		   return 1;
+	   }
+	   
+	   if (getDeviceId() < other.getDeviceId()) {
+		   return -1;
+	   } else if (getDeviceId() > other.getDeviceId()) {
+		   return 1;
+	   }
+	   
+	   return 0;
    }
 }
