@@ -75,9 +75,12 @@ public class KernelProfile {
     */
    void onStart(Device device) {
 	  KernelDeviceProfile currentDeviceProfile = deviceProfiles.get(device);
-      if (currentDeviceProfile == null) {
+      if (currentDeviceProfile == null) {    	 
          currentDeviceProfile = new KernelDeviceProfile(this, kernelClass, device);
-         deviceProfiles.put(device, currentDeviceProfile);
+         KernelDeviceProfile existingProfile = deviceProfiles.putIfAbsent(device, currentDeviceProfile);
+         if (existingProfile != null) {
+        	 currentDeviceProfile = existingProfile;
+         }
       }
       
       currentDeviceProfile.onEvent(ProfilingEvent.START);
