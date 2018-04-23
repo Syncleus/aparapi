@@ -2,6 +2,7 @@
 
 ## 1.8.0
 * Updated KernelManager to facilitate class extensions having constructors with non static parameters
+* Enable kernel profiling and execution simultaneously on multiple devices (multiple threads calling same kernel class on multiple devices)
 
 ## 1.7.0
 

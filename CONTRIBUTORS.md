@@ -49,3 +49,4 @@ Below are some of the specific details of various contributions.
 * Luis Mendes with suggestions by Automenta submited PR for issue #62 and implemented new thread-safe API for Kernel profiling
 * Luis Mendes submited PR for issue #101 - Possible deadlock in JTP mode
 * Luis Mendes submited PR to facilitate KernelManager class extension with non-static parameters in constructors
+* Luis Mendes submited PR to Enable kernel profiling and execution simultaneously on multiple devices

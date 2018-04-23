@@ -366,7 +366,7 @@ public class KernelRunner extends KernelRunnerJNI{
       boolean legacySequentialMode = kernel.getExecutionMode().equals(Kernel.EXECUTION_MODE.SEQ);
 
       passId = PASS_ID_PREPARING_EXECUTION;
-      _settings.profile.onEvent(ProfilingEvent.PREPARE_EXECUTE);
+      _settings.profile.onEvent(device, ProfilingEvent.PREPARE_EXECUTE);
 
       try {
          if (device == JavaDevice.ALTERNATIVE_ALGORITHM) {
@@ -376,7 +376,7 @@ public class KernelRunner extends KernelRunnerJNI{
                }
             } else {
                boolean silently = true; // not having an alternative algorithm is the normal state, and does not need reporting
-               fallBackToNextDevice(_settings, (Exception) null, silently);
+               fallBackToNextDevice(device, _settings, (Exception) null, silently);
             }
          } else {
             final int localSize0 = _settings.range.getLocalSize(0);
@@ -1214,7 +1214,7 @@ public class KernelRunner extends KernelRunnerJNI{
    }
 
    @SuppressWarnings("deprecation")
-   private Kernel executeOpenCL(ExecutionSettings _settings) throws AparapiException {
+   private Kernel executeOpenCL(Device device, ExecutionSettings _settings) throws AparapiException {
 
       // Read the array refs after kernel may have changed them
       // We need to do this as input to computing the localSize
@@ -1228,7 +1228,7 @@ public class KernelRunner extends KernelRunnerJNI{
       int returnValue = runKernelJNI(jniContextHandle, _settings.range, needSync, _settings.passes, inBufferRemote, outBufferRemote);
       if (returnValue != 0) {
          String reason = "OpenCL execution seems to have failed (runKernelJNI returned " + returnValue + ")";
-         return fallBackToNextDevice(_settings, new AparapiException(reason));
+         return fallBackToNextDevice(device, _settings, new AparapiException(reason));
       }
 
       if (usesOopConversion == true) {
@@ -1282,19 +1282,19 @@ public class KernelRunner extends KernelRunnerJNI{
       }
    }
 
-   private Kernel fallBackToNextDevice(ExecutionSettings _settings, String _reason) {
-      return fallBackToNextDevice(_settings, new AparapiException(_reason));
+   private Kernel fallBackToNextDevice(Device device, ExecutionSettings _settings, String _reason) {
+      return fallBackToNextDevice(device, _settings, new AparapiException(_reason));
    }
 
    @SuppressWarnings("deprecation")
-   synchronized private Kernel fallBackToNextDevice(ExecutionSettings _settings, Exception _exception) {
-      return fallBackToNextDevice(_settings, _exception, false);
+   synchronized private Kernel fallBackToNextDevice(Device device, ExecutionSettings _settings, Exception _exception) {
+      return fallBackToNextDevice(device, _settings, _exception, false);
    }
 
    @SuppressWarnings("deprecation")
-   synchronized private Kernel fallBackToNextDevice(ExecutionSettings _settings, Exception _exception, boolean _silently) {
+   synchronized private Kernel fallBackToNextDevice(Device device, ExecutionSettings _settings, Exception _exception, boolean _silently) {
       isFallBack = true;
-      _settings.profile.onEvent(ProfilingEvent.EXECUTED);
+      _settings.profile.onEvent(device, ProfilingEvent.EXECUTED);
       if (_settings.legacyExecutionMode) {
          if (!_silently && logger.isLoggable(Level.WARNING)) {
             logger.warning("Execution mode " + kernel.getExecutionMode() + " failed for " + kernel + ": " + _exception.getMessage());
@@ -1368,7 +1368,7 @@ public class KernelRunner extends KernelRunnerJNI{
       EXECUTION_MODE requestedExecutionMode = kernel.getExecutionMode();
 
       if (requestedExecutionMode.isOpenCL() && _settings.range.getDevice() != null && !(_settings.range.getDevice() instanceof OpenCLDevice)) {
-         fallBackToNextDevice(_settings, "OpenCL EXECUTION_MODE was requested but Device supplied was not an OpenCLDevice");
+         fallBackToNextDevice(_settings.range.getDevice(), _settings, "OpenCL EXECUTION_MODE was requested but Device supplied was not an OpenCLDevice");
       }
 
       Device device = _settings.range.getDevice();
@@ -1407,20 +1407,20 @@ public class KernelRunner extends KernelRunnerJNI{
                openCLDevice = (OpenCLDevice) KernelManager.DeprecatedMethods.bestGPU();
                jniFlags |= JNI_FLAG_USE_GPU; // this flag might be redundant now.
                if (openCLDevice == null) {
-                  return fallBackToNextDevice(_settings, "GPU request can't be honored, no GPU device");
+                  return fallBackToNextDevice(null, _settings, "GPU request can't be honored, no GPU device");
                }
             } else if (requestedExecutionMode.equals(EXECUTION_MODE.ACC)) {
                // Get the best ACC
                openCLDevice = (OpenCLDevice) KernelManager.DeprecatedMethods.bestACC();
                jniFlags |= JNI_FLAG_USE_ACC; // this flag might be redundant now.
                if (openCLDevice == null) {
-                  return fallBackToNextDevice(_settings, "ACC request can't be honored, no ACC device");
+                  return fallBackToNextDevice(null, _settings, "ACC request can't be honored, no ACC device");
                }
             } else {
                // We fetch the first CPU device
                openCLDevice = (OpenCLDevice) KernelManager.DeprecatedMethods.firstDevice(Device.TYPE.CPU);
                if (openCLDevice == null) {
-                  return fallBackToNextDevice(_settings, "CPU request can't be honored, no CPU device");
+                  return fallBackToNextDevice(null, _settings, "CPU request can't be honored, no CPU device");
                }
             }
          } else {
@@ -1443,10 +1443,10 @@ public class KernelRunner extends KernelRunnerJNI{
                   try {
                      final ClassModel classModel = ClassModel.createClassModel(kernel.getClass());
                      entryPoint = classModel.getEntrypoint(_settings.entrypoint, kernel);
-                     _settings.profile.onEvent(ProfilingEvent.CLASS_MODEL_BUILT);
+                     _settings.profile.onEvent(device, ProfilingEvent.CLASS_MODEL_BUILT);
                   } catch (final Exception exception) {
-                     _settings.profile.onEvent(ProfilingEvent.CLASS_MODEL_BUILT);
-                     return fallBackToNextDevice(_settings, exception);
+                     _settings.profile.onEvent(device, ProfilingEvent.CLASS_MODEL_BUILT);
+                     return fallBackToNextDevice(device, _settings, exception);
                   }
                }
 
@@ -1461,11 +1461,11 @@ public class KernelRunner extends KernelRunnerJNI{
                      // Init the device to check capabilities before emitting the
                      // code that requires the capabilities.
                      jniContextHandle = initJNI(kernel, openCLDevice, jniFlags); // openCLDevice will not be null here
-                     _settings.profile.onEvent(ProfilingEvent.INIT_JNI);
+                     _settings.profile.onEvent(device, ProfilingEvent.INIT_JNI);
                   } // end of synchronized! issue 68
 
                   if (jniContextHandle == 0) {
-                     return fallBackToNextDevice(_settings, "initJNI failed to return a valid handle");
+                     return fallBackToNextDevice(device, _settings, "initJNI failed to return a valid handle");
                   }
 
                   final String extensions = getExtensionsJNI(jniContextHandle);
@@ -1481,11 +1481,11 @@ public class KernelRunner extends KernelRunnerJNI{
                   }
 
                   if (entryPoint.requiresDoublePragma() && !hasFP64Support()) {
-                     return fallBackToNextDevice(_settings, "FP64 required but not supported");
+                     return fallBackToNextDevice(device, _settings, "FP64 required but not supported");
                   }
 
                   if (entryPoint.requiresByteAddressableStorePragma() && !hasByteAddressableStoreSupport()) {
-                     return fallBackToNextDevice(_settings, "Byte addressable stores required but not supported");
+                     return fallBackToNextDevice(device, _settings, "Byte addressable stores required but not supported");
                   }
 
                   final boolean all32AtomicsAvailable = hasGlobalInt32BaseAtomicsSupport()
@@ -1494,7 +1494,7 @@ public class KernelRunner extends KernelRunnerJNI{
 
                   if (entryPoint.requiresAtomic32Pragma() && !all32AtomicsAvailable) {
 
-                     return fallBackToNextDevice(_settings, "32 bit Atomics required but not supported");
+                     return fallBackToNextDevice(device, _settings, "32 bit Atomics required but not supported");
                   }
 
                   String openCL;
@@ -1509,20 +1509,20 @@ public class KernelRunner extends KernelRunnerJNI{
                            else if (Config.enableShowGeneratedOpenCL) {
                               System.out.println(openCL);
                            }
-                           _settings.profile.onEvent(ProfilingEvent.OPENCL_GENERATED);
+                           _settings.profile.onEvent(device, ProfilingEvent.OPENCL_GENERATED);
                            openCLCache.put(kernel.getClass(), openCL);
                         }
                         catch (final CodeGenException codeGenException) {
                            openCLCache.put(kernel.getClass(), CODE_GEN_ERROR_MARKER);
-                           _settings.profile.onEvent(ProfilingEvent.OPENCL_GENERATED);
-                           return fallBackToNextDevice(_settings, codeGenException);
+                           _settings.profile.onEvent(device, ProfilingEvent.OPENCL_GENERATED);
+                           return fallBackToNextDevice(device, _settings, codeGenException);
                         }
                      }
                      else {
                         if (openCL.equals(CODE_GEN_ERROR_MARKER)) {
-                           _settings.profile.onEvent(ProfilingEvent.OPENCL_GENERATED);
+                           _settings.profile.onEvent(device, ProfilingEvent.OPENCL_GENERATED);
                            boolean silently = true; // since we must have already reported the CodeGenException
-                           return fallBackToNextDevice(_settings, null, silently);
+                           return fallBackToNextDevice(device, _settings, null, silently);
                         }
                      }
                   }
@@ -1547,9 +1547,9 @@ public class KernelRunner extends KernelRunnerJNI{
                         }
                      }
                   }
-                  _settings.profile.onEvent(ProfilingEvent.OPENCL_COMPILED);
+                  _settings.profile.onEvent(device, ProfilingEvent.OPENCL_COMPILED);
                   if (handle == 0) {
-                     return fallBackToNextDevice(_settings, "OpenCL compile failed");
+                     return fallBackToNextDevice(device, _settings, "OpenCL compile failed");
                   }
                   
                   args = new KernelArg[entryPoint.getReferencedFields().size()];
@@ -1600,7 +1600,7 @@ public class KernelRunner extends KernelRunnerJNI{
                               try {
                                  setMultiArrayType(args[i], type);
                               } catch (AparapiException e) {
-                                 return fallBackToNextDevice(_settings, "failed to set kernel arguement "
+                                 return fallBackToNextDevice(device, _settings, "failed to set kernel arguement "
                                        + args[i].getName() + ".  Aparapi only supports 2D and 3D arrays.");
                               }
                            } else {
@@ -1677,27 +1677,27 @@ public class KernelRunner extends KernelRunnerJNI{
                   argc = i;
 
                   setArgsJNI(jniContextHandle, args, argc);
-                  _settings.profile.onEvent(ProfilingEvent.PREPARE_EXECUTE);
+                  _settings.profile.onEvent(device, ProfilingEvent.PREPARE_EXECUTE);
                   try {
-                     executeOpenCL(_settings);
+                     executeOpenCL(device, _settings);
                      isFallBack = false;
                   } catch (final AparapiException e) {
-                     fallBackToNextDevice(_settings, e);
+                     fallBackToNextDevice(device, _settings, e);
                   }
                } else { // (entryPoint != null) && !entryPoint.shouldFallback()
-                  fallBackToNextDevice(_settings, "failed to locate entrypoint");
+                  fallBackToNextDevice(device, _settings, "failed to locate entrypoint");
                }
             } else { // (entryPoint == null) || (isFallBack)
                try {
-                  executeOpenCL(_settings);
+                  executeOpenCL(device, _settings);
                   isFallBack = false;
                } catch (final AparapiException e) {
-                  fallBackToNextDevice(_settings, e);
+                  fallBackToNextDevice(device, _settings, e);
                }
             }
          } else { // isOpenCL
             if (!(device instanceof JavaDevice)) {
-               fallBackToNextDevice(_settings, "Non-OpenCL Kernel.EXECUTION_MODE requested but device is not a JavaDevice ");
+               fallBackToNextDevice(device, _settings, "Non-OpenCL Kernel.EXECUTION_MODE requested but device is not a JavaDevice ");
             }
             executeJava(_settings, (JavaDevice) device);
          }
@@ -1709,7 +1709,7 @@ public class KernelRunner extends KernelRunnerJNI{
          return kernel;
       }
       finally {
-         _settings.profile.onEvent(ProfilingEvent.EXECUTED);
+         _settings.profile.onEvent(device, ProfilingEvent.EXECUTED);
          maybeReportProfile(_settings);
       }
    }
