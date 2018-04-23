@@ -1307,6 +1307,8 @@ public class KernelRunner extends KernelRunnerJNI{
             logger.warning("Device failed for " + kernel + ": " + _exception.getMessage());
          }
 
+         //This method is synchronized thus ensuring thread safety on concurrent executions of the same kernel class,
+         //since preferences is shared between such threads.
          preferences.markPreferredDeviceFailed();
 
 //         Device nextDevice = preferences.getPreferredDevice(kernel);
@@ -1337,11 +1339,7 @@ public class KernelRunner extends KernelRunnerJNI{
          boolean legacyExecutionMode = kernel.getExecutionMode() != Kernel.EXECUTION_MODE.AUTO;
 
          ExecutionSettings settings = new ExecutionSettings(preferences, profile, _entrypoint, _range, _passes, legacyExecutionMode);
-         // Two Kernels of the same class share the same KernelPreferences object, and since failure (fallback) generally mutates
-         // the preferences object, we must lock it. Note this prevents two Kernels of the same class executing simultaneously.
-         synchronized (preferences) {
-            return executeInternalOuter(settings);
-         }
+         return executeInternalOuter(settings);
       } finally {
          executing = false;
          clearCancelMultiPass();
