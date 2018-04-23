@@ -26,6 +26,10 @@ Below you will find two side-by-side comparisons for the nbody problem on a CPU 
 |:---:|:---:|
 | GPU Accelerated | CPU Multi-threaded (8 cores) |
 
+## Donating
+
+As an open-source project we run entierly off donations. Buy one of our hardworking developers a beer by [donating here](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EGPN4CSPCW9JN). All donations go to our bounty fund and allow us to place bounties on important bugs and enhancements.
+
 ## Support and Documentation
 
 Aparapi Javadocs: [latest](http://www.javadoc.io/doc/com.aparapi/aparapi) - [1.7.0](http://www.javadoc.io/doc/com.aparapi/aparapi/1.7.0) - [1.6.0](http://www.javadoc.io/doc/com.aparapi/aparapi/1.6.0) - [1.5.0](http://www.javadoc.io/doc/com.aparapi/aparapi/1.5.0) - [1.4.1](http://www.javadoc.io/doc/com.aparapi/aparapi/1.4.1) - [1.4.0](http://www.javadoc.io/doc/com.aparapi/aparapi/1.4.0) - [1.3.4](http://www.javadoc.io/doc/com.aparapi/aparapi/1.3.4) - [1.3.3](http://www.javadoc.io/doc/com.aparapi/aparapi/1.3.3) - [1.3.2](http://www.javadoc.io/doc/com.aparapi/aparapi/1.3.2) - [1.3.1](http://www.javadoc.io/doc/com.aparapi/aparapi/1.3.1) - [1.3.0](http://www.javadoc.io/doc/com.aparapi/aparapi/1.3.0) - [1.2.0](http://www.javadoc.io/doc/com.aparapi/aparapi/1.2.0) - [1.1.2](http://www.javadoc.io/doc/com.aparapi/aparapi/1.1.2) - [1.1.1](http://www.javadoc.io/doc/com.aparapi/aparapi/1.1.1) - [1.1.0](http://www.javadoc.io/doc/com.aparapi/aparapi/1.1.0) - [1.0.0](http://www.javadoc.io/doc/com.syncleus.aparapi/aparapi/1.0.0)
