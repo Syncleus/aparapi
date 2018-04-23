@@ -1,6 +1,7 @@
 # Aparapi Changelog
 
 ## 1.7.1
+* Updated KernelManager to facilitate class extensions having constructors with non static parameters
 
 ## 1.7.0
 

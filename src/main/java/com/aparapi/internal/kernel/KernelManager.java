@@ -43,9 +43,18 @@ public class KernelManager {
    private KernelPreferences defaultPreferences;
 
    protected KernelManager() {
-      defaultPreferences = createDefaultPreferences();
+      setup();
    }
 
+   /**
+    * Default KernelManager initialization.<br/>
+    * Convenience method for being overriden to an empty implementation, so that derived 
+    * KernelManager classes can provide non static parameters to their constructors.
+    */
+   protected void setup() {
+	   defaultPreferences = createDefaultPreferences(); 
+   }
+   
    public static KernelManager instance() {
       return INSTANCE;
    }
