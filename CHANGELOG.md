@@ -5,6 +5,7 @@
 * Improved exception handling, stack traces no longer double print and Error and other throwables are never caught.
 * Fix issue #62 - SEVERE log messages on Aparapi kernel profiling under multithreading 
 * Provide new interfaces for thread safe kernel profiling (mutiple threads calling same kernel class on same device)
+* Fix issue #101 - Possible deadlock in JTP execution mode
 
 ## 1.6.0
 
