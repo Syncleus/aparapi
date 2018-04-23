@@ -1,6 +1,9 @@
 # Aparapi Changelog
 
+## 1.7.1
+
 ## 1.7.0
+
 * Fully support barrier() - localBarrier(),  globalBarrier() and localGlobalBarrier() on OpenCL 1.2 and later.
 * Improved exception handling, stack traces no longer double print and Error and other throwables are never caught.
 * Fix issue causing SEVERE log messages on Aparapi kernel profiling under multithreading.
