@@ -3,9 +3,10 @@
 ## 1.7.0
 * Fully support barrier() - localBarrier(),  globalBarrier() and localGlobalBarrier() on OpenCL 1.2 and later.
 * Improved exception handling, stack traces no longer double print and Error and other throwables are never caught.
-* Fix issue causing SEVERE log messages on Aparapi kernel profiling under multithreading 
-* Provide new interfaces for thread safe kernel profiling (mutiple threads calling same kernel class on same device)
-* Fixed occasional deadlock in JTP execution mode
+* Fix issue causing SEVERE log messages on Aparapi kernel profiling under multithreading.
+* Provide new interfaces for thread safe kernel profiling (mutiple threads calling same kernel class on same device).
+* Fixed occasional deadlock in JTP execution mode.
+* Significant speedup when running in JTP execution mode.
 
 ## 1.6.0
 
