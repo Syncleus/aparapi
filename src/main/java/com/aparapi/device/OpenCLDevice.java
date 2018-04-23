@@ -45,7 +45,7 @@ import com.aparapi.opencl.OpenCL.Local;
 import com.aparapi.opencl.OpenCL.Resource;
 import com.aparapi.opencl.OpenCL.Source;
 
-public class OpenCLDevice extends Device{
+public class OpenCLDevice extends Device implements Comparable<Device> {
 
    private final OpenCLPlatform platform;
 

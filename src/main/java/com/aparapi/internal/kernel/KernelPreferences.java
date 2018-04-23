@@ -19,11 +19,15 @@ import com.aparapi.*;
 import com.aparapi.device.*;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Thread safe class holding the kernel preferences for a given kernel class.
+ */
 public class KernelPreferences {
    private final Class<? extends Kernel> kernelClass;
    private final KernelManager manager;
-   private volatile LinkedList<Device> preferredDevices = null;
+   private final AtomicReference<LinkedList<Device>> preferredDevices = new AtomicReference<>(null);
    private final LinkedHashSet<Device> failedDevices = new LinkedHashSet<>();
 
    public KernelPreferences(KernelManager manager, Class<? extends Kernel> kernelClass) {
@@ -39,14 +43,16 @@ public class KernelPreferences {
    public List<Device> getPreferredDevices(Kernel kernel) {
       maybeSetUpDefaultPreferredDevices();
 
-      if (kernel == null) {
-         return Collections.unmodifiableList(preferredDevices);
-      }
-      List<Device> localPreferredDevices = new ArrayList<>();
       ArrayList<Device> copy;
-      synchronized (preferredDevices) {
-         copy = new ArrayList(preferredDevices);
+      synchronized (this) {
+         copy = new ArrayList<>(preferredDevices.get());
       }
+
+      if (kernel == null) {
+         return Collections.unmodifiableList(copy);
+      }
+      
+      List<Device> localPreferredDevices = new ArrayList<>();
       for (Device device : copy) {
          if (kernel.isAllowDevice(device)) {
             localPreferredDevices.add(device);
@@ -56,12 +62,12 @@ public class KernelPreferences {
    }
 
    synchronized void setPreferredDevices(LinkedHashSet<Device> _preferredDevices) {
-      if (preferredDevices != null) {
-         preferredDevices.clear();
-         preferredDevices.addAll(_preferredDevices);
+      if (preferredDevices.get() != null) {
+         preferredDevices.get().clear();
+         preferredDevices.get().addAll(_preferredDevices);
       }
       else {
-         preferredDevices = new LinkedList<>(_preferredDevices);
+         preferredDevices.set(new LinkedList<>(_preferredDevices));
       }
       failedDevices.clear();
    }
@@ -72,22 +78,18 @@ public class KernelPreferences {
    }
 
    synchronized void markPreferredDeviceFailed() {
-      if (preferredDevices.size() > 0) {
-         failedDevices.add(preferredDevices.remove(0));
+      if (preferredDevices.get().size() > 0) {
+         failedDevices.add(preferredDevices.get().remove(0));
       }
    }
 
    private void maybeSetUpDefaultPreferredDevices() {
-      if (preferredDevices == null) {
-         synchronized (this) {
-            if (preferredDevices == null) {
-               preferredDevices = new LinkedList<>(manager.getDefaultPreferences().getPreferredDevices(null));
-            }
-         }
-      }
+	   if (preferredDevices.get() == null) {
+		   preferredDevices.compareAndSet(null, new LinkedList<>(manager.getDefaultPreferences().getPreferredDevices(null)));
+	   }
    }
 
-   public List<Device> getFailedDevices() {
+   public synchronized List<Device> getFailedDevices() {
       return new ArrayList<>(failedDevices);
    }
 }

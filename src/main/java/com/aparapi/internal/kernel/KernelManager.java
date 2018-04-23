@@ -48,7 +48,7 @@ public class KernelManager {
 
    /**
     * Default KernelManager initialization.<br/>
-    * Convenience method for being overriden to an empty implementation, so that derived 
+    * Convenience method for being overridden to an empty implementation, so that derived 
     * KernelManager classes can provide non static parameters to their constructors.
     */
    protected void setup() {
