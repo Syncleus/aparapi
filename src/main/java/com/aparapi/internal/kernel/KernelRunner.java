@@ -457,7 +457,7 @@ public class KernelRunner extends KernelRunnerJNI{
                final int numGroups0 = _settings.range.getNumGroups(0);
                final int numGroups1 = _settings.range.getNumGroups(1);
                final int globalGroups = numGroups0 * numGroups1 * _settings.range.getNumGroups(2);
-
+               
                /**
                 * This localBarrier is only ever used by the kernels.  If the kernel does not use the barrier the threads
                 * can get out of sync, we promised nothing in JTP mode.
@@ -557,14 +557,24 @@ public class KernelRunner extends KernelRunnerJNI{
                      @Override
                      public void set(KernelState kernelState, int globalGroupId, int threadId) {
                         //                   (kernelState, globalGroupId, threadId) ->{
-                        kernelState.setLocalId(0, (threadId % localSize0)); // threadId % localWidth =  (for 33 = 1 % 4 = 1)
-                        kernelState.setLocalId(1, (threadId / localSize0)); // threadId / localWidth = (for 33 = 1 / 4 == 0)
+                    	final int localId0 = (threadId % localSize0);
+                    	final int localId1 = (threadId / localSize0);
+                        kernelState.setLocalId(0, localId0); // threadId % localWidth =  (for 33 = 1 % 4 = 1)
+                        kernelState.setLocalId(1, localId1); // threadId / localWidth = (for 33 = 1 / 4 == 0)
 
-                        final int groupInset = globalGroupId % numGroups0; // 4%3 = 1
-                        kernelState.setGlobalId(0, ((groupInset * localSize0) + kernelState.getLocalIds()[0])); // 1*4+1=5
+                        //The displacement in the overall 2D computation grid in the X direction is
+                        //the offset in X given by the current group being executed, plus the X displacement
+                        //inside that work-group.
+                        //Groups are like this:
+                        //[Group 0] [Group 1] [Group 2]
+                        //[Group 3] [Group 4] [Group 5]
+                        final int globalThreadIdOffsetX = (globalGroupId % numGroups0) * localSize0; 
+                        kernelState.setGlobalId(0, globalThreadIdOffsetX + localId0);
 
-                        final int completeLines = (globalGroupId / numGroups0) * localSize1;// (4/3) * 2
-                        kernelState.setGlobalId(1, (completeLines + kernelState.getLocalIds()[1])); // 2+0 = 2
+                        //Likewise X, but now for the Y direction. 
+                        final int globalThreadIdOffsetY = (globalGroupId / numGroups0) * localSize1;
+                        kernelState.setGlobalId(1, globalThreadIdOffsetY + localId1);
+                        
                         kernelState.setGroupId(0, (globalGroupId % numGroups0));
                         kernelState.setGroupId(1, (globalGroupId / numGroups0));
                      }
