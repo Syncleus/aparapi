@@ -51,7 +51,7 @@ matrix:
     # AMD APP SDK builds (v2.9.1 -> OpenCL 1.2, v3.0 -> OpenCL 2.0)
     ############################################################################
     - os: linux
-      sudo: false
+      sudo: required
       dist: trusty
       compiler: clang
       addons:
@@ -65,7 +65,7 @@ matrix:
         - AMDAPPSDK_VERSION=300 # OpenCL 2.0
         - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
     - os: linux
-      sudo: flse
+      sudo: required
       dist: trusty
       compiler: gcc
       addons:
@@ -78,7 +78,7 @@ matrix:
         - AMDAPPSDK_VERSION=300 # OpenCL 2.0
         - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
     - os: linux
-      sudo: false
+      sudo: required
       dist: trusty
       compiler: clang
       addons:
@@ -91,7 +91,7 @@ matrix:
         - ENV_CMAKE_OPTIONS="-DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
     # Build is disabled as it's reduntant with the Coveralls build (see below)
     - os: linux
-      sudo: false
+      sudo: required
       dist: trusty
       compiler: gcc
       addons:
@@ -425,8 +425,7 @@ before_install:
     - export PATH=$M2_HOME/bin:$PATH
 
     # Install dependencies
-    - sudo apt-get install jq
-    - wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r .assets[0].browser_download_url)
+    - ".travis/codacy-install.sh"
     - |
       # POCL dependencies for Trusty
       # llvm-toolchain-trusty-3.7 is not whitelisted yet https://github.com/travis-ci/apt-source-whitelist/issues/199
@@ -549,7 +548,7 @@ install:
 after_success:
   - bash <(curl -s https://codecov.io/bash)
   - mvn site
-  - java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r target/site/jacoco/jacoco.xml
+  - java -jar ~/codacy-coverage-reporter-assembly.jar report -l Java -r target/site/jacoco/jacoco.xml
 
 notifications:
   webhooks:
