@@ -4,6 +4,7 @@
 * Updated KernelManager to facilitate class extensions having constructors with non static parameters
 * Enable kernel profiling and execution simultaneously on multiple devices (multiple threads calling same kernel class on multiple devices)
 * Fixed JVM crash with multi-dimensional arrays in Local memory (2D and 3D local arrays are now supported)
+* Fixed: Signed integer constants were being interpreted as unsigned values in instruction SIPUSH
 
 ## 1.7.0
 
