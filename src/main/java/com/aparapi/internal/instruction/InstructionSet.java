@@ -3507,7 +3507,7 @@ public class InstructionSet{
    public static class I_SIPUSH extends ImmediateConstant<Integer>{
       public I_SIPUSH(MethodModel _methodPoolEntry, ByteReader _byteReader, boolean _wide) {
          super(_methodPoolEntry, ByteCode.SIPUSH, _byteReader, _wide);
-         value = _byteReader.u2();
+         value = _byteReader.s2();
       }
 
       @Override public String getDescription() {
