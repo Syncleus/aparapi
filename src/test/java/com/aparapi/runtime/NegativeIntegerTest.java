@@ -33,7 +33,7 @@ import com.aparapi.device.OpenCLDevice;
 import com.aparapi.internal.kernel.KernelManager;
 
 /**
- * Originally created for testing issue #81
+ * Originally created for testing issue #78
  *
  */
 public class NegativeIntegerTest
