@@ -139,7 +139,7 @@ public class ProfileReportBackwardsCompatTest {
     		assertEquals("Aparapi Accumulated execution time doesn't match", accumulatedExecutionTime, kernel.getAccumulatedExecutionTime(), 1e-10);
     		assertEquals("Aparapi last execution time doesn't match last report", lastExecutionTime, report.getExecutionTime(), 1e-10);
     		assertEquals("Aparapi last conversion time doesn't match last report", lastConversionTime, report.getConversionTime(), 1e-10);
-    		assertEquals("Test estimated accumulated time doesn't match within 100ms window", runTime, accumulatedExecutionTime, 100);
+    		assertEquals("Test estimated accumulated time doesn't match within 500ms window", runTime, accumulatedExecutionTime, 500);
     		assertTrue(validateBasic1Kernel(inputArray, outputArray));
     	} finally {
     		kernel.dispose();
@@ -230,7 +230,7 @@ public class ProfileReportBackwardsCompatTest {
     		assertEquals("Aparapi Accumulated execution time doesn't match", results[0].accumulatedExecutionTime, kernel1.getAccumulatedExecutionTime(), 1e-10);
     		assertEquals("Aparapi last execution time doesn't match last report", results[0].lastExecutionTime, report.getExecutionTime(), 1e-10);
     		assertEquals("Aparapi last conversion time doesn't match last report", results[0].lastConversionTime, report.getConversionTime(), 1e-10);
-    		assertEquals("Test estimated accumulated time doesn't match within 100ms window", results[0].runTime, results[0].accumulatedExecutionTime, 100);
+    		assertEquals("Test estimated accumulated time doesn't match within 300ms window", results[0].runTime, results[0].accumulatedExecutionTime, 300);
     		assertTrue(validateBasic1Kernel(inputArray, results[0].outputArray));
     		
     		//Validate kernel2 reports
@@ -240,7 +240,7 @@ public class ProfileReportBackwardsCompatTest {
     		assertEquals("Aparapi Accumulated execution time doesn't match", results[1].accumulatedExecutionTime, kernel2.getAccumulatedExecutionTime(), 1e-10);
     		assertEquals("Aparapi last execution time doesn't match last report", results[1].lastExecutionTime, report.getExecutionTime(), 1e-10);
     		assertEquals("Aparapi last conversion time doesn't match last report", results[1].lastConversionTime, report.getConversionTime(), 1e-10);
-    		assertEquals("Test estimated accumulated time doesn't match within 100ms window", results[1].runTime, results[1].accumulatedExecutionTime, 100);
+    		assertEquals("Test estimated accumulated time doesn't match within 300ms window", results[1].runTime, results[1].accumulatedExecutionTime, 300);
     		assertTrue(validateBasic2Kernel(inputArray, results[1].outputArray));
     	} finally {
     		kernel1.dispose();
