@@ -57,7 +57,6 @@ public class MultiDimensionalLocalArrayTest
         assertEquals(3840, RESULT[0], 1E-6F);
     }
 
-    @Ignore("Known bug, ignoring until fixed")
     @Test
     public void twoDimensionTest()
     {
