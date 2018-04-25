@@ -198,7 +198,7 @@ public class MultiDimensionalLocalArrayTest
     	private float[] result;
     	
     	@Local 
-        float[] localArray;
+        private float[] localArray;
 
     	@NoCL
     	public void setResult(float[] result) {
@@ -235,7 +235,7 @@ public class MultiDimensionalLocalArrayTest
     	private float[] result;
     	
     	@Local 
-        float[][] localArray;
+        private float[][] localArray;
 
     	@NoCL
     	public void setResult(float[] result) {
