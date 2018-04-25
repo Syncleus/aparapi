@@ -86,7 +86,7 @@ public class MultiDimensionalLocalArrayTest
     {
     	final Device device = getDevice();
         final int SIZE = 16;
-        final float[][] RESULT = new float[2][2];
+        final float[] RESULT = new float[2];
         Kernel kernel = new Kernel()
         {
             @Local final float[] localArray = new float[SIZE*SIZE];
@@ -106,7 +106,7 @@ public class MultiDimensionalLocalArrayTest
                         value += localArray[x + y*SIZE];
                     }
                 }
-                RESULT[0][0] = value;
+                RESULT[0] = value;
             }
         };
         try {
@@ -114,7 +114,7 @@ public class MultiDimensionalLocalArrayTest
         } finally {
         	kernel.dispose();
         }
-        assertEquals(3840, RESULT[0][0], 1E-6F);
+        assertEquals(3840, RESULT[0], 1E-6F);
     }
 
     @Test
@@ -279,10 +279,10 @@ public class MultiDimensionalLocalArrayTest
         try {
         	kernel.setResult(RESULT);
         	kernel.setArray(SIZE, new float[SIZE*SIZE]);
-        	kernel.execute(Range.create(device, SIZE, SIZE));
+        	kernel.execute(Range.create2D(device, SIZE, SIZE, SIZE, SIZE));
         	assertEquals(3840, RESULT[0], 1E-6F);
         	kernel.setArray(2*SIZE, new float[2*SIZE*2*SIZE]);
-        	kernel.execute(Range.create(device, 2*SIZE, 2*SIZE));
+        	kernel.execute(Range.create2D(device, 2*SIZE, 2*SIZE, 2*SIZE, 2*SIZE));
         	assertTrue("Result is not greater then 2840", RESULT[0]>3840);
         } finally {
         	kernel.dispose();
