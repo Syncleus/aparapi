@@ -1,6 +1,9 @@
 # Aparapi Changelog
 
+## 1.8.1
+
 ## 1.8.0
+
 * Updated KernelManager to facilitate class extensions having constructors with non static parameters
 * Enable kernel profiling and execution simultaneously on multiple devices (multiple threads calling same kernel class on multiple devices)
 * Fixed JVM crash when multi-dimensional arrays were used in Local memory (2D and 3D local arrays are now supported)
