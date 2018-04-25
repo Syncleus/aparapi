@@ -15,25 +15,81 @@
  */
 package com.aparapi.runtime;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static org.junit.Assume.assumeTrue;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-    import com.aparapi.Kernel;
-    import com.aparapi.Range;
+import com.aparapi.Kernel;
+import com.aparapi.Range;
+import com.aparapi.device.Device;
+import com.aparapi.device.JavaDevice;
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.kernel.KernelManager;
 
+/**
+ * This class provides tests for Issue #51
+ */
 public class MultiDimensionalLocalArrayTest
 {
+	
+    private static OpenCLDevice openCLDevice = null;
+
+    private class CLKernelManager extends KernelManager {
+    	@Override
+    	protected List<Device.TYPE> getPreferredDeviceTypes() {
+    		return Arrays.asList(Device.TYPE.ACC, Device.TYPE.GPU, Device.TYPE.CPU);
+    	}
+    }
+    
+    private class JTPKernelManager extends KernelManager {
+    	private JTPKernelManager() {
+    		LinkedHashSet<Device> preferredDevices = new LinkedHashSet<Device>(1);
+    		preferredDevices.add(JavaDevice.THREAD_POOL);
+    		setDefaultPreferredDevices(preferredDevices);
+    	}
+    	@Override
+    	protected List<Device.TYPE> getPreferredDeviceTypes() {
+    		return Arrays.asList(Device.TYPE.JTP);
+    	}
+    }
+    
+    @Before
+    public void setUpBeforeClass() throws Exception {
+    	KernelManager.setKernelManager(new CLKernelManager());
+        Device device = KernelManager.instance().bestDevice();
+        if (device == null || !(device instanceof OpenCLDevice)) {
+        	System.out.println("!!!No OpenCLDevice available for running the integration test");
+        }
+        assumeTrue (device != null && device instanceof OpenCLDevice);
+        openCLDevice = (OpenCLDevice) device;
+    }
+    
+    private Device getDevice() {
+    	boolean openCL = true;
+    	if (openCL) {
+    		return openCLDevice;
+    	} else {
+        	KernelManager.setKernelManager(new JTPKernelManager());
+        	return KernelManager.instance().bestDevice(); 
+    	}
+    }
+    
     @Test
     public void singleDimensionTest()
     {
+    	final Device device = getDevice();
         final int SIZE = 16;
-        final float[] RESULT = new float[] {1};
+        final float[][] RESULT = new float[2][2];
         Kernel kernel = new Kernel()
         {
-            @Local
-            final float[] localArray = new float[SIZE*SIZE];
+            @Local final float[] localArray = new float[SIZE*SIZE];
 
             @Override
             public void run()
@@ -50,22 +106,26 @@ public class MultiDimensionalLocalArrayTest
                         value += localArray[x + y*SIZE];
                     }
                 }
-                RESULT[0] = value;
+                RESULT[0][0] = value;
             }
         };
-        kernel.execute(Range.create2D(SIZE, SIZE, SIZE, SIZE));
-        assertEquals(3840, RESULT[0], 1E-6F);
+        try {
+        	kernel.execute(Range.create2D(device, SIZE, SIZE, SIZE, SIZE));
+        } finally {
+        	kernel.dispose();
+        }
+        assertEquals(3840, RESULT[0][0], 1E-6F);
     }
 
     @Test
     public void twoDimensionTest()
     {
+    	final Device device = getDevice();
         final int SIZE = 16;
-        final float[] RESULT = new float[] {1};
+        final float[][] RESULT = new float[2][2];
         Kernel kernel = new Kernel()
         {
-            @Local
-            final float[][] localArray = new float[SIZE][SIZE];
+            @Local final float[][] localArray = new float[SIZE][SIZE];
 
             @Override
             public void run()
@@ -81,11 +141,173 @@ public class MultiDimensionalLocalArrayTest
                     {
                         value += localArray[x][y];
                     }
-                }
-                RESULT[0] = value;
+                }                
+                RESULT[0][0] = value;
             }
         };
-        kernel.execute(Range.create2D(SIZE, SIZE, SIZE, SIZE));
-        assertEquals(3840, RESULT[0], 1E-6F);
+        try {
+        	kernel.execute(Range.create2D(device, SIZE, SIZE, SIZE, SIZE));
+        } finally {
+        	kernel.dispose();
+        }
+        assertEquals(3840, RESULT[0][0], 1E-6F);        
+    }
+    
+    @Ignore("Aparapi fails to re-execute kernel with local NDarrays")
+    @Test
+    public void twoDimensionMultipleExecutionTest()
+    {
+    	final Device device = getDevice();
+        final int SIZE = 16;
+        final float[][] RESULT = new float[2][2];
+        Kernel kernel = new Kernel()
+        {
+            @Local final float[][] localArray = new float[SIZE][SIZE];
+
+            @Override
+            public void run()
+            {
+                int row = getGlobalId(0);
+                int column = getGlobalId(1);
+                localArray[row][column] = row + (float)column;
+                localBarrier();
+                float value = 0;
+                for (int x = 0; x < SIZE; x++)
+                {
+                    for (int y = 0; y < SIZE; y++)
+                    {
+                        value += localArray[x][y];
+                    }
+                }                
+                RESULT[0][0] = value;
+            }
+        };
+        
+        try {
+	        kernel.execute(Range.create2D(device, SIZE, SIZE, SIZE, SIZE));
+	        assertEquals(3840, RESULT[0][0], 1E-6F);
+	        kernel.execute(Range.create2D(device, SIZE, SIZE, SIZE, SIZE));
+	        assertEquals(3840, RESULT[0][0], 1E-6F);
+        } finally {
+        	kernel.dispose();
+        }
+    }
+    
+    private class Resizable1DKernel extends Kernel {
+    	private int size;
+    	private float[] result;
+    	
+    	@Local 
+        float[] localArray;
+
+    	@NoCL
+    	public void setResult(float[] result) {
+    		this.result = result;
+    	}
+    	
+    	@NoCL
+        public void setArray(int size, float[] array) {
+    		this.size = size;
+        	localArray = array;
+        }
+        
+        @Override
+        public void run()
+        {
+            int row = getGlobalId(0);
+            int column = getGlobalId(1);
+            localArray[row + column*size] = row + column;
+            localBarrier();
+            float value = 0;
+            for (int x = 0; x < size; x++)
+            {
+                for (int y = 0; y < size; y++)
+                {
+                    value += localArray[x + y*size];
+                }
+            }
+            result[0] = value;
+        }    	
+    }
+
+    private class Resizable2DKernel extends Kernel {
+    	private int size;
+    	private float[] result;
+    	
+    	@Local 
+        float[][] localArray;
+
+    	@NoCL
+    	public void setResult(float[] result) {
+    		this.result = result;
+    	}
+    	
+    	@NoCL
+        public void setArray(int size, float[][] array) {
+    		this.size = size;
+        	localArray = array;
+        }
+        
+        @Override
+        public void run()
+        {
+            int row = getGlobalId(0);
+            int column = getGlobalId(1);
+            localArray[row][column] = row + (float)column;
+            localBarrier();
+            float value = 0;
+            for (int x = 0; x < size; x++)
+            {
+                for (int y = 0; y < size; y++)
+                {
+                    value += localArray[x][y];
+                }
+            }                
+            result[0] = value;
+        }    	
+    }
+
+    @Ignore("Aparapi-native fails to resize 1D arrays across executions")
+    @Test
+    public void resizableOneDimensionTest()
+    {
+    	final Device device = getDevice();
+        final int SIZE = 16;
+        final float[] RESULT = new float[2];
+        
+        Resizable1DKernel kernel = new Resizable1DKernel();
+        try {
+        	kernel.setResult(RESULT);
+        	kernel.setArray(SIZE, new float[SIZE*SIZE]);
+        	kernel.execute(Range.create(device, SIZE, SIZE));
+        	//assertEquals(3840, RESULT[0], 1E-6F);
+        	//kernel.setArray(2*SIZE, new float[2*SIZE*2*SIZE]);
+        	kernel.execute(Range.create(device, 2*SIZE, 2*SIZE));
+        	//assertTrue("Result is not greater then 2840", RESULT[0]>3840);
+        } finally {
+        	kernel.dispose();
+        }
+        
+    }
+    
+    @Ignore("Aparapi-native fails to resize NDarray across kernel executions")
+    @Test
+    public void resizableTwoDimensionTest()
+    {
+    	final Device device = getDevice();
+        final int SIZE = 16;
+        final float[] RESULT = new float[2];
+        Resizable2DKernel kernel = new Resizable2DKernel();
+        try {
+        	kernel.setResult(RESULT);
+        	kernel.setArray(SIZE, new float[SIZE][SIZE]);
+	        kernel.execute(Range.create2D(device, SIZE, SIZE, SIZE, SIZE));
+	        assertEquals(3840, RESULT[0], 1E-6F);
+	        kernel.setArray(2*SIZE, new float[2*SIZE][2*SIZE]);
+	        kernel.execute(Range.create2D(device, SIZE, SIZE, SIZE, SIZE));
+	        assertTrue("Result is not greater than 2840", RESULT[0]>3840);
+        } finally {
+        	kernel.dispose();
+        }
     }
 }
