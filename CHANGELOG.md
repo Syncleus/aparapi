@@ -1,8 +1,8 @@
 # Aparapi Changelog
 
-## 1.8.2
-
 ## 1.8.1
+
+* Fixed local arrays handling 1D and ND, to cope with arrays resizing across kernel executions
 
 ## 1.8.0
 

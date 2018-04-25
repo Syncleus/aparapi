@@ -10,7 +10,7 @@
 
     <groupId>com.aparapi</groupId>
     <artifactId>aparapi</artifactId>
-    <version>1.8.2-SNAPSHOT</version>
+    <version>1.8.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <prerequisites>
