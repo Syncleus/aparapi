@@ -142,11 +142,10 @@ public class OpenCLDevice extends Device implements Comparable<Device> {
    * detection.
    */
   public void configure() {
-	  if (configurator != null && !underConfiguration.get()) {
-		 if (underConfiguration.compareAndSet(false, true)) {
-			 configurator.configure(this);
-			 underConfiguration.set(false);
-		 }
+	  if (configurator != null && !underConfiguration.get() &&
+			  underConfiguration.compareAndSet(false, true)) {
+		 configurator.configure(this);
+		 underConfiguration.set(false);
 	  }
   }
   
