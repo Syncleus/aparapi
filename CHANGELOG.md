@@ -7,6 +7,8 @@
 * (JNI) Aparapi now supports efficient execution on discrete GPU and other devices with dedicated memory
 * Support for OpenCLDevice configurator/configure API
 
+* (JNI) Fixed local arrays handling 1D and ND, to cope with arrays resizing across kernel executions
+
 ## 1.8.0
 
 * Updated KernelManager to facilitate class extensions having constructors with non static parameters
