@@ -227,7 +227,7 @@ public class OpenCLDeviceConfiguratorTest {
     	IOpenCLDeviceConfigurator configurator = new IOpenCLDeviceConfigurator() {
 			@Override
 			public void configure(OpenCLDevice device) {
-				throw new IllegalArgumentException("Should be catched exception");
+				throw new IllegalArgumentException("This exception is part of the test, shouldn't cause test to fail");
 			}
     	};
     	OpenCLDevice.setConfigurator(configurator);
