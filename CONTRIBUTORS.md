@@ -51,3 +51,4 @@ Below are some of the specific details of various contributions.
 * Luis Mendes submited PR to facilitate KernelManager class extension with non-static parameters in constructors
 * Luis Mendes submited PR to Enable kernel profiling and execution simultaneously on multiple devices
 * Luis Mendes submited PR to fix issue #78 - Signed integer constants were interpreted as unsigned values for instruction SIPUSH
+* Luis Mendes submited PR to Support for OpenCLDevice configurator/configure API

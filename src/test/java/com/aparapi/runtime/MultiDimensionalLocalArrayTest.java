@@ -118,6 +118,44 @@ public class MultiDimensionalLocalArrayTest
     }
 
     @Test
+    public void singleDimensionMultipleExecutionTest()
+    {
+    	final Device device = getDevice();
+        final int SIZE = 16;
+        final float[] RESULT = new float[2];
+        Kernel kernel = new Kernel()
+        {
+            @Local final float[] localArray = new float[SIZE*SIZE];
+
+            @Override
+            public void run()
+            {
+                int row = getGlobalId(0);
+                int column = getGlobalId(1);
+                localArray[row + column*SIZE] = row + column;
+                localBarrier();
+                float value = 0;
+                for (int x = 0; x < SIZE; x++)
+                {
+                    for (int y = 0; y < SIZE; y++)
+                    {
+                        value += localArray[x + y*SIZE];
+                    }
+                }
+                RESULT[0] = value;
+            }
+        };
+        try {
+        	kernel.execute(Range.create2D(device, SIZE, SIZE, SIZE, SIZE));
+        	assertEquals(3840, RESULT[0], 1E-6F);
+        	kernel.execute(Range.create2D(device, SIZE, SIZE, SIZE, SIZE));
+        	assertEquals(3840, RESULT[0], 1E-6F);
+        } finally {
+        	kernel.dispose();
+        }
+    }
+
+    @Test
     public void twoDimensionTest()
     {
     	final Device device = getDevice();
@@ -153,7 +191,6 @@ public class MultiDimensionalLocalArrayTest
         assertEquals(3840, RESULT[0][0], 1E-6F);        
     }
     
-    @Ignore("Aparapi fails to re-execute kernel with local NDarrays")
     @Test
     public void twoDimensionMultipleExecutionTest()
     {
@@ -267,7 +304,6 @@ public class MultiDimensionalLocalArrayTest
         }    	
     }
 
-    @Ignore("Aparapi-native fails to resize 1D arrays across executions")
     @Test
     public void resizableOneDimensionTest()
     {
@@ -283,14 +319,13 @@ public class MultiDimensionalLocalArrayTest
         	assertEquals(3840, RESULT[0], 1E-6F);
         	kernel.setArray(2*SIZE, new float[2*SIZE*2*SIZE]);
         	kernel.execute(Range.create2D(device, 2*SIZE, 2*SIZE, 2*SIZE, 2*SIZE));
-        	assertTrue("Result is not greater then 2840", RESULT[0]>3840);
+        	assertTrue("Result is not greater then 3840", RESULT[0]>3840);
         } finally {
         	kernel.dispose();
         }
         
     }
     
-    @Ignore("Aparapi-native fails to resize NDarray across kernel executions")
     @Test
     public void resizableTwoDimensionTest()
     {
@@ -305,7 +340,7 @@ public class MultiDimensionalLocalArrayTest
 	        assertEquals(3840, RESULT[0], 1E-6F);
 	        kernel.setArray(2*SIZE, new float[2*SIZE][2*SIZE]);
 	        kernel.execute(Range.create2D(device, SIZE, SIZE, SIZE, SIZE));
-	        assertTrue("Result is not greater than 2840", RESULT[0]>3840);
+	        assertTrue("Result is not greater than 3840", RESULT[0]>3840);
         } finally {
         	kernel.dispose();
         }

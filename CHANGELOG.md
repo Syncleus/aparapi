@@ -1,6 +1,13 @@
 # Aparapi Changelog
 
-## 1.8.1
+## 1.9.0
+
+* (JNI) Fixed local arrays handling 1D and ND, to cope with arrays resizing across kernel executions
+* Significant speed-up on discrete GPUs with dedicated memory - OpenCLDevice.setSharedMemory(false)
+* (JNI) Aparapi now supports efficient execution on discrete GPU and other devices with dedicated memory
+* Support for OpenCLDevice configurator/configure API
+
+* (JNI) Fixed local arrays handling 1D and ND, to cope with arrays resizing across kernel executions
 
 ## 1.8.0
 
