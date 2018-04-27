@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -66,6 +67,12 @@ public class ProfileReportNewAPITest {
 	
 	@Rule 
 	public TestName name = new TestName();
+
+	
+    @After
+    public void classTeardown() {
+    	Util.resetKernelManager();
+    }
 
 	
     private class CLKernelManager extends KernelManager {

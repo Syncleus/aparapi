@@ -15,6 +15,9 @@
  */
 package com.aparapi.runtime;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import java.lang.ref.WeakReference;
@@ -28,7 +31,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.*;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -57,7 +61,6 @@ public class ProfileReportBackwardsCompatTest {
 	@Rule 
 	public TestName name = new TestName();
 
-	
     private class CLKernelManager extends KernelManager {
     	@Override
     	protected List<Device.TYPE> getPreferredDeviceTypes() {
@@ -75,6 +78,11 @@ public class ProfileReportBackwardsCompatTest {
     	protected List<Device.TYPE> getPreferredDeviceTypes() {
     		return Arrays.asList(Device.TYPE.JTP);
     	}
+    }
+    
+    @After
+    public void classTeardown() {
+    	Util.resetKernelManager();
     }
     
     public void setUpBefore() throws Exception {

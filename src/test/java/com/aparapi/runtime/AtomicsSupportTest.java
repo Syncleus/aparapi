@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,6 +59,11 @@ public class AtomicsSupportTest {
     	protected List<Device.TYPE> getPreferredDeviceTypes() {
     		return Arrays.asList(Device.TYPE.JTP);
     	}
+    }
+    
+    @AfterClass
+    public static void classTeardown() {
+    	Util.resetKernelManager();
     }
     
     @Before
