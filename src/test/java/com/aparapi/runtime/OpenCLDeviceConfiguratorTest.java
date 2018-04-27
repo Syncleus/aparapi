@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
@@ -223,15 +224,17 @@ public class OpenCLDeviceConfiguratorTest {
     
     @Test
     public void noExceptionConfiguratorTest() {
+    	final AtomicBoolean called = new AtomicBoolean(false);
     	OpenCLDevice dev = new OpenCLDevice(null, 101L, Device.TYPE.CPU);
     	IOpenCLDeviceConfigurator configurator = new IOpenCLDeviceConfigurator() {
 			@Override
 			public void configure(OpenCLDevice device) {
+				called.set(true);
 				throw new IllegalArgumentException("This exception is part of the test, shouldn't cause test to fail");
 			}
     	};
     	OpenCLDevice.setConfigurator(configurator);
     	dev.configure();
-    	assertTrue(true);
+    	assertTrue("Configurator should have benn called", called.get());
     }
  }
