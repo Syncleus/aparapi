@@ -125,6 +125,7 @@ public class OpenCLDeviceConfiguratorTest {
 				case ALT:
 					devices.add(JavaDevice.ALTERNATIVE_ALGORITHM);
 					break;
+				default:
 				}
 			}
 			
@@ -230,6 +231,7 @@ public class OpenCLDeviceConfiguratorTest {
 			}
     	};
     	OpenCLDevice.setConfigurator(configurator);
-    	dev.configure();    	
+    	dev.configure();
+    	assertTrue(true);
     }
  }

@@ -20,7 +20,7 @@ import java.util.Arrays;
 import com.aparapi.internal.kernel.KernelManager;
 
 public class Util {	
-	static void resetKernelManager() {
+	public static void resetKernelManager() {
 		KernelManager.setKernelManager(new OriginalKernelManager());
 	}
 	
