@@ -222,8 +222,8 @@ public class OpenCLDeviceConfiguratorTest {
     	assertEquals("Number of confgure() calls should be one", 1, callCounter.get());
     }
     
-    @Test
-    public void noExceptionConfiguratorTest() {
+    @Test(expected=IllegalArgumentException.class)
+    public void exceptionConfiguratorTestFail() {
     	final AtomicBoolean called = new AtomicBoolean(false);
     	OpenCLDevice dev = new OpenCLDevice(null, 101L, Device.TYPE.CPU);
     	IOpenCLDeviceConfigurator configurator = new IOpenCLDeviceConfigurator() {

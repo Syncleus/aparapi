@@ -141,15 +141,6 @@ public class OpenCLDevice extends Device implements Comparable<Device> {
     this.name = name;
   }
 
-  private static void configuratorWrapper(final IOpenCLDeviceConfigurator configurator, final OpenCLDevice device) {
-	  try {
-		  configurator.configure(device);
-	  } catch (Throwable ex) {
-		  logger.log(Level.WARNING, "Failed to configure device - Id: " + device.deviceId + 
-				  ", Name: " + device.getName(), ex);
-	  }
-  }
-  
   /**
    * Called by the underlying Aparapi OpenCL platform, upon device
    * detection.
@@ -158,7 +149,7 @@ public class OpenCLDevice extends Device implements Comparable<Device> {
 	  if (configurator != null && !underConfiguration.get() &&
 			  underConfiguration.compareAndSet(false, true)) {
 		 try {
-			 configuratorWrapper(configurator, this);
+			  configurator.configure(this);
 		 } finally {
 			 underConfiguration.set(false);
 		 }
