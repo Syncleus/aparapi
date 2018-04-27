@@ -249,10 +249,6 @@ public class BufferTransferTest {
                 for (int n = 0; n < neuronOutputs.length; n++)
                     log[n][simStep[0]] = neuronOutputs[n];
             }
-            System.out.println(getTargetDevice().getShortDescription() + (isExplicit() ? ", explicit" : ", auto"));
-
-            for (int n = 0; n < neuronOutputs.length; n++)
-                System.out.println(Arrays.toString(log[n]));
 
             assertTrue("log[2] == expected", Util.same(log[2], expected));
         }
