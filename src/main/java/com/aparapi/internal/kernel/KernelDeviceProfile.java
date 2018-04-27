@@ -220,9 +220,9 @@ public class KernelDeviceProfile {
    
    /**
     * Retrieves the most recent complete report available for the current thread calling this method.<br/>
-    * <b>Note1: <b>If the profile report is intended to be kept in memory, the object should be cloned with
+    * <b>Note1: </b>If the profile report is intended to be kept in memory, the object should be cloned with
     * {@link com.aparapi.ProfileReport#clone()}<br/>
-    * <b>Note2: <b/>If the thread didn't execute this KernelDeviceProfile instance respective kernel and device, it
+    * <b>Note2: </b>If the thread didn't execute this KernelDeviceProfile instance respective kernel and device, it
     * will return null.
     * @return <ul><li>the profiling report for the current most recent execution</li>
     *             <li>null, if no profiling report is available for such thread</li></ul>
@@ -236,7 +236,7 @@ public class KernelDeviceProfile {
    /**
     * Retrieves the most recent complete report available for the last thread that executed this KernelDeviceProfile
     * instance respective kernel and device.<br/>
-    * <b>Note1: <b>If the profile report is intended to be kept in memory, the object should be cloned with
+    * <b>Note1: </b>If the profile report is intended to be kept in memory, the object should be cloned with
     * {@link com.aparapi.ProfileReport#clone()}<br/>
     * 
     * @return <ul><li>the profiling report for the current most recent execution</li>

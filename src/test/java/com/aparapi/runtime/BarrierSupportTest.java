@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,6 +57,11 @@ public class BarrierSupportTest {
     	}
     }
 
+    @AfterClass
+    public static void classTeardown() {
+    	Util.resetKernelManager();
+    }
+    
     @Before
     public void setUpBefore() throws Exception {
     	KernelManager.setKernelManager(new CLKernelManager());

@@ -17,7 +17,13 @@ package com.aparapi.runtime;
 
 import java.util.Arrays;
 
-public class Util {
+import com.aparapi.internal.kernel.KernelManager;
+
+public class Util {	
+	public static void resetKernelManager() {
+		KernelManager.setKernelManager(new OriginalKernelManager());
+	}
+	
     static void fill(int[] array, Filler _filler) {
         for (int i = 0; i < array.length; i++) {
             _filler.fill(array, i);

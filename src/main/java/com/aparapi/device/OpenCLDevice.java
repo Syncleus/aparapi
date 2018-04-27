@@ -28,7 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.aparapi.Config;
 import com.aparapi.Range;
 import com.aparapi.internal.opencl.OpenCLArgDescriptor;
 import com.aparapi.internal.opencl.OpenCLKernel;
@@ -46,6 +49,7 @@ import com.aparapi.opencl.OpenCL.Resource;
 import com.aparapi.opencl.OpenCL.Source;
 
 public class OpenCLDevice extends Device implements Comparable<Device> {
+   private static Logger logger = Logger.getLogger(Config.getLoggerName()); 	
 	
    private static IOpenCLDeviceConfigurator configurator = null;
 
@@ -137,6 +141,15 @@ public class OpenCLDevice extends Device implements Comparable<Device> {
     this.name = name;
   }
 
+  private static void configuratorWrapper(final IOpenCLDeviceConfigurator configurator, final OpenCLDevice device) {
+	  try {
+		  configurator.configure(device);
+	  } catch (Throwable ex) {
+		  logger.log(Level.WARNING, "Failed to configure device - Id: " + device.deviceId + 
+				  ", Name: " + device.getName(), ex);
+	  }
+  }
+  
   /**
    * Called by the underlying Aparapi OpenCL platform, upon device
    * detection.
@@ -144,8 +157,11 @@ public class OpenCLDevice extends Device implements Comparable<Device> {
   public void configure() {
 	  if (configurator != null && !underConfiguration.get() &&
 			  underConfiguration.compareAndSet(false, true)) {
-		 configurator.configure(this);
-		 underConfiguration.set(false);
+		 try {
+			 configuratorWrapper(configurator, this);
+		 } finally {
+			 underConfiguration.set(false);
+		 }
 	  }
   }
   

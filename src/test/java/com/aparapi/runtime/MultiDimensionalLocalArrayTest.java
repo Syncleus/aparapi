@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -58,6 +59,11 @@ public class MultiDimensionalLocalArrayTest
     	protected List<Device.TYPE> getPreferredDeviceTypes() {
     		return Arrays.asList(Device.TYPE.JTP);
     	}
+    }
+
+    @AfterClass
+    public static void classTeardown() {
+    	Util.resetKernelManager();
     }
     
     @Before

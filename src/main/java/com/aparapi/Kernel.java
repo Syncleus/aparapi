@@ -2518,10 +2518,10 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
-    * Retrieves a profile report for the last thread that executed this kernel on the given device.<br/>
+    * Retrieves a profile report for the last thread that executed this kernel on the given device.
     * A report will only be available if at least one thread executed the kernel on the device.
-    *
-    * <b>Note1: <b>If the profile report is intended to be kept in memory, the object should be cloned with
+    * <br/>
+    * <b>Note1: </b>If the profile report is intended to be kept in memory, the object should be cloned with
     * {@link com.aparapi.ProfileReport#clone()}<br/>
     *
     * @param device the relevant device where the kernel executed 
@@ -2556,10 +2556,11 @@ public abstract class Kernel implements Cloneable {
    
    /**
     * Retrieves the most recent complete report available for the current thread calling this method for
-    * the current kernel instance and executed on the given device.<br/>
-    * <b>Note1: <b>If the profile report is intended to be kept in memory, the object should be cloned with
+    * the current kernel instance and executed on the given device.
+    * <br/>
+    * <b>Note1: </b>If the profile report is intended to be kept in memory, the object should be cloned with
     * {@link com.aparapi.ProfileReport#clone()}<br/>
-    * <b>Note2: <b/>If the thread didn't execute this kernel on the specified device, it
+    * <b>Note2: </b>If the thread didn't execute this kernel on the specified device, it
     * will return null.
     *    
     * @param device the relevant device where the kernel executed 
