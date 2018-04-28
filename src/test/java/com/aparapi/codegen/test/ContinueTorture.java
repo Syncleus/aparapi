@@ -34,16 +34,18 @@ public class ContinueTorture {
 
     public void run() {
         int idx = myId;
-        while (--idx > 0) {
+        while (idx-- > 0) {
 
             if (myId == 0) {
+				//idx--;
                 continue;
-            }
-            if (myId % 2 == 0) {
+            }else if (myId % 2 == 0) {				
                 results[myId] = actuallyDoIt(idx);
+				//idx--;
                 continue;
             } else {
                 results[myId] = actuallyDoIt2(idx);
+				//idx--;
                 continue;
             }
         }
