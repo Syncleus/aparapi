@@ -745,8 +745,10 @@ public abstract class BlockWriter{
       } else if (_instruction.getByteCode().equals(ByteCode.NONE)) {
          // we are done
       } else if (_instruction instanceof Branch) {
-         throw new CodeGenException(String.format("%s -> %04d", _instruction.getByteCode().toString().toLowerCase(),
-               ((Branch) _instruction).getTarget().getThisPC()));
+          if(_instruction instanceof ConditionalBranch16)
+            writeConditionalBranch16((ConditionalBranch16) _instruction, true);
+          else
+            throw new CodeGenException(String.format("%s -> %04d", _instruction.getByteCode().toString().toLowerCase(), ((Branch) _instruction).getTarget().getThisPC()));
       } else if (_instruction instanceof I_POP) {
          //POP discarded void call return?
          writeInstruction(_instruction.getFirstChild());

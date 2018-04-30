@@ -15,37 +15,12 @@
  */
 package com.aparapi.codegen.test;
 
-public class ContinueTorture {
-
-    final static int START_SIZE = 128;
-
-    public int[] values = new int[START_SIZE];
-
-    public int[] results = new int[START_SIZE];
-    int myId = 34;
-
-    int actuallyDoIt(int a) {
-        return 1;
-    }
-
-    int actuallyDoIt2(int a) {
-        return -1;
-    }
+public class EmptyIfBlock {
 
     public void run() {
-        int idx = myId;
-        while (--idx > 0) {
-            if (myId == 0) {
-                continue;
-            }
-            if (myId % 2 == 0) {
-                results[myId] = actuallyDoIt(idx);
-                continue;
-            } else {
-                results[myId] = actuallyDoIt2(idx);
-                continue;
-            }
+        int idx = 34;
+        if(idx < 5) {
         }
     }
 }
-//**{Throws{CodeGenException}Throws}**/
+/**{Throws{ClassParseException}Throws}**/
