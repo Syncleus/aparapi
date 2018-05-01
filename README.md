@@ -113,3 +113,8 @@ Kernel kernel = new Kernel() {
 Range range = Range.create(result.length);
 kernel.execute(range);
 ```
+
+## Support on Beerpay
+Hey dude! Help me out for a couple of :beers:!
+
+[![Beerpay](https://beerpay.io/Syncleus/aparapi/badge.svg?style=beer-square)](https://beerpay.io/Syncleus/aparapi)  [![Beerpay](https://beerpay.io/Syncleus/aparapi/make-wish.svg?style=flat-square)](https://beerpay.io/Syncleus/aparapi?focus=wish)
