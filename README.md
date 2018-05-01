@@ -27,7 +27,10 @@ Below you will find two side-by-side comparisons for the nbody problem on a CPU 
 
 ## Donating
 
-As an open-source project we run entierly off donations. Buy one of our hardworking developers a beer by [donating here](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EGPN4CSPCW9JN). All donations go to our bounty fund and allow us to place bounties on important bugs and enhancements.
+
+[![Beerpay](https://beerpay.io/Syncleus/aparapi/badge.svg?style=beer-square)](https://beerpay.io/Syncleus/aparapi)  [![Beerpay](https://beerpay.io/Syncleus/aparapi/make-wish.svg?style=flat-square)](https://beerpay.io/Syncleus/aparapi?focus=wish)
+
+As an open-source project we run entierly off donations. Buy one of our hardworking developers a beer by [donating here](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EGPN4CSPCW9JN). All donations go to our bounty fund and allow us to place bounties on important bugs and enhancements. You may also use Beerpay linked via the above badges.
 
 ## Support and Documentation
 
@@ -113,8 +116,3 @@ Kernel kernel = new Kernel() {
 Range range = Range.create(result.length);
 kernel.execute(range);
 ```
-
-## Support on Beerpay
-Hey dude! Help me out for a couple of :beers:!
-
-[![Beerpay](https://beerpay.io/Syncleus/aparapi/badge.svg?style=beer-square)](https://beerpay.io/Syncleus/aparapi)  [![Beerpay](https://beerpay.io/Syncleus/aparapi/make-wish.svg?style=flat-square)](https://beerpay.io/Syncleus/aparapi?focus=wish)
