@@ -3,6 +3,7 @@
 ## 1.10.0
 
 * If statements with empty blocks and comparisons outside of if or while statements now compile and run on the GPU.
+* Fix kernel management inconsistencies regarding preferred devices management 
 
 ## 1.9.0
 
