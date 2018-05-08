@@ -62,7 +62,7 @@ public class MultiDimensionalLocalArrayTest
     }
 
     @After
-    public static void classTeardown() {
+    public void classTeardown() {
     	Util.resetKernelManager();
     }
     
