@@ -24,6 +24,7 @@ import com.aparapi.internal.kernel.KernelManager;
 import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,6 +39,12 @@ public class LocalArrayArgsTest {
         assumeTrue (device != null && device instanceof OpenCLDevice);
         openCLDevice = (OpenCLDevice) device;
     }
+
+    @After
+    public static void classTeardown() {
+        Util.resetKernelManager();
+    }
+    
 
     @Test
     public void test() {
