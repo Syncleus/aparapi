@@ -24,7 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -76,8 +76,8 @@ public class AtomicsSupportAdvTest {
         openCLDevice = (OpenCLDevice) device;
     }
 
-    @AfterClass
-    public static void classTeardown() {
+    @After
+    public void classTeardown() {
     	Util.resetKernelManager();
     }
     

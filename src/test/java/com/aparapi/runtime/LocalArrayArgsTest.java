@@ -41,7 +41,7 @@ public class LocalArrayArgsTest {
     }
 
     @After
-    public static void classTeardown() {
+    public void classTeardown() {
         Util.resetKernelManager();
     }
     

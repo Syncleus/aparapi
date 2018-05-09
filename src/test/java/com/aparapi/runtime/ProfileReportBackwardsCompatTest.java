@@ -169,7 +169,7 @@ public class ProfileReportBackwardsCompatTest {
      * This test executes two threads one for each kernel on an OpenCL device and checks that the traditional Aparapi profiling interfaces work. 
      * @throws Exception 
      */
-    //@Test
+    @Test
     public void threadedSingleThreadPerKernelOpenCLTest() throws Exception {
     	setUpBefore();
     	logger.log(Level.INFO, "Test " + name.getMethodName() + " - Executing on device: " + openCLDevice.getShortDescription() + " - " + openCLDevice.getName());
