@@ -208,6 +208,7 @@ public class ProfileReportNewAPITest {
     		}
     		assertTrue(validateBasic1Kernel(inputArray, outputArray));
     	} finally {
+    		kernel.registerProfileReportObserver(null);
     		kernel.dispose();
     	}
     	
@@ -276,6 +277,9 @@ public class ProfileReportNewAPITest {
     			future.get();
     		}
     	} finally {
+    		for (Basic1Kernel k : kernels) {
+    			k.registerProfileReportObserver(null);
+    		}
     		executorService.shutdown();
     		try {
     			terminatedOk = executorService.awaitTermination(1, TimeUnit.MINUTES);

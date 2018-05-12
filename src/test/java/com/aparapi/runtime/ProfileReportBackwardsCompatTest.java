@@ -78,7 +78,7 @@ public class ProfileReportBackwardsCompatTest {
     		return Arrays.asList(Device.TYPE.JTP);
     	}
     }
-    
+	    
     @After
     public void classTeardown() {
     	Util.resetKernelManager();
@@ -149,6 +149,7 @@ public class ProfileReportBackwardsCompatTest {
     		assertEquals("Test estimated accumulated time doesn't match within 500ms window", runTime, accumulatedExecutionTime, 500);
     		assertTrue(validateBasic1Kernel(inputArray, outputArray));
     	} finally {
+    		kernel.registerProfileReportObserver(null);
     		kernel.dispose();
     	}
     	
@@ -250,6 +251,8 @@ public class ProfileReportBackwardsCompatTest {
     		assertEquals("Test estimated accumulated time doesn't match within 300ms window", results[1].runTime, results[1].accumulatedExecutionTime, 300);
     		assertTrue(validateBasic2Kernel(inputArray, results[1].outputArray));
     	} finally {
+    		kernel1.registerProfileReportObserver(null);
+    		kernel2.registerProfileReportObserver(null);
     		kernel1.dispose();
     		kernel2.dispose();
     	}

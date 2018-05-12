@@ -87,34 +87,38 @@ public class ProfileReportUnitTest {
 		
 		ExecutorService executorService = Executors.newFixedThreadPool(javaThreads);
 		try {
-			events.forEach(evt -> {
-				final int idx = index.getAndIncrement();
-				executorService.submit(() -> {
-					threadIds[idx] = Thread.currentThread().getId();
-					kernelDeviceProfile.onEvent(ProfilingEvent.START);
-					kernelDeviceProfile.onEvent(ProfilingEvent.EXECUTED);
+			try {
+				events.forEach(evt -> {
+					final int idx = index.getAndIncrement();
+					executorService.submit(() -> {
+						threadIds[idx] = Thread.currentThread().getId();
+						kernelDeviceProfile.onEvent(ProfilingEvent.START);
+						kernelDeviceProfile.onEvent(ProfilingEvent.EXECUTED);
+					});
 				});
-			});
-		} finally {
-			executorService.shutdown();
-			if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
-				executorService.shutdownNow();
-				throw new IllegalStateException("ExecutorService terminated abnormaly");
+			} finally {
+				executorService.shutdown();
+				if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
+					executorService.shutdownNow();
+					throw new IllegalStateException("ExecutorService terminated abnormaly");
+				}
 			}
+			
+			threadIds[index.get()] = Thread.currentThread().getId();
+			for (int i = 0; i < javaThreads; i++) {
+				assertTrue("Report wasn't received for thread with index " + i, onEventAccepted.contains(threadIds[i]));
+			}
+			assertFalse("Report was received for main thread", onEventAccepted.contains(threadIds[javaThreads]));
+			assertEquals("Reports from all threads should have been received", javaThreads, receivedReports.get());
+			
+			//Only after this event should the main thread have received a report
+			kernelDeviceProfile.onEvent(ProfilingEvent.EXECUTED);
+			
+			assertTrue("Report wasn't received for main thread", onEventAccepted.contains(threadIds[javaThreads]));
+			assertEquals("Reports from all threads should have been received", javaThreads + 1, receivedReports.get());
+		} finally {
+			kernelProfile.setReportObserver(null);
 		}
-		
-		threadIds[index.get()] = Thread.currentThread().getId();
-		for (int i = 0; i < javaThreads; i++) {
-			assertTrue("Report wasn't received for thread with index " + i, onEventAccepted.contains(threadIds[i]));
-		}
-		assertFalse("Report was received for main thread", onEventAccepted.contains(threadIds[javaThreads]));
-		assertEquals("Reports from all threads should have been received", javaThreads, receivedReports.get());
-		
-		//Only after this event should the main thread have received a report
-		kernelDeviceProfile.onEvent(ProfilingEvent.EXECUTED);
-		
-		assertTrue("Report wasn't received for main thread", onEventAccepted.contains(threadIds[javaThreads]));
-		assertEquals("Reports from all threads should have been received", javaThreads + 1, receivedReports.get());
 	}
 	
 	@Test

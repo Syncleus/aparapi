@@ -21,7 +21,7 @@ import static org.junit.Assume.assumeTrue;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -59,8 +59,8 @@ public class NegativeIntegerTest
         openCLDevice = (OpenCLDevice) device;
     }
     
-    @AfterClass
-    public static void classTeardown() {
+    @After
+    public void classTeardown() {
     	Util.resetKernelManager();
     }
     

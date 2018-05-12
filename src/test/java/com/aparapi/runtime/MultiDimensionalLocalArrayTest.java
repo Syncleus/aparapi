@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -61,8 +61,8 @@ public class MultiDimensionalLocalArrayTest
     	}
     }
 
-    @AfterClass
-    public static void classTeardown() {
+    @After
+    public void classTeardown() {
     	Util.resetKernelManager();
     }
     
