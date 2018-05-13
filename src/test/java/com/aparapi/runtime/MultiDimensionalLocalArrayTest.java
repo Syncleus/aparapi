@@ -314,7 +314,7 @@ public class MultiDimensionalLocalArrayTest
     public void resizableOneDimensionTest()
     {
     	final Device device = getDevice();
-        final int SIZE = 16;
+        final int SIZE = 8;
         final float[] RESULT = new float[2];
         
         Resizable1DKernel kernel = new Resizable1DKernel();
@@ -322,10 +322,10 @@ public class MultiDimensionalLocalArrayTest
         	kernel.setResult(RESULT);
         	kernel.setArray(SIZE, new float[SIZE*SIZE]);
         	kernel.execute(Range.create2D(device, SIZE, SIZE, SIZE, SIZE));
-        	assertEquals(3840, RESULT[0], 1E-6F);
+        	assertEquals(448, RESULT[0], 1E-6F);
         	kernel.setArray(2*SIZE, new float[2*SIZE*2*SIZE]);
         	kernel.execute(Range.create2D(device, 2*SIZE, 2*SIZE, 2*SIZE, 2*SIZE));
-        	assertTrue("Result is not greater then 3840", RESULT[0]>3840);
+        	assertTrue("Result is not greater than 3840", RESULT[0]>448);
         } finally {
         	kernel.dispose();
         }
@@ -336,17 +336,17 @@ public class MultiDimensionalLocalArrayTest
     public void resizableTwoDimensionTest()
     {
     	final Device device = getDevice();
-        final int SIZE = 16;
+        final int SIZE = 8;
         final float[] RESULT = new float[2];
         Resizable2DKernel kernel = new Resizable2DKernel();
         try {
         	kernel.setResult(RESULT);
         	kernel.setArray(SIZE, new float[SIZE][SIZE]);
 	        kernel.execute(Range.create2D(device, SIZE, SIZE, SIZE, SIZE));
-	        assertEquals(3840, RESULT[0], 1E-6F);
+	        assertEquals(448, RESULT[0], 1E-6F);
 	        kernel.setArray(2*SIZE, new float[2*SIZE][2*SIZE]);
-	        kernel.execute(Range.create2D(device, SIZE, SIZE, SIZE, SIZE));
-	        assertTrue("Result is not greater than 3840", RESULT[0]>3840);
+	        kernel.execute(Range.create2D(device, 2*SIZE, 2*SIZE, 2*SIZE, 2*SIZE));
+	        assertTrue("Result is not greater than 3840", RESULT[0]>448);
         } finally {
         	kernel.dispose();
         }
