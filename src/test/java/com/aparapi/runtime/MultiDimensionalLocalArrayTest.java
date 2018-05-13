@@ -325,7 +325,7 @@ public class MultiDimensionalLocalArrayTest
         	assertEquals(448, RESULT[0], 1E-6F);
         	kernel.setArray(2*SIZE, new float[2*SIZE*2*SIZE]);
         	kernel.execute(Range.create2D(device, 2*SIZE, 2*SIZE, 2*SIZE, 2*SIZE));
-        	assertTrue("Result is not greater than 3840", RESULT[0]>448);
+        	assertTrue("Result is not greater than 448", RESULT[0]>448);
         } finally {
         	kernel.dispose();
         }
@@ -346,7 +346,7 @@ public class MultiDimensionalLocalArrayTest
 	        assertEquals(448, RESULT[0], 1E-6F);
 	        kernel.setArray(2*SIZE, new float[2*SIZE][2*SIZE]);
 	        kernel.execute(Range.create2D(device, 2*SIZE, 2*SIZE, 2*SIZE, 2*SIZE));
-	        assertTrue("Result is not greater than 3840", RESULT[0]>448);
+	        assertTrue("Result is not greater than 448", RESULT[0]>448);
         } finally {
         	kernel.dispose();
         }
