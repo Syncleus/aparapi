@@ -79,13 +79,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinPool.ManagedBlocker;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntBinaryOperator;
 import java.util.logging.Logger;
 
 import com.aparapi.device.Device;
 import com.aparapi.device.JavaDevice;
 import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.kernel.IKernelBarrier;
 import com.aparapi.internal.kernel.KernelArg;
 import com.aparapi.internal.kernel.KernelDeviceProfile;
 import com.aparapi.internal.kernel.KernelManager;
@@ -514,9 +518,7 @@ public abstract class Kernel implements Cloneable {
 
       private int passId;
 
-      private volatile CyclicBarrier localBarrier;
-
-      private boolean localBarrierDisabled;
+      private final AtomicReference<IKernelBarrier> localBarrier = new AtomicReference<IKernelBarrier>();
 
       /**
        * Default constructor
@@ -534,7 +536,7 @@ public abstract class Kernel implements Cloneable {
          groupIds = kernelState.getGroupIds();
          range = kernelState.getRange();
          passId = kernelState.getPassId();
-         localBarrier = kernelState.getLocalBarrier();
+         localBarrier.set(kernelState.getLocalBarrier());
       }
 
       /**
@@ -640,34 +642,72 @@ public abstract class Kernel implements Cloneable {
       /**
        * @return the localBarrier
        */
-      public CyclicBarrier getLocalBarrier() {
-         return localBarrier;
+      public IKernelBarrier getLocalBarrier() {
+         return localBarrier.get();
       }
 
       /**
        * @param localBarrier the localBarrier to set
        */
-      public void setLocalBarrier(CyclicBarrier localBarrier) {
-         this.localBarrier = localBarrier;
+      public void setLocalBarrier(IKernelBarrier localBarrier) {
+         this.localBarrier.set(localBarrier);
       }
 
       public void awaitOnLocalBarrier() {
-         if (!localBarrierDisabled) {
-            try {
-               kernelState.getLocalBarrier().await();
-            } catch (final InterruptedException e) {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            } catch (final BrokenBarrierException e) {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            }
-         }
+    	  boolean completed = false;
+    	  final IKernelBarrier barrier = localBarrier.get();
+    	  while (!completed && barrier != null) {
+    		  try {
+    			  ForkJoinPool.managedBlock(barrier); //ManagedBlocker already has to be reentrant
+    			  completed = true;
+    		  } catch (InterruptedException ex) {
+    			  //Empty on purpose, either barrier is disabled on InterruptedException or lock will have to complete
+    		  }
+    	  }
       }
 
       public void disableLocalBarrier() {
-         localBarrierDisabled = true;
+    	  final IKernelBarrier barrier = localBarrier.getAndSet(null);
+    	  if (barrier != null) {
+    		  barrier.cancelBarrier();
+    	  }
       }
+
+  	  public String describe() {
+  	      final StringBuilder sb = new StringBuilder(100);
+  	      sb.append("Pass Id: ");
+  	      sb.append(passId);
+  	      sb.append(" - Group IDs: [");
+  	      boolean first = true;
+          for (int groupId : groupIds) {
+              if (!first) {
+                  sb.append(", ");
+              }
+              sb.append(groupId);
+              first = false;
+          }
+  	      sb.append("] - Global IDs: [");
+  	      first = true;
+  	      for (int globalId : globalIds) {
+  	          if (!first) {
+  	              sb.append(", ");
+  	          }
+  	          sb.append(globalId);
+  	          first = false;
+  	      }
+  	      sb.append("], Local IDs: [");
+  	      first = true;
+          for (int localId : localIds) {
+              if (!first) {
+                  sb.append(", ");
+              }
+              sb.append(localId);
+              first = false;
+          }
+          sb.append("]");
+          
+          return sb.toString();
+  	  }
    }
 
    /**
