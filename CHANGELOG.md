@@ -4,6 +4,9 @@
 
 * If statements with empty blocks and comparisons outside of if or while statements now compile and run on the GPU.
 * Fix kernel management inconsistencies regarding preferred devices management 
+* Fix Java execution mode with barriers to not deadlock when a thread dies or is interrupted (InterruptedException)
+* Fix Java execution mode to fail-fast when Kernel execution fails
+* Java execution mode now provides detailed backtraces of failed Kernel threads including passId, groupIds, globalIds and localIds
 
 ## 1.9.0
 
