@@ -40,5 +40,13 @@ public class OpenCLDeviceTest {
         verify(platform, times(1)).getName();
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowAnExceptionIfAnnotationValueIsNull() {
+        OpenCLDevice sut = Utils.createDevice(Utils.createPlatform("Intel (R)"), Device.TYPE.CPU);
+        sut.getArgs(Utils.methodByName("charAt", String.class));
+    }
+
+
+
 
 }
