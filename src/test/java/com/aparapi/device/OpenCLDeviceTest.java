@@ -1,6 +1,7 @@
 package com.aparapi.device;
 
 import com.aparapi.internal.opencl.OpenCLPlatform;
+import com.aparapi.opencl.OpenCL;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -8,6 +9,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class OpenCLDeviceTest {
+
+    public static final String TEST = "test";
 
     @Before
     public void resetConfigurator() {
@@ -47,6 +50,13 @@ public class OpenCLDeviceTest {
     }
 
 
+    @OpenCL.Source(TEST)
+    private static class SourceAnnotationTest<T> {
+        public void get() {
+        }
 
+        public void globalReadOnlyAnnotationTest(@OpenCL.GlobalReadOnly(TEST) String parameter) {
+        }
+    }
 
 }
