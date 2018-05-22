@@ -52,4 +52,7 @@ Below are some of the specific details of various contributions.
 * Luis Mendes submited PR to Enable kernel profiling and execution simultaneously on multiple devices
 * Luis Mendes submited PR to fix issue #78 - Signed integer constants were interpreted as unsigned values for instruction SIPUSH
 * Luis Mendes submited PR to Support for OpenCLDevice configurator/configure API
-* Luis mendes submited PR to fix kernel management inconsistencies regarding preferred devices management
+* Luis Mendes submited PR to fix kernel management inconsistencies regarding preferred devices management
+* Luis Mendes submited PR to Fix Java execution mode with barriers to not deadlock when a thread dies or is interrupted (InterruptedException)
+* Luis Mendes submited PR to Fix Java execution mode to fail-fast when Kernel execution fails
+* Luis Mendes submited PR to Java execution mode now provides detailed backtraces of failed Kernel threads including passId, groupIds, globalIds and localIds

@@ -56,6 +56,8 @@ import com.aparapi.*;
 import com.aparapi.Kernel.Constant;
 import com.aparapi.Kernel.*;
 import com.aparapi.device.*;
+import com.aparapi.exception.AparapiBrokenBarrierException;
+import com.aparapi.exception.AparapiKernelFailedException;
 import com.aparapi.internal.annotation.*;
 import com.aparapi.internal.exception.*;
 import com.aparapi.internal.instruction.InstructionSet.*;
@@ -71,7 +73,9 @@ import java.nio.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.ForkJoinPool.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.*;
 
@@ -311,42 +315,80 @@ public class KernelRunner extends KernelRunnerJNI{
       return capabilitiesSet.contains(OpenCL.CL_KHR_GL_SHARING);
    }
 
-   private static final class FJSafeCyclicBarrier extends CyclicBarrier{
-      FJSafeCyclicBarrier(final int threads) {
-         super(threads);
+   private static final class FJSafeBarrier implements IKernelBarrier {
+	  final int threads;
+	  final AtomicBoolean brokenBarrier = new AtomicBoolean(false);
+	  final AtomicBoolean canceled = new AtomicBoolean(false);
+	  final Object lock = new Object();
+	  int remainingThreads;
+	  
+      FJSafeBarrier(final int threads) {
+         remainingThreads = threads;
+         this.threads = threads;
+      }
+      
+      /**
+       * Should be called by worker threads when a fatal exception occurs,
+       * so that all threads fail-fast and no deadlock occurs.
+       */
+      public void breakBarrier(final Throwable e) {
+    	  synchronized (lock) {
+    		  brokenBarrier.set(true);
+    		  lock.notifyAll();
+    	  }
+      }
+      
+      public void cancelBarrier() {
+    	  synchronized (lock) {
+			  remainingThreads = threads;
+			  canceled.set(true);
+    		  lock.notifyAll();
+    	  }
       }
 
-      @Override public int await() throws InterruptedException, BrokenBarrierException {
-         class Awaiter implements ManagedBlocker{
-            private int value;
+      @Override
+      public boolean block() throws InterruptedException {
+    	  if (canceled.get()) {
+    		  return true;
+    	  }
+    	  
+		  synchronized (lock) {
+			  remainingThreads--;
+			  if (remainingThreads < 0) {
+				  throw new Error("Thread count cannot be less than 0");
+			  }
 
-            private boolean released;
-
-            @Override public boolean block() throws InterruptedException {
-               try {
-                  value = superAwait();
-                  released = true;
-                  return true;
-               } catch (final BrokenBarrierException e) {
-                  throw new RuntimeException(e);
-               }
-            }
-
-            @Override public boolean isReleasable() {
-               return released;
-            }
-
-            int getValue() {
-               return value;
-            }
-         }
-         final Awaiter awaiter = new Awaiter();
-         ForkJoinPool.managedBlock(awaiter);
-         return awaiter.getValue();
+			 if (!brokenBarrier.get() && remainingThreads > 0) {
+				 try {
+					 lock.wait();
+				 } catch (InterruptedException e) {
+					 //Either lock is already completed or thread will have to re-lock 
+					 if (remainingThreads != threads) {
+						 //This thread will have to re-lock for the same barrier event
+						 remainingThreads++;
+						 throw e;
+					 }
+				 }
+			 } else {
+				//InterruptedException will never occur here, thus lock completion is guaranteed
+				remainingThreads = threads;
+   			  	lock.notifyAll();
+			 }
+		  }
+    	  
+    	  //Breaking barrier at this point, allows barrier to be reused, if needed...
+    	  if (brokenBarrier.get()) {
+    		  throw new AparapiBrokenBarrierException("Barrier was broken");
+    	  }
+    	  
+    	  //Threads are always ready to be released at this point
+    	  return true;
       }
-
-      int superAwait() throws InterruptedException, BrokenBarrierException {
-         return super.await();
+      
+      @Override
+      public boolean isReleasable() {
+    	  //Ensure block() is always called by ForkJoinPool
+    	  return false;
       }
    }
 
@@ -406,7 +448,7 @@ public class KernelRunner extends KernelRunnerJNI{
                kernelState.setLocalId(0, 0);
                kernelState.setLocalId(1, 0);
                kernelState.setLocalId(2, 0);
-               kernelState.setLocalBarrier(new FJSafeCyclicBarrier(1));
+               kernelState.setLocalBarrier(new FJSafeBarrier(1));
 
                for (passId = 0; passId < _settings.passes; passId++) {
                   if (getCancelState() == CANCEL_STATUS_TRUE) {
@@ -469,7 +511,7 @@ public class KernelRunner extends KernelRunnerJNI{
                 *
                 * This barrier is threadCount wide.  We never hit the barrier from the dispatch thread.
                 */
-               final CyclicBarrier localBarrier = new FJSafeCyclicBarrier(threads);
+               final FJSafeBarrier localBarrier = new FJSafeBarrier(threads);
 
                final ThreadIdSetter threadIdSetter;
 
@@ -678,9 +720,12 @@ public class KernelRunner extends KernelRunnerJNI{
                                  threadIdSetter.set(kernelState, globalGroupId, threadId);
                                  kernelClone.run();
                               }
-                           }
-                           catch (RuntimeException | Error e) {
-                              logger.log(Level.SEVERE, "Execution failed", e);
+                           } catch (AparapiBrokenBarrierException e) {
+                        	   //Intentionally empty to not obfuscate threads that failed executing the kernel with those that had
+                        	   //the barrier broken by the first ones.
+                           } catch (RuntimeException | Error e) {
+                        	  localBarrier.breakBarrier(e);
+                        	  throw new AparapiKernelFailedException(kernelState.describe(), e);
                            }
                         }
                      });
@@ -688,7 +733,6 @@ public class KernelRunner extends KernelRunnerJNI{
                      tasks[id] = fjt;
                   }
 
-                  
                   for (ForkJoinTask<?> task : tasks) { // This dispatch thread waits for all worker threads here.
                 	  task.join();
                   }
@@ -703,18 +747,6 @@ public class KernelRunner extends KernelRunnerJNI{
          }
       } finally {
          passId = PASS_ID_COMPLETED_EXECUTION;
-      }
-   }
-
-   private static void await(CyclicBarrier _barrier) {
-      try {
-         _barrier.await();
-      } catch (final InterruptedException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      } catch (final BrokenBarrierException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
       }
    }
 
