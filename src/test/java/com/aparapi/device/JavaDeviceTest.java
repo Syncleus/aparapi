@@ -23,28 +23,28 @@ public class JavaDeviceTest {
 
     @Test
     public void shouldReturnCorrectPropertiesForThreadPoolDevice() {
-        assertEquals(JavaDevice.THREAD_POOL.getShortDescription(), "Java Thread Pool");
-        assertEquals(JavaDevice.THREAD_POOL.getDeviceId(), -3);
-        assertEquals(JavaDevice.THREAD_POOL.getType(), Device.TYPE.JTP);
-        assertEquals(JavaDevice.THREAD_POOL.toString(), "Java Thread Pool");
+        assertEquals("Java Thread Pool", JavaDevice.THREAD_POOL.getShortDescription());
+        assertEquals(-3, JavaDevice.THREAD_POOL.getDeviceId());
+        assertEquals(Device.TYPE.JTP, JavaDevice.THREAD_POOL.getType());
+        assertEquals("Java Thread Pool", JavaDevice.THREAD_POOL.toString());
 
     }
 
     @Test
     public void shouldReturnCorrectPropertiesForAlternativeAlgorithm() {
-        assertEquals(JavaDevice.ALTERNATIVE_ALGORITHM.getShortDescription(), "Java Alternative Algorithm");
-        assertEquals(JavaDevice.ALTERNATIVE_ALGORITHM.getDeviceId(), -2);
-        assertEquals(JavaDevice.ALTERNATIVE_ALGORITHM.getType(), Device.TYPE.ALT);
-        assertEquals(JavaDevice.ALTERNATIVE_ALGORITHM.toString(), "Java Alternative Algorithm");
+        assertEquals("Java Alternative Algorithm", JavaDevice.ALTERNATIVE_ALGORITHM.getShortDescription());
+        assertEquals(-2, JavaDevice.ALTERNATIVE_ALGORITHM.getDeviceId());
+        assertEquals(Device.TYPE.ALT, JavaDevice.ALTERNATIVE_ALGORITHM.getType());
+        assertEquals("Java Alternative Algorithm", JavaDevice.ALTERNATIVE_ALGORITHM.toString());
 
     }
 
     @Test
     public void shouldReturnCorrectPropertiesForSequential() {
-        assertEquals(JavaDevice.SEQUENTIAL.getShortDescription(), "Java Sequential");
-        assertEquals(JavaDevice.SEQUENTIAL.getDeviceId(), -1);
-        assertEquals(JavaDevice.SEQUENTIAL.getType(), Device.TYPE.SEQ);
-        assertEquals(JavaDevice.SEQUENTIAL.toString(), "Java Sequential");
+        assertEquals("Java Sequential", JavaDevice.SEQUENTIAL.getShortDescription());
+        assertEquals(-1, JavaDevice.SEQUENTIAL.getDeviceId());
+        assertEquals(Device.TYPE.SEQ, JavaDevice.SEQUENTIAL.getType());
+        assertEquals("Java Sequential", JavaDevice.SEQUENTIAL.toString());
 
     }
 }
