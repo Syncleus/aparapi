@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2016 - 2018 Syncleus, Inc.
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,15 +16,25 @@
 package com.aparapi.internal.kernel;
 
 import com.aparapi.Kernel;
+import com.aparapi.codegen.test.CallObject;
 import com.aparapi.device.Device;
 
 import static org.mockito.Mockito.mock;
 
-public class Utils {
+class Utils {
 
-    public static KernelDeviceProfile createKernelDeviceProfile() {
+    static KernelDeviceProfile createKernelDeviceProfile() {
         Device device = mock(Device.class);
         KernelProfile kernelProfile = mock(KernelProfile.class);
         return new KernelDeviceProfile(kernelProfile, Kernel.class, device);
+    }
+
+    static Kernel createKernel() {
+        return new CallObject();
+    }
+
+    static KernelRunner createKernelRunner() {
+        Kernel kernel = mock(Kernel.class);
+        return new KernelRunner(kernel);
     }
 }

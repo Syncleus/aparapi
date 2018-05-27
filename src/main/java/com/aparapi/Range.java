@@ -654,4 +654,19 @@ public class Range extends RangeJNI{
    public void setMaxWorkItemSize(int[] maxWorkItemSize) {
       this.maxWorkItemSize = maxWorkItemSize;
    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Range range = (Range) o;
+        return maxWorkGroupSize == range.maxWorkGroupSize &&
+            Objects.equals(device, range.device) &&
+            Arrays.equals(maxWorkItemSize, range.maxWorkItemSize);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(device, maxWorkGroupSize, maxWorkItemSize);
+    }
 }
