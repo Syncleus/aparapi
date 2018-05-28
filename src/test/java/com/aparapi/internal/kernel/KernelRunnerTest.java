@@ -28,6 +28,7 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -189,6 +190,34 @@ public class KernelRunnerTest {
         sut.execute("", null, 1);
     }
 
+    @Test
+    public void shouldReturnNullForKernelProfileInfoIfNotExplicit() throws Exception {
+        TestKernelWithNonFinalArray kernel = Mockito.spy(new TestKernelWithNonFinalArray(INITIAL_ARRAY));
+        KernelRunner sut = new KernelRunner(kernel);
+        when(kernel.isRunningCL()).thenReturn(true);
+        assertEquals(null, sut.getProfileInfo());
+    }
+
+    @Test
+    public void shouldReturnNullForKernelProfileInfoIfExplicitKernelNotCL() throws Exception {
+        TestKernelWithNonFinalArray kernel = Mockito.spy(new TestKernelWithNonFinalArray(INITIAL_ARRAY));
+        KernelRunner sut = new KernelRunner(kernel);
+        Utils.setFieldValue(sut, "explicit", true);
+        when(kernel.isRunningCL()).thenReturn(false);
+        assertEquals(null, sut.getProfileInfo());
+    }
+
+    @Test
+    public void shouldPutArrayIfExplicitAndKernelIsOpenCL() throws Exception {
+        TestKernelWithNonFinalArray kernel = Mockito.spy(new TestKernelWithNonFinalArray(INITIAL_ARRAY));
+        KernelRunner sut = new KernelRunner(kernel);
+        Utils.setFieldValue(sut, "explicit", true);
+        when(kernel.isRunningCL()).thenReturn(true);
+        sut.put(INITIAL_ARRAY);
+        Set actualAray = (Set) Utils.getFieldValue(sut, "puts");
+        assertFalse(actualAray.isEmpty());
+        assertEquals(actualAray.iterator().next(), INITIAL_ARRAY);
+    }
 
     private static void assertArraysEqual(int[] expectedArray, TestKernelWithNonFinalArray updatedKernel) {
         assertTrue(Arrays.equals(expectedArray, updatedKernel.values));
