@@ -19,6 +19,8 @@ import com.aparapi.Kernel;
 import com.aparapi.codegen.test.CallObject;
 import com.aparapi.device.Device;
 
+import java.lang.reflect.Field;
+
 import static org.mockito.Mockito.mock;
 
 class Utils {
@@ -36,5 +38,24 @@ class Utils {
     static KernelRunner createKernelRunner() {
         Kernel kernel = mock(Kernel.class);
         return new KernelRunner(kernel);
+    }
+
+    static KernelArg createKernelArg(Field field, int type) {
+        KernelArg arg = new KernelArg();
+        arg.setField(field);
+        arg.setType(type);
+        return arg;
+    }
+
+    static Object getFieldValue(KernelRunner kernelRunner, String fieldName) throws Exception {
+        Field field = KernelRunner.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(kernelRunner);
+    }
+
+    static <T> void setFieldValue(KernelRunner kernelRunner, String fieldName, T fieldValue) throws Exception {
+        Field field = KernelRunner.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(kernelRunner, fieldValue);
     }
 }
