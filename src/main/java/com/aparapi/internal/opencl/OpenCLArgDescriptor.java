@@ -18,6 +18,8 @@
  */
 package com.aparapi.internal.opencl;
 
+import java.util.Objects;
+
 public class OpenCLArgDescriptor{
 
    public final static int ARG_BYTE_BIT = 1 << 0x000;
@@ -114,4 +116,21 @@ public class OpenCLArgDescriptor{
 
       return (argBuilder.toString());
    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OpenCLArgDescriptor that = (OpenCLArgDescriptor) o;
+        return bits == that.bits &&
+            Objects.equals(memVal, that.memVal) &&
+            Objects.equals(name, that.name) &&
+            Objects.equals(kernel, that.kernel);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(memVal, name, bits, kernel);
+    }
 }
