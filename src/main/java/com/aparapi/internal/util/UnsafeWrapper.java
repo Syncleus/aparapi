@@ -116,7 +116,7 @@ public class UnsafeWrapper{
          arrayBaseOffsetMethod = uc.getDeclaredMethod("arrayBaseOffset", Class.class);
          arrayIndexScaleMethod = uc.getDeclaredMethod("arrayIndexScale", Class.class);
          getObjectMethod = uc.getDeclaredMethod("getObject", Object.class, long.class);
-         getIntMethod = uc.getDeclaredMethod("getInt", Object.class, long.class);
+          getIntMethod = uc.getDeclaredMethod("getInt", Object.class, long.class);
          getFloatMethod = uc.getDeclaredMethod("getFloat", Object.class, long.class);
          getByteMethod = uc.getDeclaredMethod("getByte", Object.class, long.class);
          getBooleanMethod = uc.getDeclaredMethod("getBoolean", Object.class, long.class);
