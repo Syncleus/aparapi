@@ -82,47 +82,47 @@ matrix:
            - libopencv-dev
          sources: &trusty_pocl_sources
            - ubuntu-toolchain-r-test
-     env:
+      env:
+       - LINUX_DIST=trusty
+       - OPENCL_LIB=pocl
+       - OPENCL_VERSION="10"
+       - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/pocl/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
+    - os: linux
+      dist: trusty
+      sudo: required
+      compiler: gcc
+      addons:
+        apt:
+          packages: *trusty_pocl_packages
+##          sources: *trusty_pocl_sources
+      env:
       - LINUX_DIST=trusty
       - OPENCL_LIB=pocl
       - OPENCL_VERSION="10"
       - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/pocl/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
-   - os: linux
-     dist: trusty
-     sudo: required
-     compiler: gcc
-     addons:
-       apt:
-         packages: *trusty_pocl_packages
-##          sources: *trusty_pocl_sources
-     env:
-      - LINUX_DIST=trusty
-      - OPENCL_LIB=pocl
-      - OPENCL_VERSION="10"
-      - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/pocl/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
-   # Trusty, OpenCL 1.1
-   - os: linux
-     dist: trusty
-     sudo: required
-     compiler: clang
-     addons:
-       apt:
-         packages: *trusty_pocl_packages
-##          sources: *trusty_pocl_sources
-     env:
-      - LINUX_DIST=trusty
-      - OPENCL_LIB=pocl
-      - OPENCL_VERSION="11"
-      - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/pocl/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
-   - os: linux
-     dist: trusty
-     sudo: required
-     compiler: gcc
-     addons:
-       apt:
-         packages: *trusty_pocl_packages
-##          sources: *trusty_pocl_sources
-     env:
+      # Trusty, OpenCL 1.1
+    - os: linux
+      dist: trusty
+      sudo: required
+      compiler: clang
+      addons:
+        apt:
+          packages: *trusty_pocl_packages
+    ##          sources: *trusty_pocl_sources
+      env:
+       - LINUX_DIST=trusty
+       - OPENCL_LIB=pocl
+       - OPENCL_VERSION="11"
+       - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/pocl/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
+    - os: linux
+      dist: trusty
+      sudo: required
+      compiler: gcc
+      addons:
+        apt:
+          packages: *trusty_pocl_packages
+    ##          sources: *trusty_pocl_sources
+      env:
       - LINUX_DIST=trusty
       - OPENCL_LIB=pocl
       - OPENCL_VERSION="11"
