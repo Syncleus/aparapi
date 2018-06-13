@@ -207,9 +207,9 @@ matrix:
 
     # OSX build
     - os: osx
-     compiler: clang
-     env:
-       - ENV_CXX_FLAGS="-Wno-c99-extensions"
+      compiler: clang
+      env:
+        - ENV_CXX_FLAGS="-Wno-c99-extensions"
 
 before_install:
     #install maven 3.5.0
