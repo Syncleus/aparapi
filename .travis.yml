@@ -54,7 +54,7 @@ matrix:
       dist: trusty
       sudo: required
       compiler: clang
-     addons:
+      addons:
        apt:
          packages: &trusty_pocl_packages
            - g++-4.8
