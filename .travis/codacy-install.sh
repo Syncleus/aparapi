@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-latest="4.0.1"
+# get latest version of codacy reporter from sonatype
+latest=$(curl "https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/maven-metadata.xml" | xpath -e "/metadata/versioning/release/text()")
+
 echo Downloading latest version $latest of codacy reporter from sonatype
 # download laterst assembly jar
 mvn dependency:get dependency:copy \
