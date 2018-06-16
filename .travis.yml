@@ -164,6 +164,7 @@ matrix:
             - python-yaml
             - lcov
             - libopencv-dev
+            - libxml-xpath-perl
           sources: &precise_icd_sources
             - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.7
