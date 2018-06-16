@@ -50,11 +50,12 @@ matrix:
     # OSX
     ############################################################################
 
+    # FIXME: Error exit code when installing OpenCV with Brew
     # OSX build
-    - os: osx
-      compiler: clang
-      env:
-        - ENV_CXX_FLAGS="-Wno-c99-extensions"
+    #- os: osx
+      #compiler: clang
+      #env:
+        #- ENV_CXX_FLAGS="-Wno-c99-extensions"
 
     ############################################################################
     # POCL builds (OpenCL 1.0, 1.1)
@@ -241,7 +242,7 @@ before_install:
         brew update
         brew outdated boost || brew upgrade boost
         brew outdated cmake || brew upgrade cmake
-        brew install lcov opencv
+        brew install lcov opencv # FIXME: exit status 1 with no error message
       fi
     - gem install coveralls-lcov
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
