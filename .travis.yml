@@ -91,6 +91,7 @@ matrix:
            - python-yaml
            - lcov
            - libopencv-dev
+           - libxml-xpath-perl
          sources: &trusty_pocl_sources
            - ubuntu-toolchain-r-test
       env:
