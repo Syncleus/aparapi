@@ -202,7 +202,7 @@ public class ProfileReportNewAPITest {
 
     		assertEquals("Number of profiling reports doesn't match the expected", runs, state.receivedReportsCount);
     		assertEquals("Aparapi Accumulated execution time doesn't match", kernel.getAccumulatedExecutionTimeAllThreads(device), state.accumulatedElapsedTime, 1e-10);
-    		assertEquals("Test estimated accumulated time doesn't match within 250ms window", runTime, kernel.getAccumulatedExecutionTimeAllThreads(device), 250);
+    		assertTrue("Test estimated accumulated time is over 200ms below wall time", runTime < kernel.getAccumulatedExecutionTimeAllThreads(device) + 250);
     		for (int i = 0; i < runs; i++) {
     			assertTrue("Report with id " + i + " wasn't received", observer.receivedReportIds[i]);
     		}
