@@ -238,10 +238,14 @@ before_install:
         #sudo apt-get install -qq -y clang-3.7 libclang-common-3.7-dev libclang-3.7-dev libclang1-3.7 libllvm3.7 lldb-3.7 llvm-3.7 llvm-3.7-dev llvm-3.7-runtime clang-modernize-3.7 clang-format-3.7 lldb-3.7-dev
       # OSX
       elif [[ ${TRAVIS_OS_NAME} == "osx" ]]; then
+        # xpath install is based on http://lewandowski.io/2015/01/sed-xpath/
+        brew tap concept-not-found/tap
         brew update
         brew outdated boost || brew upgrade boost
         brew outdated cmake || brew upgrade cmake
         brew install lcov xpath homebrew/science/opencv
+        mv /usr/local/bin/xpath /usr/local/bin/osx.xpath
+        sudo ln -s /usr/local/Cellar/xpath/1.13-7/bin/xpath /usr/local/bin/xpath
       fi
     - gem install coveralls-lcov
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
