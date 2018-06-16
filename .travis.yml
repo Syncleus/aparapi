@@ -241,7 +241,7 @@ before_install:
         brew update
         brew outdated boost || brew upgrade boost
         brew outdated cmake || brew upgrade cmake
-        brew install lcov opencv || true # Spuriously exits with code 1 even when successful
+        brew install lcov opencv
       fi
     - gem install coveralls-lcov
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
