@@ -45,6 +45,17 @@ env:
 
 matrix:
   include:
+
+    ############################################################################
+    # OSX
+    ############################################################################
+
+    # OSX build
+    - os: osx
+      compiler: clang
+      env:
+        - ENV_CXX_FLAGS="-Wno-c99-extensions"
+
     ############################################################################
     # POCL builds (OpenCL 1.0, 1.1)
     ############################################################################
@@ -200,16 +211,6 @@ matrix:
         - OPENCL_LIB=khronos-icd
         - OPENCL_VERSION="20"
         - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
-
-    ############################################################################
-    # OSX
-    ############################################################################
-
-    # OSX build
-    - os: osx
-      compiler: clang
-      env:
-        - ENV_CXX_FLAGS="-Wno-c99-extensions"
 
 before_install:
     #install maven 3.5.0
