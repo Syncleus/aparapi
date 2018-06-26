@@ -1240,71 +1240,74 @@ public class ClassModel {
 
          for (int i = 1; i < size; i++) {
             final Constant constant = cp.getConstant(i);
-
-             final byte tag = constant.getTag();
-             switch (tag) {
-                 case Const.CONSTANT_Class:
-                     final int ni = ((ConstantClass) constant).getNameIndex();
-                     add(new ClassEntry(ni, i));
-                     break;
-                 case Const.CONSTANT_String:
-                     final int si = ((ConstantString) constant).getStringIndex();
-                     add(new StringEntry(si, i));
-                     break;
-                 case Const.CONSTANT_Utf8:
-                     add(new UTF8Entry(((ConstantUtf8) constant).getBytes(), i));
-                     break;
-                 case Const.CONSTANT_Double:
-                     add(new DoubleEntry(((ConstantDouble) constant).getBytes(), i));
-                     break;
-                 case Const.CONSTANT_Float:
-                     add(new FloatEntry(((ConstantFloat) constant).getBytes(), i));
-                     break;
-                 case Const.CONSTANT_Long:
-                     add(new LongEntry(((ConstantLong) constant).getBytes(), i));
-                     break;
-                 case Const.CONSTANT_Integer:
-                     add(new IntegerEntry(((ConstantInteger) constant).getBytes(), i));
-                     break;
-                 case Const.CONSTANT_NameAndType:
-                     final int ntInd = ((ConstantNameAndType) constant).getNameIndex();
-                     final int siNT = ((ConstantNameAndType) constant).getSignatureIndex();
-                     add(new NameAndTypeEntry(ntInd, siNT, i));
-                     break;
-                 case Const.CONSTANT_InterfaceMethodref:
-                     final int refClassIndexIMR = ((ConstantCP) constant).getClassIndex();
-                     final int nameAndTypeIndIMR = ((ConstantCP) constant).getNameAndTypeIndex();
-                     add(new InterfaceMethodEntry(refClassIndexIMR, nameAndTypeIndIMR, i));
-                     break;
-                 case Const.CONSTANT_Methodref:
-                     final int refClassIndexM = ((ConstantCP) constant).getClassIndex();
-                     final int nameAndTypeIndM = ((ConstantCP) constant).getNameAndTypeIndex();
-                     add(new MethodEntry(refClassIndexM, nameAndTypeIndM, i));
-                     break;
-                 case Const.CONSTANT_Fieldref:
-                     final int refClassIndex = ((ConstantCP) constant).getClassIndex();
-                     final int nameAndTypeInd = ((ConstantCP) constant).getNameAndTypeIndex();
-                     add(new FieldEntry(refClassIndex, nameAndTypeInd, i));
-                     break;
-                 case Const.CONSTANT_MethodHandle:
-                     final ConstantMethodHandle cmh = (ConstantMethodHandle) constant;
-                     final int refKind = cmh.getReferenceKind();
-                     final int refInd = cmh.getReferenceIndex();
-                    add(new MethodHandleEntry(refKind, refInd, i));
-                    break;
-                 case Const.CONSTANT_MethodType:
-                     final ConstantMethodType cmt = (ConstantMethodType) constant;
-                     final int descInd = cmt.getDescriptorIndex();
-                     add(new MethodTypeEntry(descInd, i));
-                     break;
-                 case Const.CONSTANT_InvokeDynamic:
-                     final ConstantInvokeDynamic cid = (ConstantInvokeDynamic) constant;
-                     final int bsMethAttInd = cid.getBootstrapMethodAttrIndex();
-                     final int ntIndID = cid.getNameAndTypeIndex();
-                     add(new InvokeDynamicEntry(bsMethAttInd, ntIndID, i));
-                     break;
-                 default:
-                     System.out.printf("slot %04x unexpected Constant constantPoolType = %s\n", i, constant);
+            if (constant != null) {
+                final byte tag = constant.getTag();
+                switch (tag) {
+                    case Const.CONSTANT_Class:
+                        final int ni = ((ConstantClass) constant).getNameIndex();
+                        add(new ClassEntry(ni, i));
+                        break;
+                    case Const.CONSTANT_String:
+                        final int si = ((ConstantString) constant).getStringIndex();
+                        add(new StringEntry(si, i));
+                        break;
+                    case Const.CONSTANT_Utf8:
+                        add(new UTF8Entry(((ConstantUtf8) constant).getBytes(), i));
+                        break;
+                    case Const.CONSTANT_Double:
+                        add(new DoubleEntry(((ConstantDouble) constant).getBytes(), i));
+                        break;
+                    case Const.CONSTANT_Float:
+                        add(new FloatEntry(((ConstantFloat) constant).getBytes(), i));
+                        break;
+                    case Const.CONSTANT_Long:
+                        add(new LongEntry(((ConstantLong) constant).getBytes(), i));
+                        break;
+                    case Const.CONSTANT_Integer:
+                        add(new IntegerEntry(((ConstantInteger) constant).getBytes(), i));
+                        break;
+                    case Const.CONSTANT_NameAndType:
+                        final int ntInd = ((ConstantNameAndType) constant).getNameIndex();
+                        final int siNT = ((ConstantNameAndType) constant).getSignatureIndex();
+                        add(new NameAndTypeEntry(ntInd, siNT, i));
+                        break;
+                    case Const.CONSTANT_InterfaceMethodref:
+                        final int refClassIndexIMR = ((ConstantCP) constant).getClassIndex();
+                        final int nameAndTypeIndIMR = ((ConstantCP) constant).getNameAndTypeIndex();
+                        add(new InterfaceMethodEntry(refClassIndexIMR, nameAndTypeIndIMR, i));
+                        break;
+                    case Const.CONSTANT_Methodref:
+                        final int refClassIndexM = ((ConstantCP) constant).getClassIndex();
+                        final int nameAndTypeIndM = ((ConstantCP) constant).getNameAndTypeIndex();
+                        add(new MethodEntry(refClassIndexM, nameAndTypeIndM, i));
+                        break;
+                    case Const.CONSTANT_Fieldref:
+                        final int refClassIndex = ((ConstantCP) constant).getClassIndex();
+                        final int nameAndTypeInd = ((ConstantCP) constant).getNameAndTypeIndex();
+                        add(new FieldEntry(refClassIndex, nameAndTypeInd, i));
+                        break;
+                    case Const.CONSTANT_MethodHandle:
+                        final ConstantMethodHandle cmh = (ConstantMethodHandle) constant;
+                        final int refKind = cmh.getReferenceKind();
+                        final int refInd = cmh.getReferenceIndex();
+                        add(new MethodHandleEntry(refKind, refInd, i));
+                        break;
+                    case Const.CONSTANT_MethodType:
+                        final ConstantMethodType cmt = (ConstantMethodType) constant;
+                        final int descInd = cmt.getDescriptorIndex();
+                        add(new MethodTypeEntry(descInd, i));
+                        break;
+                    case Const.CONSTANT_InvokeDynamic:
+                        final ConstantInvokeDynamic cid = (ConstantInvokeDynamic) constant;
+                        final int bsMethAttInd = cid.getBootstrapMethodAttrIndex();
+                        final int ntIndID = cid.getNameAndTypeIndex();
+                        add(new InvokeDynamicEntry(bsMethAttInd, ntIndID, i));
+                        break;
+                    default:
+                        System.out.printf("slot %04x unexpected Constant constantPoolType = %s\n", i, constant);
+                }
+            } else {
+                add(new EmptyEntry(i));
             }
          }
       }
@@ -2543,7 +2546,7 @@ public class ClassModel {
             } else if (attributeName.equals(RUNTIMEVISIBLEPARAMETERANNOTATIONS_TAG)) {
                 final RuntimeVisibleParameterAnnotations rvpa = (RuntimeVisibleParameterAnnotations) attr;
                runtimeVisibleParameterAnnotationsEntry = new RuntimeParameterAnnotationsEntry(rvpa.getParameterAnnotationEntries(), attributeNameIndex, length);
-               entry = runtimeVisibleParameterAnnotationsEntry;               
+               entry = runtimeVisibleParameterAnnotationsEntry;
             } else if (attributeName.equals(BOOTSTRAPMETHODS_TAG)) {
                 final BootstrapMethods methds = (BootstrapMethods) attr;
                bootstrapMethodsEntry = new BootstrapMethodsEntry(methds.getBootstrapMethods(), attributeNameIndex, length);
