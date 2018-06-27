@@ -813,7 +813,8 @@ public class ExpressionList{
                 logger.fine("Scope block from " + startPc + " to  " + (tail.getThisPC() + tail.getLength()));
                 for (Instruction i = head; i != null; i = i.getNextPC()) {
                     if (i.getThisPC() == startPc) {
-                        final Instruction startInstruction = i.getRootExpr().getPrevExpr();
+                        final Instruction j = i.getRootExpr().getPrevExpr();
+                        final Instruction startInstruction =  j == null ? i : j;
                         logger.fine("Start = " + startInstruction);
 
                         addAsComposites(ByteCode.COMPOSITE_ARBITRARY_SCOPE, startInstruction.getPrevExpr(), null);

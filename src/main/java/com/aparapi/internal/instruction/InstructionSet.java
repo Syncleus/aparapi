@@ -1276,7 +1276,7 @@ public class InstructionSet{
       @Override public boolean isDeclaration() {
          LocalVariableInfo lvi = method.getLocalVariableTableEntry().getVariable(getThisPC() + getLength(),
                getLocalVariableTableIndex());
-         return (lvi != null) && (lvi.getStart() == getThisPC() + getLength());
+             return (lvi != null) && (lvi.getStart() == getThisPC() + getLength() || lvi.getStart() == getThisPC());
       }
 
       @Override public String getDescription() {
