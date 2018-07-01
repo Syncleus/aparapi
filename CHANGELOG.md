@@ -7,6 +7,8 @@
 * Fix Java execution mode with barriers to not deadlock when a thread dies or is interrupted (InterruptedException)
 * Fix Java execution mode to fail-fast when Kernel execution fails
 * Java execution mode now provides detailed backtraces of failed Kernel threads including passId, groupIds, globalIds and localIds
+* Internal translation of bytecode is now facilitated by the BCEL library
+* Scala support has been added (see unit tests).
 
 ## 1.9.0
 
