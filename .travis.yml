@@ -216,9 +216,9 @@ matrix:
         - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
 
 before_install:
-    #install maven 3.5.0
-    - export M2_HOME=$HOME/apache-maven-3.5.0
-    - if [ ! -d $M2_HOME/bin ]; then curl https://archive.apache.org/dist/maven/maven-3/3.5.0/binaries/apache-maven-3.5.0-bin.tar.gz | tar zxf - -C $HOME; fi
+    #install maven 3.5.4
+    - export M2_HOME=$HOME/apache-maven-3.5.4
+    - if [ ! -d $M2_HOME/bin ]; then curl https://archive.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz | tar zxf - -C $HOME; fi
     - export PATH=$M2_HOME/bin:$PATH
 
     # Install dependencies
