@@ -74,7 +74,7 @@ public class LocalAtomicVariableArrayTest {
     @Test
     public void openCLTest() {
         SimpleLocalVarKernel myKernel = new SimpleLocalVarKernel();
-        Range range = openCLDevice.createRange(SIZE, SIZE);;
+        Range range = openCLDevice.createRange(SIZE, SIZE);
         try {
             myKernel.execute(range);
             assertEquals("Atomic increment doesn't match", SIZE, myKernel.atomics[1].get());
@@ -93,13 +93,10 @@ public class LocalAtomicVariableArrayTest {
         }
 
         @Override public void run() {
-            int gid = getGlobalId();
-
             atomicUpdate(atomics, 1);
         }
 
         public int atomicUpdate(AtomicInteger[] arr, int index) {
-            //Other logic could be included to avoid having to call atomicUpdate, just to update an atomic
             return atomicInc(arr[index]);    
         }               
     }
