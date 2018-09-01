@@ -58,3 +58,4 @@ Below are some of the specific details of various contributions.
 * Luis Mendes submited PR to Fix Java execution mode to fail-fast when Kernel execution fails
 * Luis Mendes submited PR to Java execution mode now provides detailed backtraces of failed Kernel threads including passId, groupIds, globalIds and localIds
 * Saurabh Rawat contributed apache BCEL bytecode parsing and Scala support.
+* Luis Mendes submited PR #139 to Fix arrays of AtomicInteger stored on local variables no longer fail with type cast exception - Partial fix for #138

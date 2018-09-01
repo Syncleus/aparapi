@@ -9,6 +9,7 @@
 * Java execution mode now provides detailed backtraces of failed Kernel threads including passId, groupIds, globalIds and localIds
 * Internal translation of bytecode is now facilitated by the BCEL library
 * Scala support has been added (see unit tests).
+* Fix arrays of AtomicInteger stored on local variables no longer fail with type cast exception while generating OpenCL (support for I_ALOAD_0,1,2,3 bytecode instructions)
 
 ## 1.9.0
 

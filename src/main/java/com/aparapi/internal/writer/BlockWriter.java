@@ -790,12 +790,20 @@ public abstract class BlockWriter{
    }
 
    private boolean isMultiDimensionalArray(final AccessArrayElement arrayLoadInstruction) {
-       AccessField accessInstanceField = getUltimateInstanceFieldAccess(arrayLoadInstruction);
-      return isMultiDimensionalArray(accessInstanceField.getConstantPoolFieldEntry().getNameAndTypeEntry());
+      AccessField accessInstanceField = getUltimateInstanceFieldAccess(arrayLoadInstruction);
+       if (accessInstanceField != null) {
+           return isMultiDimensionalArray(accessInstanceField.getConstantPoolFieldEntry().getNameAndTypeEntry());
+       } else {
+           //Arrays can be accessed through local variables instead of instance fields, thus, AccessField instruction
+           //can be null.
+           AccessLocalVariable accessLocalVariable = getUltimateInstanceLocalVarAccess(arrayLoadInstruction);
+           //Directly check for multi-dimensional array...
+           return accessLocalVariable.getLocalVariableInfo().getVariableDescriptor().startsWith("[[");
+       }      
    }
 
    private boolean isObjectArray(final AccessArrayElement arrayLoadInstruction) {
-       AccessField accessInstanceField = getUltimateInstanceFieldAccess(arrayLoadInstruction);
+      AccessField accessInstanceField = getUltimateInstanceFieldAccess(arrayLoadInstruction);
       return isObjectArray(accessInstanceField.getConstantPoolFieldEntry().getNameAndTypeEntry());
    }
 
@@ -804,10 +812,25 @@ public abstract class BlockWriter{
       while (load instanceof I_AALOAD) {
          load = load.getFirstChild();
       }
+      
+      if (load instanceof I_ALOAD ||
+          load instanceof I_ALOAD_0 || load instanceof I_ALOAD_1 || load instanceof I_ALOAD_2 || load instanceof I_ALOAD_3)  {
+          //It is not a Field Access, it is either a constant index local variable (0..3), or is a variable indexed local variable (>3)
+          return null;
+      }
 
       return (AccessField) load;
    }
 
+   private AccessLocalVariable getUltimateInstanceLocalVarAccess(AccessArrayElement arrayLoadInstruction) {
+       Instruction load = arrayLoadInstruction.getArrayRef();
+       while (load instanceof I_AALOAD) {
+          load = load.getFirstChild();
+       }
+
+       return (AccessLocalVariable)load;
+   }   
+   
    public void writeMethod(MethodCall _methodCall, MethodEntry _methodEntry) throws CodeGenException {
       boolean noCL = _methodEntry.getOwnerClassModel().getNoCLMethods()
             .contains(_methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
