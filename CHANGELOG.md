@@ -1,5 +1,7 @@
 # Aparapi Changelog
 
+## v1.10.1
+
 ## 1.10.0
 
 * If statements with empty blocks and comparisons outside of if or while statements now compile and run on the GPU.
