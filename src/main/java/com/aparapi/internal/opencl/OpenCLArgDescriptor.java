@@ -18,36 +18,53 @@
  */
 package com.aparapi.internal.opencl;
 
+import java.lang.annotation.Native;
+
 public class OpenCLArgDescriptor{
 
+   @Native
    public final static int ARG_BYTE_BIT = 1 << 0x000;
 
+   @Native
    public final static int ARG_SHORT_BIT = 1 << 0x001;
 
+   @Native
    public final static int ARG_INT_BIT = 1 << 0x002;
 
+   @Native
    public final static int ARG_FLOAT_BIT = 1 << 0x003;
 
+   @Native
    public final static int ARG_LONG_BIT = 1 << 0x004;
 
+   @Native
    public final static int ARG_DOUBLE_BIT = 1 << 0x005;
 
+   @Native
    public final static int ARG_ARRAY_BIT = 1 << 0x006;
 
+   @Native
    public final static int ARG_PRIMITIVE_BIT = 1 << 0x007;
 
+   @Native
    public final static int ARG_GLOBAL_BIT = 1 << 0x008;
 
+   @Native
    public final static int ARG_LOCAL_BIT = 1 << 0x009;
 
+   @Native
    public final static int ARG_CONST_BIT = 1 << 0x00A;
 
+   @Native
    public final static int ARG_READONLY_BIT = 1 << 0x00B;
 
+   @Native
    public final static int ARG_WRITEONLY_BIT = 1 << 0x00C;
 
+   @Native
    public final static int ARG_READWRITE_BIT = 1 << 0x00D;
 
+   @Native
    public final static int ARG_ISARG_BIT = 1 << 0x00E;
 
    public OpenCLMem memVal;

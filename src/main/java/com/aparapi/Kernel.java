@@ -63,6 +63,7 @@ import com.aparapi.internal.opencl.OpenCLLoader;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Native;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -1946,6 +1947,7 @@ public abstract class Kernel implements Cloneable {
    }
 
     private static final double LOG_2_RECIPROCAL = 1.0D / Math.log(2.0D);
+    @Native
     private static final double PI_RECIPROCAL = 1.0D / Math.PI;
 
     @OpenCLMapping(mapTo = "acospi")
