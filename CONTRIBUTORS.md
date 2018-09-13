@@ -24,6 +24,7 @@
 * Toon Baeyens <toon.baeyens@gmail.com>
 * Luis Mendes <luis.p.mendes@gmail.com>
 * Saurabh Rawat <saurabh.rawat90@gmail.com>
+* Sven Guenther <sven.guenther@gmail.com>
 
 # Details
 
