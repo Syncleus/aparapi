@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 public class IntArray2DTest {
     @Test
     public void test() {
-        int size = 1048576;
+        int size = 128;
         final int count = 3;
         final int[][] V = new int[count][size];
 
