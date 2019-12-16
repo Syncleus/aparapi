@@ -34,18 +34,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class BarrierSupportTest {
-    private static OpenCLDevice openCLDevice = null;
-    private static int SIZE;
-    private int[] targetArray;
+    protected static OpenCLDevice openCLDevice = null;
+    protected static int SIZE;
+    protected int[] targetArray;
 
-    private class CLKernelManager extends KernelManager {
+    protected class CLKernelManager extends KernelManager {
     	@Override
     	protected List<Device.TYPE> getPreferredDeviceTypes() {
     		return Arrays.asList(Device.TYPE.ACC, Device.TYPE.GPU, Device.TYPE.CPU);
     	}
     }
 
-    private class JTPKernelManager extends KernelManager {
+    protected class JTPKernelManager extends KernelManager {
     	private JTPKernelManager() {
     		LinkedHashSet<Device> preferredDevices = new LinkedHashSet<Device>(1);
     		preferredDevices.add(JavaDevice.THREAD_POOL);
