@@ -41,7 +41,7 @@ public class BarrierSupportTest {
     protected class CLKernelManager extends KernelManager {
     	@Override
     	protected List<Device.TYPE> getPreferredDeviceTypes() {
-    		return Arrays.asList(Device.TYPE.ACC, Device.TYPE.GPU, Device.TYPE.CPU);
+    		return Arrays.asList(Device.TYPE.ACC, Device.TYPE.GPU);
     	}
     }
 
