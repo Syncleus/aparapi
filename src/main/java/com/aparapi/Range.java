@@ -19,6 +19,7 @@ import com.aparapi.device.*;
 import com.aparapi.internal.jni.*;
 
 import java.util.*;
+import java.lang.annotation.Native;
 
 /**
  * 
@@ -64,8 +65,10 @@ import java.util.*;
  */
 public class Range extends RangeJNI{
 
+   @Native
    public static final int THREADS_PER_CORE = 16;
 
+   @Native
    public static final int MAX_OPENCL_GROUP_SIZE = 256;
 
    public static final int MAX_GROUP_SIZE = Math.max(Runtime.getRuntime().availableProcessors() * THREADS_PER_CORE,

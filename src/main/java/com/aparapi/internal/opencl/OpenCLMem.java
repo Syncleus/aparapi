@@ -15,12 +15,18 @@
  */
 package com.aparapi.internal.opencl;
 
+import java.lang.annotation.Native;
+
+
 public class OpenCLMem{
 
+   @Native
    public final static int MEM_DIRTY_BIT = 1 << 0x00F;
 
+   @Native
    public final static int MEM_COPY_BIT = 1 << 0x010;
 
+   @Native
    public final static int MEM_ENQUEUED_BIT = 1 << 0x011;
 
    public long bits; // dirty, copy, enqueued

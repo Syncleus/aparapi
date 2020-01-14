@@ -58,6 +58,8 @@ import com.aparapi.internal.tool.*;
 
 import java.util.logging.*;
 
+import java.lang.annotation.Native;
+
 /**
  * A central location for holding all runtime configurable properties as well as logging configuration.
  * 
@@ -151,6 +153,7 @@ public class Config extends ConfigJNI{
    public static final boolean enablePUTSTATIC = Boolean.getBoolean(propPkgName + ".enable.PUTSTATIC");
 
    // Allow static array accesses 
+   @Native
    public static final boolean enableGETSTATIC = true; //Boolean.getBoolean(propPkgName + ".enable.GETSTATIC");
 
    public static final boolean enableINVOKEINTERFACE = Boolean.getBoolean(propPkgName + ".enable.INVOKEINTERFACE");

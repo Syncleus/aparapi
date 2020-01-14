@@ -1,6 +1,7 @@
 # Aparapi Changelog
 
 ## v1.10.1
+* Fixed the header genaration for JDK8 and above.
 
 ## 1.10.0
 
