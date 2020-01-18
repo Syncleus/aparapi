@@ -2,10 +2,18 @@
 
 ## v1.10.1
 
+* Fixed bug causing wrong Aparapi-native library to be loaded.
+* Minimum Java JDK compatible is now 1.8 or higher, used to be 1.7
+* Updated the following dependency versions:
+** com.aparapi: aparapi-jni 1.4.1 -> 1.4.2
+** org.scala-lang: scala-library 2.12.6 -> 2.13.1
+** net.alchim31.maven: scala-maven-plugin 3.4.1 -> 4.3.0
+** org.apache.bcel: bcel 6.2 -> 6.4.1
+
 ## 1.10.0
 
 * If statements with empty blocks and comparisons outside of if or while statements now compile and run on the GPU.
-* Fix kernel management inconsistencies regarding preferred devices management 
+* Fix kernel management inconsistencies regarding preferred devices management
 * Fix Java execution mode with barriers to not deadlock when a thread dies or is interrupted (InterruptedException)
 * Fix Java execution mode to fail-fast when Kernel execution fails
 * Java execution mode now provides detailed backtraces of failed Kernel threads including passId, groupIds, globalIds and localIds
