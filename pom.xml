@@ -125,7 +125,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <scalaVersion>2.12.6</scalaVersion>
+                    <scalaVersion>2.13.1</scalaVersion>
                 </configuration>
             </plugin>
             <plugin>
