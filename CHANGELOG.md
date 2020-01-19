@@ -2,6 +2,7 @@
 
 ## v2.0.0
 
+* Fixed Potential JVM crash when using multi-dimensional arrays (> 1D)
 * Fixed bug causing wrong Aparapi-native library to be loaded.
 * Minimum Java JDK compatible is now 1.8 or higher, used to be 1.7
 * Updated the following dependency versions:
