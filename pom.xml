@@ -27,7 +27,7 @@
 
     <name>Aparapi</name>
     <description>A java OpenCl framework.</description>
-    <url>https://github.com/Syncleus/aparapi</url>
+    <url>https://git.qoto.org/aparapi/aparapi</url>
 
     <licenses>
         <license>
@@ -44,13 +44,13 @@
 
     <scm>
         <connection>scm:git:https://github.com/Syncleus/aparapi.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/Syncleus/aparapi.git</developerConnection>
-        <url>https://github.com/Syncleus/aparapi</url>
+        <developerConnection>scm:git:ssh://git@git.qoto.org/aparapi/aparapi.git</developerConnection>
+        <url>https://git.qoto.org/aparapi/aparapi</url>
     </scm>
 
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/Syncleus/aparapi/issues</url>
+        <url>https://git.qoto.org/aparapi/aparapi/issues</url>
     </issueManagement>
 
     <developers>
