@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/1060/branches/lambda/examples/effects
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/968/branches/lambda/examples/effects/.classpath
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/968/branches/lambda/examples/effects/.project
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/1060/branches/lambda/examples/effects/build.xml
+END

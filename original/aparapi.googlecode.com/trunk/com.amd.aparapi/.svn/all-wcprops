@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/1015/trunk/com.amd.aparapi
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/49/trunk/com.amd.aparapi/.classpath
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/49/trunk/com.amd.aparapi/.project
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/277/trunk/com.amd.aparapi/build.xml
+END

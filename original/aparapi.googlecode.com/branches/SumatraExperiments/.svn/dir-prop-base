@@ -1,0 +1,11 @@
+K 10
+svn:ignore
+V 4
+log
+
+K 13
+svn:mergeinfo
+V 82
+/branches/AddExtensionMechanism:314-420
+/branches/SupportGlobalLocalMemory:116-257
+END

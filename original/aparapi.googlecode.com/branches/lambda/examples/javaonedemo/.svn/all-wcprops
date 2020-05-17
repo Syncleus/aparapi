@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/1131/branches/lambda/examples/javaonedemo
+END
+nbody.bat
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/1131/branches/lambda/examples/javaonedemo/nbody.bat
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/968/branches/lambda/examples/javaonedemo/.classpath
+END
+life.bat
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/1131/branches/lambda/examples/javaonedemo/life.bat
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/968/branches/lambda/examples/javaonedemo/.project
+END
+nbody.sh
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/1115/branches/lambda/examples/javaonedemo/nbody.sh
+END
+mandel.bat
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/1131/branches/lambda/examples/javaonedemo/mandel.bat
+END
+life.sh
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/1070/branches/lambda/examples/javaonedemo/life.sh
+END
+mandel.sh
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/1070/branches/lambda/examples/javaonedemo/mandel.sh
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/1060/branches/lambda/examples/javaonedemo/build.xml
+END

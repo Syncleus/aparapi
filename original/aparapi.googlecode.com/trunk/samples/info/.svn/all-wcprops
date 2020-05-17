@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/978/trunk/samples/info
+END
+info.bat
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/975/trunk/samples/info/info.bat
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/975/trunk/samples/info/.classpath
+END
+info.sh
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/975/trunk/samples/info/info.sh
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/975/trunk/samples/info/.project
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/975/trunk/samples/info/build.xml
+END

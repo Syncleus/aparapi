@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+
+<project name="nbody" default="get" basedir=".">
+   <property name="jogamp-jar-url" value="http://jogamp.org/deployment/archive/rc/gluegen_52-joal_32-jogl_66-jocl_41/jar"/>
+   <target name="get">
+      <!--      <get dest="jogamp">
+         <url url="${jogamp-jar-url}/jogl-all.jar"/> 
+         <url url="${jogamp-jar-url}/gluegen-rt.jar"/> 
+      </get>-->
+      <get dest="jogamp">
+         <url url="${jogamp-jar-url}/jogl-all-natives-windows-i586.jar"/> 
+         <url url="${jogamp-jar-url}/gluegen-rt-natives-windows-i586.jar"/> 
+      </get>
+      <unzip src="jogamp/jogl-all-natives-windows-i586.jar" dest="jogamp/windows-x86"/>
+      <unzip src="jogamp/gluegen-rt-natives-windows-i586.jar" dest="jogamp/windows-x86"/>
+      <delete dir="jogamp/windows-x86/META-INF"/>
+      <get dest="jogamp">
+         <url url="${jogamp-jar-url}/jogl-all-natives-windows-amd64.jar"/> 
+         <url url="${jogamp-jar-url}/gluegen-rt-natives-windows-amd64.jar"/> 
+      </get>
+      <unzip src="jogamp/jogl-all-natives-windows-amd64.jar" dest="jogamp/windows-amd64"/>
+      <unzip src="jogamp/gluegen-rt-natives-windows-amd64.jar" dest="jogamp/windows-amd64"/>
+      <delete dir="jogamp/windows-amd64/META-INF"/>
+      <get dest="jogamp">
+         <url url="${jogamp-jar-url}/jogl-all-natives-linux-i586.jar"/> 
+         <url url="${jogamp-jar-url}/gluegen-rt-natives-linux-i586.jar"/> 
+      </get>
+      <unzip src="jogamp/jogl-all-natives-linux-i586.jar" dest="jogamp/linux-i586"/>
+      <unzip src="jogamp/gluegen-rt-natives-linux-i586.jar" dest="jogamp/linux-i586"/>
+      <delete dir="jogamp/linux-i586/META-INF"/>
+      <get dest="jogamp">
+         <url url="${jogamp-jar-url}/jogl-all-natives-linux-amd64.jar"/> 
+         <url url="${jogamp-jar-url}/gluegen-rt-natives-linux-amd64.jar"/> 
+      </get>
+      <unzip src="jogamp/jogl-all-natives-linux-amd64.jar" dest="jogamp/linux-amd64"/>
+      <unzip src="jogamp/gluegen-rt-natives-linux-amd64.jar" dest="jogamp/linux-amd64"/>
+      <delete dir="jogamp/linux-amd64/META-INF"/>
+	  <get dest="jogamp">
+	     <url url="${jogamp-jar-url}/jogl-all-natives-macosx-universal.jar"/> 
+	     <url url="${jogamp-jar-url}/gluegen-rt-natives-macosx-universal.jar"/> 
+	  </get>
+     <unzip src="jogamp/jogl-all-natives-macosx-universal.jar" dest="jogamp/macosx-universal"/>
+     <unzip src="jogamp/gluegen-rt-natives-macosx-universal.jar" dest="jogamp/macosx-universal"/>
+     <delete dir="jogamp/macosx-universal/META-INF"/>
+   </target>
+	
+</project>

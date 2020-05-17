@@ -1,0 +1,356 @@
+kernel &run (	
+	kernarg_u64 %_this
+	) {
+	ld_kernarg_u64  $d2, [%_this];
+	workitemabsid_u32 $s8, 0;
+	align 4 spill_u8 %spillseg[   100];
+@L0:
+	st_spill_s32 $s8, [%spillseg][8];
+	ld_global_u32 $d0, [$d2 + 24];
+	mov_b64 $d3, $d0;
+	ld_global_s32 $s3, [$d0 + 16];
+	cmp_ge_b1_u32 $c0, $s8, $s3;
+	cbr $c0, @L1;
+@L2:
+	ld_global_u32 $d3, [$d2 + 28];
+	mov_b64 $d1, $d3;
+	ld_global_u32 $d3, [$d3 + 16];
+	mov_b64 $d1, $d3;
+	cvt_s64_s32 $d1, $s8;
+	mul_s64 $d1, $d1, 4;
+	add_u64 $d0, $d0, $d1;
+	ld_global_u32 $d0, [$d0 + 24];
+	mov_b64 $d1, $d0;
+	ld_global_u32 $d0, [$d0 + 16];
+	mov_b64 $d1, $d0;
+	ld_global_s32 $s1, [$d3 + 16];
+	ld_global_u32 $d2, [$d2 + 32];
+	st_spill_u64 $d2, [%spillseg][16];
+	ld_global_s32 $s5, [$d0 + 16];
+	cmp_ge_b1_u32 $c0, 0, $s1;
+	cbr $c0, @L3;
+@L4:
+	cmp_ge_b1_u32 $c0, 0, $s5;
+	cbr $c0, @L5;
+@L6:
+	sub_s32 $s6, $s1, $s5;
+	cmp_lt_b1_s32 $c0, $s6, 0;
+	cbr $c0, @L7;
+@L8:
+	cmp_ge_b1_u32 $c0, 0, $s1;
+	cbr $c0, @L9;
+@L10:
+	ld_global_u16 $s7, [$d3 + 24];
+	ld_global_u16 $s9, [$d0 + 24];
+	st_spill_s32 $s9, [%spillseg][24];
+	cmp_eq_b1_s32 $c0, $s7, $s9;
+	cbr $c0, @L11;
+@L12:
+	mov_b32 $s7, 0;
+	brn @L13;
+@L14:
+	cmp_ge_b1_u32 $c0, $s7, $s1;
+	cbr $c0, @L15;
+@L16:
+	cvt_s64_s32 $d10, $s7;
+	mul_s64 $d10, $d10, 2;
+	add_u64 $d11, $d3, $d10;
+	ld_global_u16 $s10, [$d11 + 24];
+	cmp_eq_b1_s32 $c0, $s10, $s9;
+	cbr $c0, @L17;
+@L13:
+	add_s32 $s7, $s7, 1;
+	cmp_ge_b1_s32 $c0, $s6, $s7;
+	cbr $c0, @L14;
+	brn @L17;
+@L15:
+	mov_b32 $s2, $s7;
+	//ForeignCall to createOutOfBoundsException would have gone here
+	brn @L18;
+@L17:
+	add_s32 $s10, $s7, 1;
+	cmp_lt_b1_s32 $c0, $s6, $s7;
+	cbr $c0, @L19;
+@L20:
+	add_s32 $s11, $s10, $s5;
+	sub_s32 $s11, $s11, 1;
+	mov_b32 $s13, $s10;
+	mov_b32 $s14, 1;
+	brn @L21;
+@L22:
+	cmp_ge_b1_u32 $c0, $s13, $s1;
+	cbr $c0, @L23;
+@L24:
+	cvt_s64_s32 $d8, $s13;
+	mul_s64 $d8, $d8, 2;
+	add_u64 $d2, $d3, $d8;
+	ld_global_u16 $s2, [$d2 + 24];
+	cmp_ge_b1_u32 $c0, $s14, $s5;
+	cbr $c0, @L25;
+@L26:
+	cvt_s64_s32 $d8, $s14;
+	mul_s64 $d8, $d8, 2;
+	add_u64 $d9, $d0, $d8;
+	ld_global_u16 $s8, [$d9 + 24];
+	cmp_ne_b1_s32 $c0, $s2, $s8;
+	cbr $c0, @L27;
+@L28:
+	add_s32 $s14, $s14, 1;
+	add_s32 $s13, $s13, 1;
+@L21:
+	cmp_ge_b1_s32 $c0, $s13, $s11;
+	cbr $c0, @L27;
+	brn @L22;
+@L23:
+	mov_b32 $s2, $s13;
+	//ForeignCall to createOutOfBoundsException would have gone here
+	brn @L29;
+@L25:
+	mov_b32 $s2, $s14;
+	//ForeignCall to createOutOfBoundsException would have gone here
+	brn @L30;
+@L27:
+	cmp_eq_b1_s32 $c0, $s13, $s11;
+	cbr $c0, @L31;
+@L19:
+	add_s32 $s2, $s5, 1;
+	st_spill_s32 $s2, [%spillseg][32];
+	ld_spill_s32 $s9, [%spillseg][24];
+@L32:
+	cmp_lt_b1_s32 $c0, $s6, $s10;
+	cbr $c0, @L33;
+@L34:
+	cmp_ge_b1_u32 $c0, $s10, $s1;
+	cbr $c0, @L35;
+@L36:
+	cvt_s64_s32 $d7, $s10;
+	mul_s64 $d7, $d7, 2;
+	add_u64 $d8, $d3, $d7;
+	ld_global_u16 $s7, [$d8 + 24];
+	cmp_eq_b1_s32 $c0, $s7, $s9;
+	cbr $c0, @L37;
+@L38:
+	add_s32 $s10, $s10, 1;
+	cmp_lt_b1_s32 $c0, $s6, $s10;
+	cbr $c0, @L37;
+@L39:
+	cmp_ge_b1_u32 $c0, $s10, $s1;
+	cbr $c0, @L40;
+@L41:
+	cvt_s64_s32 $d7, $s10;
+	mul_s64 $d7, $d7, 2;
+	add_u64 $d8, $d3, $d7;
+	ld_global_u16 $s7, [$d8 + 24];
+	cmp_ne_b1_s32 $c0, $s7, $s9;
+	cbr $c0, @L42;
+	brn @L37;
+@L43:
+	cmp_ge_b1_u32 $c0, $s10, $s1;
+	cbr $c0, @L44;
+@L45:
+	cvt_s64_s32 $d7, $s10;
+	mul_s64 $d7, $d7, 2;
+	add_u64 $d8, $d3, $d7;
+	ld_global_u16 $s7, [$d8 + 24];
+	cmp_eq_b1_s32 $c0, $s7, $s9;
+	cbr $c0, @L37;
+@L42:
+	add_s32 $s10, $s10, 1;
+	cmp_ge_b1_s32 $c0, $s6, $s10;
+	cbr $c0, @L43;
+	brn @L37;
+@L44:
+	mov_b32 $s2, $s10;
+	//ForeignCall to createOutOfBoundsException would have gone here
+	brn @L46;
+@L37:
+	add_s32 $s7, $s10, 1;
+	cmp_lt_b1_s32 $c0, $s6, $s10;
+	cbr $c0, @L47;
+@L48:
+	add_s32 $s8, $s2, $s10;
+	sub_s32 $s8, $s8, 1;
+	cmp_ge_b1_s32 $c0, $s7, $s8;
+	cbr $c0, @L49;
+@L50:
+	cmp_ge_b1_u32 $c0, $s7, $s1;
+	cbr $c0, @L51;
+@L52:
+	cvt_s64_s32 $d11, $s7;
+	mul_s64 $d11, $d11, 2;
+	add_u64 $d13, $d3, $d11;
+	ld_global_u16 $s11, [$d13 + 24];
+	cmp_ge_b1_u32 $c0, 1, $s5;
+	cbr $c0, @L53;
+@L54:
+	ld_global_u16 $s13, [$d0 + 26];
+	cmp_eq_b1_s32 $c0, $s11, $s13;
+	cbr $c0, @L55;
+@L56:
+	mov_b32 $s11, $s7;
+	st_spill_s32 $s10, [%spillseg][28];
+@L57:
+	cmp_eq_b1_s32 $c0, $s11, $s8;
+	cbr $c0, @L58;
+@L59:
+	mov_b32 $s10, $s7;
+	ld_spill_s32 $s2, [%spillseg][32];
+	brn @L32;
+@L49:
+	mov_b32 $s11, $s7;
+	st_spill_s32 $s10, [%spillseg][28];
+	brn @L57;
+@L47:
+	mov_b32 $s10, $s7;
+	brn @L32;
+@L55:
+	add_s32 $s11, $s10, 2;
+	mov_b32 $s13, 2;
+	st_spill_s32 $s10, [%spillseg][28];
+	brn @L60;
+@L61:
+	cmp_ge_b1_u32 $c0, $s11, $s1;
+	cbr $c0, @L62;
+@L63:
+	cvt_s64_s32 $d14, $s11;
+	mul_s64 $d14, $d14, 2;
+	add_u64 $d10, $d3, $d14;
+	ld_global_u16 $s10, [$d10 + 24];
+	cmp_ge_b1_u32 $c0, $s13, $s5;
+	cbr $c0, @L64;
+@L65:
+	cvt_s64_s32 $d14, $s13;
+	mul_s64 $d14, $d14, 2;
+	add_u64 $d2, $d0, $d14;
+	ld_global_u16 $s2, [$d2 + 24];
+	cmp_ne_b1_s32 $c0, $s10, $s2;
+	cbr $c0, @L57;
+@L66:
+	add_s32 $s11, $s11, 1;
+	add_s32 $s13, $s13, 1;
+@L60:
+	cmp_ge_b1_s32 $c0, $s11, $s8;
+	cbr $c0, @L57;
+	brn @L61;
+@L62:
+	mov_b32 $s2, $s11;
+	//ForeignCall to createOutOfBoundsException would have gone here
+	brn @L67;
+@L64:
+	mov_b32 $s2, $s13;
+	//ForeignCall to createOutOfBoundsException would have gone here
+	brn @L68;
+@L67:
+	mov_b32 $s7, $s11;
+	brn @L69;
+@L68:
+	mov_b32 $s7, $s11;
+@L70:
+	ld_spill_s32 $s10, [%spillseg][28];
+	brn @L71;
+@L51:
+	st_spill_s32 $s10, [%spillseg][28];
+	mov_b32 $s2, $s7;
+	//ForeignCall to createOutOfBoundsException would have gone here
+	mov_b32 $s13, 1;
+	brn @L69;
+@L53:
+	st_spill_s32 $s10, [%spillseg][28];
+	mov_b32 $s2, 1;
+	//ForeignCall to createOutOfBoundsException would have gone here
+	mov_b32 $s13, 1;
+	brn @L70;
+@L35:
+	mov_b32 $s2, $s10;
+	//ForeignCall to createOutOfBoundsException would have gone here
+	brn @L72;
+@L40:
+	mov_b32 $s2, $s10;
+	//ForeignCall to createOutOfBoundsException would have gone here
+	brn @L46;
+@L31:
+	ld_spill_u64 $d2, [%spillseg][16];
+	ld_spill_s32 $s8, [%spillseg][8];
+@L73:
+	mov_b64 $d0, $d2;
+	ld_global_s32 $s0, [$d2 + 16];
+	cmp_ge_b1_u32 $c0, $s8, $s0;
+	cbr $c0, @L74;
+@L75:
+	mov_b32 $s0, -1;
+	mov_b32 $s3, 1;
+	mov_b32 $s1, 0;
+	cmp_lt_b1_s32 $c0, $s0, $s7;
+	cmov_b32 $s1, $c0, $s3, $s1;
+	cvt_s64_s32 $d8, $s8;
+	add_u64 $d2, $d2, $d8;
+	st_global_s8 $s1, [$d2 + 24];
+	ret;
+@L58:
+	ld_spill_s32 $s7, [%spillseg][28];
+	ld_spill_u64 $d2, [%spillseg][16];
+	ld_spill_s32 $s8, [%spillseg][8];
+	brn @L73;
+@L7:
+	mov_b32 $s7, -1;
+	brn @L73;
+@L33:
+	mov_b32 $s7, -1;
+	ld_spill_u64 $d2, [%spillseg][16];
+	ld_spill_s32 $s8, [%spillseg][8];
+	brn @L73;
+@L11:
+	mov_b32 $s7, 0;
+	brn @L17;
+@L3:
+	cmp_eq_b1_s32 $c0, $s5, 0;
+	cbr $c0, @L76;
+@L77:
+	mov_b32 $s7, -1;
+	ld_spill_u64 $d2, [%spillseg][16];
+	ld_spill_s32 $s8, [%spillseg][8];
+	brn @L73;
+@L69:
+	mov_b32 $s14, $s13;
+	mov_b32 $s13, $s7;
+	ld_spill_s32 $s7, [%spillseg][28];
+	mov_b32 $s11, $s8;
+@L29:
+	ret;
+@L74:
+	ret;
+@L5:
+	cmp_eq_b1_s32 $c0, $s5, 0;
+	cbr $c0, @L78;
+@L79:
+	ret;
+@L76:
+	ld_spill_u64 $d2, [%spillseg][16];
+	ld_spill_s32 $s8, [%spillseg][8];
+	mov_b32 $s7, $s1;
+	brn @L73;
+@L72:
+	ret;
+@L9:
+	ret;
+@L78:
+	mov_b32 $s7, 0;
+	brn @L73;
+@L46:
+	ret;
+@L18:
+	mov_b32 $s10, $s7;
+	brn @L46;
+@L30:
+	mov_b32 $s8, $s11;
+	mov_b32 $s0, $s14;
+	mov_b32 $s10, $s7;
+	mov_b32 $s7, $s13;
+@L80:
+	ret;
+@L71:
+	mov_b32 $s0, $s13;
+	brn @L80;
+@L1:
+	ret;
+};	

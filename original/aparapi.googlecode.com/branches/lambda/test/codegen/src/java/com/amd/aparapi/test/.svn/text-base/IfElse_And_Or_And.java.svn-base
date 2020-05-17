@@ -1,0 +1,46 @@
+package com.amd.aparapi.test;
+
+public class IfElse_And_Or_And{
+   public void run(){
+      int x = 5;
+      int y = 5;
+
+      boolean pass = false;
+
+      if((x >= 0 && x < 10) || (y >= 0 && y < 10)){
+         pass = true;
+      }else{
+         pass = false;
+      }
+
+   }
+}
+
+/**{OpenCL{
+ typedef struct This_s{
+ int passid;
+ }This;
+
+ int get_pass_id(This *this){
+ return this->passid;
+ }
+
+ __kernel void run(
+ int passid
+ ){
+ This thisStruct;
+ This* this=&thisStruct;
+ this->passid = passid;
+ {
+ int i_1 = 5;
+ int i_2 = 5;
+ int i_3 = 0;
+ if (i_1>=0 && i_1<10 || i_2>=0 && i_2<10){
+ i_3 = 1;
+ } else {
+ i_3 = 0;
+ }
+ return;
+ }
+ }
+ }OpenCL}**/

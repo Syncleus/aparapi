@@ -1,0 +1,18 @@
+K 10
+svn:ignore
+V 158
+dist_windows_x86
+dist_windows_x86.zip
+dist_windows_x86_64
+dist_windows_x86_64.zip
+dist_mac_x86_64
+dist_mac_x86_64.zip
+dist_linux_x86_64
+dist_linux_x86_64.zip
+
+K 13
+svn:mergeinfo
+V 82
+/branches/AddExtensionMechanism:314-420
+/branches/SupportGlobalLocalMemory:116-257
+END

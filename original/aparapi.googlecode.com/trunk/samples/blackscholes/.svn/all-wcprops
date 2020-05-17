@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/786/trunk/samples/blackscholes
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/258/trunk/samples/blackscholes/.classpath
+END
+blackscholes.bat
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/786/trunk/samples/blackscholes/blackscholes.bat
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/258/trunk/samples/blackscholes/.project
+END
+blackscholes.sh
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/280/trunk/samples/blackscholes/blackscholes.sh
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/280/trunk/samples/blackscholes/build.xml
+END

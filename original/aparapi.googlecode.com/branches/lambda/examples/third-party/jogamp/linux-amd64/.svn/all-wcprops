@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/linux-amd64
+END
+libnativewindow_awt.so
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/linux-amd64/libnativewindow_awt.so
+END
+libgluegen-rt.so
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/linux-amd64/libgluegen-rt.so
+END
+libnewt.so
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/linux-amd64/libnewt.so
+END
+libjogl_mobile.so
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/linux-amd64/libjogl_mobile.so
+END
+libjogl_desktop.so
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/linux-amd64/libjogl_desktop.so
+END
+libnativewindow_x11.so
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/linux-amd64/libnativewindow_x11.so
+END

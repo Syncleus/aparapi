@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/652/trunk/examples/movie
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/629/trunk/examples/movie/.classpath
+END
+movie.bat
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/652/trunk/examples/movie/movie.bat
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/629/trunk/examples/movie/.project
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/629/trunk/examples/movie/build.xml
+END

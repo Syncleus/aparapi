@@ -1,0 +1,9 @@
+K 10
+svn:ignore
+V 36
+bin
+classes
+jvj.jar
+jviolajones.jar
+
+END

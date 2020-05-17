@@ -1,0 +1,155 @@
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/1460/branches/lambda/com.amd.aparapi.jni/src/cpp
+END
+clHelper.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/968/branches/lambda/com.amd.aparapi.jni/src/cpp/clHelper.cpp
+END
+cltest.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/968/branches/lambda/com.amd.aparapi.jni/src/cpp/cltest.cpp
+END
+agent.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/1460/branches/lambda/com.amd.aparapi.jni/src/cpp/agent.cpp
+END
+clHelper.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/979/branches/lambda/com.amd.aparapi.jni/src/cpp/clHelper.h
+END
+config.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/1086/branches/lambda/com.amd.aparapi.jni/src/cpp/config.cpp
+END
+aparapi.sumatra
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/1035/branches/lambda/com.amd.aparapi.jni/src/cpp/aparapi.sumatra
+END
+arrayBuffer.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/!svn/ver/968/branches/lambda/com.amd.aparapi.jni/src/cpp/arrayBuffer.cpp
+END
+config.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/1086/branches/lambda/com.amd.aparapi.jni/src/cpp/config.h
+END
+switch-template.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/1027/branches/lambda/com.amd.aparapi.jni/src/cpp/switch-template.cpp
+END
+profileInfo.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/!svn/ver/979/branches/lambda/com.amd.aparapi.jni/src/cpp/profileInfo.cpp
+END
+aparapi.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/1291/branches/lambda/com.amd.aparapi.jni/src/cpp/aparapi.cpp
+END
+arrayBuffer.h
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/968/branches/lambda/com.amd.aparapi.jni/src/cpp/arrayBuffer.h
+END
+aparapi.mercurial
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/!svn/ver/1062/branches/lambda/com.amd.aparapi.jni/src/cpp/aparapi.mercurial
+END
+jniHelper.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/979/branches/lambda/com.amd.aparapi.jni/src/cpp/jniHelper.cpp
+END
+profileInfo.h
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/968/branches/lambda/com.amd.aparapi.jni/src/cpp/profileInfo.h
+END
+instruction.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/1032/branches/lambda/com.amd.aparapi.jni/src/cpp/instruction.cpp
+END
+opencljni.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/979/branches/lambda/com.amd.aparapi.jni/src/cpp/opencljni.cpp
+END
+aparapi.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/968/branches/lambda/com.amd.aparapi.jni/src/cpp/aparapi.h
+END
+jniHelper.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/1047/branches/lambda/com.amd.aparapi.jni/src/cpp/jniHelper.h
+END
+opencljni.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/968/branches/lambda/com.amd.aparapi.jni/src/cpp/opencljni.h
+END
+classtoolstest.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/1032/branches/lambda/com.amd.aparapi.jni/src/cpp/classtoolstest.cpp
+END
+instruction.h
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/1032/branches/lambda/com.amd.aparapi.jni/src/cpp/instruction.h
+END
+classtools.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/!svn/ver/1012/branches/lambda/com.amd.aparapi.jni/src/cpp/classtools.cpp
+END
+classtools.h
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/1020/branches/lambda/com.amd.aparapi.jni/src/cpp/classtools.h
+END
+common.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/968/branches/lambda/com.amd.aparapi.jni/src/cpp/common.h
+END

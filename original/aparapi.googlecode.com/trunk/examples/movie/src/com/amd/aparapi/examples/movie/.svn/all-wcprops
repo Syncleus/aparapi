@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/652/trunk/examples/movie/src/com/amd/aparapi/examples/movie
+END
+ConvMatrix3x3Editor.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/!svn/ver/629/trunk/examples/movie/src/com/amd/aparapi/examples/movie/ConvMatrix3x3Editor.java
+END
+JJMPEGPlayer.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/629/trunk/examples/movie/src/com/amd/aparapi/examples/movie/JJMPEGPlayer.java
+END
+AparapiSolution.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/!svn/ver/652/trunk/examples/movie/src/com/amd/aparapi/examples/movie/AparapiSolution.java
+END
+PureJavaSolution.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/652/trunk/examples/movie/src/com/amd/aparapi/examples/movie/PureJavaSolution.java
+END
+ReferenceSolution.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/!svn/ver/652/trunk/examples/movie/src/com/amd/aparapi/examples/movie/ReferenceSolution.java
+END

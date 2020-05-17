@@ -1,0 +1,107 @@
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/!svn/ver/660/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones
+END
+RectanglePruner.java
+K 25
+svn:wc:ra_dav:version-url
+V 134
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/RectanglePruner.java
+END
+CannyPruner.java
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/CannyPruner.java
+END
+AparapiDetector.java
+K 25
+svn:wc:ra_dav:version-url
+V 134
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/AparapiDetector.java
+END
+Detector.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/!svn/ver/573/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/Detector.java
+END
+SingleThreadedDetector.java
+K 25
+svn:wc:ra_dav:version-url
+V 141
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/SingleThreadedDetector.java
+END
+StopWatch.java
+K 25
+svn:wc:ra_dav:version-url
+V 128
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/StopWatch.java
+END
+HaarCascade.java
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/HaarCascade.java
+END
+Test.java
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/!svn/ver/660/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/Test.java
+END
+DetectorNoJDOM.java
+K 25
+svn:wc:ra_dav:version-url
+V 133
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/DetectorNoJDOM.java
+END
+BatchTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 128
+/svn/!svn/ver/566/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/BatchTest.java
+END
+MultiThreadedDetector.java
+K 25
+svn:wc:ra_dav:version-url
+V 140
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/MultiThreadedDetector.java
+END
+detector.cl
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/detector.cl
+END
+AparapiDetector2.java
+K 25
+svn:wc:ra_dav:version-url
+V 135
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/AparapiDetector2.java
+END
+AparapiDetector3.java
+K 25
+svn:wc:ra_dav:version-url
+V 135
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/AparapiDetector3.java
+END
+AparapiDetector4.java
+K 25
+svn:wc:ra_dav:version-url
+V 135
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/AparapiDetector4.java
+END
+AparapiDetector5.java
+K 25
+svn:wc:ra_dav:version-url
+V 135
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/AparapiDetector5.java
+END
+AparapiDetector6.java
+K 25
+svn:wc:ra_dav:version-url
+V 135
+/svn/!svn/ver/557/branches/StagedExamplesAndSamples/examples/jviolajones/src/com/amd/aparapi/examples/jviolajones/AparapiDetector6.java
+END

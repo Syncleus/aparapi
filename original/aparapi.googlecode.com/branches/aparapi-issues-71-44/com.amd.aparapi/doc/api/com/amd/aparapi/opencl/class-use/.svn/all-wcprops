@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use
+END
+OpenCL.GlobalWriteOnly.html
+K 25
+svn:wc:ra_dav:version-url
+V 132
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use/OpenCL.GlobalWriteOnly.html
+END
+OpenCL.GlobalReadOnly.html
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use/OpenCL.GlobalReadOnly.html
+END
+OpenCL.Get.html
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use/OpenCL.Get.html
+END
+OpenCL.Source.html
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use/OpenCL.Source.html
+END
+OpenCL.Kernel.html
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use/OpenCL.Kernel.html
+END
+OpenCL.html
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use/OpenCL.html
+END
+OpenCLAdapter.html
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use/OpenCLAdapter.html
+END
+OpenCL.GlobalReadWrite.html
+K 25
+svn:wc:ra_dav:version-url
+V 132
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use/OpenCL.GlobalReadWrite.html
+END
+OpenCL.Resource.html
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use/OpenCL.Resource.html
+END
+OpenCL.Put.html
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use/OpenCL.Put.html
+END
+OpenCL.Constant.html
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use/OpenCL.Constant.html
+END
+OpenCL.Arg.html
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use/OpenCL.Arg.html
+END
+OpenCL.Local.html
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/opencl/class-use/OpenCL.Local.html
+END

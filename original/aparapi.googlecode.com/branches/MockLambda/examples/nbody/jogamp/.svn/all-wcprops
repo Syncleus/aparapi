@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/842/branches/MockLambda/examples/nbody/jogamp
+END
+gluegen-rt-natives-linux-amd64.jar
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/!svn/ver/842/branches/MockLambda/examples/nbody/jogamp/gluegen-rt-natives-linux-amd64.jar
+END
+gluegen-rt.jar
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/842/branches/MockLambda/examples/nbody/jogamp/gluegen-rt.jar
+END
+jogl-all-natives-linux-amd64.jar
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/842/branches/MockLambda/examples/nbody/jogamp/jogl-all-natives-linux-amd64.jar
+END
+jogl.all.jar
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/842/branches/MockLambda/examples/nbody/jogamp/jogl.all.jar
+END

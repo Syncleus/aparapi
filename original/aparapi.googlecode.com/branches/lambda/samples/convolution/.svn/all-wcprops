@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/1128/branches/lambda/samples/convolution
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/968/branches/lambda/samples/convolution/.classpath
+END
+pureJava.bat
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/968/branches/lambda/samples/convolution/pureJava.bat
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/968/branches/lambda/samples/convolution/.project
+END
+opencl.bat
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/968/branches/lambda/samples/convolution/opencl.bat
+END
+knight.png
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/968/branches/lambda/samples/convolution/knight.png
+END
+testcard.jpg
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/968/branches/lambda/samples/convolution/testcard.jpg
+END
+conv.bat
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/1128/branches/lambda/samples/convolution/conv.bat
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/1060/branches/lambda/samples/convolution/build.xml
+END
+conv.sh
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/1070/branches/lambda/samples/convolution/conv.sh
+END

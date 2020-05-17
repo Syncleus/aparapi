@@ -1,0 +1,54 @@
+diff -r 8d6fc90e7bbf src/share/classes/java/lang/invoke/InnerClassLambdaMetafactory.java
+--- a/src/share/classes/java/lang/invoke/InnerClassLambdaMetafactory.java	Mon Dec 03 16:57:46 2012 +0100
++++ b/src/share/classes/java/lang/invoke/InnerClassLambdaMetafactory.java	Wed Dec 19 11:04:00 2012 -0500
+@@ -29,6 +29,7 @@
+ import java.lang.reflect.Method;
+ import java.security.ProtectionDomain;
+ import java.util.concurrent.atomic.AtomicInteger;
++import java.util.concurrent.ConcurrentHashMap;
+ import jdk.internal.org.objectweb.asm.*;
+ import static jdk.internal.org.objectweb.asm.Opcodes.*;
+ import sun.misc.Unsafe;
+@@ -38,7 +39,7 @@
+ /**
+  * InnerClassLambdaMetafactory
+  */
+-/*non-public*/ final class InnerClassLambdaMetafactory extends AbstractValidatingLambdaMetafactory {
++public final class InnerClassLambdaMetafactory extends AbstractValidatingLambdaMetafactory {
+     private static final int CLASSFILE_VERSION = 51;
+     private static final Type TYPE_VOID = Type.getType(void.class);
+     private static final String METHOD_DESCRIPTOR_VOID = Type.getMethodDescriptor(Type.VOID_TYPE);
+@@ -156,6 +157,17 @@
+         }
+     }
+ 
++
++
++    private static final ConcurrentHashMap<String, byte[]> classByteArrayTable = new ConcurrentHashMap<String, byte[]>();
++	     
++    public static byte[] getBytesForClassName(String className) {
++        return classByteArrayTable.get(className);
++    }
++    public static void setBytesForClassName( String className, byte[] classBytes) {
++	    classByteArrayTable.put(className,classBytes);
++    }
++
+     /**
+      * Generate a class file which implements the functional
+      * interface, define and return the class.
+@@ -227,7 +239,15 @@
+                 }
+             }
+         );
++        
+ 
++        // ecaspole 121211
++		System.out.println("spinInnerClass: lambdaClassName = " + lambdaClassName +
++							", classBytes = " + classBytes +
++							", loader = " + loader );
++
++        setBytesForClassName(lambdaClassName, classBytes);
++        
+         return (Class<? extends T>) Unsafe.getUnsafe().defineClass(lambdaClassName, classBytes, 0, classBytes.length, loader, pd);
+     }
+ 

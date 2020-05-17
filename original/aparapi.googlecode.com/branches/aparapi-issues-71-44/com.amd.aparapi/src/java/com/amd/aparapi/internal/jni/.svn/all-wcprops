@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/!svn/ver/806/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/internal/jni
+END
+OpenCLJNI.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/!svn/ver/765/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/internal/jni/OpenCLJNI.java
+END
+ConfigJNI.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/!svn/ver/806/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/internal/jni/ConfigJNI.java
+END
+KernelRunnerJNI.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/!svn/ver/793/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/internal/jni/KernelRunnerJNI.java
+END
+KernelArgJNI.java
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svn/!svn/ver/765/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/internal/jni/KernelArgJNI.java
+END
+RangeJNI.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/!svn/ver/765/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/internal/jni/RangeJNI.java
+END

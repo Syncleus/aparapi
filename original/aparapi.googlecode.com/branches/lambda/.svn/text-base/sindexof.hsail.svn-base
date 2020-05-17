@@ -1,0 +1,526 @@
+version 0:95: $full : $large;
+kernel &run(
+   kernarg_u64 %_arg0, 
+   kernarg_u64 %_arg1, 
+   kernarg_u64 %_arg2, 
+   kernarg_s32 %_arg3
+   ){
+         ld_kernarg_u64 $d0, [%_arg0];
+         ld_kernarg_u64 $d1, [%_arg1];
+         ld_kernarg_u64 $d2, [%_arg2];
+         ld_kernarg_s32 $s3, [%_arg3];
+         workitemabsid_u32 $s3, 0;
+
+ // 0000_0000 aload_0  var#0(oref_0 Ljava/lang/String;)
+         mov_b64 $d5, $d0;
+
+ // 0000_0001 aload_1  var#1(oref_1 [Ljava/lang/String;)
+         mov_b64 $d6, $d1;
+
+ // 0000_0002 iload_3  var#3(i_3 I)
+         mov_b32 $s7, $s3;
+
+ // 0000_0003 aaload  
+         cvt_u64_s32 $d7, $s7;
+         mad_u64 $d7, $d7, 8, $d6;
+         ld_global_u64 $d6, [$d7+24];
+
+ // 0000_0004 invokevirtual Z java.lang.String.contains
+         
+ // 0001_0000   aload_0  var#0(oref_0 Ljava/lang/String;)
+         mov_b64 $d7, $d5;
+
+ // 0001_0001   aload_1  var#1(oref_1 Ljava/lang/CharSequence;)
+         mov_b64 $d8, $d6;
+
+ // 0001_0002   invokeinterface
+         
+ // 0002_0000   aload_0  var#0(oref_0 Ljava/lang/String;)
+         mov_b64 $d9, $d8;
+
+ // 0002_0001   areturn 
+         mov_u64 $d8, $d9;
+
+         // st_arg_u64 $d9, [%_result];
+         // ret;
+
+
+
+ // 0001_0007   invokevirtual I java.lang.String.indexOf
+         
+ // 0003_0000   aload_0  var#0(oref_0 Ljava/lang/String;)
+         mov_b64 $d9, $d7;
+
+ // 0003_0001   aload_1  var#1(oref_1 Ljava/lang/String;)
+         mov_b64 $d10, $d8;
+
+ // 0003_0002   iconst_0.0
+         mov_b32 $s11, 0;
+
+ // 0003_0003   invokevirtual I java.lang.String.indexOf
+         
+ // 0004_0000   aload_0  var#0(oref_0 Ljava/lang/String;)
+         mov_b64 $d12, $d9;
+
+ // 0004_0001   getfield [C java.lang.String value
+         ld_global_u64 $d12, [$d12+16];
+
+ // 0004_0004   iconst_0.0
+         mov_b32 $s13, 0;
+
+ // 0004_0005   aload_0  var#0(oref_0 Ljava/lang/String;)
+         mov_b64 $d14, $d9;
+
+ // 0004_0006   getfield [C java.lang.String value
+         ld_global_u64 $d14, [$d14+16];
+
+ // 0004_0009   arraylength
+         ld_global_s32 $s14, [$d14+16];
+
+ // 0004_0010   aload_1  var#1(oref_1 Ljava/lang/String;)
+         mov_b64 $d15, $d10;
+
+ // 0004_0011   getfield [C java.lang.String value
+         ld_global_u64 $d15, [$d15+16];
+
+ // 0004_0014   iconst_0.0
+         mov_b32 $s16, 0;
+
+ // 0004_0015   aload_1  var#1(oref_1 Ljava/lang/String;)
+         mov_b64 $d17, $d10;
+
+ // 0004_0016   getfield [C java.lang.String value
+         ld_global_u64 $d17, [$d17+16];
+
+ // 0004_0019   arraylength
+         ld_global_s32 $s17, [$d17+16];
+
+ // 0004_0020   iload_2  var#2(i_2 I)
+         mov_b32 $s18, $s11;
+
+ // 0004_0021   invokestatic I java.lang.String.indexOf
+         
+ // 0005_0000   iload    var#6(i_6 I)
+         mov_b32 $s25, $s18;
+
+ // 0005_0002   iload_2  var#2(i_2 I)
+         mov_b32 $s26, $s14;
+
+ // 0005_0003   if_icmplt 17
+         cmp_lt_b1_s32 $c1, $s25, $s26;
+         cbr $c1, @L0005_0017;
+
+ // 0005_0006   iload    var#5(i_5 I)
+         mov_b32 $s25, $s17;
+
+ // 0005_0008   ifne     15
+         cmp_ne_b1_s32 $c1, $s25, 0;
+         cbr $c1, @L0005_0015;
+
+ // 0005_0011   iload_2  var#2(i_2 I)
+         mov_b32 $s25, $s14;
+
+ // 0005_0012   goto     16
+         brn @L0005_0016;
+@L0005_0015:
+
+ // 0005_0015   iconst_m1.-1
+         mov_b32 $s26, -1;
+@L0005_0016:
+
+ // 0005_0016   ireturn 
+         mov_s32 $s12, $s25;
+
+         // st_arg_s32 $s25, [%_result];
+         // ret;
+@L0005_0017:
+
+ // 0005_0017   iload    var#6(i_6 I)
+         mov_b32 $s25, $s18;
+
+ // 0005_0019   ifge     25
+         cmp_ge_b1_s32 $c1, $s25, 0;
+         cbr $c1, @L0005_0025;
+
+ // 0005_0022   iconst_0.0
+         mov_b32 $s25, 0;
+
+ // 0005_0023   istore   var#6(i_6 I)
+         mov_b32 $s18, $s25;
+@L0005_0025:
+
+ // 0005_0025   iload    var#5(i_5 I)
+         mov_b32 $s25, $s17;
+
+ // 0005_0027   ifne     33
+         cmp_ne_b1_s32 $c1, $s25, 0;
+         cbr $c1, @L0005_0033;
+
+ // 0005_0030   iload    var#6(i_6 I)
+         mov_b32 $s25, $s18;
+
+ // 0005_0032   ireturn 
+         mov_s32 $s12, $s25;
+
+         // st_arg_s32 $s25, [%_result];
+         // ret;
+@L0005_0033:
+
+ // 0005_0033   aload_3  var#3(oref_3 [C)
+         mov_b64 $d25, $d15;
+
+ // 0005_0034   iload    var#4(i_4 I)
+         mov_b32 $s26, $s16;
+
+ // 0005_0036   caload  
+         cvt_u64_s32 $d26, $s26;
+         mad_u64 $d26, $d26, 2, $d25;
+         ld_global_u16 $s25, [$d26+24];
+         //cvt_s32_u16 $s25,  $s25;
+
+ // 0005_0037   istore   var#7(i_7 call to type.toString())
+         mov_b32 $s19, $s25;
+
+ // 0005_0039   iload_1  var#1(i_1 I)
+         mov_b32 $s25, $s13;
+
+ // 0005_0040   iload_2  var#2(i_2 I)
+         mov_b32 $s26, $s14;
+
+ // 0005_0041   iload    var#5(i_5 I)
+         mov_b32 $s27, $s17;
+
+ // 0005_0043   isub    
+         sub_s32 $s26, $s26, $s27;
+
+ // 0005_0044   iadd    
+         add_s32 $s25, $s25, $s26;
+
+ // 0005_0045   istore   var#8(i_8 call to type.toString())
+         mov_b32 $s20, $s25;
+
+ // 0005_0047   iload_1  var#1(i_1 I)
+         mov_b32 $s25, $s13;
+
+ // 0005_0048   iload    var#6(i_6 I)
+         mov_b32 $s26, $s18;
+
+ // 0005_0050   iadd    
+         add_s32 $s25, $s25, $s26;
+
+ // 0005_0051   istore   var#9(i_9 call to type.toString())
+         mov_b32 $s21, $s25;
+@L0005_0053:
+
+ // 0005_0053   iload    var#9(i_9 call to type.toString())
+         mov_b32 $s25, $s21;
+
+ // 0005_0055   iload    var#8(i_8 call to type.toString())
+         mov_b32 $s26, $s20;
+
+ // 0005_0057   if_icmpgt 164
+         cmp_gt_b1_s32 $c1, $s25, $s26;
+         cbr $c1, @L0005_0164;
+
+ // 0005_0060   aload_0  var#0(oref_0 [C)
+         mov_b64 $d25, $d12;
+
+ // 0005_0061   iload    var#9(i_9 call to type.toString())
+         mov_b32 $s26, $s21;
+
+ // 0005_0063   caload  
+         cvt_u64_s32 $d26, $s26;
+         mad_u64 $d26, $d26, 2, $d25;
+         ld_global_u16 $s25, [$d26+24];
+         //cvt_s32_u16 $s25,  $s25;
+
+ // 0005_0064   iload    var#7(i_7 call to type.toString())
+         mov_b32 $s26, $s19;
+
+ // 0005_0066   if_icmpeq 91
+         cmp_eq_b1_s32 $c1, $s25, $s26;
+         cbr $c1, @L0005_0091;
+@L0005_0069:
+
+ // 0005_0069   iinc     var#9(i_9 call to type.toString())
+         add_s32 $s21, $s21, 1;
+
+ // 0005_0072   iload    var#9(i_9 call to type.toString())
+         mov_b32 $s25, $s21;
+
+ // 0005_0074   iload    var#8(i_8 call to type.toString())
+         mov_b32 $s26, $s20;
+
+ // 0005_0076   if_icmpgt 91
+         cmp_gt_b1_s32 $c1, $s25, $s26;
+         cbr $c1, @L0005_0091;
+
+ // 0005_0079   aload_0  var#0(oref_0 [C)
+         mov_b64 $d25, $d12;
+
+ // 0005_0080   iload    var#9(i_9 call to type.toString())
+         mov_b32 $s26, $s21;
+
+ // 0005_0082   caload  
+         cvt_u64_s32 $d26, $s26;
+         mad_u64 $d26, $d26, 2, $d25;
+         ld_global_u16 $s25, [$d26+24];
+         //cvt_s32_u16 $s25,  $s25;
+
+ // 0005_0083   iload    var#7(i_7 call to type.toString())
+         mov_b32 $s26, $s19;
+
+ // 0005_0085   if_icmpeq 91
+         cmp_eq_b1_s32 $c1, $s25, $s26;
+         cbr $c1, @L0005_0091;
+
+ // 0005_0088   goto     69
+         brn @L0005_0069;
+@L0005_0091:
+
+ // 0005_0091   iload    var#9(i_9 call to type.toString())
+         mov_b32 $s25, $s21;
+
+ // 0005_0093   iload    var#8(i_8 call to type.toString())
+         mov_b32 $s26, $s20;
+
+ // 0005_0095   if_icmpgt 158
+         cmp_gt_b1_s32 $c1, $s25, $s26;
+         cbr $c1, @L0005_0158;
+
+ // 0005_0098   iload    var#9(i_9 call to type.toString())
+         mov_b32 $s25, $s21;
+
+ // 0005_0100   iconst_1.1
+         mov_b32 $s26, 1;
+
+ // 0005_0101   iadd    
+         add_s32 $s25, $s25, $s26;
+
+ // 0005_0102   istore   var#10(i_10 call to type.toString())
+         mov_b32 $s22, $s25;
+
+ // 0005_0104   iload    var#10(i_10 call to type.toString())
+         mov_b32 $s25, $s22;
+
+ // 0005_0106   iload    var#5(i_5 I)
+         mov_b32 $s26, $s17;
+
+ // 0005_0108   iadd    
+         add_s32 $s25, $s25, $s26;
+
+ // 0005_0109   iconst_1.1
+         mov_b32 $s26, 1;
+
+ // 0005_0110   isub    
+         sub_s32 $s25, $s25, $s26;
+
+ // 0005_0111   istore   var#11(i_11 call to type.toString())
+         mov_b32 $s23, $s25;
+
+ // 0005_0113   iload    var#4(i_4 I)
+         mov_b32 $s25, $s16;
+
+ // 0005_0115   iconst_1.1
+         mov_b32 $s26, 1;
+
+ // 0005_0116   iadd    
+         add_s32 $s25, $s25, $s26;
+
+ // 0005_0117   istore   var#12(i_12 call to type.toString())
+         mov_b32 $s24, $s25;
+@L0005_0119:
+
+ // 0005_0119   iload    var#10(i_10 call to type.toString())
+         mov_b32 $s25, $s22;
+
+ // 0005_0121   iload    var#11(i_11 call to type.toString())
+         mov_b32 $s26, $s23;
+
+ // 0005_0123   if_icmpge 146
+         cmp_ge_b1_s32 $c1, $s25, $s26;
+         cbr $c1, @L0005_0146;
+
+ // 0005_0126   aload_0  var#0(oref_0 [C)
+         mov_b64 $d25, $d12;
+
+ // 0005_0127   iload    var#10(i_10 call to type.toString())
+         mov_b32 $s26, $s22;
+
+ // 0005_0129   caload  
+         cvt_u64_s32 $d26, $s26;
+         mad_u64 $d26, $d26, 2, $d25;
+         ld_global_u16 $s25, [$d26+24];
+         //cvt_s32_u16 $s25,  $s25;
+
+ // 0005_0130   aload_3  var#3(oref_3 [C)
+         mov_b64 $d26, $d15;
+
+ // 0005_0131   iload    var#12(i_12 call to type.toString())
+         mov_b32 $s27, $s24;
+
+ // 0005_0133   caload  
+         cvt_u64_s32 $d27, $s27;
+         mad_u64 $d27, $d27, 2, $d26;
+         ld_global_u16 $s26, [$d27+24];
+         //cvt_s32_u16 $s26,  $s26;
+
+ // 0005_0134   if_icmpne 146
+         cmp_ne_b1_s32 $c1, $s25, $s26;
+         cbr $c1, @L0005_0146;
+
+ // 0005_0137   iinc     var#10(i_10 call to type.toString())
+         add_s32 $s22, $s22, 1;
+
+ // 0005_0140   iinc     var#12(i_12 call to type.toString())
+         add_s32 $s24, $s24, 1;
+
+ // 0005_0143   goto     119
+         brn @L0005_0119;
+@L0005_0146:
+
+ // 0005_0146   iload    var#10(i_10 call to type.toString())
+         mov_b32 $s25, $s22;
+
+ // 0005_0148   iload    var#11(i_11 call to type.toString())
+         mov_b32 $s26, $s23;
+
+ // 0005_0150   if_icmpne 158
+         cmp_ne_b1_s32 $c1, $s25, $s26;
+         cbr $c1, @L0005_0158;
+
+ // 0005_0153   iload    var#9(i_9 call to type.toString())
+         mov_b32 $s25, $s21;
+
+ // 0005_0155   iload_1  var#1(i_1 I)
+         mov_b32 $s26, $s13;
+
+ // 0005_0156   isub    
+         sub_s32 $s25, $s25, $s26;
+
+ // 0005_0157   ireturn 
+         mov_s32 $s12, $s25;
+
+         // st_arg_s32 $s25, [%_result];
+         // ret;
+@L0005_0158:
+
+ // 0005_0158   iinc     var#9(i_9 call to type.toString())
+         add_s32 $s21, $s21, 1;
+
+ // 0005_0161   goto     53
+         brn @L0005_0053;
+@L0005_0164:
+
+ // 0005_0164   iconst_m1.-1
+         mov_b32 $s25, -1;
+
+ // 0005_0165   ireturn 
+         mov_s32 $s12, $s25;
+
+         // st_arg_s32 $s25, [%_result];
+         // ret;
+
+
+
+ // 0004_0024   ireturn 
+         mov_s32 $s9, $s12;
+
+         // st_arg_s32 $s12, [%_result];
+         // ret;
+
+
+
+ // 0003_0006   ireturn 
+         mov_s32 $s7, $s9;
+
+         // st_arg_s32 $s9, [%_result];
+         // ret;
+
+
+
+ // 0001_0010   iconst_m1.-1
+         mov_b32 $s8, -1;
+
+ // 0001_0011   if_icmple 18
+         cmp_le_b1_s32 $c1, $s7, $s8;
+         cbr $c1, @L0001_0018;
+
+ // 0001_0014   iconst_1.1
+         mov_b32 $s7, 1;
+
+ // 0001_0015   goto     19
+         brn @L0001_0019;
+@L0001_0018:
+
+ // 0001_0018   iconst_0.0
+         mov_b32 $s8, 0;
+@L0001_0019:
+
+ // 0001_0019   ireturn 
+         mov_s32 $s5, $s8;
+
+         // st_arg_s32 $s8, [%_result];
+         // ret;
+
+
+
+ // 0000_0007 istore   var#4(i_4 call to type.toString())
+         mov_b32 $s4, $s5;
+
+ // 0000_0009 aload_2  var#2(oref_2 [Z)
+         mov_b64 $d5, $d2;
+
+ // 0000_0010 iload_3  var#3(i_3 I)
+         mov_b32 $s6, $s3;
+
+ // 0000_0011 iload    var#4(i_4 call to type.toString())
+         mov_b32 $s7, $s4;
+
+ // 0000_0013 bastore 
+         cvt_u64_s32 $d6, $s6;
+         mad_u64 $d6, $d6, 1, $d5;
+         st_global_s8 $s7, [$d6+24];
+
+ // 0000_0014 return  
+         ret;
+};
+/*
+0000={
+     hsailtest.StringLambda.lambda$0(Ljava/lang/String;[Ljava/lang/String;[ZI)V
+}
+
+0001={
+     hsailtest.StringLambda.lambda$0(Ljava/lang/String;[Ljava/lang/String;[ZI)V
+     @0004 : java.lang.String_contains(Ljava/lang/CharSequence;)Z
+}
+
+0002={
+     hsailtest.StringLambda.lambda$0(Ljava/lang/String;[Ljava/lang/String;[ZI)V
+     @0004 : java.lang.String_contains(Ljava/lang/CharSequence;)Z
+     @0002 : java.lang.String_toString()Ljava/lang/String;
+}
+
+0003={
+     hsailtest.StringLambda.lambda$0(Ljava/lang/String;[Ljava/lang/String;[ZI)V
+     @0004 : java.lang.String_contains(Ljava/lang/CharSequence;)Z
+     @0007 : java.lang.String_indexOf(Ljava/lang/String;)I
+}
+
+0004={
+     hsailtest.StringLambda.lambda$0(Ljava/lang/String;[Ljava/lang/String;[ZI)V
+     @0004 : java.lang.String_contains(Ljava/lang/CharSequence;)Z
+     @0007 : java.lang.String_indexOf(Ljava/lang/String;)I
+     @0003 : java.lang.String_indexOf(Ljava/lang/String;I)I
+}
+
+0005={
+     hsailtest.StringLambda.lambda$0(Ljava/lang/String;[Ljava/lang/String;[ZI)V
+     @0004 : java.lang.String_contains(Ljava/lang/CharSequence;)Z
+     @0007 : java.lang.String_indexOf(Ljava/lang/String;)I
+     @0003 : java.lang.String_indexOf(Ljava/lang/String;I)I
+     @0021 : java.lang.String_indexOf([CII[CIII)I
+}
+
+*/
+

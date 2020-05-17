@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/949/trunk/examples/third-party/jogamp/macosx-universal
+END
+libjogl_mobile.jnilib
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/949/trunk/examples/third-party/jogamp/macosx-universal/libjogl_mobile.jnilib
+END
+libjogl_desktop.jnilib
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/949/trunk/examples/third-party/jogamp/macosx-universal/libjogl_desktop.jnilib
+END
+libnativewindow_macosx.jnilib
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/!svn/ver/949/trunk/examples/third-party/jogamp/macosx-universal/libnativewindow_macosx.jnilib
+END
+libnativewindow_awt.jnilib
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/949/trunk/examples/third-party/jogamp/macosx-universal/libnativewindow_awt.jnilib
+END
+libgluegen-rt.jnilib
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/949/trunk/examples/third-party/jogamp/macosx-universal/libgluegen-rt.jnilib
+END
+libnewt.jnilib
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/949/trunk/examples/third-party/jogamp/macosx-universal/libnewt.jnilib
+END

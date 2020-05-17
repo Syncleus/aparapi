@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/896/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp
+END
+CLHelper.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/CLHelper.cpp
+END
+CLTest.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/CLTest.cpp
+END
+JNIHelper.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/JNIHelper.cpp
+END
+CLException.h
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/891/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/CLException.h
+END
+CLHelper.h
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/CLHelper.h
+END
+JNIHelper.h
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/JNIHelper.h
+END
+Common.h
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/Common.h
+END

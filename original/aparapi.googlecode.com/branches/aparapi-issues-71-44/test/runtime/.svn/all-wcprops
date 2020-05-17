@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/794/branches/aparapi-issues-71-44/test/runtime
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/784/branches/aparapi-issues-71-44/test/runtime/.classpath
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/691/branches/aparapi-issues-71-44/test/runtime/.project
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/691/branches/aparapi-issues-71-44/test/runtime/build.xml
+END

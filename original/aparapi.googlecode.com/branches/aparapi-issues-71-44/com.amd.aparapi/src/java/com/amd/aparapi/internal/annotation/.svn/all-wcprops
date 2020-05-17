@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/!svn/ver/765/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/internal/annotation
+END
+RemoveMe.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/!svn/ver/765/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/internal/annotation/RemoveMe.java
+END
+Unused.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/!svn/ver/765/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/internal/annotation/Unused.java
+END
+UsedByJNICode.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/!svn/ver/765/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/internal/annotation/UsedByJNICode.java
+END
+DocMe.java
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svn/!svn/ver/765/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/internal/annotation/DocMe.java
+END
