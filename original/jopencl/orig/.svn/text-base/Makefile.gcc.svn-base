@@ -1,0 +1,42 @@
+ATI_STREAM_HOME=/home/gfrost/atistream/ati-stream-sdk-v2.0-beta2-lnx32
+JAVA_HOME=/home/gfrost/jdk7dev/boot/jdk1.6.0_12
+
+FILES=OpenCL CLKernel CLContext CLDevice CLMem CLProgram CLPlatform CLCommandQueue CLSampler
+
+CC_INCLUDES = \
+   -I${JAVA_HOME}/include \
+   -I${JAVA_HOME}/include/linux \
+   -Iinclude \
+   -I${ATI_STREAM_HOME}/include
+
+CC_LIBPATH = \
+   -L ${ATI_STREAM_HOME}/lib/x86
+
+JAVAH=${JAVA_HOME}/bin/javah
+JAVAC=${JAVA_HOME}/bin/javac
+JAVA=${JAVA_HOME}/bin/java
+RM=rm -rf
+MKDIR=mkdir
+CC=gcc -g --std=c99
+LINK=ld
+
+all: javac javah lib run
+
+clean:
+	${RM} wrapper.o classes include libjopencl.so
+
+javac: $(patsubst %,javax/opencl/%.java,${FILES}) javax/opencl/CLException.java example/ExVectoradd.java
+	${RM} classes
+	${MKDIR} classes
+	${JAVAC} -d classes $?
+
+javah:
+	${JAVAH} -classpath classes -force -d include $(patsubst %,javax.opencl.%,${FILES})
+
+lib:
+	${CC} -c wrapper.c ${CC_INCLUDES}
+	${LINK} -G wrapper.o ${CC_LIBPATH} -lOpenCL -o libjopencl.so
+
+run:
+	LD_LIBRARY_PATH=${ATI_STREAM_HOME}/lib/x86:/home/gfrost/projects/jopencl ${JAVA}  example.ExVectoradd
+

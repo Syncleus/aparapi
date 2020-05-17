@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+
+<project name="jopencl" default="build" basedir=".">
+   <property environment="env" />
+
+   <target name="build" depends="clean">
+      <taskdef name="opencl" classname="com.amd.javalabs.ant.OpenCLJNITask" classpath="../com.amd.javalabs.ant/com.amd.javalabs.ant.jar"/>
+      <mkdir dir="classes"/>
+
+      <javac destdir="classes" debug="on" srcdir="src/java"/>
+
+      <jar jarfile="jopencl.jar" basedir="classes" />
+
+      <jar jarfile="jopencl-ex-vector-add.jar" basedir="classes" >
+         <manifest>
+            <attribute name="Main-Class" value="example.ExVectoradd"/>
+         </manifest>      
+      </jar> 
+
+      <copy todir="classes/example" file="src/java/example/NBody.cl"/>
+
+      <jar jarfile="jopencl-nbody.jar" basedir="classes" >
+         <manifest>
+            <attribute name="Main-Class" value="example.ExNBody"/>
+         </manifest>      
+      </jar> 
+
+      <jar jarfile="jopencl-nbodyui.jar" basedir="classes" >
+         <manifest>
+            <attribute name="Main-Class" value="example.ExNBodyWithUI"/>
+         </manifest>      
+      </jar> 
+
+      <delete file="classes/example/NBody.cl"/>
+      <copy todir="classes/example" file="src/java/example/LeeMazeRouter.cl"/>
+      <jar jarfile="jopencl-lee.jar" basedir="classes" >
+         <manifest>
+            <attribute name="Main-Class" value="example.ExLeeMazeRouter"/>
+         </manifest>      
+      </jar> 
+      <delete file="classes/example/LeeMazeRouter.cl"/>
+
+      <mkdir dir="include"/>
+      <javah classpath="jopencl.jar" destdir="include" force="true">
+         <class name="javax.opencl.OpenCL"/>
+         <class name="javax.opencl.CLContext"/>
+         <class name="javax.opencl.CLKernel"/>
+         <class name="javax.opencl.CLDevice"/>
+         <class name="javax.opencl.CLMem"/>
+         <class name="javax.opencl.CLProgram"/>
+         <class name="javax.opencl.CLPlatform"/>
+         <class name="javax.opencl.CLCommandQueue"/>
+         <class name="javax.opencl.CLSampler"/>
+      </javah>
+
+      <opencl out="jopencl" source="src/cpp/JOpenCL.cpp" includepath="include"/>
+   </target>
+
+   <target name="clean">
+      <delete file="JOpenCL.o"/>
+      <delete file="jopencl.obj"/>
+      <delete file="jopencl.exp"/>
+      <delete file="jopencl.lib"/>
+      <delete file="libjopencl.so" />
+      <delete file="jopencl-ex-vector-add.jar" />
+      <delete file="jopencl-nbody.jar" />
+      <delete file="jopencl-nbodyui.jar" />
+      <delete dir="classes" />
+      <delete dir="include" />
+   </target>
+
+</project>

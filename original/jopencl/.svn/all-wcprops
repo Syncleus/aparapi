@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/sss/see/javalabs/!svn/ver/6686/javalabs/projects/jopencl
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/sss/see/javalabs/!svn/ver/6523/javalabs/projects/jopencl/.classpath
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/sss/see/javalabs/!svn/ver/6358/javalabs/projects/jopencl/.project
+END
+go.bat
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/sss/see/javalabs/!svn/ver/6686/javalabs/projects/jopencl/go.bat
+END
+readme.txt
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/sss/see/javalabs/!svn/ver/6358/javalabs/projects/jopencl/readme.txt
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/sss/see/javalabs/!svn/ver/6642/javalabs/projects/jopencl/build.xml
+END
