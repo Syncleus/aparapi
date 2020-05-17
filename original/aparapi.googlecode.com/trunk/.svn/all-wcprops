@@ -1,0 +1,45 @@
+K 26
+svn:wc:ra_dav:activity-url
+V 14
+/svn/!svn/act/
+K 25
+svn:wc:ra_dav:version-url
+V 24
+/svn/!svn/ver/1015/trunk
+END
+LICENSE.TXT
+K 25
+svn:wc:ra_dav:version-url
+V 34
+/svn/!svn/ver/48/trunk/LICENSE.TXT
+END
+QuickReference.pdf
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/54/trunk/QuickReference.pdf
+END
+aparapi-eclipse-formatting.xml
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/48/trunk/aparapi-eclipse-formatting.xml
+END
+Notes.txt
+K 25
+svn:wc:ra_dav:version-url
+V 33
+/svn/!svn/ver/421/trunk/Notes.txt
+END
+CREDITS.txt
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/1004/trunk/CREDITS.txt
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 33
+/svn/!svn/ver/974/trunk/build.xml
+END

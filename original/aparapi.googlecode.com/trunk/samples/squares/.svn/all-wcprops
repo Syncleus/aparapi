@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/280/trunk/samples/squares
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/49/trunk/samples/squares/.classpath
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/49/trunk/samples/squares/.project
+END
+squares.bat
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/280/trunk/samples/squares/squares.bat
+END
+squares.sh
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/280/trunk/samples/squares/squares.sh
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/280/trunk/samples/squares/build.xml
+END

@@ -1,0 +1,101 @@
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/907/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp
+END
+cltest.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/cltest.cpp
+END
+clHelper.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/clHelper.cpp
+END
+clHelper.h
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/clHelper.h
+END
+config.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/config.cpp
+END
+arrayBuffer.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/arrayBuffer.cpp
+END
+config.h
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/config.h
+END
+profileInfo.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/profileInfo.cpp
+END
+aparapi.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/!svn/ver/907/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/aparapi.cpp
+END
+arrayBuffer.h
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/arrayBuffer.h
+END
+jniHelper.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/905/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/jniHelper.cpp
+END
+profileInfo.h
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/profileInfo.h
+END
+opencljni.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/opencljni.cpp
+END
+aparapi.h
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/aparapi.h
+END
+jniHelper.h
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/jniHelper.h
+END
+opencljni.h
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/opencljni.h
+END
+common.h
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/903/branches/SumatraExperiments/com.amd.aparapi.jni/src/cpp/common.h
+END

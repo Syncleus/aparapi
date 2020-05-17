@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/990/trunk/test/runtime/src/java/com/amd/aparapi/test/runtime
+END
+ExplicitBoolean.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/647/trunk/test/runtime/src/java/com/amd/aparapi/test/runtime/ExplicitBoolean.java
+END
+CallStaticFromAnonymousKernel.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/!svn/ver/846/trunk/test/runtime/src/java/com/amd/aparapi/test/runtime/CallStaticFromAnonymousKernel.java
+END
+UseStaticArray.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/!svn/ver/990/trunk/test/runtime/src/java/com/amd/aparapi/test/runtime/UseStaticArray.java
+END
+Issue68.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/657/trunk/test/runtime/src/java/com/amd/aparapi/test/runtime/Issue68.java
+END
+Issue69.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/658/trunk/test/runtime/src/java/com/amd/aparapi/test/runtime/Issue69.java
+END
+RangeSize.java
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/828/trunk/test/runtime/src/java/com/amd/aparapi/test/runtime/RangeSize.java
+END
+Test12x4_4x2.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/624/trunk/test/runtime/src/java/com/amd/aparapi/test/runtime/Test12x4_4x2.java
+END
+Util.java
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/618/trunk/test/runtime/src/java/com/amd/aparapi/test/runtime/Util.java
+END
+BufferTransfer.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/!svn/ver/657/trunk/test/runtime/src/java/com/amd/aparapi/test/runtime/BufferTransfer.java
+END

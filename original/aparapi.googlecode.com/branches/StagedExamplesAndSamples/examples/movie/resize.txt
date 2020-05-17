@@ -1,0 +1,1 @@
+resize -i C:\Users\gfrost\Desktop\faces\movies\leo.mov -aspect 16:9 -s 1280x720  -strict experimental output.mp4 

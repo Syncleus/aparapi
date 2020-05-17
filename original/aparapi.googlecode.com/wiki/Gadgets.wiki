@@ -1,0 +1,14 @@
+#summary Gadgetorium
+
+
+[http://www.ohloh.net/p/aparapi/widgets widgets]
+
+<wiki:gadget url="http://www.ohloh.net/p/596963/widgets/project_users_logo.xml" height="43" border="0"/>
+
+<wiki:gadget url="http://www.ohloh.net/p/596963/widgets/project_languages.xml" height="200" width="350" border=""/>
+
+<wiki:gadget url="http://www.ohloh.net/p/596963/widgets/project_factoids_stats.xml" height="250" width="500" border=""/>
+
+<wiki:gadget url="http://www.ohloh.net/p/596963/widgets/project_factoids.xml" width ="400" border="0"/>
+
+<wiki:gadget url="http://www.ohloh.net/p/596963/widgets/project_cocomo.xml" width="500" height="240" border="0"/>

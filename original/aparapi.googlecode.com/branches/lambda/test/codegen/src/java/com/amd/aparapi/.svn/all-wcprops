@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/1303/branches/lambda/test/codegen/src/java/com/amd/aparapi
+END
+UpdateJUnits.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/1303/branches/lambda/test/codegen/src/java/com/amd/aparapi/UpdateJUnits.java
+END
+KernelHelper.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/1255/branches/lambda/test/codegen/src/java/com/amd/aparapi/KernelHelper.java
+END
+CreateJUnitTests.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/!svn/ver/1303/branches/lambda/test/codegen/src/java/com/amd/aparapi/CreateJUnitTests.java
+END
+Source.java
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/1303/branches/lambda/test/codegen/src/java/com/amd/aparapi/Source.java
+END
+SwingDiff.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/1245/branches/lambda/test/codegen/src/java/com/amd/aparapi/SwingDiff.java
+END
+DiffMatchPatch.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/1255/branches/lambda/test/codegen/src/java/com/amd/aparapi/DiffMatchPatch.java
+END
+Diff.java
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/1255/branches/lambda/test/codegen/src/java/com/amd/aparapi/Diff.java
+END
+CodeGenOpenCLJUnitBase.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/!svn/ver/1303/branches/lambda/test/codegen/src/java/com/amd/aparapi/CodeGenOpenCLJUnitBase.java
+END
+CodeGenHSAILJUnitBase.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/!svn/ver/1303/branches/lambda/test/codegen/src/java/com/amd/aparapi/CodeGenHSAILJUnitBase.java
+END

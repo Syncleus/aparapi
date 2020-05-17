@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+
+<project name="vlcjplayer" default="build" basedir=".">
+   <property name="jogamp-jar-url" value="http://jogamp.org/deployment/archive/rc/gluegen_28-joal_17-jogl_41-jocl_25/jar/"/>
+
+   <path id="compiler.class.path">
+      <pathelement path="../../com.amd.aparapi/aparapi.jar"/>
+      <pathelement path="vlcj/jna.jar"/>
+      <pathelement path="vlcj/platform.jar"/>
+      <pathelement path="vlcj/vlcj-1.2.2.jar"/>
+   </path>
+
+   <path id="runtime.class.path" cache="true">
+      <path refid="compiler.class.path"/>
+      <pathelement path="${ant.project.name}.jar"/>
+   </path>
+
+   <condition property="needjars">
+      <or>
+         <not><available file="vlcj/jna.jar"/> </not>
+         <not><available file="vlcj/platform.jar"/> </not>
+         <not><available file="vlcj/vlcj-1.2.2.jar"/> </not>
+      </or>
+   </condition>
+
+   <target name="getjars" if="needjars">
+      <delete dir="vlcj"/>
+      <get dest="vlcj">
+         <url url="http://java.net/projects/jna/sources/svn/content/tags/3.3.0/jnalib/dist/jna.jar"/> 
+         <url url="http://java.net/projects/jna/sources/svn/content/tags/3.3.0/jnalib/dist/platform.jar"/> 
+         <url url="http://vlcj.googlecode.com/files/vlcj-1.2.2.jar"/> 
+      </get>
+   </target>
+
+
+   <target name="build" depends="clean, getjars">
+      <mkdir dir="classes"/>
+      <javac srcdir="src" destdir="classes" debug="on" includeantruntime="false">
+         <classpath refid="compiler.class.path"/>
+      </javac>
+      <jar jarfile="${ant.project.name}.jar" basedir="classes"/>
+   </target>
+
+   <target name="clean">
+      <delete dir="classes"/>
+      <delete file="${ant.project.name}.jar"/>
+   </target>
+
+   <target name="run-jtp">
+      <java classname="com.amd.aparapi.examples.vlcj.Main" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <arg line="http://www.youtube.com/watch?v=3qAp2-VoM2I"/>
+
+         <arg line="http://www.youtube.com/watch?v=DX1iplQQJTo"/>
+         <arg line="http://www.youtube.com/watch?v=Gw7C72JTY9I"/>
+         <sysproperty key="jna.library.path" path="C:\Program Files\VideoLAN\VLC"/>
+         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni"/>
+         <sysproperty key="com.amd.aparapi.executionMode" value="JTP"/>
+      </java>
+   </target>
+
+   <target name="run-gpu">
+      <java classname="com.amd.aparapi.examples.vlcj.Main" fork="true">
+         <classpath refid="runtime.class.path"/>
+         <arg line="http://www.youtube.com/watch?v=DX1iplQQJTo"/>
+         <arg line="http://www.youtube.com/watch?v=3qAp2-VoM2I"/>
+
+         <arg line="http://www.youtube.com/watch?v=Gw7C72JTY9I"/>
+         <sysproperty key="jna.library.path" path="C:\Program Files\VideoLAN\VLC"/>
+         <sysproperty key="java.library.path" path="..\..\com.amd.aparapi.jni"/>
+         <sysproperty key="com.amd.aparapi.executionMode" value="GPU"/>
+      </java>
+   </target>
+
+   <target name="run" depends="run-gpu"/>
+
+
+</project>

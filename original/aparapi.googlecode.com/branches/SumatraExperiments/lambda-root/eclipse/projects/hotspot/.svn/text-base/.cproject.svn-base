@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="cdt.managedbuild.config.gnu.exe.debug.1129526054">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.debug.1129526054" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+				<macros>
+					<stringMacro name="ALT_BOOTDIR" type="VALUE_TEXT" value="/usr/lib/jvm/java-7-openjdk-amd64 "/>
+					<stringMacro name="LANG" type="VALUE_TEXT" value="C"/>
+				</macros>
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.debug.1129526054" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
+					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.1129526054." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.1210274038" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
+							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug.1110564400" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
+							<builder arguments="" buildPath="${workspace_loc:/hotspot}" command="make" enableCleanBuild="false" enabledIncrementalBuild="true" id="cdt.managedbuild.target.gnu.builder.exe.debug.1508200345" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.458349539" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1706633910" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
+								<option id="gnu.cpp.compiler.exe.debug.option.optimization.level.59277476" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.482567408" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.301306178" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="AMD64"/>
+									<listOptionValue builtIn="false" value="ASSERT"/>
+									<listOptionValue builtIn="false" value="COMPILER1"/>
+									<listOptionValue builtIn="false" value="COMPILER2"/>
+									<listOptionValue builtIn="false" value="FASTDEBUG"/>
+									<listOptionValue builtIn="false" value="GAMMA"/>
+									<listOptionValue builtIn="false" value="INCLUDE_TRACE"/>
+									<listOptionValue builtIn="false" value="LINK_INTO_LIBJVM"/>
+									<listOptionValue builtIn="false" value="LINUX"/>
+									<listOptionValue builtIn="false" value="TARGET_ARCH_MODEL_x86_64"/>
+									<listOptionValue builtIn="false" value="TARGET_ARCH_x86"/>
+									<listOptionValue builtIn="false" value="TARGET_COMPILER_gcc"/>
+									<listOptionValue builtIn="false" value="TARGET_OS_ARCH_MODEL_linux_x86_64"/>
+									<listOptionValue builtIn="false" value="TARGET_OS_ARCH_linux_x86"/>
+									<listOptionValue builtIn="false" value="TARGET_OS_FAMILY_linux"/>
+									<listOptionValue builtIn="false" value="VM_LITTLE_ENDIAN"/>
+									<listOptionValue builtIn="false" value="GNU_SOURCE"/>
+									<listOptionValue builtIn="false" value="_REENTRANT"/>
+									<listOptionValue builtIn="false" value="amd64"/>
+									<listOptionValue builtIn="false" value="ARCH=\&quot;amd64\&quot;"/>
+									<listOptionValue builtIn="false" value="FULL_VERSION=\&quot;25.0-b05\&quot;"/>
+									<listOptionValue builtIn="false" value="HOTSPOT_BUILD_USER=\&quot;gfrost\&quot;"/>
+									<listOptionValue builtIn="false" value="HOTSPOT_LIB_ARCH=\&quot;amd64\&quot;"/>
+									<listOptionValue builtIn="false" value="HOTSPOT_RELEASE_VERSIOn=\&quot;25.0-b05\&quot;"/>
+									<listOptionValue builtIn="false" value="HOTSPOT_VM_DISTRO=\&quot;OpenJDK\&quot;"/>
+									<listOptionValue builtIn="false" value="JDK_MAJOR_VERSION=\&quot;1\&quot;"/>
+									<listOptionValue builtIn="false" value="JDK_MINOR_VERSION=\&quot;8\&quot;"/>
+									<listOptionValue builtIn="false" value="JRE_RELEASE_VERSION=\&quot;1.8.0-internal-fastdebug-gfrost_2012_12_04_14_11-b00\&quot;"/>
+									<listOptionValue builtIn="false" value="LAUNCHER_TYPE=\&quot;gamma\&quot;"/>
+									<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+									<listOptionValue builtIn="false" value="_LP64=1"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.include.paths.107148587" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/include"/>
+									<listOptionValue builtIn="false" value="/usr/include/sys"/>
+									<listOptionValue builtIn="false" value="/usr/include/linux"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7/x86_64-linux-gnu"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7.2"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7.2/tr1"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7.2/tr2"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/hotspot/src/cpu/x86/vm"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/hotspot/src/os/linux/vm"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/hotspot/src/os/posix/vm"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/hotspot/src/share/vm"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/build/linux-amd64/hotspot/outputdir/linux_amd64_compiler2/generated"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/hotspot/src/os_cpu/linux_x86/vm"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.71841076" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1849026405" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.2147115829" name="Optimization Level" superClass="gnu.c.compiler.exe.debug.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.exe.debug.option.debugging.level.1999536026" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.include.paths.1858715856" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/include"/>
+									<listOptionValue builtIn="false" value="/usr/include/sys"/>
+									<listOptionValue builtIn="false" value="/usr/include/linux"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7/x86_64-linux-gnu"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7.2"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7.2/tr1"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7.2/tr2"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/hotspot/src/cpu/x86/vm"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/hotspot/src/os/linux/vm"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/hotspot/src/os/posix/vm"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/hotspot/src/share/vm"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/build/linux-amd64/hotspot/outputdir/linux_amd64_compiler2/generated"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/hotspot/src/os_cpu/linux_x86/vm"/>
+								</option>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.790993140" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="AMD64"/>
+									<listOptionValue builtIn="false" value="ASSERT"/>
+									<listOptionValue builtIn="false" value="COMPILER1"/>
+									<listOptionValue builtIn="false" value="COMPILER2"/>
+									<listOptionValue builtIn="false" value="FASTDEBUG"/>
+									<listOptionValue builtIn="false" value="GAMMA"/>
+									<listOptionValue builtIn="false" value="INCLUDE_TRACE"/>
+									<listOptionValue builtIn="false" value="LINK_INTO_LIBJVM"/>
+									<listOptionValue builtIn="false" value="LINUX"/>
+									<listOptionValue builtIn="false" value="TARGET_ARCH_MODEL_x86_64"/>
+									<listOptionValue builtIn="false" value="TARGET_ARCH_x86"/>
+									<listOptionValue builtIn="false" value="TARGET_COMPILER_gcc"/>
+									<listOptionValue builtIn="false" value="TARGET_OS_ARCH_MODEL_linux_x86_64"/>
+									<listOptionValue builtIn="false" value="TARGET_OS_ARCH_linux_x86"/>
+									<listOptionValue builtIn="false" value="TARGET_OS_FAMILY_linux"/>
+									<listOptionValue builtIn="false" value="VM_LITTLE_ENDIAN"/>
+									<listOptionValue builtIn="false" value="GNU_SOURCE"/>
+									<listOptionValue builtIn="false" value="_REENTRANT"/>
+									<listOptionValue builtIn="false" value="amd64"/>
+									<listOptionValue builtIn="false" value="ARCH=\&quot;amd64\&quot;"/>
+									<listOptionValue builtIn="false" value="FULL_VERSION=\&quot;25.0-b05\&quot;"/>
+									<listOptionValue builtIn="false" value="HOTSPOT_BUILD_USER=\&quot;gfrost\&quot;"/>
+									<listOptionValue builtIn="false" value="HOTSPOT_LIB_ARCH=\&quot;amd64\&quot;"/>
+									<listOptionValue builtIn="false" value="HOTSPOT_RELEASE_VERSIOn=\&quot;25.0-b05\&quot;"/>
+									<listOptionValue builtIn="false" value="HOTSPOT_VM_DISTRO=\&quot;OpenJDK\&quot;"/>
+									<listOptionValue builtIn="false" value="JDK_MAJOR_VERSION=\&quot;1\&quot;"/>
+									<listOptionValue builtIn="false" value="JDK_MINOR_VERSION=\&quot;8\&quot;"/>
+									<listOptionValue builtIn="false" value="JRE_RELEASE_VERSION=\&quot;1.8.0-internal-fastdebug-gfrost_2012_12_04_14_11-b00\&quot;"/>
+									<listOptionValue builtIn="false" value="LAUNCHER_TYPE=\&quot;gamma\&quot;"/>
+									<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+									<listOptionValue builtIn="false" value="_LP64=1"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1667739528" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1325024518" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.888857511" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.400663451" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.974680571" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug">
+								<option id="gnu.both.asm.option.include.paths.406052373" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths"/>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.2092985246" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="generated"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="hotspot-src-cpu-x86-vm"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="hotspot-src-os-linux-vm"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="hotspot-src-os-posix-vm"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="hotspot-src-os_cpu-linux_x86-vm"/>
+						<entry excluding="**/shark/**" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot-src-share-vm"/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="cdt.managedbuild.config.gnu.exe.release.190555224">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.release.190555224" moduleId="org.eclipse.cdt.core.settings" name="Release">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.release.190555224" name="Release" parent="cdt.managedbuild.config.gnu.exe.release">
+					<folderInfo id="cdt.managedbuild.config.gnu.exe.release.190555224." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.1830763016" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.release">
+							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.release.1053428161" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.release"/>
+							<builder buildPath="${workspace_loc:/hotspot/Release}" command="make" id="cdt.managedbuild.target.gnu.builder.exe.release.1229885475" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.release"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.100499917" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.839372429" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release">
+								<option id="gnu.cpp.compiler.exe.release.option.optimization.level.1924622644" name="Optimization Level" superClass="gnu.cpp.compiler.exe.release.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.exe.release.option.debugging.level.37359681" name="Debug Level" superClass="gnu.cpp.compiler.exe.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.include.paths.413883291" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/hotspot/src/cpu/x86/vm"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/build/linux-amd64/hotspot/outputdir/linux_amd64_compiler2/generated"/>
+									<listOptionValue builtIn="false" value="/usr/include/sys"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7/x86_64-linux-gnu"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.62780642" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.1418273935" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release">
+								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.exe.release.option.optimization.level.1950332749" name="Optimization Level" superClass="gnu.c.compiler.exe.release.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.exe.release.option.debugging.level.527050732" name="Debug Level" superClass="gnu.c.compiler.exe.release.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.include.paths.528202654" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/hotspot/src/cpu/x86/vm"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/build/linux-amd64/hotspot/outputdir/linux_amd64_compiler2/generated"/>
+									<listOptionValue builtIn="false" value="/usr/include/sys"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7/x86_64-linux-gnu"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1916488852" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.168894956" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.259947969" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1458754118" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.release.202522217" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.release">
+								<option id="gnu.both.asm.option.include.paths.733523285" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/hotspot/src/cpu/x86/vm"/>
+									<listOptionValue builtIn="false" value="/home/gfrost/aparapi/branches/SumatraExperiments/lambda-root/lambda/build/linux-amd64/hotspot/outputdir/linux_amd64_compiler2/generated"/>
+									<listOptionValue builtIn="false" value="/usr/include/sys"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7/x86_64-linux-gnu"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.642211104" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="hotspot.cdt.managedbuild.target.gnu.exe.523364210" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.190555224;cdt.managedbuild.config.gnu.exe.release.190555224.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1418273935;cdt.managedbuild.tool.gnu.c.compiler.input.1916488852">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.1129526054;cdt.managedbuild.config.gnu.exe.debug.1129526054.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1849026405;cdt.managedbuild.tool.gnu.c.compiler.input.1667739528">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.190555224;cdt.managedbuild.config.gnu.exe.release.190555224.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.839372429;cdt.managedbuild.tool.gnu.cpp.compiler.input.62780642">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.1129526054;cdt.managedbuild.config.gnu.exe.debug.1129526054.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1706633910;cdt.managedbuild.tool.gnu.cpp.compiler.input.71841076">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/hotspot"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/hotspot"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+</cproject>

@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/1180/branches/lambda/samples/blackscholes
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/968/branches/lambda/samples/blackscholes/.classpath
+END
+blackscholes.bat
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/1104/branches/lambda/samples/blackscholes/blackscholes.bat
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/968/branches/lambda/samples/blackscholes/.project
+END
+lambda.bat
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/1104/branches/lambda/samples/blackscholes/lambda.bat
+END
+blackscholes.sh
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/1070/branches/lambda/samples/blackscholes/blackscholes.sh
+END
+lambda.sh
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/1180/branches/lambda/samples/blackscholes/lambda.sh
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/1060/branches/lambda/samples/blackscholes/build.xml
+END

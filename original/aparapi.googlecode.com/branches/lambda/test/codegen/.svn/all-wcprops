@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/1303/branches/lambda/test/codegen
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/968/branches/lambda/test/codegen/.classpath
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/968/branches/lambda/test/codegen/.project
+END
+runtest.bat
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/1100/branches/lambda/test/codegen/runtest.bat
+END
+update.sh
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/1253/branches/lambda/test/codegen/update.sh
+END
+runtest.sh
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/1253/branches/lambda/test/codegen/runtest.sh
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/1255/branches/lambda/test/codegen/build.xml
+END

@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/968/branches/lambda/samples/convolution/src/com/amd/aparapi/sample/convolution
+END
+ConvMatrix3x3Editor.java
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/!svn/ver/968/branches/lambda/samples/convolution/src/com/amd/aparapi/sample/convolution/ConvMatrix3x3Editor.java
+END
+Convolution.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/!svn/ver/968/branches/lambda/samples/convolution/src/com/amd/aparapi/sample/convolution/Convolution.java
+END
+ConvolutionOpenCL.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/!svn/ver/968/branches/lambda/samples/convolution/src/com/amd/aparapi/sample/convolution/ConvolutionOpenCL.java
+END
+ConvolutionViewer.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/!svn/ver/968/branches/lambda/samples/convolution/src/com/amd/aparapi/sample/convolution/ConvolutionViewer.java
+END
+convolution.cl
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/!svn/ver/968/branches/lambda/samples/convolution/src/com/amd/aparapi/sample/convolution/convolution.cl
+END
+PureJava.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/!svn/ver/968/branches/lambda/samples/convolution/src/com/amd/aparapi/sample/convolution/PureJava.java
+END

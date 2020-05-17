@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+
+<project name="movie" default="build" basedir=".">
+
+   <target name="getjjmpeg-windows-i586" if="use.win32.jjmpeg">
+      <delete dir="jjmpeg"/>
+      <mkdir dir="jjmpeg"/>
+      <get dest="jjmpeg">
+         <url url="http://jjmpeg.googlecode.com/files/jjmpeg-0.0-bin.tar.bz2"/> 
+      </get>
+      <untar src="jjmpeg/jjmpeg-0.0-bin.tar.bz2" compression="bzip2" dest="jjmpeg"/>
+   </target>
+
+   <target name="getffmpeg-windows-i586" if="use.win32.ffmpeg">
+      <delete dir="ffmpeg"/>
+      <mkdir dir="ffmpeg"/>
+      <get dest="ffmpeg">
+         <url url="http://ffmpeg.zeranoe.com/builds/win32/shared/ffmpeg-git-9c2651a-win32-shared.7z"/> 
+      </get>
+      <exec dir="ffmpeg" executable="C:\Program Files\7-Zip\7z.exe">
+         <arg value="x"/>
+         <arg value="ffmpeg-git-9c2651a-win32-shared.7z"/>
+      </exec>
+   </target>
+ <target name="getjjmpeg-windows-amd64" if="use.win64.jjmpeg">
+      <delete dir="jjmpeg"/>
+      <mkdir dir="jjmpeg"/>
+      <get dest="jjmpeg">
+         <url url="http://jjmpeg.googlecode.com/files/jjmpeg-0.0-bin.tar.bz2"/> 
+      </get>
+      <untar src="jjmpeg/jjmpeg-0.0-bin.tar.bz2" compression="bzip2" dest="jjmpeg"/>
+   </target>
+    <target name="getffmpeg-windows-amd64" if="use.win64.ffmpeg">
+      <delete dir="ffmpeg"/>
+      <mkdir dir="ffmpeg"/>
+      <get dest="ffmpeg">
+         <url url="http://ffmpeg.zeranoe.com/builds/win64/shared/ffmpeg-git-9c2651a-win64-shared.7z"/> 
+      </get>
+      <exec dir="ffmpeg" executable="C:\Program Files\7-Zip\7z.exe">
+         <arg value="x"/>
+         <arg value="ffmpeg-git-9c2651a-win64-shared.7z"/>
+      </exec>
+   </target>
+
+   <target name="checkos">
+      <condition property="use.win32.jjmpeg">
+         <and>
+            <os family="windows" />
+            <or>
+               <os arch="x86" />
+               <os arch="i386" />
+            </or>
+            <not><available file="jjmpeg/jjmpeg-0.0/native/mswin-i386/jjmpeg.dll"/> </not>
+            <not><available file="jjmpeg/jjmpeg-0.0/dist/jjmpeg.jar"/> </not>
+         </and>
+      </condition>
+      <condition property="use.win32.ffmpeg">
+         <and>
+            <os family="windows" />
+            <or>
+               <os arch="x86" />
+               <os arch="i386" />
+            </or>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win32-shared\bin\avcodec-53.dll"/> </not>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win32-shared\bin\avdevice-53.dll"/> </not>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win32-shared\bin\avfilter-53.dll"/> </not>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win32-shared\bin\avformat-53.dll"/> </not>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win32-shared\bin\avutil-51.dll"/> </not>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win32-shared\bin\postproc-51.dll"/> </not>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win32-shared\bin\swscale-2.dll"/> </not>
+         </and>
+      </condition>
+      <condition property="use.win64.jjmpeg">
+         <and>
+            <os family="windows" />
+            <not>
+               <or>
+                  <os arch="x86" />
+                  <os arch="i386" />
+               </or>
+            </not>
+            <not><available file="jjmpeg/jjmpeg-0.0/native/mswin-amd64/jjmpeg.dll"/> </not>
+            <not><available file="jjmpeg/jjmpeg-0.0/dist/jjmpeg.jar"/> </not>
+         </and>
+      </condition>
+
+       <condition property="use.win64.ffmpeg">
+         <and>
+            <os family="windows" />
+            <not>
+               <or>
+                  <os arch="x86" />
+                  <os arch="i386" />
+               </or>
+            </not>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win64-shared\bin\avcodec-53.dll"/> </not>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win64-shared\bin\avdevice-53.dll"/> </not>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win64-shared\bin\avfilter-53.dll"/> </not>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win64-shared\bin\avformat-53.dll"/> </not>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win64-shared\bin\avutil-51.dll"/> </not>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win64-shared\bin\postproc-51.dll"/> </not>
+            <not><available file="ffmpeg\ffmpeg-git-9c2651a-win64-shared\bin\swscale-2.dll"/> </not>
+         </and>
+      </condition>
+   </target>
+
+   <target name="getstuff" depends="checkos, getjjmpeg-windows-i586, getffmpeg-windows-i586, getjjmpeg-windows-amd64, getffmpeg-windows-amd64"/>
+
+   <target name="build" depends="getstuff,clean">
+      <mkdir dir="classes"/>
+      <javac srcdir="src" destdir="classes" debug="on" includeantruntime="false" >
+         <classpath>
+            <pathelement path="..\..\com.amd.aparapi\dist\aparapi.jar"/>
+            <pathelement path="jjmpeg\jjmpeg-0.0\dist\jjmpeg.jar/"/>
+            <pathelement path="..\jviolajones\jviolajones.jar/"/>
+         </classpath>
+      </javac>
+      <jar jarfile="${ant.project.name}.jar" basedir="classes"/>
+   </target>
+
+   <target name="clean">
+      <delete dir="classes"/>
+      <delete file="${ant.project.name}.jar"/>
+   </target>
+
+
+</project>

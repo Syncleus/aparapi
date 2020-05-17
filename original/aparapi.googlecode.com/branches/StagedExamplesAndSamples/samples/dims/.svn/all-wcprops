@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/251/branches/StagedExamplesAndSamples/samples/dims
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/251/branches/StagedExamplesAndSamples/samples/dims/.classpath
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/251/branches/StagedExamplesAndSamples/samples/dims/.project
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/251/branches/StagedExamplesAndSamples/samples/dims/build.xml
+END

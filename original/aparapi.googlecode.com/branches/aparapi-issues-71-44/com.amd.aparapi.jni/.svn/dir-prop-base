@@ -1,0 +1,22 @@
+K 10
+svn:ignore
+V 222
+include
+dist
+aparapi.exp
+aparapi.lib
+aparapi.obj
+arrayBuffer.obj
+clHelper.obj
+config.obj
+JNIContext.obj
+jniHelper.obj
+KernelArg.obj
+OpenCLArgDescriptor.obj
+opencljni.obj
+OpenCLMem.obj
+profileInfo.obj
+Range.obj
+aparapi.obj
+
+END

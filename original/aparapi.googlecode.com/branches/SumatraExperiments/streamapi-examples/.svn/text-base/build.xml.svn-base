@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+
+<project name="com.amd.aparapi" default="build" basedir=".">
+
+        <!-- 
+			DO NOT EDIT BELOW THIS LINE 
+	-->
+	<echo>OS Name:    ${os.name}</echo>
+	<echo>OS Version: ${os.version}</echo>
+	<echo>OS Arch:    ${os.arch}</echo>
+
+	<property name="ant.build.javac.source" value="1.8"/>
+	<property name="ant.build.javac.target" value="1.8"/>
+
+
+        <target name="clean">
+           <delete dir="classes"/>
+           <delete file="hotspot.log"/>
+   	   <delete file="agent.jar"/>
+           <delete file="examples.jar"/>
+   	</target>
+
+   	<target name="build" depends="clean" description="Build">
+          <mkdir dir="classes"/>
+   	  <javac debug="true" srcdir="src" destdir="classes" includeantruntime="false"/>
+          <jar jarfile="examples.jar" basedir="classes"/>
+          <jar jarfile="agent.jar" basedir="classes">
+            <manifest>
+               <attribute name="Premain-Class" value="agent.Agent"/>
+             </manifest>
+          </jar>
+       </target>
+
+</project>

@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/808/branches/aparapi-issues-71-44/examples/effects
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/808/branches/aparapi-issues-71-44/examples/effects/.classpath
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/689/branches/aparapi-issues-71-44/examples/effects/.project
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/689/branches/aparapi-issues-71-44/examples/effects/build.xml
+END

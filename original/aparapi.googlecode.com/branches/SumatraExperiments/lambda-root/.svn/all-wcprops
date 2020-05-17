@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/940/branches/SumatraExperiments/lambda-root
+END
+bld-debug.bash
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/921/branches/SumatraExperiments/lambda-root/bld-debug.bash
+END
+setvars.bash
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/921/branches/SumatraExperiments/lambda-root/setvars.bash
+END
+bld-all.bash
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/921/branches/SumatraExperiments/lambda-root/bld-all.bash
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/921/branches/SumatraExperiments/lambda-root/.project
+END
+bld-cdt.bash
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/921/branches/SumatraExperiments/lambda-root/bld-cdt.bash
+END
+.cproject
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/921/branches/SumatraExperiments/lambda-root/.cproject
+END
+get-lambda.bash
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/923/branches/SumatraExperiments/lambda-root/get-lambda.bash
+END
+bld-hotspot.bash
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/921/branches/SumatraExperiments/lambda-root/bld-hotspot.bash
+END
+run-gdb
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/940/branches/SumatraExperiments/lambda-root/run-gdb
+END

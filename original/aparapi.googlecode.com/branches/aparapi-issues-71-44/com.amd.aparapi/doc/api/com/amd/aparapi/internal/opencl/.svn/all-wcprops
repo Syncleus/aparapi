@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/internal/opencl
+END
+OpenCLMem.html
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/internal/opencl/OpenCLMem.html
+END
+OpenCLKernel.html
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/internal/opencl/OpenCLKernel.html
+END
+package-frame.html
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/internal/opencl/package-frame.html
+END
+OpenCLPlatform.html
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/internal/opencl/OpenCLPlatform.html
+END
+package-use.html
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/internal/opencl/package-use.html
+END
+package-summary.html
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/internal/opencl/package-summary.html
+END
+OpenCLLoader.html
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/internal/opencl/OpenCLLoader.html
+END
+OpenCLProgram.html
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/internal/opencl/OpenCLProgram.html
+END
+package-tree.html
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/internal/opencl/package-tree.html
+END
+OpenCLArgDescriptor.html
+K 25
+svn:wc:ra_dav:version-url
+V 128
+/svn/!svn/ver/875/branches/aparapi-issues-71-44/com.amd.aparapi/doc/api/com/amd/aparapi/internal/opencl/OpenCLArgDescriptor.html
+END

@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/1128/branches/lambda/samples/add
+END
+.classpath
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/968/branches/lambda/samples/add/.classpath
+END
+add.sh
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/1070/branches/lambda/samples/add/add.sh
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/968/branches/lambda/samples/add/.project
+END
+add.bat
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/1128/branches/lambda/samples/add/add.bat
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/1060/branches/lambda/samples/add/build.xml
+END

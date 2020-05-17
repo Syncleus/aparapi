@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/windows-amd64
+END
+gluegen-rt.dll
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/windows-amd64/gluegen-rt.dll
+END
+nativewindow_awt.dll
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/windows-amd64/nativewindow_awt.dll
+END
+newt.dll
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/windows-amd64/newt.dll
+END
+nativewindow_win32.dll
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/windows-amd64/nativewindow_win32.dll
+END
+jogl_mobile.dll
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/windows-amd64/jogl_mobile.dll
+END
+jogl_desktop.dll
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/968/branches/lambda/examples/third-party/jogamp/windows-amd64/jogl_desktop.dll
+END

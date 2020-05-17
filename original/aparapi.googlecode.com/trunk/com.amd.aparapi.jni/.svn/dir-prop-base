@@ -1,0 +1,16 @@
+K 10
+svn:ignore
+V 119
+clt
+include
+cltest_x86_64.dSYM
+clt.dSYM
+dist
+cltest_x86_64
+Debug
+aparapi.exp
+aparapi.lib
+Aparapi.sdf
+cltest_x86_64.exe
+
+END

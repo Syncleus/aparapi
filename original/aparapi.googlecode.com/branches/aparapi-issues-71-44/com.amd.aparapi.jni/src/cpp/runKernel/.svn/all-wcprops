@@ -1,0 +1,95 @@
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel
+END
+Range.h
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/!svn/ver/891/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/Range.h
+END
+Config.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/Config.cpp
+END
+ArrayBuffer.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/ArrayBuffer.cpp
+END
+KernelArg.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/!svn/ver/870/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/KernelArg.cpp
+END
+Config.h
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/Config.h
+END
+ProfileInfo.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/ProfileInfo.cpp
+END
+ArrayBuffer.h
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/ArrayBuffer.h
+END
+Aparapi.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/Aparapi.cpp
+END
+KernelArg.h
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/!svn/ver/891/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/KernelArg.h
+END
+List.h
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/888/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/List.h
+END
+ProfileInfo.h
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/ProfileInfo.h
+END
+Aparapi.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/894/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/Aparapi.h
+END
+JNIContext.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/!svn/ver/891/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/JNIContext.cpp
+END
+JNIContext.h
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/!svn/ver/891/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/JNIContext.h
+END
+Range.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/870/branches/aparapi-issues-71-44/com.amd.aparapi.jni/src/cpp/runKernel/Range.cpp
+END

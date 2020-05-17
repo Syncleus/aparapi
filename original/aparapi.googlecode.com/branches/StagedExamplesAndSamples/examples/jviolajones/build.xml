@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+
+<project name="jviolajones" default="build" basedir=".">
+   <property name="aparapi" value="..\..\..\..\trunk\"/>
+
+   <target name="build" depends="clean">
+      <mkdir dir="classes"/>
+      <javac srcdir="src" destdir="classes" debug="on" includeantruntime="false" >
+         <classpath>
+            <pathelement path="${aparapi}\com.amd.aparapi\dist\aparapi.jar"/>
+            <pathelement path="jdom.jar/"/>
+         </classpath>
+      </javac>
+      <jar jarfile="${ant.project.name}.jar" basedir="classes"/>
+   </target>
+
+   <target name="clean">
+      <delete dir="classes"/>
+      <delete file="${ant.project.name}.jar"/>
+   </target>
+
+   <target name="run">
+      <java classname="detection.Test" fork="yes" >
+         <sysproperty key="java.library.path" path="${aparapi}\com.amd.aparapi.jni\dist"/>
+         <classpath>
+            <pathelement path="${ant.project.name}.jar"/>
+            <pathelement path="${aparapi}\com.amd.aparapi\dist\aparapi.jar"/>
+            <pathelement path="jdom.jar/"/>
+         </classpath>
+         <arg value="team-america.jpg"/>
+         <arg value="haarcascade_frontalface_alt2.xml"/>
+      </java>
+   </target>
+   <target name="hprof">
+      <java classname="detection.Test" fork="yes" >
+         <jvmarg value="-agentlib:hprof=cpu=times"/>
+         <!--<jvmarg value="-agentlib:hprof=cpu=samples"/>-->
+         <sysproperty key="java.library.path" path="${aparapi}\com.amd.aparapi.jni\dist"/>
+         <classpath>
+            <pathelement path="${ant.project.name}.jar"/>
+            <pathelement path="${aparapi}\com.amd.aparapi\dist\aparapi.jar"/>
+            <pathelement path="jdom.jar/"/>
+         </classpath>
+         <arg value="team-america.jpg"/>
+         <arg value="haarcascade_frontalface_alt2.xml"/>
+      </java>
+   </target>
+
+</project>

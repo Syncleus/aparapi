@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<project name="javaonedemo" default="build" basedir=".">
+
+   <path id="compiler.class.path">
+      <pathelement path="../../com.amd.aparapi/dist/aparapi.jar"/>
+      <pathelement path="jogamp/jogl.all.jar"/>
+      <pathelement path="jogamp/gluegen-rt.jar"/>
+   </path>
+
+   <path id="runtime.class.path" cache="true">
+      <path refid="compiler.class.path"/>
+      <pathelement path="${ant.project.name}.jar"/>
+   </path>
+
+   <target name="build" depends="clean">
+      <mkdir dir="classes"/>
+      <javac srcdir="src" destdir="classes" debug="on" includeantruntime="false">
+         <classpath refid="compiler.class.path"/>
+      </javac>
+      <copy todir="classes/com/amd/aparapi/examples/javaonedemo" file="src/com/amd/aparapi/examples/javaonedemo/particle.jpg"/>
+      <jar jarfile="${ant.project.name}.jar" basedir="classes"/>
+   </target>
+
+   <target name="clean">
+      <delete dir="classes"/>
+      <delete file="${ant.project.name}.jar"/>
+   </target>
+
+</project>

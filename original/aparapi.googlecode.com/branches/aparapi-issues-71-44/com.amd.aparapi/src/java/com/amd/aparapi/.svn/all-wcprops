@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/!svn/ver/882/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi
+END
+Kernel.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/!svn/ver/858/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/Kernel.java
+END
+package-info.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/!svn/ver/741/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/package-info.java
+END
+Config.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/!svn/ver/806/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/Config.java
+END
+Range.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/!svn/ver/765/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/Range.java
+END
+ProfileInfo.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/!svn/ver/776/branches/aparapi-issues-71-44/com.amd.aparapi/src/java/com/amd/aparapi/ProfileInfo.java
+END

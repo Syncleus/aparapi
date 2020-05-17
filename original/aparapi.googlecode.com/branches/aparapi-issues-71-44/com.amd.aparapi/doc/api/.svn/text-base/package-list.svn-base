@@ -1,0 +1,16 @@
+com.amd.aparapi
+com.amd.aparapi.annotation
+com.amd.aparapi.device
+com.amd.aparapi.exception
+com.amd.aparapi.internal.annotation
+com.amd.aparapi.internal.exception
+com.amd.aparapi.internal.instruction
+com.amd.aparapi.internal.jni
+com.amd.aparapi.internal.kernel
+com.amd.aparapi.internal.model
+com.amd.aparapi.internal.opencl
+com.amd.aparapi.internal.reader
+com.amd.aparapi.internal.tool
+com.amd.aparapi.internal.util
+com.amd.aparapi.internal.writer
+com.amd.aparapi.opencl
