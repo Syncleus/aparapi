@@ -1,0 +1,62 @@
+CYGWIN_HOME_DIR=$(subst \,/,${CYGWIN_HOME})
+JAVA_HOME_DIR=$(subst \,/,${JAVA_HOME})
+CC_HOME_DIR=$(subst \,/,${CC_HOME})
+CC_SDK_HOME_DIR=$(subst \,/,${CC_SDK_HOME})
+ATI_STREAM_HOME_DIR=$(subst \,/,${ATI_STREAM_HOME})
+
+FILES=OpenCL CLKernel CLContext CLDevice CLMem CLProgram CLPlatform CLCommandQueue CLSampler
+
+EXAMPLES= example/ExVectoradd.java example/ExQuery.java example/NBody.java
+
+CC_INCLUDES = \
+  /I$(CC_SDK_HOME_DIR)/Include \
+  /I$(CC_HOME_DIR)/include \
+  /I$(JAVA_HOME_DIR)/include \
+  /I$(JAVA_HOME_DIR)/include/win32 \
+  /I$(ATI_STREAM_HOME_DIR)/include
+
+CC_LIBPATH = \
+  /link \
+  /LIBPATH:$(CC_HOME_DIR)/lib \
+  /LIBPATH:$(CC_SDK_HOME_DIR)/lib \
+  /LIBPATH:$(ATI_STREAM_HOME_DIR)/lib/x86
+
+RM=${CYGWIN_HOME_DIR}/bin/rm -rf
+CP=${CYGWIN_HOME_DIR}/bin/cp
+MKDIR=${CYGWIN_HOME_DIR}/bin/mkdir
+TOUCH=${CYGWIN_HOME_DIR}/bin/touch
+CPP=${CC_HOME_DIR}/bin/cl /TP
+CC=${CC_HOME_DIR}/bin/cl /TC
+LINK=${CC_HOME_DIR}/bin/cl /LD
+JAVA=${JAVA_HOME_DIR}/bin/java
+JAVAC=${JAVA_HOME_DIR}/bin/javac
+JAVAH=${JAVA_HOME_DIR}/bin/javah
+
+NAME=JOpenCL
+
+all: javac javah lib run
+
+%.obj : %.cpp
+	${CPP} /Iinclude ${CC_INCLUDES} /c $<
+
+clean:
+	${RM} ${NAME}.obj ${NAME}.dll ${NAME}.lib ${NAME}.exp ${JAVA_HOME_DIR}/bin/OpenCl.dll ${JAVA_HOME_DIR}/bin/${NAME}.dll classes include 
+
+javac: $(patsubst %,javax/opencl/%.java,${FILES}) javax/opencl/CLException.java ${EXAMPLES}
+	${RM} classes
+	${MKDIR} classes
+	${JAVAC} -d classes $? 
+
+javah: 
+	${JAVAH} -classpath classes -force -d include $(patsubst %,javax.opencl.%,${FILES})
+
+lib:  ${NAME}.obj
+	${LINK} ${NAME}.obj $(CC_LIBPATH) OpenCL.lib 
+	${CP} ${ATI_STREAM_HOME_DIR}/bin/x86/OpenCl.dll ${JAVA_HOME_DIR}/bin/OpenCl.dll
+	${CP} ${NAME}.dll  ${JAVA_HOME_DIR}/bin/${NAME}.dll
+
+run: 
+	${JAVA} -classpath classes example.ExVectoradd
+	${JAVA} -classpath classes example.ExQuery
+	${JAVA} -classpath classes example.NBody
+
