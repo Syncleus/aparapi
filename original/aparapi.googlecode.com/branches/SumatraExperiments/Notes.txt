@@ -1,3 +1,0 @@
-Maybe we can use Java 7's method handles for this?
-http://java.sun.com/developer/technicalArticles/DynTypeLang/
-
