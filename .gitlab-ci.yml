@@ -1,0 +1,23 @@
+image: maven:latest
+
+cache:
+  paths:
+    - ~/.m2/repository/
+    - target/
+
+build:
+  stage: build
+  script:
+    - mvn $MAVEN_CLI_OPTS compile
+
+test:
+  stage: test
+  script:
+    - mvn $MAVEN_CLI_OPTS test
+
+deploy:
+  stage: deploy
+  script:
+    - mvn $MAVEN_CLI_OPTS deploy
+  only:
+    - master
