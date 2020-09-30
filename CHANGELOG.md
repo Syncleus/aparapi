@@ -3,6 +3,10 @@
 ## v2.0.1
 
 * Fixed bug where ClassModel would throw an error when loaded if boot strap methods were 0.
+* Updated the following dependency versions:
+** org.apache.bcel:bcel 6.4.1 -< 6.5.0
+** org.scala-lang:scala-library 2.13.1 -> 2.13.3 
+
 
 ## v2.0.0
 
