@@ -8,22 +8,22 @@ cache:
 build:
   stage: build
   script:
-    - mvn $MAVEN_CLI_OPTS compile
+    - mvn compile
   tags:
     - general
 
 test:
   stage: test
   script:
-    - mvn $MAVEN_CLI_OPTS test
+    - mvn test
   tags:
     - opencl
 
 deploy:
   stage: deploy
   script:
-    - mvn $MAVEN_CLI_OPTS deploy
+    - mvn -DskipTests=true deploy
   tags:
-    - opencl
+    - general
   only:
     - master
