@@ -2042,12 +2042,10 @@ public class ClassModel {
             super( _nameIndex, _length);
             numBootstrapMethods = methods.length;
             bootstrapMethods = new BootstrapMethod[numBootstrapMethods];
-            if (methods.length>0) {
-                int i = 0;
-                for (org.apache.bcel.classfile.BootstrapMethod bm : methods) {
-                    bootstrapMethods[i] = new BootstrapMethod(bm);
-                    i += 1;
-                }
+            int i = 0;
+            for (org.apache.bcel.classfile.BootstrapMethod bm : methods) {
+                bootstrapMethods[i] = new BootstrapMethod(bm);
+                i += 1;
             }
          }
 
