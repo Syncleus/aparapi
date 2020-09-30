@@ -3,6 +3,11 @@ image: maven:latest
 include:
   - template: Code-Quality.gitlab-ci.yml
 
+stages:
+  - build
+  - test
+  - deploy
+
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
@@ -14,8 +19,6 @@ code_quality:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_COMMIT_TAG'
-  stages:
-    - test
 
 cache:
   paths:
