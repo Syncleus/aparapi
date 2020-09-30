@@ -32,3 +32,4 @@ deploy:
     - general
   only:
     - master
+    - /^v.*$/
