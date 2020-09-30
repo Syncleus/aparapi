@@ -9,15 +9,21 @@ build:
   stage: build
   script:
     - mvn $MAVEN_CLI_OPTS compile
+  tags:
+    - general
 
 test:
   stage: test
   script:
     - mvn $MAVEN_CLI_OPTS test
+  tags:
+    - opencl
 
 deploy:
   stage: deploy
   script:
     - mvn $MAVEN_CLI_OPTS deploy
+  tags:
+    - opencl
   only:
     - master
