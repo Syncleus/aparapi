@@ -2,6 +2,8 @@
 
 ## v2.0.1
 
+* Fixed bug where ClassModel would throw an error when loaded if boot strap methods were 0.
+
 ## v2.0.0
 
 * Fixed Potential JVM crash when using multi-dimensional arrays (> 1D)
