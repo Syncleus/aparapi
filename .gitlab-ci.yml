@@ -1,4 +1,4 @@
-image: maven:latest
+image: aparapi/aparapi-nvidia:git
 
 include:
   - template: Code-Quality.gitlab-ci.yml
