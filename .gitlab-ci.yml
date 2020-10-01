@@ -1,4 +1,4 @@
-image: aparapi/aparapi-nvidia:git
+image: maven:latest
 
 include:
   - template: Code-Quality.gitlab-ci.yml
@@ -34,6 +34,7 @@ build:
     - general
 
 test-nvidia-gpu:
+  image: aparapi/aparapi-nvidia:latest
   stage: test
   script:
     - clinfo
@@ -42,6 +43,7 @@ test-nvidia-gpu:
     - opencl
 
 test-nvidia-cpu:
+  image: aparapi/aparapi-nvidia:latest
   stage: test
   script:
     - clinfo
@@ -50,7 +52,25 @@ test-nvidia-cpu:
     - compute
 
 test-amdgpu-cpu:
-  image: aparapi/aparapi-amdgpu:git
+  image: aparapi/aparapi-amdgpu:latest
+  stage: test
+  script:
+    - clinfo
+    - mvn $MAVEN_CLI_OPTS test
+  tags:
+    - compute
+
+test-pocl-gpu:
+  image: aparapi/aparapi-pocl:latest
+  stage: test
+  script:
+    - clinfo
+    - mvn $MAVEN_CLI_OPTS test
+  tags:
+    - opencl
+
+test-amdgpu-cpu:
+  image: aparapi/aparapi-pocl:latest
   stage: test
   script:
     - clinfo
