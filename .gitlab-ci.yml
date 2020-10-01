@@ -63,16 +63,6 @@ test-amdgpu-cpu:
   tags:
     - compute
 
-test-pocl-gpu:
-  image: aparapi/aparapi-pocl:latest
-  stage: test
-  script:
-    - clinfo
-    - if [[ "$(clinfo | grep 'Device Type')" != *"GPU"* ]]; then exit -1; fi
-    - mvn $MAVEN_CLI_OPTS test
-  tags:
-    - opencl
-
 test-pocl-cpu:
   image: aparapi/aparapi-pocl:latest
   stage: test
