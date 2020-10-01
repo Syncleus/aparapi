@@ -40,6 +40,12 @@ test-nvidia-gpu:
     - clinfo
     - if [[ "$(clinfo | grep 'Device Type')" != *"GPU"* ]]; then exit -1; fi
     - mvn $MAVEN_CLI_OPTS test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+        - target/failsafe-reports/TEST-*.xml
   tags:
     - opencl
 
@@ -50,6 +56,12 @@ test-nvidia-cpu:
     - clinfo
     - if [[ "$(clinfo | grep 'Device Type')" == *"GPU"* ]]; then exit -1; fi
     - mvn $MAVEN_CLI_OPTS test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+        - target/failsafe-reports/TEST-*.xml
   tags:
     - compute
 
@@ -60,6 +72,12 @@ test-amdgpu-cpu:
     - clinfo
     - if [[ "$(clinfo | grep 'Device Type')" == *"GPU"* ]]; then exit -1; fi
     - mvn $MAVEN_CLI_OPTS test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+        - target/failsafe-reports/TEST-*.xml
   tags:
     - compute
 
@@ -70,6 +88,12 @@ test-pocl-cpu:
     - clinfo
     - if [[ "$(clinfo | grep 'Device Type')" == *"GPU"* ]]; then exit -1; fi
     - mvn $MAVEN_CLI_OPTS test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+        - target/failsafe-reports/TEST-*.xml
   tags:
     - compute
 
