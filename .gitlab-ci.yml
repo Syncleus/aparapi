@@ -33,13 +33,30 @@ build:
   tags:
     - general
 
-test:
+test-nvidia-gpu:
   stage: test
   script:
     - clinfo
     - mvn $MAVEN_CLI_OPTS test
   tags:
     - opencl
+
+test-nvidia-cpu:
+  stage: test
+  script:
+    - clinfo
+    - mvn $MAVEN_CLI_OPTS test
+  tags:
+    - compute
+
+test-amdgpu-cpu:
+  image: aparapi/aparapi-amdgpu:git
+  stage: test
+  script:
+    - clinfo
+    - mvn $MAVEN_CLI_OPTS test
+  tags:
+    - compute
 
 deploy:
   stage: deploy
