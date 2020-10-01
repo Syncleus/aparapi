@@ -36,6 +36,7 @@ build:
 test:
   stage: test
   script:
+    - clinfo
     - mvn $MAVEN_CLI_OPTS test
   tags:
     - opencl
