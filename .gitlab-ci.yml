@@ -38,10 +38,7 @@ test-nvidia-gpu:
   stage: test
   script:
     - clinfo
-    - PLATFORMS=$(clinfo | grep "Number of platforms" | sed "s/Number of platforms[[:space:]]*\([0-9]*\)[^0-9]*/\1/g")
-    - if [ $PLATFORMS == "0" ]; then
-        exit -1;
-      fi
+    - if [[ "$(clinfo | grep 'Device Type')" != *"GPU"* ]]; then exit -1; fi
     - mvn $MAVEN_CLI_OPTS test
   tags:
     - opencl
@@ -51,9 +48,7 @@ test-nvidia-cpu:
   stage: test
   script:
     - clinfo
-    - if [ $PLATFORMS != "0" ]; then
-        exit -1;
-      fi
+    - if [[ "$(clinfo | grep 'Device Type')" == *"GPU"* ]]; then exit -1; fi
     - mvn $MAVEN_CLI_OPTS test
   tags:
     - compute
@@ -63,9 +58,7 @@ test-amdgpu-cpu:
   stage: test
   script:
     - clinfo
-    - if [ $PLATFORMS != "0" ]; then
-        exit -1;
-      fi
+    - if [[ "$(clinfo | grep 'Device Type')" == *"GPU"* ]]; then exit -1; fi
     - mvn $MAVEN_CLI_OPTS test
   tags:
     - compute
@@ -75,21 +68,17 @@ test-pocl-gpu:
   stage: test
   script:
     - clinfo
-    - if [ $PLATFORMS == "0" ]; then
-        exit -1;
-      fi
+    - if [[ "$(clinfo | grep 'Device Type')" != *"GPU"* ]]; then exit -1; fi
     - mvn $MAVEN_CLI_OPTS test
   tags:
     - opencl
 
-test-amdgpu-cpu:
+test-pocl-cpu:
   image: aparapi/aparapi-pocl:latest
   stage: test
   script:
     - clinfo
-    - if [ $PLATFORMS != "0" ]; then
-        exit -1;
-      fi
+    - if [[ "$(clinfo | grep 'Device Type')" == *"GPU"* ]]; then exit -1; fi
     - mvn $MAVEN_CLI_OPTS test
   tags:
     - compute
