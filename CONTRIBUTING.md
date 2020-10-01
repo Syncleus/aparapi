@@ -76,6 +76,7 @@ First ensure the package is prepared for the release process:
 * Ensure that none of the dependencies used are snapshots.
 * Update the changelog file.
 * Check that all Aparapi libraries used as dependencies point to the latest version.
+* After making the release go to the aparapi-docker project and push an image for the new aparapi version
 
 Next lets take a few steps to do the actual release:
 
