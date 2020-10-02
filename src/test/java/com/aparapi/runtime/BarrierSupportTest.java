@@ -32,6 +32,8 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
+
 
 public class BarrierSupportTest {
     protected static OpenCLDevice openCLDevice = null;
