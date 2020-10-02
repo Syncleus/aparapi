@@ -154,7 +154,7 @@
                 <configuration>
                 	<forkCount>6</forkCount>
                 	<reuseForks>false</reuseForks>
-                  <argLine>-Xmx2048m -XX:MaxPermSize=512m</argLine>
+                  <argLine>@{argLine} -Xmx2048m -XX:MaxPermSize=512m</argLine>
                 </configuration>
             </plugin>
             <plugin>
