@@ -6,6 +6,7 @@ include:
 stages:
   - build
   - test
+  - visualize
   - deploy
 
 variables:
@@ -39,7 +40,16 @@ test-nvidia-gpu:
   script:
     - clinfo
     - if [[ "$(clinfo | grep 'Device Type')" != *"GPU"* ]]; then exit -1; fi
-    - mvn $MAVEN_CLI_OPTS test
+    - mvn $MAVEN_CLI_OPTS org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report site
+    - mv target target-nvidia-gpu
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - target-nvidia-gpu/surefire-reports/TEST-*.xml
+        - target-nvidia-gpu/failsafe-reports/TEST-*.xml
+    paths:
+      - target-nvidia-gpu
   tags:
     - opencl
 
@@ -49,7 +59,16 @@ test-nvidia-cpu:
   script:
     - clinfo
     - if [[ "$(clinfo | grep 'Device Type')" == *"GPU"* ]]; then exit -1; fi
-    - mvn $MAVEN_CLI_OPTS test
+    - mvn $MAVEN_CLI_OPTS org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report site
+    - mv target target-nvidia-cpu
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - target-nvidia-cpu/surefire-reports/TEST-*.xml
+        - target-nvidia-cpu/failsafe-reports/TEST-*.xml
+    paths:
+      - target-nvidia-cpu
   tags:
     - compute
 
@@ -59,7 +78,16 @@ test-amdgpu-cpu:
   script:
     - clinfo
     - if [[ "$(clinfo | grep 'Device Type')" == *"GPU"* ]]; then exit -1; fi
-    - mvn $MAVEN_CLI_OPTS test
+    - mvn $MAVEN_CLI_OPTS org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report site
+    - mv target target-amdgpu-cpu
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - target-amdgpu-cpu/surefire-reports/TEST-*.xml
+        - target-amdgpu-cpu/failsafe-reports/TEST-*.xml
+    paths:
+      - target-amdgpu-cpu
   tags:
     - compute
 
@@ -69,9 +97,43 @@ test-pocl-cpu:
   script:
     - clinfo
     - if [[ "$(clinfo | grep 'Device Type')" == *"GPU"* ]]; then exit -1; fi
-    - mvn $MAVEN_CLI_OPTS test
+    - mvn $MAVEN_CLI_OPTS org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report site
+    - mv target target-pocl-cpu
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - target-pocl-cpu/surefire-reports/TEST-*.xml
+        - target-pocl-cpu/failsafe-reports/TEST-*.xml
+    paths:
+      - target-pocl-cpu
   tags:
     - compute
+
+coverage:
+  stage: visualize # Must be in a stage later than test-jdk11's stage. The visualize stage does not exist by default. Please define it first, or chose an existing stage like deploy.
+  image: haynes/jacoco2cobertura:1.0.3
+  script:
+    - 'python /opt/cover2cover.py target-nvidia-gpu/site/jacoco/jacoco.xml src/main/java > target-nvidia-gpu/site/cobertura.xml'
+    - 'python /opt/source2filename.py target-nvidia-gpu/site/cobertura.xml'
+    - 'python /opt/cover2cover.py target-nvidia-cpu/site/jacoco/jacoco.xml src/main/java > target-nvidia-cpu/site/cobertura.xml'
+    - 'python /opt/source2filename.py target-nvidia-cpu/site/cobertura.xml'
+    - 'python /opt/cover2cover.py target-amdgpu-cpu/site/jacoco/jacoco.xml src/main/java > target-amdgpu-cpu/site/cobertura.xml'
+    - 'python /opt/source2filename.py target-amdgpu-cpu/site/cobertura.xml'
+    - 'python /opt/cover2cover.py target-pocl-cpu/site/jacoco/jacoco.xml src/main/java > target-pocl-cpu/site/cobertura.xml'
+    - 'python /opt/source2filename.py target-pocl-cpu/site/cobertura.xml'
+  needs: ["test-nvidia-gpu", "test-nvidia-cpu", "test-amdgpu-cpu", "test-pocl-cpu"]
+  dependencies:
+    - test-nvidia-gpu
+    - test-nvidia-cpu
+    - test-amdgpu-cpu
+    - test-pocl-cpu
+  artifacts:
+    reports:
+      cobertura: target-nvidia-gpu/site/cobertura.xml
+      cobertura: target-nvidia-cpu/site/cobertura.xml
+      cobertura: target-amdgpu-cpu/site/cobertura.xml
+      cobertura: target-pocl-cpu/site/cobertura.xml
 
 deploy:
   stage: deploy
