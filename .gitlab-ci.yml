@@ -40,7 +40,7 @@ test-nvidia-gpu:
   script:
     - clinfo
     - if [[ "$(clinfo | grep 'Device Type')" != *"GPU"* ]]; then exit -1; fi
-    - mvn $MAVEN_CLI_OPTS clean org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report
+    - mvn $MAVEN_CLI_OPTS clean org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report site
     - mv target target-nvidia-gpu
   artifacts:
     when: always
@@ -59,7 +59,7 @@ test-nvidia-cpu:
   script:
     - clinfo
     - if [[ "$(clinfo | grep 'Device Type')" == *"GPU"* ]]; then exit -1; fi
-    - mvn $MAVEN_CLI_OPTS clean org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report
+    - mvn $MAVEN_CLI_OPTS clean org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report site
     - mv target target-nvidia-cpu
   artifacts:
     when: always
@@ -78,7 +78,7 @@ test-amdgpu-cpu:
   script:
     - clinfo
     - if [[ "$(clinfo | grep 'Device Type')" == *"GPU"* ]]; then exit -1; fi
-    - mvn $MAVEN_CLI_OPTS clean org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report
+    - mvn $MAVEN_CLI_OPTS clean org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report site
     - mv target target-amdgpu-cpu
   artifacts:
     when: always
@@ -97,7 +97,7 @@ test-pocl-cpu:
   script:
     - clinfo
     - if [[ "$(clinfo | grep 'Device Type')" == *"GPU"* ]]; then exit -1; fi
-    - mvn $MAVEN_CLI_OPTS clean org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report
+    - mvn $MAVEN_CLI_OPTS clean org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report site
     - mv target target-pocl-cpu
   artifacts:
     when: always
