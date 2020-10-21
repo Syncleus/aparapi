@@ -2587,6 +2587,10 @@ public abstract class Kernel implements Cloneable {
 		   deviceProfile = profile.getDeviceProfile(device);
 	   }
 
+	   if (deviceProfile == null) {
+		   return null;
+	   }
+	   
 	   if (hasObserver) {
 		   return null;
 	   }
@@ -2625,6 +2629,10 @@ public abstract class Kernel implements Cloneable {
 		   deviceProfile = profile.getDeviceProfile(device);
 	   }
 
+	   if (deviceProfile == null) {
+		   return null;
+	   }
+	   
 	   if (hasObserver) {
 		   return null;
 	   }
