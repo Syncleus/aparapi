@@ -1290,7 +1290,11 @@ public class KernelRunner extends KernelRunnerJNI{
       }
       recreateRange(_settings);
       try {
+<<<<<<< HEAD
          return executeInternalInner(_settings, null, false);
+=======
+         return executeInternalInner(_settings, false);
+>>>>>>> c4e5929ebc2d5dee505e2e1aeab0f18214238427
       } catch (CompileFailedException e) {
          logger.log(Level.SEVERE, "KernelRunner#fallBackByExecutionMode() this should never happen...", e);
          throw new IllegalStateException("This should never happen, since compileOnly is set to false", e);
@@ -1367,7 +1371,11 @@ public class KernelRunner extends KernelRunnerJNI{
 
       recreateRange(_settings);
       try {
+<<<<<<< HEAD
          return executeInternalInner(_settings, null, false);
+=======
+         return executeInternalInner(_settings, false);
+>>>>>>> c4e5929ebc2d5dee505e2e1aeab0f18214238427
       } catch (CompileFailedException e) {
          logger.log(Level.SEVERE, "KernelRunner#fallBackToNextDevice() this should never happen, since compileOnly is set to false...", e);
          throw new IllegalStateException("This should never happen, since compileOnly is set to false", e);
@@ -1396,12 +1404,20 @@ public class KernelRunner extends KernelRunnerJNI{
       KernelPreferences preferences = KernelManager.instance().getPreferences(kernel);
       Range range = new Range(device, 1);
 	   ExecutionSettings settings = new ExecutionSettings(preferences, profile, _entrypoint, range, 1, false);
+<<<<<<< HEAD
 	   return executeInternalInner(settings, device, true);
+=======
+	   return executeInternalInner(settings, true);
+>>>>>>> c4e5929ebc2d5dee505e2e1aeab0f18214238427
    }
 
    private synchronized Kernel executeInternalOuter(ExecutionSettings _settings) {
       try {
+<<<<<<< HEAD
          return executeInternalInner(_settings, null, false);
+=======
+         return executeInternalInner(_settings, false);
+>>>>>>> c4e5929ebc2d5dee505e2e1aeab0f18214238427
       } catch (CompileFailedException e) {
          logger.log(Level.SEVERE, "KernelRunner#executeInternalOuter() this should never happen, since compileOnly is set to false...", e);
          throw new IllegalStateException("This should never happen, since compileOnly is set to false", e);

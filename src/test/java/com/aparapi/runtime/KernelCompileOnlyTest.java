@@ -174,7 +174,7 @@ public class KernelCompileOnlyTest {
       myKernel.compile(null);
       fail("Compilation should fail");
    }
-   
+
    @Test(expected = CompileFailedException.class)
    public void testCompilationFailedExceptionCompilingOnOpenCL() throws CompileFailedException {
       NotCompilableKernel myKernel = new NotCompilableKernel();
