@@ -89,6 +89,7 @@ import java.util.logging.Logger;
 import com.aparapi.device.Device;
 import com.aparapi.device.JavaDevice;
 import com.aparapi.device.OpenCLDevice;
+import com.aparapi.exception.CompileFailedException;
 import com.aparapi.internal.kernel.IKernelBarrier;
 import com.aparapi.internal.kernel.KernelArg;
 import com.aparapi.internal.kernel.KernelDeviceProfile;
@@ -2903,6 +2904,29 @@ public abstract class Kernel implements Cloneable {
     */
    public synchronized Kernel execute(String _entrypoint, Range _range, int _passes) {
       return prepareKernelRunner().execute(_entrypoint, _range, _passes);
+   }
+
+   /**
+    * Force pre-compilation of the kernel for a given device, without executing it.
+    * 
+    * @param _device the device for which the kernel is to be compiled
+    * @return the Kernel instance (this) so we can chain calls
+    * @throws CompileFailedException if compilation failed for some reason
+    */
+   public synchronized Kernel compile(Device _device) throws CompileFailedException {
+      return prepareKernelRunner().compile("run", _device);
+   }
+
+   /**
+    * Force pre-compilation of the kernel for a given device, without executing it.
+    * 
+    * @param _entrypoint is the name of the method we wish to use as the entrypoint to the kernel
+    * @param _device the device for which the kernel is to be compiled
+    * @return the Kernel instance (this) so we can chain calls
+    * @throws CompileFailedException if compilation failed for some reason
+    */
+   public synchronized Kernel compile(String _entrypoint, Device _device) throws CompileFailedException {
+      return prepareKernelRunner().compile(_entrypoint, _device);
    }
 
    public boolean isAutoCleanUpArrays() {

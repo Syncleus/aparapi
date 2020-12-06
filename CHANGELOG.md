@@ -1,7 +1,8 @@
 # Aparapi Changelog
 
 ## v2.0.1
-
+* New Kernel.compile(...) methods for forcing pre-compilation of a kernel without executing it
+* Fixed NPE bug for Kernel.getProfileReportCurrentThread(device) and similar methods 
 * Fixed bug where ClassModel would throw an error when loaded if boot strap methods were 0.
 * Updated the following dependency versions:
 ** org.apache.bcel:bcel 6.4.1 -< 6.5.0

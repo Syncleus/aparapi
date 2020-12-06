@@ -58,6 +58,7 @@ import com.aparapi.Kernel.*;
 import com.aparapi.device.*;
 import com.aparapi.exception.AparapiBrokenBarrierException;
 import com.aparapi.exception.AparapiKernelFailedException;
+import com.aparapi.exception.CompileFailedException;
 import com.aparapi.internal.annotation.*;
 import com.aparapi.internal.exception.*;
 import com.aparapi.internal.instruction.InstructionSet.*;
@@ -75,7 +76,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.ForkJoinPool.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.*;
 
@@ -116,7 +116,7 @@ public class KernelRunner extends KernelRunnerJNI{
    private final Kernel kernel;
 
    private Entrypoint entryPoint;
-
+   
    private int argc;
 
    // may be read by a thread other than the control thread, hence volatile
@@ -167,6 +167,9 @@ public class KernelRunner extends KernelRunnerJNI{
 			threadsDiedCounter.incrementAndGet();
 	   }
    }
+   
+   private final Hashtable<Device, Boolean> kernelIsCompiledForDeviceHash = new Hashtable<Device, Boolean>();
+   private final Hashtable<Device, Boolean> kernelNeverExecutedForDeviceHash = new Hashtable<Device, Boolean>();
    
    /**
     * Create a KernelRunner for a specific Kernel instance.
@@ -1286,7 +1289,12 @@ public class KernelRunner extends KernelRunnerJNI{
          kernel.setFallbackExecutionMode();
       }
       recreateRange(_settings);
-      return executeInternalInner(_settings);
+      try {
+         return executeInternalInner(_settings, null, false);
+      } catch (CompileFailedException e) {
+         logger.log(Level.SEVERE, "KernelRunner#fallBackByExecutionMode() this should never happen...", e);
+         throw new IllegalStateException("This should never happen, since compileOnly is set to false", e);
+      }
    }
 
    private void recreateRange(ExecutionSettings _settings) {
@@ -1358,7 +1366,12 @@ public class KernelRunner extends KernelRunnerJNI{
       }
 
       recreateRange(_settings);
-      return executeInternalInner(_settings);
+      try {
+         return executeInternalInner(_settings, null, false);
+      } catch (CompileFailedException e) {
+         logger.log(Level.SEVERE, "KernelRunner#fallBackToNextDevice() this should never happen, since compileOnly is set to false...", e);
+         throw new IllegalStateException("This should never happen, since compileOnly is set to false", e);
+      }
    }
 
    @SuppressWarnings("deprecation")
@@ -1377,10 +1390,21 @@ public class KernelRunner extends KernelRunnerJNI{
          clearCancelMultiPass();
       }
    }
+   
+   public synchronized Kernel compile(String _entrypoint, final Device device) throws CompileFailedException {
+      KernelProfile profile = KernelManager.instance().getProfile(kernel.getClass());
+      KernelPreferences preferences = KernelManager.instance().getPreferences(kernel);
+      Range range = new Range(device, 1);
+	   ExecutionSettings settings = new ExecutionSettings(preferences, profile, _entrypoint, range, 1, false);
+	   return executeInternalInner(settings, device, true);
+   }
 
    private synchronized Kernel executeInternalOuter(ExecutionSettings _settings) {
       try {
-         return executeInternalInner(_settings);
+         return executeInternalInner(_settings, null, false);
+      } catch (CompileFailedException e) {
+         logger.log(Level.SEVERE, "KernelRunner#executeInternalOuter() this should never happen, since compileOnly is set to false...", e);
+         throw new IllegalStateException("This should never happen, since compileOnly is set to false", e);
       } finally {
          if (kernel.isAutoCleanUpArrays() &&_settings.range.getGlobalSize_0() != 0) {
             cleanUpArrays();
@@ -1389,7 +1413,7 @@ public class KernelRunner extends KernelRunnerJNI{
    }
 
    @SuppressWarnings("deprecation")
-   private synchronized Kernel executeInternalInner(ExecutionSettings _settings) {
+   private synchronized Kernel executeInternalInner(ExecutionSettings _settings, Device aparapiDevice, boolean compileOnly) throws CompileFailedException {
 
       if (_settings.range == null) {
          throw new IllegalStateException("range can't be null");
@@ -1397,8 +1421,24 @@ public class KernelRunner extends KernelRunnerJNI{
 
       EXECUTION_MODE requestedExecutionMode = kernel.getExecutionMode();
 
-      if (requestedExecutionMode.isOpenCL() && _settings.range.getDevice() != null && !(_settings.range.getDevice() instanceof OpenCLDevice)) {
+      if (!compileOnly && requestedExecutionMode.isOpenCL() && _settings.range.getDevice() != null && !(_settings.range.getDevice() instanceof OpenCLDevice)) {
          fallBackToNextDevice(_settings.range.getDevice(), _settings, "OpenCL EXECUTION_MODE was requested but Device supplied was not an OpenCLDevice");
+      }
+      
+      if (compileOnly) {
+         if (aparapiDevice == null) {
+            throw new CompileFailedException("A kernel can only be compiled for a specific device, but no concrete device was specified");
+         }
+         
+         if (kernelIsCompiledForDeviceHash.getOrDefault(aparapiDevice, false)) {
+            return kernel;
+         }
+         
+         if (!(aparapiDevice instanceof OpenCLDevice)) {
+            //Nothing to do
+            kernelIsCompiledForDeviceHash.putIfAbsent(aparapiDevice, true);
+            return kernel;
+	     }
       }
 
       Device device = _settings.range.getDevice();
@@ -1431,7 +1471,7 @@ public class KernelRunner extends KernelRunnerJNI{
 
          int jniFlags = 0;
          // for legacy reasons use old logic where Kernel.EXECUTION_MODE is not AUTO
-         if (_settings.legacyExecutionMode && !userSpecifiedDevice && requestedExecutionMode.isOpenCL()) {
+         if (!compileOnly && _settings.legacyExecutionMode && !userSpecifiedDevice && requestedExecutionMode.isOpenCL()) {
             if (requestedExecutionMode.equals(EXECUTION_MODE.GPU)) {
                // Get the best GPU
                openCLDevice = (OpenCLDevice) KernelManager.DeprecatedMethods.bestGPU();
@@ -1468,7 +1508,7 @@ public class KernelRunner extends KernelRunnerJNI{
          /* for backward compatibility reasons we still honor execution mode */
          boolean isOpenCl = requestedExecutionMode.isOpenCL() || device instanceof OpenCLDevice;
          if (isOpenCl) {
-            if ((entryPoint == null) || (isFallBack)) {
+            if (kernelNeverExecutedForDeviceHash.getOrDefault(device, true) || (entryPoint == null) || (isFallBack)) {
                if (entryPoint == null) {
                   try {
                      final ClassModel classModel = ClassModel.createClassModel(kernel.getClass());
@@ -1476,11 +1516,15 @@ public class KernelRunner extends KernelRunnerJNI{
                      _settings.profile.onEvent(device, ProfilingEvent.CLASS_MODEL_BUILT);
                   } catch (final Exception exception) {
                      _settings.profile.onEvent(device, ProfilingEvent.CLASS_MODEL_BUILT);
+                     if (compileOnly) {
+                        //Cannot fallback in compile only mode
+                        throw new CompileFailedException(exception);
+                     }
                      return fallBackToNextDevice(device, _settings, exception);
                   }
                }
 
-               if ((entryPoint != null)) {
+               if (!kernelIsCompiledForDeviceHash.getOrDefault(device, false) && (entryPoint != null)) {
                   synchronized (Kernel.class) { // This seems to be needed because of a race condition uncovered with issue #68 http://code.google.com/p/aparapi/issues/detail?id=68
 
                      //  jniFlags |= (Config.enableProfiling ? JNI_FLAG_ENABLE_PROFILING : 0);
@@ -1495,6 +1539,9 @@ public class KernelRunner extends KernelRunnerJNI{
                   } // end of synchronized! issue 68
 
                   if (jniContextHandle == 0) {
+                     if (compileOnly) {
+                        throw new CompileFailedException("initJNI failed to return a valid handle");
+                     }
                      return fallBackToNextDevice(device, _settings, "initJNI failed to return a valid handle");
                   }
 
@@ -1511,10 +1558,16 @@ public class KernelRunner extends KernelRunnerJNI{
                   }
 
                   if (entryPoint.requiresDoublePragma() && !hasFP64Support()) {
+                     if (compileOnly) {
+                        throw new CompileFailedException("FP64 required but not supported");
+                     }
                      return fallBackToNextDevice(device, _settings, "FP64 required but not supported");
                   }
 
                   if (entryPoint.requiresByteAddressableStorePragma() && !hasByteAddressableStoreSupport()) {
+                     if (compileOnly) {
+                        throw new CompileFailedException("Byte addressable stores required but not supported");
+                     }
                      return fallBackToNextDevice(device, _settings, "Byte addressable stores required but not supported");
                   }
 
@@ -1523,7 +1576,9 @@ public class KernelRunner extends KernelRunnerJNI{
                         && hasLocalInt32ExtendedAtomicsSupport();
 
                   if (entryPoint.requiresAtomic32Pragma() && !all32AtomicsAvailable) {
-
+                     if (compileOnly) {
+                        throw new CompileFailedException("32 bit Atomics required but not supported");
+                     }
                      return fallBackToNextDevice(device, _settings, "32 bit Atomics required but not supported");
                   }
 
@@ -1545,6 +1600,9 @@ public class KernelRunner extends KernelRunnerJNI{
                         catch (final CodeGenException codeGenException) {
                            openCLCache.put(kernel.getClass(), CODE_GEN_ERROR_MARKER);
                            _settings.profile.onEvent(device, ProfilingEvent.OPENCL_GENERATED);
+                           if (compileOnly) {
+                              throw new CompileFailedException(codeGenException);
+                           }
                            return fallBackToNextDevice(device, _settings, codeGenException);
                         }
                      }
@@ -1552,6 +1610,9 @@ public class KernelRunner extends KernelRunnerJNI{
                         if (openCL.equals(CODE_GEN_ERROR_MARKER)) {
                            _settings.profile.onEvent(device, ProfilingEvent.OPENCL_GENERATED);
                            boolean silently = true; // since we must have already reported the CodeGenException
+                           if (compileOnly) {
+                              throw new CompileFailedException("Code Gen Error Marker present");
+                           }
                            return fallBackToNextDevice(device, _settings, null, silently);
                         }
                      }
@@ -1579,9 +1640,22 @@ public class KernelRunner extends KernelRunnerJNI{
                   }
                   _settings.profile.onEvent(device, ProfilingEvent.OPENCL_COMPILED);
                   if (handle == 0) {
+                     if (compileOnly) {
+                        //When compiling a kernel for a specific device device fallback is not allowed
+                        throw new CompileFailedException("OpenCL compile failed");
+                     }
                      return fallBackToNextDevice(device, _settings, "OpenCL compile failed");
                   }
                   
+                  kernelIsCompiledForDeviceHash.putIfAbsent(device, true);
+                  
+                  if (compileOnly) {
+                     return kernel;
+                  }
+               }
+                  
+               if (entryPoint != null) {
+                  //Pre-compiled kernels that never executed must resume here 
                   args = new KernelArg[entryPoint.getReferencedFields().size()];
                   int i = 0;
 
@@ -1708,6 +1782,8 @@ public class KernelRunner extends KernelRunnerJNI{
 
                   setArgsJNI(jniContextHandle, args, argc);
                   _settings.profile.onEvent(device, ProfilingEvent.PREPARE_EXECUTE);
+                  
+                  kernelNeverExecutedForDeviceHash.putIfAbsent(device, false);
                   try {
                      executeOpenCL(device, _settings);
                      isFallBack = false;
@@ -1715,6 +1791,9 @@ public class KernelRunner extends KernelRunnerJNI{
                      fallBackToNextDevice(device, _settings, e);
                   }
                } else { // (entryPoint != null) && !entryPoint.shouldFallback()
+                  if (compileOnly) {
+                     throw new CompileFailedException("failed to locate entrypoint");
+                  }
                   fallBackToNextDevice(device, _settings, "failed to locate entrypoint");
                }
             } else { // (entryPoint == null) || (isFallBack)
