@@ -1,6 +1,8 @@
 # Aparapi Changelog
 
 ## v2.0.1
+* Add support for getKernelMaxWorkGroupSize(), getKernelCompileWorkGroupSize(), getKernelPreferredWorkGroupSizeMultiple(), getKernelMinimumPrivateMemSizeInUsePerWorkItem() and getKernelLocalMemSizeInUse()
+* Fixed Barriers give inconsistent results on NVIDIA backend.
 * New Kernel.compile(...) methods for forcing pre-compilation of a kernel without executing it
 * Fixed NPE bug for Kernel.getProfileReportCurrentThread(device) and similar methods 
 * Fixed bug where ClassModel would throw an error when loaded if boot strap methods were 0.

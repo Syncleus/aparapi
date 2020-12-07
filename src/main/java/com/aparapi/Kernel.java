@@ -53,6 +53,7 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 package com.aparapi;
 
 import com.aparapi.annotation.Experimental;
+import com.aparapi.exception.QueryFailedException;
 import com.aparapi.internal.model.CacheEnabler;
 import com.aparapi.internal.model.ClassModel.ConstantPool.MethodReferenceEntry;
 import com.aparapi.internal.model.ClassModel.ConstantPool.NameAndTypeEntry;
@@ -2452,17 +2453,17 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
-    * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.<br/> 
+    * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.<br> 
     * It will also enforce memory ordering, such that modifications made by each thread in the work-group, to the memory,
     * before entering into this barrier call will be visible by all threads leaving the barrier.
-    * <br/>
-    * <br/><b>Note1: </b>In OpenCL will execute as barrier(CLK_LOCAL_MEM_FENCE), which will have a different behaviour than in Java,
+    * <br>
+    * <br><b>Note1: </b>In OpenCL will execute as barrier(CLK_LOCAL_MEM_FENCE), which will have a different behaviour than in Java,
     * because it will only guarantee visibility of modifications made to <b>local memory space</b> to all threads leaving the barrier.
-    * <br/>
-    * <br/><b>Note2: </b>In OpenCL it is required that all threads must enter the same if blocks and must iterate
+    * <br>
+    * <br><b>Note2: </b>In OpenCL it is required that all threads must enter the same if blocks and must iterate
     * the same number of times in all loops (for, while, ...).
-    * <br/>
-    * <br/><b>Note3: </b> Java version is identical to localBarrier(), globalBarrier() and localGlobalBarrier()
+    * <br>
+    * <br><b>Note3: </b> Java version is identical to localBarrier(), globalBarrier() and localGlobalBarrier()
     *
     * @annotion Experimental
     */
@@ -2473,18 +2474,18 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
-    * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.<br/> 
+    * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.<br> 
     * It will also enforce memory ordering, such that modifications made by each thread in the work-group, to the memory,
     * before entering into this barrier call will be visible by all threads leaving the barrier.
-    * <br/> 
-    * <br/><b>Note1: </b>In OpenCL will execute as barrier(CLK_GLOBAL_MEM_FENCE), which will have a different behaviour; than in Java,
+    * <br> 
+    * <br><b>Note1: </b>In OpenCL will execute as barrier(CLK_GLOBAL_MEM_FENCE), which will have a different behaviour; than in Java,
     * because it will only guarantee visibility of modifications made to <b>global memory space</b> to all threads,
     * in the work group, leaving the barrier.
-    * <br/>
-    * <br/><b>Note2: </b>In OpenCL it is required that all threads must enter the same if blocks and must iterate
+    * <br>
+    * <br><b>Note2: </b>In OpenCL it is required that all threads must enter the same if blocks and must iterate
     * the same number of times in all loops (for, while, ...).
-    * <br/>
-    * <br/><b>Note3: </b> Java version is identical to localBarrier(), globalBarrier() and localGlobalBarrier()
+    * <br>
+    * <br><b>Note3: </b> Java version is identical to localBarrier(), globalBarrier() and localGlobalBarrier()
     *
     * @annotion Experimental
     */
@@ -2495,21 +2496,21 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
-    * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.<br/> 
+    * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.<br> 
     * It will also enforce memory ordering, such that modifications made by each thread in the work-group, to the memory,
     * before entering into this barrier call will be visible by all threads leaving the barrier.
-    * <br/> 
-    * <br/><b>Note1: </b>When in doubt, use this barrier instead of localBarrier() or globalBarrier(), despite the possible
+    * <br> 
+    * <br><b>Note1: </b>When in doubt, use this barrier instead of localBarrier() or globalBarrier(), despite the possible
     * performance loss.
-    * <br/>
-    * <br/><b>Note2: </b>In OpenCL will execute as barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE), which will 
+    * <br>
+    * <br><b>Note2: </b>In OpenCL will execute as barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE), which will 
     * have the same behaviour than in Java, because it will guarantee the visibility of modifications made to 
     * <b>any of the memory spaces</b> to all threads, in the work group, leaving the barrier.
-    * <br/>
-    * <br/><b>Note3: </b>In OpenCL it is required that all threads must enter the same if blocks and must iterate
+    * <br>
+    * <br><b>Note3: </b>In OpenCL it is required that all threads must enter the same if blocks and must iterate
     * the same number of times in all loops (for, while, ...).
-    * <br/>
-    * <br/><b>Note4: </b> Java version is identical to localBarrier(), globalBarrier() and localGlobalBarrier()
+    * <br>
+    * <br><b>Note4: </b> Java version is identical to localBarrier(), globalBarrier() and localGlobalBarrier()
     *
     * @annotion Experimental
     */
@@ -2543,12 +2544,12 @@ public abstract class Kernel implements Cloneable {
    /**
     * Registers a new profile report observer to receive profile reports as they're produced.
     * This is the method recommended when the client application desires to receive all the execution profiles
-    * for the current kernel instance on all devices over all client threads running such kernel with a single observer<br/>
+    * for the current kernel instance on all devices over all client threads running such kernel with a single observer<br>
     * <b>Note1: </b>A report will be generated by a thread that finishes executing a kernel. In multithreaded execution
     * environments it is up to the observer implementation to handle thread safety.
-	* <br/>
+	* <br>
 	* <b>Note2: </b>To cancel the report subscription just set observer to <code>null</code> value.
-    * <br/>
+    * <br>
     * @param observer the observer instance that will receive the profile reports
     */
    public void registerProfileReportObserver(IProfileReportObserver observer) {
@@ -2561,9 +2562,9 @@ public abstract class Kernel implements Cloneable {
    /**
     * Retrieves a profile report for the last thread that executed this kernel on the given device.
     * A report will only be available if at least one thread executed the kernel on the device.
-    * <br/>
+    * <br>
     * <b>Note1: </b>If the profile report is intended to be kept in memory, the object should be cloned with
-    * {@link com.aparapi.ProfileReport#clone()}<br/>
+    * {@link com.aparapi.ProfileReport#clone()}<br>
     *
     * @param device the relevant device where the kernel executed 
     *
@@ -2602,9 +2603,9 @@ public abstract class Kernel implements Cloneable {
    /**
     * Retrieves the most recent complete report available for the current thread calling this method for
     * the current kernel instance and executed on the given device.
-    * <br/>
+    * <br>
     * <b>Note1: </b>If the profile report is intended to be kept in memory, the object should be cloned with
-    * {@link com.aparapi.ProfileReport#clone()}<br/>
+    * {@link com.aparapi.ProfileReport#clone()}<br>
     * <b>Note2: </b>If the thread didn't execute this kernel on the specified device, it
     * will return null.
     *    
@@ -2644,15 +2645,15 @@ public abstract class Kernel implements Cloneable {
    /**
     * Determine the execution time of the previous Kernel.execute(range) called from the last thread that ran and 
     * executed on the most recently used device.
-    * <br/>
+    * <br>
     * <b>Note1: </b>This is kept for backwards compatibility only, usage of either
     * {@link #getProfileReportLastThread(Device)} or {@link #registerProfileReportObserver(IProfileReportObserver)}
-    * is encouraged instead.<br/>
+    * is encouraged instead.<br>
     * <b>Note2: </b>Calling this method is not recommended when using more than a single thread to execute
-    * the same kernel, or when running kernels on more than one device concurrently.<br/>
-    * <br/>
-    * Note that for the first call this will include the conversion time.<br/>
-    * <br/>
+    * the same kernel, or when running kernels on more than one device concurrently.<br>
+    * <br>
+    * Note that for the first call this will include the conversion time.<br>
+    * <br>
     * @return <ul><li>The time spent executing the kernel (ms)</li>
     *             <li>NaN, if no profile report is available</li></ul>
     *
@@ -2673,15 +2674,15 @@ public abstract class Kernel implements Cloneable {
 
    /**
     * Determine the time taken to convert bytecode to OpenCL for first Kernel.execute(range) call.
-    * <br/>
+    * <br>
     * <b>Note1: </b>This is kept for backwards compatibility only, usage of either
     * {@link #getProfileReportLastThread(Device)} or {@link #registerProfileReportObserver(IProfileReportObserver)}
-    * is encouraged instead.<br/>
+    * is encouraged instead.<br>
     * <b>Note2: </b>Calling this method is not recommended when using more than a single thread to execute
-    * the same kernel, or when running kernels on more than one device concurrently.<br/>
-    * <br/>
-    * Note that for the first call this will include the conversion time.<br/>
-    * <br/>
+    * the same kernel, or when running kernels on more than one device concurrently.<br>
+    * <br>
+    * Note that for the first call this will include the conversion time.<br>
+    * <br>
     * @return <ul><li>The time spent preparing the kernel for execution using GPU</li>
     *             <li>NaN, if no profile report is available</li></ul>
     *
@@ -2703,10 +2704,10 @@ public abstract class Kernel implements Cloneable {
    /**
     * Determine the total execution time of all previous kernel executions called from the current thread,
     * calling this method, that executed the current kernel on the specified device.
-    * <br/>
+    * <br>
     * <b>Note1: </b>This is the recommended method to retrieve the accumulated execution time for a single
     * current thread, even when doing multithreading for the same kernel and device.
-    * <br/>
+    * <br>
     * Note that this will include the initial conversion time.
     *
     * @param the device of interest where the kernel executed
@@ -2733,10 +2734,10 @@ public abstract class Kernel implements Cloneable {
    /**
     * Determine the total execution time of all produced profile reports from all threads that executed the
     * current kernel on the specified device.
-    * <br/>
+    * <br>
     * <b>Note1: </b>This is the recommended method to retrieve the accumulated execution time, even
     * when doing multithreading for the same kernel and device.
-    * <br/>
+    * <br>
     * Note that this will include the initial conversion time.
     *
     * @param the device of interest where the kernel executed
@@ -2763,12 +2764,12 @@ public abstract class Kernel implements Cloneable {
    /**
     * Determine the total execution time of all previous Kernel.execute(range) calls for all threads
     * that ran this kernel for the device used in the last kernel execution.   
-    * <br/>
+    * <br>
     * <b>Note1: </b>This is kept for backwards compatibility only, usage of 
-    * {@link #getAccumulatedExecutionTimeAllThreads(Device)} is encouraged instead.<br/>
+    * {@link #getAccumulatedExecutionTimeAllThreads(Device)} is encouraged instead.<br>
     * <b>Note2: </b>Calling this method is not recommended when using more than a single thread to execute
-    * the same kernel on multiple devices concurrently.<br/>
-    * <br/>
+    * the same kernel on multiple devices concurrently.<br>
+    * <br>
     * Note that this will include the initial conversion time.
     *
     * @return <ul><li>The total time spent executing the kernel (ms)</li>
@@ -2928,7 +2929,63 @@ public abstract class Kernel implements Cloneable {
    public synchronized Kernel compile(String _entrypoint, Device _device) throws CompileFailedException {
       return prepareKernelRunner().compile(_entrypoint, _device);
    }
+   
+   /**
+    * Retrieves that minimum private memory in use per work item for this kernel instance and 
+    * the specified device.
+    * 
+    * @param device the device where the kernel is intended to run
+    * @return the number of bytes used per work item
+    * @throws QueryFailedException if the query couldn't complete
+    */
+   public long getKernelMinimumPrivateMemSizeInUsePerWorkItem(Device device) throws QueryFailedException {
+      return prepareKernelRunner().getKernelMinimumPrivateMemSizeInUsePerWorkItem(device);
+   }
 
+   /**
+    * Retrieves the amount of local memory used in the specified device by this kernel instance.
+    * 
+    * @param device the device where the kernel is intended to run
+    * @return the number of bytes of local memory in use for the specified device and current kernel 
+    * @throws QueryFailedException if the query couldn't complete
+    */
+   public long getKernelLocalMemSizeInUse(Device device) throws QueryFailedException {
+      return prepareKernelRunner().getKernelLocalMemSizeInUse(device);
+   }
+   
+   /**
+    * Retrieves the preferred work-group multiple in the specified device for this kernel instance.
+    * 
+    * @param device the device where the kernel is intended to run
+    * @return the preferred work group multiple
+    * @throws QueryFailedException if the query couldn't complete
+    */
+   public int getKernelPreferredWorkGroupSizeMultiple(Device device) throws QueryFailedException {
+      return prepareKernelRunner().getKernelPreferredWorkGroupSizeMultiple(device);
+   }
+   
+   /**
+    * Retrieves the maximum work-group size allowed for this kernel when running on the specified device.
+    * 
+    * @param device the device where the kernel is intended to run
+    * @return the preferred work group multiple
+    * @throws QueryFailedException if the query couldn't complete
+    */
+   public int getKernelMaxWorkGroupSize(Device device) throws QueryFailedException {
+      return prepareKernelRunner().getKernelMaxWorkGroupSize(device);
+   }
+   
+   /**
+    * Retrieves the specified work-group size in the compiled kernel for the specified device or intermediate language for the device.
+    * 
+    * @param device the device where the kernel is intended to run
+    * @return the preferred work group multiple
+    * @throws QueryFailedException if the query couldn't complete
+    */
+   public int[] getKernelCompileWorkGroupSize(Device device) throws QueryFailedException {
+      return prepareKernelRunner().getKernelCompileWorkGroupSize(device);
+   }
+   
    public boolean isAutoCleanUpArrays() {
       return autoCleanUpArrays;
    }

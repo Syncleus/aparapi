@@ -59,6 +59,7 @@ import com.aparapi.device.*;
 import com.aparapi.exception.AparapiBrokenBarrierException;
 import com.aparapi.exception.AparapiKernelFailedException;
 import com.aparapi.exception.CompileFailedException;
+import com.aparapi.exception.QueryFailedException;
 import com.aparapi.internal.annotation.*;
 import com.aparapi.internal.exception.*;
 import com.aparapi.internal.instruction.InstructionSet.*;
@@ -232,6 +233,72 @@ public class KernelRunner extends KernelRunnerJNI{
       //      threadPool.shutdownNow();
    }
 
+   public long getKernelMinimumPrivateMemSizeInUsePerWorkItem(Device device) throws QueryFailedException {
+      if (device != null && !(device instanceof OpenCLDevice)) {
+         return 0;
+      } else {
+         try {
+            compile("run", device);
+            return getKernelMinimumPrivateMemSizeInUsePerWorkItemJNI(jniContextHandle);
+         } catch (CompileFailedException ex) {
+            throw new QueryFailedException("Failed to query kernel MinimumPrivateMemSizeInUsePerWorkItem", ex); 
+         }
+      }
+   }
+   
+   public long getKernelLocalMemSizeInUse(Device device) throws QueryFailedException {
+      if (device != null && !(device instanceof OpenCLDevice)) {
+         return 0;
+      } else {
+         try {
+            compile("run", device);
+            return getKernelLocalMemSizeInUseJNI(jniContextHandle);
+         } catch (CompileFailedException ex) {
+            throw new QueryFailedException("Failed to query kernel LocalMemSizeInUse", ex); 
+         }
+      }
+   }
+   
+   public int getKernelPreferredWorkGroupSizeMultiple(Device device) throws QueryFailedException {
+      if (device != null && !(device instanceof OpenCLDevice)) {
+         return 1;
+      } else {
+         try {
+            compile("run", device);
+            return getKernelPreferredWorkGroupSizeMultipleJNI(jniContextHandle);
+         } catch (CompileFailedException ex) {
+            throw new QueryFailedException("Failed to query kernel PreferredWorkGroupSizeMultiple", ex); 
+         }
+      }
+   }
+   
+   public int getKernelMaxWorkGroupSize(Device device) throws QueryFailedException {
+      if (device != null && !(device instanceof OpenCLDevice)) {
+         return device.getMaxWorkGroupSize();
+      } else {
+         try {
+            compile("run", device);
+            return getKernelMaxWorkGroupSizeJNI(jniContextHandle);
+         } catch (CompileFailedException ex) {
+            throw new QueryFailedException("Failed to query kernel MaxWorkGroupSize", ex); 
+         }
+      }
+   }
+   
+   public int[] getKernelCompileWorkGroupSize(Device device) throws QueryFailedException {
+      final int[] unknownCompileWorkGroupSize = {0, 0, 0};
+      if (device != null && !(device instanceof OpenCLDevice)) {
+         return unknownCompileWorkGroupSize;
+      } else {
+         try {
+            compile("run", device);
+            return getKernelCompileWorkGroupSizeJNI(jniContextHandle);
+         } catch (CompileFailedException ex) {
+            throw new QueryFailedException("Failed to query kernel CompileWorkGroupSize", ex); 
+         }
+      }
+   }
+ 
    private Set<String> capabilitiesSet;
 
    boolean hasFP64Support() {

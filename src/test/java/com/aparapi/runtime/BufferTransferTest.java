@@ -19,6 +19,7 @@ import com.aparapi.Kernel;
 import com.aparapi.Range;
 import com.aparapi.device.Device;
 import com.aparapi.device.OpenCLDevice;
+import com.aparapi.exception.QueryFailedException;
 import com.aparapi.internal.kernel.KernelManager;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,10 +43,14 @@ public class BufferTransferTest {
     }
 
     @Test
-    public void testInOutOnce() {
+    public void testInOutOnce() throws QueryFailedException {
 
-        final int SIZE = 1024;
+        int SIZE = 1024;
         final InOutKernel kernel = new InOutKernel();
+        int maxSize = kernel.getKernelMaxWorkGroupSize(openCLDevice);
+        if (maxSize < SIZE) {
+           SIZE = maxSize;
+        }
         final Range range = openCLDevice.createRange(SIZE);
 
         kernel.in = new int[SIZE];
@@ -63,10 +68,14 @@ public class BufferTransferTest {
     }
 
     @Test
-    public void testAuto() {
+    public void testAuto() throws QueryFailedException {
 
-        final int SIZE = 1024;
+        int SIZE = 1024;
         final AddKernel kernel = new AddKernel();
+        int maxSize = kernel.getKernelMaxWorkGroupSize(openCLDevice);
+        if (maxSize < SIZE) {
+           SIZE = maxSize;
+        }
         final Range range = openCLDevice.createRange(SIZE);
 
         kernel.values = new int[SIZE];
@@ -111,10 +120,14 @@ public class BufferTransferTest {
     }
 
     @Test
-    public void testExplicit() {
+    public void testExplicit() throws QueryFailedException {
 
-        final int SIZE = 1024;
+        int SIZE = 1024;
         final AddKernel kernel = new AddKernel();
+        int maxSize = kernel.getKernelMaxWorkGroupSize(openCLDevice);
+        if (maxSize < SIZE) {
+           SIZE = maxSize;
+        }        
         kernel.setExplicit(true);
         final Range range = openCLDevice.createRange(SIZE);
 
