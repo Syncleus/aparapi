@@ -20,6 +20,7 @@ import com.aparapi.Range;
 import com.aparapi.device.Device;
 import com.aparapi.device.JavaDevice;
 import com.aparapi.device.OpenCLDevice;
+import com.aparapi.exception.QueryFailedException;
 import com.aparapi.internal.kernel.KernelManager;
 
 import static org.junit.Assert.*;
@@ -41,32 +42,33 @@ public class BarrierSupportTest {
     protected int[] targetArray;
 
     protected class CLKernelManager extends KernelManager {
-    	@Override
-    	protected List<Device.TYPE> getPreferredDeviceTypes() {
-    		return Arrays.asList(Device.TYPE.ACC, Device.TYPE.GPU);
-    	}
+        @Override
+        protected List<Device.TYPE> getPreferredDeviceTypes() {
+            return Arrays.asList(Device.TYPE.ACC, Device.TYPE.GPU);
+        }
     }
 
     protected class JTPKernelManager extends KernelManager {
-    	private JTPKernelManager() {
-    		LinkedHashSet<Device> preferredDevices = new LinkedHashSet<Device>(1);
-    		preferredDevices.add(JavaDevice.THREAD_POOL);
-    		setDefaultPreferredDevices(preferredDevices);
-    	}
-    	@Override
-    	protected List<Device.TYPE> getPreferredDeviceTypes() {
-    		return Arrays.asList(Device.TYPE.JTP);
-    	}
+        private JTPKernelManager() {
+            LinkedHashSet<Device> preferredDevices = new LinkedHashSet<Device>(1);
+            preferredDevices.add(JavaDevice.THREAD_POOL);
+            setDefaultPreferredDevices(preferredDevices);
+        }
+
+        @Override
+        protected List<Device.TYPE> getPreferredDeviceTypes() {
+            return Arrays.asList(Device.TYPE.JTP);
+        }
     }
 
     @AfterClass
     public static void classTeardown() {
-    	Util.resetKernelManager();
+        Util.resetKernelManager();
     }
 
     @Before
     public void setUpBefore() throws Exception {
-    	KernelManager.setKernelManager(new CLKernelManager());
+        KernelManager.setKernelManager(new CLKernelManager());
         Device device = KernelManager.instance().bestDevice();
         assumeTrue (device != null && device instanceof OpenCLDevice);
         openCLDevice = (OpenCLDevice) device;
@@ -74,143 +76,199 @@ public class BarrierSupportTest {
     }
 
     @Test
-    @Ignore("Known bug, reported as Issue #2.")
     public void testBarrier1() {
-        final Barrrier1Kernel kernel = new Barrrier1Kernel(SIZE);
+        Barrrier1Kernel kernel = new Barrrier1Kernel(SIZE);
         try {
-	        final Range range = openCLDevice.createRange(SIZE, SIZE);
-	        targetArray = initInputArray();
-	        kernel.setExplicit(false);
-	        kernel.setArray(targetArray);
-	        kernel.execute(range);
-	        assertTrue(validate());
+            int maxSize = kernel.getKernelMaxWorkGroupSize(openCLDevice);
+            if (maxSize < SIZE) {
+               SIZE = maxSize;
+               kernel = new Barrrier1Kernel(SIZE);
+               maxSize = kernel.getKernelMaxWorkGroupSize(openCLDevice);
+               if (maxSize != SIZE) {
+                  System.err.println("Sub-optimal test using " + SIZE + " local work group instead of using " + maxSize);
+               }
+            }
+       } catch (QueryFailedException ex) {
+           kernel.dispose();
+           fail(ex.toString());
+       }
+
+        try {
+	         final Range range = openCLDevice.createRange(SIZE, SIZE);
+	         targetArray = initInputArray();
+	         kernel.setExplicit(false);
+	         kernel.setArray(targetArray);
+	         kernel.execute(range);
+	         assertTrue(validate());
         } finally {
-        	kernel.dispose();
+            kernel.dispose();
         }
     }
 
     @Test
-    @Ignore("Known bug, reported as Issue #2.")
     public void testBarrier1Explicit() {
-        final Barrrier1Kernel kernel = new Barrrier1Kernel(SIZE);
+        Barrrier1Kernel kernel = new Barrrier1Kernel(SIZE);
         try {
-	        final Range range = openCLDevice.createRange(SIZE, SIZE);
-	        targetArray = initInputArray();
-	        kernel.setExplicit(true);
-	        kernel.setArray(targetArray);
-	        kernel.put(targetArray);
-	        kernel.execute(range);
-	        kernel.get(targetArray);
-	        assertTrue(validate());
+            int maxSize = kernel.getKernelMaxWorkGroupSize(openCLDevice);
+            if (maxSize < SIZE) {
+                SIZE = maxSize;
+                kernel = new Barrrier1Kernel(SIZE);
+                maxSize = kernel.getKernelMaxWorkGroupSize(openCLDevice);
+                if (maxSize != SIZE) {
+                   System.err.println("Sub-optimal test using " + SIZE + " local work group instead of using " + maxSize);
+                }
+            }
+        } catch (QueryFailedException ex) {
+            kernel.dispose();
+            fail(ex.toString());
+        }
+
+        try {
+	         final Range range = openCLDevice.createRange(SIZE, SIZE);
+	         targetArray = initInputArray();
+	         kernel.setExplicit(true);
+	         kernel.setArray(targetArray);
+	         kernel.put(targetArray);
+	         kernel.execute(range);
+	         kernel.get(targetArray);
+	         assertTrue(validate());
         } finally {
-        	kernel.dispose();
+            kernel.dispose();
         }
     }
 
     @Test
     public void testBarrier1JTP() {
-    	SIZE = 256;
-    	KernelManager.setKernelManager(new JTPKernelManager());
+        SIZE = 256;
+        KernelManager.setKernelManager(new JTPKernelManager());
         Device device = KernelManager.instance().bestDevice();
         assumeTrue (device != null && device instanceof JavaDevice);
 
         final Barrrier1Kernel kernel = new Barrrier1Kernel(SIZE);
         try {
-	        final Range range = device.createRange(SIZE, SIZE);
-	        targetArray = initInputArray();
-	        kernel.setExplicit(false);
-	        kernel.setArray(targetArray);
-	        kernel.execute(range);
-	        assertTrue(validate());
+	         final Range range = device.createRange(SIZE, SIZE);
+	         targetArray = initInputArray();
+	         kernel.setExplicit(false);
+	         kernel.setArray(targetArray);
+	         kernel.execute(range);
+	         assertTrue(validate());
         } finally {
-        	kernel.dispose();
+            kernel.dispose();
         }
     }
 
     @Test
-    @Ignore("Known bug, reported as Issue #2.")
     public void testBarrier2() {
-        final Barrrier2Kernel kernel = new Barrrier2Kernel(SIZE);
+        Barrrier2Kernel kernel = new Barrrier2Kernel(SIZE);
         try {
-	        final Range range = openCLDevice.createRange(SIZE, SIZE);
-	        targetArray = initInputArray();
-	        kernel.setExplicit(false);
-	        kernel.setArray(targetArray);
-	        kernel.execute(range);
-	        assertTrue(validate());
+            int maxSize = kernel.getKernelMaxWorkGroupSize(openCLDevice);
+            if (maxSize < SIZE) {
+                SIZE = maxSize;
+                kernel = new Barrrier2Kernel(SIZE);
+                maxSize = kernel.getKernelMaxWorkGroupSize(openCLDevice);
+                if (maxSize != SIZE) {
+                    System.err.println("Sub-optimal test using " + SIZE + " local work group instead of using " + maxSize);
+                }
+            }
+        } catch (QueryFailedException ex) {
+            kernel.dispose();
+            fail(ex.toString());
+        }
+
+        try {
+	         final Range range = openCLDevice.createRange(SIZE, SIZE);
+	         targetArray = initInputArray();
+	         kernel.setExplicit(false);
+	         kernel.setArray(targetArray);
+	         kernel.execute(range);
+	         assertTrue(validate());
         } finally {
-        	kernel.dispose();
+            kernel.dispose();
         }
     }
 
     @Test
-    @Ignore("Known bug, reported as Issue #2.")
     public void testBarrier2Explicit() {
-        final Barrrier2Kernel kernel = new Barrrier2Kernel(SIZE);
+        Barrrier2Kernel kernel = new Barrrier2Kernel(SIZE);
         try {
-	        final Range range = openCLDevice.createRange(SIZE, SIZE);
-	        targetArray = initInputArray();
-	        kernel.setExplicit(true);
-	        kernel.setArray(targetArray);
-	        kernel.put(targetArray);
-	        kernel.execute(range);
-	        kernel.get(targetArray);
-	        assertTrue(validate());
+            int maxSize = kernel.getKernelMaxWorkGroupSize(openCLDevice);
+            if (maxSize < SIZE) {
+               SIZE = maxSize;
+               kernel = new Barrrier2Kernel(SIZE);
+               maxSize = kernel.getKernelMaxWorkGroupSize(openCLDevice);
+               if (maxSize != SIZE) {
+                   System.err.println("Sub-optimal test using " + SIZE + " local work group instead of using " + maxSize);
+               }
+            }
+        } catch (QueryFailedException ex) {
+            kernel.dispose();
+            fail(ex.toString());
+        }
+        
+        try {
+	         final Range range = openCLDevice.createRange(SIZE, SIZE);
+	         targetArray = initInputArray();
+	         kernel.setExplicit(true);
+	         kernel.setArray(targetArray);
+	         kernel.put(targetArray);
+	         kernel.execute(range);
+	         kernel.get(targetArray);
+	         assertTrue(validate());
         } finally {
-        	kernel.dispose();
+            kernel.dispose();
         }
     }
 
     @Test
     public void testBarrier2JTP() {
-    	SIZE = 256;
-    	KernelManager.setKernelManager(new JTPKernelManager());
+        SIZE = 256;
+        KernelManager.setKernelManager(new JTPKernelManager());
         Device device = KernelManager.instance().bestDevice();
         assumeTrue (device != null && device instanceof JavaDevice);
 
         final Barrrier2Kernel kernel = new Barrrier2Kernel(SIZE);
         try {
-	        final Range range = device.createRange(SIZE, SIZE);
-	        targetArray = initInputArray();
-	        kernel.setExplicit(false);
-	        kernel.setArray(targetArray);
-	        kernel.execute(range);
-	        assertTrue(validate());
+	         final Range range = device.createRange(SIZE, SIZE);
+	         targetArray = initInputArray();
+	         kernel.setExplicit(false);
+	         kernel.setArray(targetArray);
+	         kernel.execute(range);
+	         assertTrue(validate());
         } finally {
-        	kernel.dispose();
+            kernel.dispose();
         }
     }
 
     private int[] initInputArray() {
-    	int[] inputArray = new int[SIZE];
-    	for (int i = 0; i < SIZE; i++) {
-    		inputArray[i] = i;
-    	}
-    	return inputArray;
+        int[] inputArray = new int[SIZE];
+        for (int i = 0; i < SIZE; i++) {
+            inputArray[i] = i;
+        }
+        return inputArray;
     }
 
     private boolean validate() {
-    	int[] inputArray = initInputArray();
+        int[] inputArray = initInputArray();
         int[] expected = new int[SIZE];
         for (int threadId = 0; threadId < SIZE; threadId++) {
-        	final int targetId = (SIZE - 1) - ((threadId + SIZE/2) % SIZE);
-        	expected[targetId] += inputArray[threadId];
+            final int targetId = (SIZE - 1) - ((threadId + SIZE/2) % SIZE);
+            expected[targetId] += inputArray[threadId];
             for (int i = 0; i < SIZE; i++) {
-            	expected[threadId] += i;
+                expected[threadId] += i;
             }
         }
 
         int[] temp = expected;
-    	expected = new int[SIZE];
+        expected = new int[SIZE];
         for (int threadId = 0; threadId < SIZE; threadId++) {
-        	int targetId = ((threadId + SIZE/2) % SIZE);
-        	expected[targetId] = temp[threadId];
+            int targetId = ((threadId + SIZE/2) % SIZE);
+            expected[targetId] = temp[threadId];
         }
 
         for (int threadId = 0; threadId < SIZE; threadId++) {
-	    	if (threadId < SIZE/2) {
-	    		expected[threadId] += expected[(SIZE-1) - threadId];
-	    	}
+            if (threadId < SIZE/2) {
+                expected[threadId] += expected[(SIZE-1) - threadId];
+            }
         }
 
         assertArrayEquals("targetArray", expected, targetArray);
@@ -219,15 +277,15 @@ public class BarrierSupportTest {
     }
 
     private static class Barrrier1Kernel extends Kernel {
-    	private final int SIZE;
+        private final int SIZE;
         private int[] resultArray;
 
         @Local
         private int[] myArray;
 
         private Barrrier1Kernel(int size) {
-        	this.SIZE = size;
-        	myArray = new int[size];
+            this.SIZE = size;
+            myArray = new int[size];
         }
 
         @NoCL
@@ -236,8 +294,8 @@ public class BarrierSupportTest {
         }
 
         private void doInitialCopy(@Local int[] target, int[] source, int id) {
-        	int targetId = (SIZE - 1) - ((id + SIZE/2) % SIZE);
-        	target[targetId] = source[id];
+            int targetId = (SIZE - 1) - ((id + SIZE/2) % SIZE);
+            target[targetId] = source[id];
         }
 
         private void doComputation1(@Local int[] arr, int id) {
@@ -257,21 +315,21 @@ public class BarrierSupportTest {
             resultArray[targetId] = myArray[id];
             globalBarrier();
             if (id < SIZE/2) {
-            	resultArray[id] += resultArray[(SIZE - 1) - id];
+                resultArray[id] += resultArray[(SIZE - 1) - id];
             }
         }
     }
 
     private static class Barrrier2Kernel extends Kernel {
-    	private final int SIZE;
+        private final int SIZE;
         private int[] resultArray;
 
         @Local
         private int[] myArray;
 
         private Barrrier2Kernel(int size) {
-        	this.SIZE = size;
-        	myArray = new int[size];
+            this.SIZE = size;
+            myArray = new int[size];
         }
 
         @NoCL
@@ -280,8 +338,8 @@ public class BarrierSupportTest {
         }
 
         private void doInitialCopy(@Local int[] target, int[] source, int id) {
-        	int targetId = (SIZE - 1) - ((id + SIZE/2) % SIZE);
-        	target[targetId] = source[id];
+            int targetId = (SIZE - 1) - ((id + SIZE/2) % SIZE);
+            target[targetId] = source[id];
         }
 
         private void doComputation1(@Local int[] arr, int id) {
@@ -301,7 +359,7 @@ public class BarrierSupportTest {
             resultArray[targetId] = myArray[id];
             localGlobalBarrier();
             if (id < SIZE/2) {
-            	resultArray[id] += resultArray[(SIZE - 1) - id];
+                resultArray[id] += resultArray[(SIZE - 1) - id];
             }
         }
     }

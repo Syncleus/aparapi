@@ -72,6 +72,10 @@ public class AparapiException extends Exception{
       super(_msg);
    }
 
+   public AparapiException(String _msg, Throwable _t) {
+      super(_msg, _t);
+   }
+   
    public AparapiException(Throwable _t) {
       super(_t);
    }
