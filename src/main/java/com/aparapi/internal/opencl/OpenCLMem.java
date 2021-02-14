@@ -34,4 +34,7 @@ public class OpenCLMem{
    public Object instance;
 
    public OpenCLProgram program;
+   
+   //Dummy JNI method just to ensure that above definition are generated for aparapi-native with newer Java > 8 compilers
+   private native void dummyJNI();
 }
