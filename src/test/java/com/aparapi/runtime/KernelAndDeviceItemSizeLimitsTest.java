@@ -77,14 +77,14 @@ public class KernelAndDeviceItemSizeLimitsTest {
    public void testKernelLocalMemSizeInUseAndExecuteOnOpenCL() {
       SimpleKernel myKernel = new SimpleKernel();
       
-      long maxLocalMemSize = 0;
+      long maxLocalMemSize = -10;
       try  {
          maxLocalMemSize = myKernel.getKernelLocalMemSizeInUse(openCLDevice);
       } catch(QueryFailedException e) {
          fail("This shouldn't happen");
       }
       
-      assertTrue("Max Local Mem Size should be greater than 0", maxLocalMemSize > 0);
+      assertTrue("Max Local Mem Size should be greater or equal to 0", maxLocalMemSize >= 0);
       
       Range r = Range.create(openCLDevice, SIZE, SIZE);
       myKernel.execute(r);
@@ -102,7 +102,7 @@ public class KernelAndDeviceItemSizeLimitsTest {
    public void testKernelMinimumPrivateMemSizeInUsePerWorkItemAndExecuteOnOpenCL() {
       SimpleKernel myKernel = new SimpleKernel();
       
-      long maxPrivateMemSize = 0;
+      long maxPrivateMemSize = -10;
       try  {
          maxPrivateMemSize = myKernel.getKernelMinimumPrivateMemSizeInUsePerWorkItem(openCLDevice);
       } catch(QueryFailedException e) {
@@ -127,7 +127,7 @@ public class KernelAndDeviceItemSizeLimitsTest {
    public void testKernelMaxWorkGroupSizeAndExecuteOnOpenCL() {
       SimpleKernel myKernel = new SimpleKernel();
       
-      int maxWorkGroupSize = 0;
+      int maxWorkGroupSize = -10;
       try  {
          maxWorkGroupSize = myKernel.getKernelMaxWorkGroupSize(openCLDevice);
       } catch(QueryFailedException e) {
@@ -152,7 +152,7 @@ public class KernelAndDeviceItemSizeLimitsTest {
    public void testPreferredKernelWorkGroupSizeMultipleAndExecuteOnOpenCL() {
       SimpleKernel myKernel = new SimpleKernel();
       
-      int preferredWorkGroupSizeMultiple = 0;
+      int preferredWorkGroupSizeMultiple = -10;
       try  {
          preferredWorkGroupSizeMultiple = myKernel.getKernelPreferredWorkGroupSizeMultiple(openCLDevice);
       } catch(QueryFailedException e) {
@@ -213,14 +213,14 @@ public class KernelAndDeviceItemSizeLimitsTest {
       
       SimpleKernel myKernel = new SimpleKernel();
       
-      long maxLocalMemSize = 0;
+      long maxLocalMemSize = -10;
       try  {
          maxLocalMemSize = myKernel.getKernelLocalMemSizeInUse(device);
       } catch(QueryFailedException e) {
          fail("This shouldn't happen");
       }
       
-      assertTrue("Max Local Mem Size should be equal to 0", maxLocalMemSize == 0);
+      assertTrue("Max Local Mem Size should be equal or greater to 0", maxLocalMemSize >= 0);
       
       Range r = Range.create(device, SIZE, SIZE);
       myKernel.execute(r);
@@ -242,14 +242,14 @@ public class KernelAndDeviceItemSizeLimitsTest {
       
       SimpleKernel myKernel = new SimpleKernel();
       
-      long maxPrivateMemSize = 0;
+      long maxPrivateMemSize = -10;
       try  {
          maxPrivateMemSize = myKernel.getKernelMinimumPrivateMemSizeInUsePerWorkItem(device);
       } catch(QueryFailedException e) {
          fail("This shouldn't happen");
       }
       
-      assertTrue("Max Private Mem Size should be equal to 0", maxPrivateMemSize == 0);
+      assertTrue("Max Private Mem Size should be equal or greater to 0", maxPrivateMemSize >= 0);
       
       Range r = Range.create(device, SIZE, SIZE);
       myKernel.execute(r);
@@ -300,7 +300,7 @@ public class KernelAndDeviceItemSizeLimitsTest {
       
       SimpleKernel myKernel = new SimpleKernel();
       
-      int preferredWorkGroupSizeMultiple = 0;
+      int preferredWorkGroupSizeMultiple = -10;
       try  {
          preferredWorkGroupSizeMultiple = myKernel.getKernelPreferredWorkGroupSizeMultiple(device);
       } catch(QueryFailedException e) {
