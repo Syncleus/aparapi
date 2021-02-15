@@ -7,8 +7,10 @@
 * Fixed NPE bug for Kernel.getProfileReportCurrentThread(device) and similar methods 
 * Fixed bug where ClassModel would throw an error when loaded if boot strap methods were 0.
 * Updated the following dependency versions:
+** com.aparapi: aparapi-jni 1.4.2 -> 1.4.3
 ** org.apache.bcel:bcel 6.4.1 -< 6.5.0
-** org.scala-lang:scala-library 2.13.1 -> 2.13.3 
+** org.scala-lang:scala-library 2.13.1 -> 2.13.4
+** com.syncleus:syncleus 7 -> 8 
 
 
 ## v2.0.0
