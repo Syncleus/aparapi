@@ -6,6 +6,7 @@
 * New Kernel.compile(...) methods for forcing pre-compilation of a kernel without executing it
 * Fixed NPE bug for Kernel.getProfileReportCurrentThread(device) and similar methods 
 * Fixed bug where ClassModel would throw an error when loaded if boot strap methods were 0.
+* Aparapi can now run on any OpenCL version rather than failing on untested versions it produces a warning.
 * Updated the following dependency versions:
 ** com.aparapi: aparapi-jni 1.4.2 -> 1.4.3
 ** org.apache.bcel:bcel 6.4.1 -< 6.5.0
