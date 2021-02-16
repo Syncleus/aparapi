@@ -146,7 +146,7 @@ public class ProfileReportBackwardsCompatTest {
     		assertEquals("Aparapi Accumulated execution time doesn't match", accumulatedExecutionTime, kernel.getAccumulatedExecutionTime(), 1e-10);
     		assertEquals("Aparapi last execution time doesn't match last report", lastExecutionTime, report.getExecutionTime(), 1e-10);
     		assertEquals("Aparapi last conversion time doesn't match last report", lastConversionTime, report.getConversionTime(), 1e-10);
-    		assertEquals("Test estimated accumulated time doesn't match within 500ms window", runTime, accumulatedExecutionTime, 500);
+    		assertEquals("Test estimated accumulated time doesn't match within 20% time window", runTime, accumulatedExecutionTime, 0.2f*runTime);
     		assertTrue(validateBasic1Kernel(inputArray, outputArray));
     	} finally {
     		kernel.registerProfileReportObserver(null);
