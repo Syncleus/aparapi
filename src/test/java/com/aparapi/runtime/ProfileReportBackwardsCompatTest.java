@@ -146,7 +146,10 @@ public class ProfileReportBackwardsCompatTest {
     		assertEquals("Aparapi Accumulated execution time doesn't match", accumulatedExecutionTime, kernel.getAccumulatedExecutionTime(), 1e-10);
     		assertEquals("Aparapi last execution time doesn't match last report", lastExecutionTime, report.getExecutionTime(), 1e-10);
     		assertEquals("Aparapi last conversion time doesn't match last report", lastConversionTime, report.getConversionTime(), 1e-10);
-    		assertEquals("Test estimated accumulated time doesn't match within 20% time window", runTime, accumulatedExecutionTime, 0.2f*runTime);
+    		//FIXME This is a temporary workaround, however the time profiling should be accurately measured instead of relying on Java timer
+    		//Here we allow a 20% error margin for machines under heavy load during the test, where latency is higher
+    		//as well as, introduce a 250ms tolerance for fast machines for which the execution time is of the same order of the Java latency
+    		assertEquals("Test estimated accumulated time doesn't match within a 20% time window", runTime, accumulatedExecutionTime, 0.2f * runTime + 250);
     		assertTrue(validateBasic1Kernel(inputArray, outputArray));
     	} finally {
     		kernel.registerProfileReportObserver(null);
@@ -238,8 +241,10 @@ public class ProfileReportBackwardsCompatTest {
     		assertEquals("Aparapi Accumulated execution time doesn't match", results[0].accumulatedExecutionTime, kernel1.getAccumulatedExecutionTime(), 1e-10);
     		assertEquals("Aparapi last execution time doesn't match last report", results[0].lastExecutionTime, report.getExecutionTime(), 1e-10);
     		assertEquals("Aparapi last conversion time doesn't match last report", results[0].lastConversionTime, report.getConversionTime(), 1e-10);
-    		//FIXME Commented out as time accounting method is not reliable on some situtations
-    		//assertEquals("Test estimated accumulated time doesn't match within 300ms window", results[0].runTime, results[0].accumulatedExecutionTime, 300);
+                //FIXME This is a temporary workaround, however the time profiling should be accurately measured instead of relying on Java timer
+                //Here we allow a 20% error margin for machines under heavy load during the test, where latency is higher
+                //as well as, introduce a 250ms tolerance for fast machines for which the execution time is of the same order of the Java latency
+    		assertEquals("Test estimated accumulated time doesn't match within a 20% time window", results[0].runTime, results[0].accumulatedExecutionTime, 0.2f * results[0].runTime + 250);
     		assertTrue(validateBasic1Kernel(inputArray, results[0].outputArray));
     		
     		//Validate kernel2 reports
@@ -249,8 +254,10 @@ public class ProfileReportBackwardsCompatTest {
     		assertEquals("Aparapi Accumulated execution time doesn't match", results[1].accumulatedExecutionTime, kernel2.getAccumulatedExecutionTime(), 1e-10);
     		assertEquals("Aparapi last execution time doesn't match last report", results[1].lastExecutionTime, report.getExecutionTime(), 1e-10);
     		assertEquals("Aparapi last conversion time doesn't match last report", results[1].lastConversionTime, report.getConversionTime(), 1e-10);
-    		//FIXME Commented out as time accounting method is not reliable on some situtations
-    		//assertEquals("Test estimated accumulated time doesn't match within 300ms window", results[1].runTime, results[1].accumulatedExecutionTime, 300);
+                //FIXME This is a temporary workaround, however the time profiling should be accurately measured instead of relying on Java timer
+                //Here we allow a 20% error margin for machines under heavy load during the test, where latency is higher
+                //as well as, introduce a 250ms tolerance for fast machines for which the execution time is of the same order of the Java latency
+    		assertEquals("Test estimated accumulated time doesn't match within a 20% time window", results[1].runTime, results[1].accumulatedExecutionTime, 0.2f * results[1].runTime + 250);
     		assertTrue(validateBasic2Kernel(inputArray, results[1].outputArray));
     	} finally {
     		kernel1.registerProfileReportObserver(null);
