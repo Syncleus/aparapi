@@ -1,6 +1,6 @@
 # Aparapi Changelog
 
-## v2.0.1
+## v3.0.0
 * Add support for getKernelMaxWorkGroupSize(), getKernelCompileWorkGroupSize(), getKernelPreferredWorkGroupSizeMultiple(), getKernelMinimumPrivateMemSizeInUsePerWorkItem() and getKernelLocalMemSizeInUse()
 * Fixed Barriers give inconsistent results on NVIDIA backend.
 * New Kernel.compile(...) methods for forcing pre-compilation of a kernel without executing it
