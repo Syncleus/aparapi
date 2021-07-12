@@ -1,12 +1,12 @@
 ![](http://aparapi.com/images/logo-text-adjacent.png)
 
-[![pipeline status](http://git.qoto.org/aparapi/aparapi/badges/master/pipeline.svg)](http://git.qoto.org/aparapi/aparapi/-/commits/master)
-[![coverage report](http://git.qoto.org/aparapi/aparapi/badges/master/coverage.svg)](http://git.qoto.org/aparapi/aparapi/-/commits/master)
+[![pipeline status](http://git.qoto.org/aparapi/aparapi/badges/master/pipeline.svg)](http://git.qoto.org/aparapi/aparapi/-/commits/v3.0.0)
+[![coverage report](http://git.qoto.org/aparapi/aparapi/badges/master/coverage.svg)](http://git.qoto.org/aparapi/aparapi/-/commits/v3.0.0)
 [![codecov](https://codecov.io/gh/Syncleus/aparapi/branch/master/graph/badge.svg)](https://codecov.io/gh/Syncleus/aparapi)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8c0efbe275f44369d9959b5ded14bfd)](https://www.codacy.com/app/freemo/aparapi?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Syncleus/aparapi&amp;utm_campaign=badger)
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 [![SemVer](https://img.shields.io/badge/SemVer-v2.0.0-green)](https://semver.org/spec/v2.0.0.html)
-[![Javadocs](http://www.javadoc.io/badge/com.aparapi/aparapi.svg)](http://www.javadoc.io/doc/com.aparapi/aparapi)
+[![Javadocs](http://www.javadoc.io/badge/com.aparapi/aparapi.svg)](http://www.javadoc.io/doc/com.aparapi/aparapi/3.0.0)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.aparapi/aparapi/badge.png?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.aparapi/aparapi/)
 [![Gitter](https://badges.gitter.im/Syncleus/aparapi.svg)](https://gitter.im/Syncleus/aparapi?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
