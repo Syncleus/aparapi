@@ -230,7 +230,7 @@ before_install:
         # see https://github.com/travis-ci/travis-ci/issues/6120
         POCL_LLVM_URL=http://llvm.org/releases/${POCL_LLVM_VERSION}/clang+llvm-${POCL_LLVM_VERSION}-x86_64-linux-gnu-ubuntu-14.04.tar.xz
         mkdir -p ${DEPS_DIR}/llvm-${POCL_LLVM_VERSION}
-        travis_retry wget --no-check-certificate --quiet -O llvm-${POCL_LLVM_VERSION}.tar.xz ${POCL_LLVM_URL}
+ wget --no-check-certificate --quiet -O llvm-${POCL_LLVM_VERSION}.tar.xz ${POCL_LLVM_URL}
         tar xf llvm-${POCL_LLVM_VERSION}.tar.xz -C ${DEPS_DIR}/llvm-${POCL_LLVM_VERSION} --strip-components 1
 
         #sudo add-apt-repository -y "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.7 main"
@@ -257,7 +257,7 @@ install:
       if [[ ${TRAVIS_OS_NAME} == "linux" ]]; then
         CMAKE_URL="http://www.cmake.org/files/v3.4/cmake-3.4.3-Linux-x86_64.tar.gz"
         mkdir -p ${DEPS_DIR}/cmake
-        travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C ${DEPS_DIR}/cmake
+ wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C ${DEPS_DIR}/cmake
         export PATH=${DEPS_DIR}/cmake/bin:${PATH}
       fi
 
@@ -268,9 +268,9 @@ install:
       if [[ ${TRAVIS_OS_NAME} == "linux" ]]; then
         mkdir -p ${OPENCL_ROOT}/include/CL
         pushd ${OPENCL_ROOT}/include/CL
-        travis_retry git clone --depth 1 https://github.com/KhronosGroup/OpenCL-Headers.git -b opencl${OPENCL_VERSION}
+ git clone --depth 1 https://github.com/KhronosGroup/OpenCL-Headers.git -b opencl${OPENCL_VERSION}
         mv ./OpenCL-Headers/* .
-        travis_retry wget -w 1 -np -nd -nv -A h,hpp --no-check-certificate ${OPENCL_REGISTRY}/api/2.1/cl.hpp;
+ wget -w 1 -np -nd -nv -A h,hpp --no-check-certificate ${OPENCL_REGISTRY}/api/2.1/cl.hpp;
         popd
       fi
 
@@ -279,7 +279,7 @@ install:
     ############################################################################
     - |
       if [[ ${TRAVIS_OS_NAME} == "linux" && ${OPENCL_LIB} == "pocl" ]]; then
-        travis_retry git clone --depth 1 https://github.com/pocl/pocl.git -b ${POCL_BRANCH}
+ git clone --depth 1 https://github.com/pocl/pocl.git -b ${POCL_BRANCH}
         cd pocl
         if [[ -n "${POCL_COMMIT}" ]]; then
           git checkout ${POCL_COMMIT}
@@ -300,11 +300,11 @@ install:
       if [[ ${TRAVIS_OS_NAME} == "linux" && ${OPENCL_LIB} == "khronos-icd" ]]; then
         mkdir -p ${OPENCL_ROOT}
         pushd ${OPENCL_ROOT}
-        travis_retry git clone --depth 1 https://github.com/KhronosGroup/OpenCL-ICD-Loader.git
+ git clone --depth 1 https://github.com/KhronosGroup/OpenCL-ICD-Loader.git
         mv ./OpenCL-ICD-Loader/* .
         mkdir -p inc/CL
         pushd inc/CL
-        travis_retry git clone --depth 1 https://github.com/KhronosGroup/OpenCL-Headers.git
+ git clone --depth 1 https://github.com/KhronosGroup/OpenCL-Headers.git
         mv ./OpenCL-Headers/* .
         popd
         mkdir -p lib
@@ -328,3 +328,7 @@ notifications:
     on_success: change  # options: [always|never|change] default: always
     on_failure: always  # options: [always|never|change] default: always
     on_start: never     # options: [always|never|change] default: always
+
+cache:
+  directories:
+  - $HOME/.m2
