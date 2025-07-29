@@ -155,7 +155,7 @@ public class KernelRunner extends KernelRunnerJNI{
    
    final private ThreadDiedHandler handler = new ThreadDiedHandler();
    //Allow a thread pool per KernelRunner which will also be per Kernel instance 
-   private final ForkJoinPool threadPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors(),
+   private ForkJoinPool threadPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors(),
          lowPriorityThreadFactory, handler, false);
    private static HashMap<Class<? extends Kernel>, String> openCLCache = new HashMap<>();
    private static LinkedHashSet<String> seenBinaryKeys = new LinkedHashSet<>();
@@ -781,7 +781,7 @@ public class KernelRunner extends KernelRunnerJNI{
                         kernelState.setLocalBarrier(localBarrier);
                      }
 
-                     ForkJoinTask<?> fjt = threadPool.submit(
+                     ForkJoinTask<?> fjt = getThreadPool().submit(
                      //                     () -> {
                      new Runnable() {
                         public void run() {
@@ -2107,7 +2107,15 @@ public class KernelRunner extends KernelRunnerJNI{
       return (explicit);
    }
 
-   private static class ExecutionSettings {
+   public ForkJoinPool getThreadPool() {
+      return threadPool;
+   }
+
+   public void setThreadPool(ForkJoinPool threadPool) {
+     this.threadPool = threadPool;
+   }
+
+private static class ExecutionSettings {
       final KernelPreferences preferences;
       final KernelProfile profile;
       final String entrypoint;
