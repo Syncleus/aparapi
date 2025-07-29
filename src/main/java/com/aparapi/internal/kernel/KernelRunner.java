@@ -155,8 +155,10 @@ public class KernelRunner extends KernelRunnerJNI{
    
    final private ThreadDiedHandler handler = new ThreadDiedHandler();
    //Allow a thread pool per KernelRunner which will also be per Kernel instance 
-   private final ForkJoinPool threadPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors(),
+   private ForkJoinPool threadPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors(),
          lowPriorityThreadFactory, handler, false);
+   private static ForkJoinPool commonPoolResource=null;
+   private static boolean useStaticPool = true;
    private static HashMap<Class<? extends Kernel>, String> openCLCache = new HashMap<>();
    private static LinkedHashSet<String> seenBinaryKeys = new LinkedHashSet<>();
 
@@ -781,7 +783,7 @@ public class KernelRunner extends KernelRunnerJNI{
                         kernelState.setLocalBarrier(localBarrier);
                      }
 
-                     ForkJoinTask<?> fjt = threadPool.submit(
+                     ForkJoinTask<?> fjt = getThreadPool().submit(
                      //                     () -> {
                      new Runnable() {
                         public void run() {
@@ -2105,6 +2107,28 @@ public class KernelRunner extends KernelRunnerJNI{
 
    public boolean isExplicit() {
       return (explicit);
+   }
+
+   public ForkJoinPool getThreadPool() {
+      if(useStaticPool) {
+         if(commonPoolResource==null) {
+            commonPoolResource=threadPool;
+         }
+         return commonPoolResource;
+      }
+      return threadPool;
+   }
+
+   public void setThreadPool(ForkJoinPool threadPool) {
+     this.threadPool = threadPool;
+   }
+
+   public static boolean isUseStaticPool() {
+      return useStaticPool;
+   }
+
+   public static void setUseStaticPool(boolean useStaticPool) {
+      KernelRunner.useStaticPool = useStaticPool;
    }
 
    private static class ExecutionSettings {
