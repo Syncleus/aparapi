@@ -157,6 +157,8 @@ public class KernelRunner extends KernelRunnerJNI{
    //Allow a thread pool per KernelRunner which will also be per Kernel instance 
    private ForkJoinPool threadPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors(),
          lowPriorityThreadFactory, handler, false);
+   private static ForkJoinPool commonPoolResource=null;
+   private static boolean useStaticPool = true;
    private static HashMap<Class<? extends Kernel>, String> openCLCache = new HashMap<>();
    private static LinkedHashSet<String> seenBinaryKeys = new LinkedHashSet<>();
 
@@ -2108,6 +2110,12 @@ public class KernelRunner extends KernelRunnerJNI{
    }
 
    public ForkJoinPool getThreadPool() {
+      if(useStaticPool) {
+         if(commonPoolResource==null) {
+            commonPoolResource=threadPool;
+         }
+         return commonPoolResource;
+      }
       return threadPool;
    }
 
@@ -2115,7 +2123,15 @@ public class KernelRunner extends KernelRunnerJNI{
      this.threadPool = threadPool;
    }
 
-private static class ExecutionSettings {
+   public static boolean isUseStaticPool() {
+      return useStaticPool;
+   }
+
+   public static void setUseStaticPool(boolean useStaticPool) {
+      KernelRunner.useStaticPool = useStaticPool;
+   }
+
+   private static class ExecutionSettings {
       final KernelPreferences preferences;
       final KernelProfile profile;
       final String entrypoint;
