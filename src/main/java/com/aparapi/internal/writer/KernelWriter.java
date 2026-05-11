@@ -241,7 +241,7 @@ public abstract class KernelWriter extends BlockWriter{
             getterField = m.getAccessorVariableFieldEntry();
          }
          if (getterField != null && isThis(_methodCall.getArg(0))) {
-            String fieldName = getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+            String fieldName = getOpenCLIdentifier(getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
             write("this->");
             write(fieldName);
             return;
@@ -283,8 +283,8 @@ public abstract class KernelWriter extends BlockWriter{
                final AccessArrayElement arrayAccess = (AccessArrayElement) ((VirtualMethodCall) _methodCall).getInstanceReference();
                final Instruction refAccess = arrayAccess.getArrayRef();
                //assert refAccess instanceof I_GETFIELD : "ref should come from getfield";
-               final String fieldName = ((AccessField) refAccess).getConstantPoolFieldEntry().getNameAndTypeEntry()
-                     .getNameUTF8Entry().getUTF8();
+               final String fieldName = getOpenCLIdentifier(((AccessField) refAccess).getConstantPoolFieldEntry().getNameAndTypeEntry()
+                     .getNameUTF8Entry().getUTF8());
                write(" &(this->" + fieldName);
                write("[");
                writeInstruction(arrayAccess.getArrayIndex());
@@ -343,6 +343,8 @@ public abstract class KernelWriter extends BlockWriter{
          final StringBuilder thisStructLine = new StringBuilder();
          final StringBuilder argLine = new StringBuilder();
          final StringBuilder assignLine = new StringBuilder();
+         final String fieldName = field.getName();
+         final String openCLFieldName = getOpenCLIdentifier(fieldName);
 
          String signature = field.getDescriptor();
 
@@ -352,11 +354,11 @@ public abstract class KernelWriter extends BlockWriter{
 
          // check the suffix
 
-         String type = field.getName().endsWith(Kernel.LOCAL_SUFFIX) ? __local
-               : (field.getName().endsWith(Kernel.CONSTANT_SUFFIX) ? __constant : __global);
+         String type = fieldName.endsWith(Kernel.LOCAL_SUFFIX) ? __local
+               : (fieldName.endsWith(Kernel.CONSTANT_SUFFIX) ? __constant : __global);
          Integer privateMemorySize = null;
          try {
-            privateMemorySize = _entryPoint.getClassModel().getPrivateMemorySize(field.getName());
+            privateMemorySize = _entryPoint.getClassModel().getPrivateMemorySize(fieldName);
          } catch (ClassParseException e) {
             throw new CodeGenException(e);
          }
@@ -423,13 +425,13 @@ public abstract class KernelWriter extends BlockWriter{
 
          if (privateMemorySize == null) {
             assignLine.append("this->");
-            assignLine.append(field.getName());
+            assignLine.append(openCLFieldName);
             assignLine.append(" = ");
-            assignLine.append(field.getName());
+            assignLine.append(openCLFieldName);
          }
 
-         argLine.append(field.getName());
-         thisStructLine.append(field.getName());
+         argLine.append(openCLFieldName);
+         thisStructLine.append(openCLFieldName);
          if (privateMemorySize == null) {
             assigns.add(assignLine.toString());
          }
@@ -441,7 +443,7 @@ public abstract class KernelWriter extends BlockWriter{
 
          // Add int field into "this" struct for supporting java arraylength op
          // named like foo__javaArrayLength
-         if (isPointer && _entryPoint.getArrayFieldArrayLengthUsed().contains(field.getName()) || isPointer && numDimensions > 1) {
+         if (isPointer && _entryPoint.getArrayFieldArrayLengthUsed().contains(fieldName) || isPointer && numDimensions > 1) {
 
             for (int i = 0; i < numDimensions; i++) {
                final StringBuilder lenStructLine = new StringBuilder();
@@ -449,7 +451,7 @@ public abstract class KernelWriter extends BlockWriter{
                final StringBuilder lenAssignLine = new StringBuilder();
 
                String suffix = numDimensions == 1 ? "" : Integer.toString(i);
-               String lenName = field.getName() + BlockWriter.arrayLengthMangleSuffix + suffix;
+               String lenName = openCLFieldName + BlockWriter.arrayLengthMangleSuffix + suffix;
 
                lenStructLine.append("int " + lenName);
 
@@ -468,7 +470,7 @@ public abstract class KernelWriter extends BlockWriter{
                   final StringBuilder dimStructLine = new StringBuilder();
                   final StringBuilder dimArgLine = new StringBuilder();
                   final StringBuilder dimAssignLine = new StringBuilder();
-                  String dimName = field.getName() + BlockWriter.arrayDimMangleSuffix + suffix;
+                  String dimName = openCLFieldName + BlockWriter.arrayDimMangleSuffix + suffix;
 
                   dimStructLine.append("int " + dimName);
 
@@ -562,7 +564,7 @@ public abstract class KernelWriter extends BlockWriter{
 
                final String cType = convertType(field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8(), true, false);
                assert cType != null : "could not find type for " + field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-               writeln(cType + " " + field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8() + ";");
+               writeln(cType + " " + getOpenCLIdentifier(field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8()) + ";");
             }
 
             // compute total size for OpenCL buffer
@@ -687,7 +689,7 @@ public abstract class KernelWriter extends BlockWriter{
                }
                
                write(convertType(descriptor, true, false));
-               write(lvi.getVariableName());
+               write(getOpenCLIdentifier(lvi.getVariableName()));
                alreadyHasFirstArg = true;
                
                localVariableIndex++;
