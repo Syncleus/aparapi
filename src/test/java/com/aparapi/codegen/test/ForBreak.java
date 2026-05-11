@@ -30,4 +30,3 @@ public class ForBreak {
 
     }
 }
-/**{Throws{ClassParseException}Throws}**/

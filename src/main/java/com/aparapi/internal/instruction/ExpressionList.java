@@ -673,6 +673,26 @@ public class ExpressionList{
 
                     }
                 }
+                if (!handled && tail.isBranch() && tail.asBranch().isForwardUnconditional()
+                    && _instruction.isForwardConditionalBranchTarget()) {
+                    final Branch forwardGoto = tail.asBranch();
+                    final Instruction forwardTarget = forwardGoto.getTarget();
+                    final Instruction beforeForwardTarget = forwardTarget.getPrevPC();
+                    if (forwardTarget.isAfter(_instruction) && forwardTarget.isForwardConditionalBranchTarget()) {
+                        if (beforeForwardTarget != null && beforeForwardTarget.isBranch()
+                            && beforeForwardTarget.asBranch().isReverseUnconditional()) {
+                            final ConditionalBranch lastForwardConditional = _instruction.getForwardConditionalBranches().getLast();
+                            final BranchSet branchSet = lastForwardConditional.getOrCreateBranchSet();
+                            if (doesNotContainCompositeOrBranch(branchSet.getLast().getNextExpr(), forwardGoto)) {
+                                forwardGoto.setBreakOrContinue(true);
+                                branchSet.unhook();
+                                forwardGoto.unhook();
+                                addAsComposites(ByteCode.COMPOSITE_IF, branchSet.getFirst().getPrevExpr(), branchSet);
+                                handled = true;
+                            }
+                        }
+                    }
+                }
                 if (!handled && !tail.isForwardBranch() && _instruction.isForwardConditionalBranchTarget()) {
                     /**
                      * This an if(exp)

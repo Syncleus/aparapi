@@ -80,6 +80,8 @@ public abstract class BlockWriter{
 
    public final static String arrayDimMangleSuffix = "__javaArrayDimension";
 
+   private final Stack<Instruction> breakTargets = new Stack<Instruction>();
+
    public abstract void write(String _string);
 
    public void writeln(String _string) {
@@ -207,11 +209,11 @@ public abstract class BlockWriter{
             if (!(delta instanceof CompositeInstruction)) {
                writeInstruction(delta);
                write(")");
-               writeBlock(blockStart, delta);
+               writeBreakableBlock(blockStart, delta, branchSet.getTarget());
             } else {
                write("){");
                in();
-               writeSequence(blockStart, delta);
+               writeBreakableSequence(blockStart, delta, branchSet.getTarget());
 
                newLine();
                writeSequence(delta, delta.getNextExpr());
@@ -229,7 +231,7 @@ public abstract class BlockWriter{
          final Instruction blockStart = writeConditional(branchSet);
          write(")");
          final Instruction lastGoto = instruction.getLastChild();
-         writeBlock(blockStart, lastGoto);
+         writeBreakableBlock(blockStart, lastGoto, branchSet.getTarget());
 
       } else if (instruction instanceof CompositeEmptyLoopInstruction) {
          newLine();
@@ -256,17 +258,18 @@ public abstract class BlockWriter{
          while (last.getPrevExpr().isBranch()) {
             last = last.getPrevExpr();
          }
-         writeConditional(instruction.getBranchSet(), true);
+         final BranchSet branchSet = instruction.getBranchSet();
+         writeConditional(branchSet, true);
          write("; ");
          final Instruction delta = last.getPrevExpr();
          if (!(delta instanceof CompositeInstruction)) {
             writeInstruction(delta);
             write(")");
-            writeBlock(topGoto.getNextExpr(), delta);
+            writeBreakableBlock(topGoto.getNextExpr(), delta, branchSet.getFallThrough());
          } else {
             write("){");
             in();
-            writeSequence(topGoto.getNextExpr(), delta);
+            writeBreakableSequence(topGoto.getNextExpr(), delta, branchSet.getFallThrough());
 
             newLine();
             writeSequence(delta, delta.getNextExpr());
@@ -281,7 +284,7 @@ public abstract class BlockWriter{
          write("do");
          Instruction blockStart = instruction.getFirstChild();
          Instruction blockEnd = instruction.getLastChild();
-         writeBlock(blockStart, blockEnd);
+         writeBreakableBlock(blockStart, blockEnd, ((CompositeInstruction) instruction).getBranchSet().getFallThrough());
          write("while(");
          writeConditional(((CompositeInstruction) instruction).getBranchSet(), true);
          write(");");
@@ -325,6 +328,42 @@ public abstract class BlockWriter{
       newLine();
 
       write("}");
+   }
+
+   private void writeBreakableBlock(Instruction first, Instruction last, Instruction breakTarget) throws CodeGenException {
+      pushBreakTarget(breakTarget);
+      try {
+         writeBlock(first, last);
+      } finally {
+         popBreakTarget();
+      }
+   }
+
+   private void writeBreakableSequence(Instruction first, Instruction last, Instruction breakTarget) throws CodeGenException {
+      pushBreakTarget(breakTarget);
+      try {
+         writeSequence(first, last);
+      } finally {
+         popBreakTarget();
+      }
+   }
+
+   private void pushBreakTarget(Instruction breakTarget) {
+      breakTargets.push(breakTarget);
+   }
+
+   private void popBreakTarget() {
+      breakTargets.pop();
+   }
+
+   private boolean isCurrentBreakTarget(Branch branch) {
+      if (breakTargets.isEmpty()) {
+         return false;
+      }
+
+      final Instruction breakTarget = breakTargets.peek();
+      final Instruction branchTarget = branch.getTarget();
+      return branchTarget == breakTarget || branchTarget.getStartPC() == breakTarget.getStartPC();
    }
 
    public Instruction writeConditional(BranchSet _branchSet) throws CodeGenException {
@@ -745,10 +784,13 @@ public abstract class BlockWriter{
       } else if (_instruction.getByteCode().equals(ByteCode.NONE)) {
          // we are done
       } else if (_instruction instanceof Branch) {
-          if(_instruction instanceof ConditionalBranch16)
+          final Branch branch = (Branch) _instruction;
+          if (isCurrentBreakTarget(branch)) {
+             write("break");
+          } else if(_instruction instanceof ConditionalBranch16)
             writeConditionalBranch16((ConditionalBranch16) _instruction, true);
           else
-            throw new CodeGenException(String.format("%s -> %04d", _instruction.getByteCode().toString().toLowerCase(), ((Branch) _instruction).getTarget().getThisPC()));
+            throw new CodeGenException(String.format("%s -> %04d", _instruction.getByteCode().toString().toLowerCase(), branch.getTarget().getThisPC()));
       } else if (_instruction instanceof I_POP) {
          //POP discarded void call return?
          writeInstruction(_instruction.getFirstChild());
