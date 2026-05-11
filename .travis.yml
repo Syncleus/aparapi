@@ -172,7 +172,7 @@ matrix:
             - llvm-toolchain-precise-3.7
             - boost-latest
       env:
-        - RUN_TEST=false
+        - RUN_TESTS=false
         - OPENCL_LIB=khronos-icd
         - OPENCL_VERSION="12"
         - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
@@ -184,7 +184,7 @@ matrix:
           packages: *precise_icd_packages
           sources: *precise_icd_sources
       env:
-        - RUN_TEST=false
+        - RUN_TESTS=false
         - OPENCL_LIB=khronos-icd
         - OPENCL_VERSION="12"
         - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
@@ -197,7 +197,7 @@ matrix:
           packages: *precise_icd_packages
           sources: *precise_icd_sources
       env:
-        - RUN_TEST=false
+        - RUN_TESTS=false
         - OPENCL_LIB=khronos-icd
         - OPENCL_VERSION="20"
         - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
@@ -210,7 +210,7 @@ matrix:
           packages: *precise_icd_packages
           sources: *precise_icd_sources
       env:
-        - RUN_TEST=false
+        - RUN_TESTS=false
         - OPENCL_LIB=khronos-icd
         - OPENCL_VERSION="20"
         - ENV_CMAKE_OPTIONS="-DOpenCL_LIBRARY=${OPENCL_ROOT}/lib/libOpenCL.so -DOpenCL_INCLUDE_DIR=${OPENCL_ROOT}/include"
@@ -315,6 +315,14 @@ install:
         popd
         popd
       fi
+
+script:
+  - |
+    if [[ "${RUN_TESTS}" == "true" ]]; then
+      mvn test
+    else
+      mvn -DskipTests package
+    fi
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
