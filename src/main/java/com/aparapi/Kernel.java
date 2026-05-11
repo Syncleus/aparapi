@@ -2804,6 +2804,19 @@ public abstract class Kernel implements Cloneable {
       return (execute(_range, 1));
    }
 
+   /**
+    * Start asynchronous execution of <code>_range</code> kernels.
+    * <p>
+    * This method starts a background Java thread that invokes {@link #execute(Range)} and returns an {@link Execution}
+    * handle that can be used to wait for completion.
+    *
+    * @param _range The range of kernels that we would like to initiate.
+    * @return An execution handle that can be used to wait for completion.
+    */
+   public Execution executeAsync(final Range _range) {
+      return (executeAsync(_range, 1));
+   }
+
    @Override
    @SuppressWarnings("deprecation")
    public String toString() {
@@ -2839,6 +2852,19 @@ public abstract class Kernel implements Cloneable {
       return (execute(createRange(_range), 1));
    }
 
+   /**
+    * Start asynchronous execution of <code>_range</code> kernels.
+    * <p>
+    * Since adding the new <code>Range class</code> this method offers backward compatibility and merely defers to
+    * <code>executeAsync(Range.create(_range), 1)</code>.
+    *
+    * @param _range The number of Kernels that we would like to initiate.
+    * @return An execution handle that can be used to wait for completion.
+    */
+   public Execution executeAsync(final int _range) {
+      return (executeAsync(createRange(_range), 1));
+   }
+
    @SuppressWarnings("deprecation")
    protected Range createRange(int _range) {
       if (executionMode.equals(EXECUTION_MODE.AUTO)) {
@@ -2865,6 +2891,17 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
+    * Start asynchronous execution of <code>_passes</code> iterations of <code>_range</code> kernels.
+    *
+    * @param _range The range of kernels that we would like to initiate.
+    * @param _passes The number of passes to make.
+    * @return An execution handle that can be used to wait for completion.
+    */
+   public Execution executeAsync(final Range _range, final int _passes) {
+      return (executeAsync("run", _range, _passes));
+   }
+
+   /**
     * Start execution of <code>_passes</code> iterations over the <code>_range</code> of kernels.
     * <p>
     * When <code>kernel.execute(_range)</code> is invoked, Aparapi will schedule the execution of <code>_range</code> kernels. If the execution mode is GPU then
@@ -2877,6 +2914,17 @@ public abstract class Kernel implements Cloneable {
     */
    public synchronized Kernel execute(int _range, int _passes) {
       return (execute(createRange(_range), _passes));
+   }
+
+   /**
+    * Start asynchronous execution of <code>_passes</code> iterations over the given range.
+    *
+    * @param _range The number of Kernels that we would like to initiate.
+    * @param _passes The number of passes to make.
+    * @return An execution handle that can be used to wait for completion.
+    */
+   public Execution executeAsync(final int _range, final int _passes) {
+      return (executeAsync(createRange(_range), _passes));
    }
 
    /**
@@ -2894,6 +2942,17 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
+    * Start asynchronous execution of <code>globalSize</code> kernels for the given entrypoint.
+    *
+    * @param _entrypoint is the name of the method we wish to use as the entrypoint to the kernel.
+    * @param _range The range of kernels that we would like to initiate.
+    * @return An execution handle that can be used to wait for completion.
+    */
+   public Execution executeAsync(final String _entrypoint, final Range _range) {
+      return (executeAsync(_entrypoint, _range, 1));
+   }
+
+   /**
     * Start execution of <code>globalSize</code> kernels for the given entrypoint.
     * <p>
     * When <code>kernel.execute("entrypoint", globalSize)</code> is invoked, Aparapi will schedule the execution of <code>globalSize</code> kernels. If the execution mode is GPU then
@@ -2905,6 +2964,23 @@ public abstract class Kernel implements Cloneable {
     */
    public synchronized Kernel execute(String _entrypoint, Range _range, int _passes) {
       return prepareKernelRunner().execute(_entrypoint, _range, _passes);
+   }
+
+   /**
+    * Start asynchronous execution of <code>globalSize</code> kernels for the given entrypoint.
+    *
+    * @param _entrypoint is the name of the method we wish to use as the entrypoint to the kernel.
+    * @param _range The range of kernels that we would like to initiate.
+    * @param _passes The number of passes to make.
+    * @return An execution handle that can be used to wait for completion.
+    */
+   public Execution executeAsync(final String _entrypoint, final Range _range, final int _passes) {
+      return new Execution(this, new Runnable() {
+         @Override
+         public void run() {
+            execute(_entrypoint, _range, _passes);
+         }
+      });
    }
 
    /**
