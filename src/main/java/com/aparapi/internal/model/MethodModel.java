@@ -1484,7 +1484,7 @@ public class MethodModel{
                descriptor = "/* arg */";
             } else {
                name = _storeSpec.toString().toLowerCase() + "_" + _slotIndex;
-               descriptor = _storeSpec.toString();
+               descriptor = _storeSpec.equals(StoreSpec.L) ? Character.toString(ClassModel.SIGC_LONG) : _storeSpec.toString();
             }
          }
 
