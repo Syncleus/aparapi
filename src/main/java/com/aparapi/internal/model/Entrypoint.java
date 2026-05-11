@@ -554,9 +554,9 @@ public class Entrypoint implements Cloneable {
 
                final Instruction arrayRef = assignment.getArrayRef();
                // AccessField here allows instance and static array refs
-               if (arrayRef instanceof I_GETFIELD) {
-                  final I_GETFIELD getField = (I_GETFIELD) arrayRef;
-                  final FieldEntry field = getField.getConstantPoolFieldEntry();
+               if (arrayRef instanceof AccessField) {
+                  final AccessField accessField = (AccessField) arrayRef;
+                  final FieldEntry field = accessField.getConstantPoolFieldEntry();
                   final String assignedArrayFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
                   arrayFieldAssignments.add(assignedArrayFieldName);
                   referencedFieldNames.add(assignedArrayFieldName);
@@ -567,9 +567,9 @@ public class Entrypoint implements Cloneable {
 
                final Instruction arrayRef = access.getArrayRef();
                // AccessField here allows instance and static array refs
-               if (arrayRef instanceof I_GETFIELD) {
-                  final I_GETFIELD getField = (I_GETFIELD) arrayRef;
-                  final FieldEntry field = getField.getConstantPoolFieldEntry();
+               if (arrayRef instanceof AccessField) {
+                  final AccessField accessField = (AccessField) arrayRef;
+                  final FieldEntry field = accessField.getConstantPoolFieldEntry();
                   final String accessedArrayFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
                   arrayFieldAccesses.add(accessedArrayFieldName);
                   referencedFieldNames.add(accessedArrayFieldName);
