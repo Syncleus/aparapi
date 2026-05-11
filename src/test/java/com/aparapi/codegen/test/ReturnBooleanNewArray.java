@@ -26,4 +26,27 @@ public class ReturnBooleanNewArray {
         returnBooleanNewArray();
     }
 }
-/**{Throws{CodeGenException}Throws}**/
+/**{OpenCL{
+ typedef struct This_s{
+ int passid;
+ }This;
+ int get_pass_id(This *this){
+ return this->passid;
+ }
+ __global char* com_aparapi_codegen_test_ReturnBooleanNewArray__returnBooleanNewArray(This *this){
+ char __aparapiReturnArray3[1024];
+ return(__aparapiReturnArray3);
+ }
+ __kernel void run(
+ int passid
+ ){
+ This thisStruct;
+ This* this=&thisStruct;
+ this->passid = passid;
+ {
+ com_aparapi_codegen_test_ReturnBooleanNewArray__returnBooleanNewArray(this);
+ return;
+ }
+ }
+
+ }OpenCL}**/
