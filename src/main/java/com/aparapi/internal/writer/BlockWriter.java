@@ -698,11 +698,6 @@ public abstract class BlockWriter{
          final AssignToLocalVariable assignToLocalVariable = inlineAssignInstruction.getAssignToLocalVariable();
 
          final LocalVariableInfo localVariableInfo = assignToLocalVariable.getLocalVariableInfo();
-         if (assignToLocalVariable.isDeclaration()) {
-            // this is bad! we need a general way to hoist up a required declaration
-            throw new CodeGenException("/* we can't declare this " + convertType(localVariableInfo.getVariableDescriptor(), true, false)
-                  + " here */");
-         }
          write(localVariableInfo.getVariableName());
          write("=");
          writeInstruction(inlineAssignInstruction.getRhs());
