@@ -339,6 +339,10 @@ public abstract class KernelWriter extends BlockWriter{
       entryPoint = _entryPoint;
 
       for (final ClassModelField field : _entryPoint.getReferencedClassModelFields()) {
+         if (_entryPoint.canInlineNullArrayField(field.getName())) {
+            continue;
+         }
+
          // Field field = _entryPoint.getClassModel().getField(f.getName());
          final StringBuilder thisStructLine = new StringBuilder();
          final StringBuilder argLine = new StringBuilder();
@@ -747,7 +751,15 @@ public abstract class KernelWriter extends BlockWriter{
    }
 
    @Override public void writeInstruction(Instruction _instruction) throws CodeGenException {
-      if ((_instruction instanceof I_IUSHR) || (_instruction instanceof I_LUSHR)) {
+      if (_instruction instanceof AccessField) {
+         final AccessField accessField = (AccessField) _instruction;
+         final String fieldName = accessField.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+         if (entryPoint.canInlineNullArrayField(fieldName)) {
+            write("NULL");
+         } else {
+            super.writeInstruction(_instruction);
+         }
+      } else if ((_instruction instanceof I_IUSHR) || (_instruction instanceof I_LUSHR)) {
          final BinaryOperator binaryInstruction = (BinaryOperator) _instruction;
          final Instruction parent = binaryInstruction.getParentExpr();
          boolean needsParenthesis = true;

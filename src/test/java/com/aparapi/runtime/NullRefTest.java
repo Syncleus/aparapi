@@ -16,14 +16,29 @@
 package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
-import org.junit.Ignore;
+import com.aparapi.internal.model.ClassModel;
+import com.aparapi.internal.model.Entrypoint;
+import com.aparapi.internal.writer.KernelWriter;
 import org.junit.Test;
 
+import static org.junit.Assert.assertTrue;
+
 public class NullRefTest {
-    @Ignore("Known bug, runs on CPU but not GPU.")
     @Test
     public void test() {
         new NullRefTest().doTest();
+    }
+
+    @Test
+    public void finalNullArrayIsInlinedInGeneratedOpenCL() throws Exception {
+        NullRefKernel kernel = new NullRefKernel();
+        ClassModel classModel = ClassModel.createClassModel(kernel.getClass());
+        Entrypoint entrypoint = classModel.getEntrypoint("run", kernel);
+
+        String openCL = KernelWriter.writeToString(entrypoint);
+        assertTrue(entrypoint.canInlineNullArrayField("nullArray"));
+        assertTrue(openCL.contains("if (NULL == NULL)"));
+        assertTrue(!openCL.contains("nullArray"));
     }
 
     private void doTest() {

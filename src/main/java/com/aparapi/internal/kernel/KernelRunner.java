@@ -1727,6 +1727,10 @@ public class KernelRunner extends KernelRunnerJNI{
                   int i = 0;
 
                   for (final Field field : entryPoint.getReferencedFields()) {
+                     if (entryPoint.canInlineNullArrayField(field.getName())) {
+                        continue;
+                     }
+
                      try {
                         field.setAccessible(true);
                         args[i] = new KernelArg();

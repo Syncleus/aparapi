@@ -143,6 +143,39 @@ public class Entrypoint implements Cloneable {
       return kernelInstance;
    }
 
+   public boolean canInlineNullArrayField(String fieldName) {
+      try {
+         final Field field = getFieldFromClassHierarchy(classModel.getClassWeAreModelling(), fieldName);
+         return canInlineNullArrayField(field);
+      } catch (final AparapiException e) {
+         return false;
+      }
+   }
+
+   private boolean canInlineNullArrayField(Field field) {
+      if ((field == null) || !field.getType().isArray() || !Modifier.isFinal(field.getModifiers())) {
+         return false;
+      }
+
+      final String fieldName = field.getName();
+      if (arrayFieldAccesses.contains(fieldName) || arrayFieldAssignments.contains(fieldName)
+            || arrayFieldArrayLengthUsed.contains(fieldName)) {
+         return false;
+      }
+
+      try {
+         if (!Modifier.isStatic(field.getModifiers()) && (kernelInstance == null)) {
+            return false;
+         }
+         field.setAccessible(true);
+         return field.get(Modifier.isStatic(field.getModifiers()) ? null : kernelInstance) == null;
+      } catch (final RuntimeException e) {
+         return false;
+      } catch (final IllegalAccessException e) {
+         return false;
+      }
+   }
+
    public void setKernelInstance(Object _k) {
       kernelInstance = _k;
    }
@@ -704,7 +737,7 @@ public class Entrypoint implements Cloneable {
          try {
             final Class<?> clazz = classModel.getClassWeAreModelling();
             final Field field = getFieldFromClassHierarchy(clazz, referencedFieldName);
-            if (field != null) {
+            if ((field != null) && !canInlineNullArrayField(field)) {
                referencedFields.add(field);
                final ClassModelField ff = classModel.getField(referencedFieldName);
                assert ff != null : "ff should not be null for " + clazz.getName() + "." + referencedFieldName;
