@@ -160,8 +160,7 @@ public class Entrypoint implements Cloneable {
       // while not found
       //  get its fields
       //  if found
-      //   if not private, done
-      //  if private, failure
+      //   if not static, done
       //  if not found, get next superclass
 
       Field field = null;
@@ -201,12 +200,12 @@ public class Entrypoint implements Cloneable {
          try {
             field = mySuper.getDeclaredField(_name);
             final int modifiers = field.getModifiers();
-            if ((Modifier.isStatic(modifiers) == false) && (Modifier.isPrivate(modifiers) == false)) {
+            if (Modifier.isStatic(modifiers) == false) {
                final Class<?> type = field.getType();
                if (logger.isLoggable(Level.FINE)) {
                   logger.fine("field type is " + type.getName());
                }
-               if (type.isPrimitive() || type.isArray()) {
+               if (type.isPrimitive() || type.isArray() || type.equals(AtomicInteger.class)) {
                   return field;
                }
                throw new ClassParseException(ClassParseException.TYPE.OBJECTFIELDREFERENCE);
