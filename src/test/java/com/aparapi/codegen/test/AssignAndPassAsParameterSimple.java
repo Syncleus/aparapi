@@ -26,4 +26,28 @@ public class AssignAndPassAsParameterSimple {
         actuallyDoIt(z = 1);
     }
 }
-/**{Throws{CodeGenException}Throws}**/
+/**{OpenCL{
+ typedef struct This_s{
+
+ int passid;
+ }This;
+ int get_pass_id(This *this){
+ return this->passid;
+ }
+
+ void com_amd_aparapi_test_AssignAndPassAsParameterSimple__actuallyDoIt(This *this, int a){
+ return;
+ }
+ __kernel void run(
+ int passid
+ ){
+ This thisStruct;
+ This* this=&thisStruct;
+ this->passid = passid;
+ {
+ int z;
+ com_amd_aparapi_test_AssignAndPassAsParameterSimple__actuallyDoIt(this, z=1);
+ return;
+ }
+ }
+ }OpenCL}**/
