@@ -15,7 +15,6 @@
  */
 package com.aparapi.codegen.test;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class FirstAssignInExpression2Test extends com.aparapi.codegen.CodeGenJUnitBase {
@@ -36,28 +35,27 @@ public class FirstAssignInExpression2Test extends com.aparapi.codegen.CodeGenJUn
         + " this->passid = passid;\n"
         + " {\n"
         + " int value = 1;\n"
-        + " int result=0;\n"
-        + " int assignMe=0;\n"
-        + " if (true){\n"
+        + " int result = 0;\n"
+        + " int assignMe;\n"
+        + " if (value==value){\n"
         + " result = assignMe = value;\n"
         + " }else{\n"
         + " assignMe =1;\n"
         + " result=2;\n"
         + " }\n"
         + " result++;\n"
+        + " assignMe++;\n"
         + " return;\n"
         + " }\n"
         + " }\n"
         + " "};
     private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
-    @Ignore
     @Test
     public void FirstAssignInExpression2Test() {
         test(com.aparapi.codegen.test.FirstAssignInExpression2.class, expectedException, expectedOpenCL);
     }
 
-    @Ignore
     @Test
     public void FirstAssignInExpression2TestWorksWithCaching() {
         test(com.aparapi.codegen.test.FirstAssignInExpression2.class, expectedException, expectedOpenCL);

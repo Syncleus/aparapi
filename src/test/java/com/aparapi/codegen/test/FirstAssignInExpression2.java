@@ -48,15 +48,16 @@ public class FirstAssignInExpression2 {
  this->passid = passid;
  {
  int value = 1;
- int result=0;
- int assignMe=0;
- if (true){
+ int result = 0;
+ int assignMe;
+ if (value==value){
  result = assignMe = value;
  }else{
  assignMe =1;
  result=2;
  }
  result++;
+ assignMe++;
  return;
  }
  }
