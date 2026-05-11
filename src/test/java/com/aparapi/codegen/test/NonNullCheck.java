@@ -44,7 +44,7 @@ public class NonNullCheck {
  this->passid = passid;
  {
  if (this->ints != NULL){
- int value = this->ints[0];
+ this->ints[0];
  }
  return;
  }

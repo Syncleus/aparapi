@@ -428,9 +428,7 @@ public abstract class BlockWriter{
                  }
                  write(convertType(descriptor, true, false));
              }
-             if (localVariableInfo == null) {
-                 throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
-             } else {
+             if (localVariableInfo != null) {
                  write(localVariableInfo.getVariableName() + " = ");
              }
          }
