@@ -2520,6 +2520,20 @@ public abstract class Kernel implements Cloneable {
 	   kernelState.awaitOnLocalBarrier();
    }
 
+   /**
+    * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.
+    * <p>
+    * This is a convenience alias for {@link #localGlobalBarrier()} intended for callers looking for a CUDA-style
+    * thread synchronization primitive.
+    *
+    * @annotion Experimental
+    */
+   @OpenCLDelegate
+   @Experimental
+   protected final void syncThreads() {
+	   kernelState.awaitOnLocalBarrier();
+   }
+
    @OpenCLMapping(mapTo = "hypot")
    protected float hypot(final float a, final float b) {
       return (float) Math.hypot(a, b);
