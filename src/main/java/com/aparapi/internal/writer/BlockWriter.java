@@ -377,6 +377,23 @@ public abstract class BlockWriter{
       return ("(" + raw + ")");
    }
 
+   private void writeReturnNewArray(I_NEWARRAY _newArrayInstruction) throws CodeGenException {
+      final String returnArrayName = "__aparapiReturnArray" + _newArrayInstruction.getThisPC();
+      write(convertType(_newArrayInstruction.getMethod().getReturnType(), true, true));
+      write(" ");
+      write(returnArrayName);
+      for (Instruction operand = _newArrayInstruction.getFirstChild(); operand != null; operand = operand.getNextExpr()) {
+         write("[");
+         writeInstruction(operand);
+         write("]");
+      }
+      write(";");
+      newLine();
+      write("return(");
+      write(returnArrayName);
+      write(")");
+   }
+
    public void writeInstruction(Instruction _instruction) throws CodeGenException {
       if (_instruction instanceof CompositeIfElseInstruction) {
          boolean needParenthesis = isNeedParenthesis(_instruction);
@@ -397,7 +414,8 @@ public abstract class BlockWriter{
 
       } else if (_instruction instanceof I_NEWARRAY) {
           if (_instruction.getParentExpr() instanceof Return) {
-              throw new CodeGenException("'newarray' is not allowed after 'return'");
+              writeReturnNewArray((I_NEWARRAY) _instruction);
+              return;
           }
 
           for (Instruction operand = _instruction.getFirstChild(); operand != null; operand = operand.getNextExpr()) {
@@ -632,11 +650,15 @@ public abstract class BlockWriter{
       } else if (_instruction instanceof Return) {
 
          final Return ret = (Return) _instruction;
-         write("return");
-         if (ret.getStackConsumeCount() > 0) {
-            write("(");
+         if (ret.getStackConsumeCount() > 0 && ret.getFirstChild() instanceof I_NEWARRAY) {
             writeInstruction(ret.getFirstChild());
-            write(")");
+         } else {
+            write("return");
+            if (ret.getStackConsumeCount() > 0) {
+               write("(");
+               writeInstruction(ret.getFirstChild());
+               write(")");
+            }
          }
 
       } else if (_instruction instanceof MethodCall) {

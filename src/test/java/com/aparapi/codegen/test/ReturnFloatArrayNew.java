@@ -25,4 +25,27 @@ public class ReturnFloatArrayNew {
         returnFloatArrayNew();
     }
 }
-/**{Throws{CodeGenException}Throws}**/
+/**{OpenCL{
+ typedef struct This_s{
+ int passid;
+ }This;
+ int get_pass_id(This *this){
+ return this->passid;
+ }
+ __global float* com_aparapi_codegen_test_ReturnFloatArrayNew__returnFloatArrayNew(This *this){
+ float __aparapiReturnArray3[1024];
+ return(__aparapiReturnArray3);
+ }
+ __kernel void run(
+ int passid
+ ){
+ This thisStruct;
+ This* this=&thisStruct;
+ this->passid = passid;
+ {
+ com_aparapi_codegen_test_ReturnFloatArrayNew__returnFloatArrayNew(this);
+ return;
+ }
+ }
+
+ }OpenCL}**/
