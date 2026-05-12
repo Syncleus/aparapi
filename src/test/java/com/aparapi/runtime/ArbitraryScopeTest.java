@@ -16,15 +16,10 @@
 package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
-import com.aparapi.Range;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 public class ArbitraryScopeTest
 {
-    @Ignore("Known bug, ignoring test")
     @Test
     public void UnusedInArbitraryScopeTest()
     {
@@ -40,7 +35,6 @@ public class ArbitraryScopeTest
         kernel.execute(1);
     }
 
-    @Ignore("Known bug, ignoring test")
     @Test
     public void UnusedInNormalScopeTest()
     {

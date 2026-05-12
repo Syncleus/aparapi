@@ -411,32 +411,32 @@ public abstract class BlockWriter{
 
          final LocalVariableInfo localVariableInfo = assignToLocalVariable.getLocalVariableInfo();
 
-         if ((_instruction.getFirstChild() instanceof I_NEWARRAY)) {
-             if (localVariableInfo == null) {
-                 throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
-             } else {
-                 final String descriptor = localVariableInfo.getVariableDescriptor();
-                 write(convertType(descriptor, true, true));
-                 write(localVariableInfo.getVariableName());
-             }
+         if (localVariableInfo == null) {
+            // A javac local variable table can omit unused locals. Preserve any
+            // RHS side effects without inventing a name or scope for the local.
+            for (Instruction operand = _instruction.getFirstChild(); operand != null; operand = operand.getNextExpr()) {
+               writeInstruction(operand);
+            }
          } else {
-             if (assignToLocalVariable.isDeclaration()) {
-                 final String descriptor = localVariableInfo.getVariableDescriptor();
-                 // Arrays always map to __global arrays
-                 if (descriptor.startsWith("[")) {
+            if ((_instruction.getFirstChild() instanceof I_NEWARRAY)) {
+               final String descriptor = localVariableInfo.getVariableDescriptor();
+               write(convertType(descriptor, true, true));
+               write(localVariableInfo.getVariableName());
+            } else {
+               if (assignToLocalVariable.isDeclaration()) {
+                  final String descriptor = localVariableInfo.getVariableDescriptor();
+                  // Arrays always map to __global arrays
+                  if (descriptor.startsWith("[")) {
                      write(" __global ");
-                 }
-                 write(convertType(descriptor, true, false));
-             }
-             if (localVariableInfo == null) {
-                 throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
-             } else {
-                 write(localVariableInfo.getVariableName() + " = ");
-             }
-         }
+                  }
+                  write(convertType(descriptor, true, false));
+               }
+               write(localVariableInfo.getVariableName() + " = ");
+            }
 
-         for (Instruction operand = _instruction.getFirstChild(); operand != null; operand = operand.getNextExpr()) {
-            writeInstruction(operand);
+            for (Instruction operand = _instruction.getFirstChild(); operand != null; operand = operand.getNextExpr()) {
+               writeInstruction(operand);
+            }
          }
 
       } else if (_instruction instanceof AssignToArrayElement) {
