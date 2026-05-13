@@ -304,6 +304,14 @@ public abstract class BlockWriter{
 
    }
 
+   private void writeNewArrayDimensions(I_NEWARRAY _newArray) throws CodeGenException {
+      for (Instruction operand = _newArray.getFirstChild(); operand != null; operand = operand.getNextExpr()) {
+         write("[");
+         writeInstruction(operand);
+         write("]");
+      }
+   }
+
    protected void writeGetterBlock(FieldEntry accessorVariableFieldEntry) {
       write("{");
       in();
@@ -396,15 +404,7 @@ public abstract class BlockWriter{
           writeComposite((CompositeInstruction) _instruction);
 
       } else if (_instruction instanceof I_NEWARRAY) {
-          if (_instruction.getParentExpr() instanceof Return) {
-              throw new CodeGenException("'newarray' is not allowed after 'return'");
-          }
-
-          for (Instruction operand = _instruction.getFirstChild(); operand != null; operand = operand.getNextExpr()) {
-              write("[");
-              writeInstruction(operand);
-              write("]");
-          }
+          writeNewArrayDimensions((I_NEWARRAY) _instruction);
 
       } else if (_instruction instanceof AssignToLocalVariable) {
          final AssignToLocalVariable assignToLocalVariable = (AssignToLocalVariable) _instruction;
@@ -632,6 +632,19 @@ public abstract class BlockWriter{
       } else if (_instruction instanceof Return) {
 
          final Return ret = (Return) _instruction;
+         if (ret.getFirstChild() instanceof I_NEWARRAY) {
+            final I_NEWARRAY newArray = (I_NEWARRAY) ret.getFirstChild();
+            final String returnArrayName = "returnArray" + ret.getThisPC();
+            write(convertType(ret.getMethod().getReturnType(), true, true));
+            write(returnArrayName);
+            writeNewArrayDimensions(newArray);
+            write(";");
+            newLine();
+            write("return(");
+            write(returnArrayName);
+            write(")");
+            return;
+         }
          write("return");
          if (ret.getStackConsumeCount() > 0) {
             write("(");
