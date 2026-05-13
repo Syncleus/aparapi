@@ -241,7 +241,7 @@ public abstract class KernelWriter extends BlockWriter{
             getterField = m.getAccessorVariableFieldEntry();
          }
          if (getterField != null && isThis(_methodCall.getArg(0))) {
-            String fieldName = getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+            String fieldName = mangleIdentifier(getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
             write("this->");
             write(fieldName);
             return;
@@ -285,7 +285,8 @@ public abstract class KernelWriter extends BlockWriter{
                //assert refAccess instanceof I_GETFIELD : "ref should come from getfield";
                final String fieldName = ((AccessField) refAccess).getConstantPoolFieldEntry().getNameAndTypeEntry()
                      .getNameUTF8Entry().getUTF8();
-               write(" &(this->" + fieldName);
+               final String mangledFieldName = mangleIdentifier(fieldName);
+               write(" &(this->" + mangledFieldName);
                write("[");
                writeInstruction(arrayAccess.getArrayIndex());
                write("])");
@@ -423,13 +424,13 @@ public abstract class KernelWriter extends BlockWriter{
 
          if (privateMemorySize == null) {
             assignLine.append("this->");
-            assignLine.append(field.getName());
+            assignLine.append(mangleIdentifier(field.getName()));
             assignLine.append(" = ");
-            assignLine.append(field.getName());
+            assignLine.append(mangleIdentifier(field.getName()));
          }
 
-         argLine.append(field.getName());
-         thisStructLine.append(field.getName());
+         argLine.append(mangleIdentifier(field.getName()));
+         thisStructLine.append(mangleIdentifier(field.getName()));
          if (privateMemorySize == null) {
             assigns.add(assignLine.toString());
          }
@@ -449,7 +450,7 @@ public abstract class KernelWriter extends BlockWriter{
                final StringBuilder lenAssignLine = new StringBuilder();
 
                String suffix = numDimensions == 1 ? "" : Integer.toString(i);
-               String lenName = field.getName() + BlockWriter.arrayLengthMangleSuffix + suffix;
+               String lenName = mangleIdentifier(field.getName()) + BlockWriter.arrayLengthMangleSuffix + suffix;
 
                lenStructLine.append("int " + lenName);
 
@@ -468,7 +469,7 @@ public abstract class KernelWriter extends BlockWriter{
                   final StringBuilder dimStructLine = new StringBuilder();
                   final StringBuilder dimArgLine = new StringBuilder();
                   final StringBuilder dimAssignLine = new StringBuilder();
-                  String dimName = field.getName() + BlockWriter.arrayDimMangleSuffix + suffix;
+                  String dimName = mangleIdentifier(field.getName()) + BlockWriter.arrayDimMangleSuffix + suffix;
 
                   dimStructLine.append("int " + dimName);
 
@@ -562,7 +563,7 @@ public abstract class KernelWriter extends BlockWriter{
 
                final String cType = convertType(field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8(), true, false);
                assert cType != null : "could not find type for " + field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-               writeln(cType + " " + field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8() + ";");
+               writeln(cType + " " + mangleIdentifier(field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8()) + ";");
             }
 
             // compute total size for OpenCL buffer
@@ -687,7 +688,7 @@ public abstract class KernelWriter extends BlockWriter{
                }
                
                write(convertType(descriptor, true, false));
-               write(lvi.getVariableName());
+               write(mangleIdentifier(lvi.getVariableName()));
                alreadyHasFirstArg = true;
                
                localVariableIndex++;

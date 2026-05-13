@@ -80,7 +80,20 @@ public abstract class BlockWriter{
 
    public final static String arrayDimMangleSuffix = "__javaArrayDimension";
 
+   private static final Set<String> openCLReservedIdentifiers = new HashSet<String>(Arrays.asList(
+         "__constant", "__global", "__kernel", "__local", "__private", "auto", "bool", "break", "case",
+         "char", "complex", "constant", "continue", "default", "do", "double", "else", "enum", "extern",
+         "false", "float", "for", "global", "goto", "half", "if", "image1d_array_t", "image1d_buffer_t",
+         "image1d_t", "image2d_array_t", "image2d_depth_t", "image2d_t", "image3d_t", "inline", "int",
+         "kernel", "local", "long", "private", "read_only", "read_write", "register", "restrict", "return",
+         "sampler_t", "short", "signed", "sizeof", "static", "struct", "switch", "true", "typedef", "uchar",
+         "uint", "ulong", "union", "unsigned", "ushort", "void", "volatile", "while", "write_only"));
+
    public abstract void write(String _string);
+
+   protected String mangleIdentifier(String identifier) {
+      return openCLReservedIdentifiers.contains(identifier) || identifier.startsWith("__") ? identifier + "_" : identifier;
+   }
 
    public void writeln(String _string) {
       write(_string);
@@ -309,7 +322,7 @@ public abstract class BlockWriter{
       in();
       newLine();
       write("return this->");
-      write(accessorVariableFieldEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
+      write(mangleIdentifier(accessorVariableFieldEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8()));
       write(";");
       out();
       newLine();
@@ -417,7 +430,7 @@ public abstract class BlockWriter{
              } else {
                  final String descriptor = localVariableInfo.getVariableDescriptor();
                  write(convertType(descriptor, true, true));
-                 write(localVariableInfo.getVariableName());
+                 write(mangleIdentifier(localVariableInfo.getVariableName()));
              }
          } else {
              if (assignToLocalVariable.isDeclaration()) {
@@ -431,7 +444,7 @@ public abstract class BlockWriter{
              if (localVariableInfo == null) {
                  throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
              } else {
-                 write(localVariableInfo.getVariableName() + " = ");
+                 write(mangleIdentifier(localVariableInfo.getVariableName()) + " = ");
              }
          }
 
@@ -481,7 +494,7 @@ public abstract class BlockWriter{
 
             NameAndTypeEntry nameAndTypeEntry = ((AccessField) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
             if (isMultiDimensionalArray(nameAndTypeEntry)) {
-               String arrayName = nameAndTypeEntry.getNameUTF8Entry().getUTF8();
+               String arrayName = mangleIdentifier(nameAndTypeEntry.getNameUTF8Entry().getUTF8());
                write(" * this->" + arrayName + arrayDimMangleSuffix + dim);
             }
          }
@@ -506,7 +519,7 @@ public abstract class BlockWriter{
                writeThisRef();
             }
          }
-         write(accessField.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
+         write(mangleIdentifier(accessField.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8()));
 
       } else if (_instruction instanceof I_ARRAYLENGTH) {
 
@@ -521,7 +534,7 @@ public abstract class BlockWriter{
             dim++;
          }
          NameAndTypeEntry nameAndTypeEntry = ((AccessInstanceField) load).getConstantPoolFieldEntry().getNameAndTypeEntry();
-         final String arrayName = nameAndTypeEntry.getNameUTF8Entry().getUTF8();
+         final String arrayName = mangleIdentifier(nameAndTypeEntry.getNameUTF8Entry().getUTF8());
          String dimSuffix = isMultiDimensionalArray(nameAndTypeEntry) ? Integer.toString(dim) : "";
          write("this->" + arrayName + arrayLengthMangleSuffix + dimSuffix);
       } else if (_instruction instanceof AssignToField) {
@@ -537,7 +550,7 @@ public abstract class BlockWriter{
                writeThisRef();
             }
          }
-         write(assignedField.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8());
+         write(mangleIdentifier(assignedField.getConstantPoolFieldEntry().getNameAndTypeEntry().getNameUTF8Entry().getUTF8()));
          write("=");
          writeInstruction(assignedField.getValueToAssign());
       } else if (_instruction instanceof Constant<?>) {
@@ -581,13 +594,13 @@ public abstract class BlockWriter{
       } else if (_instruction instanceof AccessLocalVariable) {
          final AccessLocalVariable localVariableLoadInstruction = (AccessLocalVariable) _instruction;
          final LocalVariableInfo localVariable = localVariableLoadInstruction.getLocalVariableInfo();
-         write(localVariable.getVariableName());
+         write(mangleIdentifier(localVariable.getVariableName()));
       } else if (_instruction instanceof I_IINC) {
          final I_IINC location = (I_IINC) _instruction;
          final LocalVariableInfo localVariable = location.getLocalVariableInfo();
          final int adjust = location.getAdjust();
 
-         write(localVariable.getVariableName());
+         write(mangleIdentifier(localVariable.getVariableName()));
          if (adjust == 1) {
             write("++");
          } else if (adjust == -1) {
@@ -688,7 +701,7 @@ public abstract class BlockWriter{
             if (localVariableInfo == null) {
                throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
             } else {
-               write(localVariableInfo.getVariableName() + " = ");
+               write(mangleIdentifier(localVariableInfo.getVariableName()) + " = ");
             }
 
          }
@@ -703,7 +716,7 @@ public abstract class BlockWriter{
             throw new CodeGenException("/* we can't declare this " + convertType(localVariableInfo.getVariableDescriptor(), true, false)
                   + " here */");
          }
-         write(localVariableInfo.getVariableName());
+         write(mangleIdentifier(localVariableInfo.getVariableName()));
          write("=");
          writeInstruction(inlineAssignInstruction.getRhs());
       } else if (_instruction.getByteCode().equals(ByteCode.FIELD_ARRAY_ELEMENT_ASSIGN)) {
