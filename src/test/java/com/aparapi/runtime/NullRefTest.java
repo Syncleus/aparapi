@@ -16,19 +16,50 @@
 package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
-import org.junit.Ignore;
+import com.aparapi.Range;
+import com.aparapi.device.Device;
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.kernel.KernelManager;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assume.assumeTrue;
+
 public class NullRefTest {
-    @Ignore("Known bug, runs on CPU but not GPU.")
+    private static OpenCLDevice openCLDevice = null;
+
+    private class CLKernelManager extends KernelManager {
+        @Override
+        protected List<Device.TYPE> getPreferredDeviceTypes() {
+            return Arrays.asList(Device.TYPE.ACC, Device.TYPE.GPU, Device.TYPE.CPU);
+        }
+    }
+
+    @Before
+    public void setUpBeforeClass() throws Exception {
+        KernelManager.setKernelManager(new CLKernelManager());
+        Device device = KernelManager.instance().bestDevice();
+        assumeTrue(device != null && device instanceof OpenCLDevice);
+        openCLDevice = (OpenCLDevice) device;
+    }
+
+    @After
+    public void classTeardown() {
+        Util.resetKernelManager();
+    }
+
     @Test
     public void test() {
-        new NullRefTest().doTest();
+        doTest();
     }
 
     private void doTest() {
         final Kernel kernel = new NullRefKernel();
-        kernel.execute(1);
+        kernel.execute(Range.create(openCLDevice, 1, 1));
     }
 
     private class NullRefKernel extends Kernel {

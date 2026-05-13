@@ -810,6 +810,14 @@ public class Entrypoint implements Cloneable {
       return found;
    }
 
+   private boolean isFinalNullArrayField(Field field) throws IllegalAccessException {
+      if (kernelInstance == null || !field.getType().isArray() || !Modifier.isFinal(field.getModifiers())) {
+         return false;
+      }
+      field.setAccessible(true);
+      return field.get(kernelInstance) == null;
+   }
+
    private FieldEntry getSimpleGetterField(MethodModel method) {
       return method.getAccessorVariableFieldEntry();
    }
@@ -840,6 +848,20 @@ public class Entrypoint implements Cloneable {
 
    public Set<String> getArrayFieldArrayLengthUsed() {
       return (arrayFieldArrayLengthUsed);
+   }
+
+   public boolean isFinalNullArrayField(String fieldName) {
+      for (final Field field : referencedFields) {
+         if (field.getName().equals(fieldName)) {
+            try {
+               return isFinalNullArrayField(field);
+            } catch (final SecurityException | IllegalAccessException e) {
+               e.printStackTrace();
+               return false;
+            }
+         }
+      }
+      return false;
    }
 
    public MethodModel getMethodModel() {
