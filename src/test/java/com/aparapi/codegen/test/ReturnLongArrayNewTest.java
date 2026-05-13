@@ -15,13 +15,13 @@
  */
 package com.aparapi.codegen.test;
 
-import com.aparapi.internal.exception.CodeGenException;
 import org.junit.Test;
 
 public class ReturnLongArrayNewTest extends com.aparapi.codegen.CodeGenJUnitBase {
 
-    private static final String[] expectedOpenCL = null;
-    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = CodeGenException.class;
+    private static final String[] expectedOpenCL = ReturnArrayNewTestSupport.expectedOpenCL("long",
+            "ReturnLongArrayNew", "returnLongArrayNew");
+    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     @Test
     public void ReturnLongArrayNewTest() {
