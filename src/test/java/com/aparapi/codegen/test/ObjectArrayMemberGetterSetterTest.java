@@ -105,7 +105,7 @@ public class ObjectArrayMemberGetterSetterTest extends com.aparapi.codegen.CodeG
         + "   this->out = out;\n"
         + "   this->passid = passid;\n"
         + "   {\n"
-        + "      int myId = get_global_id(0);\n"
+        + "      int myId = (int)get_global_id(0);\n"
         + "      int tmp = com_aparapi_codegen_test_DummyOOA__getMem( &(this->dummy[myId]));\n"
         + "      com_aparapi_codegen_test_DummyOOA__setMem( &(this->dummy[myId]), (com_aparapi_codegen_test_DummyOOA__getMem( &(this->dummy[myId])) + 2));\n"
         + "      com_aparapi_codegen_test_DummyOOA__setMem( &(this->dummy[myId]), (com_aparapi_codegen_test_TheOtherOne__getMem( &(this->other[myId])) + com_aparapi_codegen_test_ObjectArrayMemberGetterSetter__getSomething(this)));\n"

@@ -52,7 +52,7 @@ public class ObjectArrayMemberCallTest extends com.aparapi.codegen.CodeGenJUnitB
         + "   this->dummy = dummy;\n"
         + "   this->passid = passid;\n"
         + "   {\n"
-        + "      int myId = get_global_id(0);\n"
+        + "      int myId = (int)get_global_id(0);\n"
         + "      this->dummy[myId].mem=com_aparapi_codegen_test_ObjectArrayMemberCall$DummyOOA__addEmUp( &(this->dummy[myId]), this->dummy[myId].mem, 2);\n"
         + "      int tmp = com_aparapi_codegen_test_ObjectArrayMemberCall$DummyOOA__addToMem( &(this->dummy[myId]), 2);\n"
         + "      int tmp2 = com_aparapi_codegen_test_ObjectArrayMemberCall$DummyOOA__addEmUpPlusOne( &(this->dummy[myId]), 2, tmp);\n"

@@ -42,7 +42,7 @@ public class ObjectArrayMemberAccessTest extends com.aparapi.codegen.CodeGenJUni
 " this->dummy = dummy;\n" +
 " this->passid = passid;\n" +
 " {\n" +
-" int myId = get_global_id(0);\n" +
+" int myId = (int)get_global_id(0);\n" +
 " this->dummy[myId].mem=this->dummy[myId].mem + 2;\n" +
 " this->dummy[myId].floatField=this->dummy[myId].floatField + 2.0f;\n" +
 " return;\n" +

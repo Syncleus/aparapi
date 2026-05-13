@@ -218,7 +218,12 @@ public abstract class KernelWriter extends BlockWriter{
 
       if (barrierAndGetterMappings != null) {
          // this is one of the OpenCL barrier or size getter methods
-         // write the mapping and exit
+         // write the mapping and exit. OpenCL work-item query functions return size_t,
+         // but the corresponding Kernel methods return Java int; preserve the Java
+         // narrowing semantics before any enclosing cast/arithmetic is applied.
+         if (methodSignature.endsWith(")I") && !methodName.equals("getPassId")) {
+            write("(int)");
+         }
          if (argc > 0) {
             write(barrierAndGetterMappings);
             write("(");
@@ -311,6 +316,37 @@ public abstract class KernelWriter extends BlockWriter{
 
    private boolean isThis(Instruction instruction) {
       return instruction instanceof I_ALOAD_0;
+   }
+
+   private static boolean usesLongMultiply(MethodModel methodModel) {
+      if (methodModel == null) {
+         return false;
+      }
+
+      for (Instruction instruction = methodModel.getPCHead(); instruction != null; instruction = instruction.getNextPC()) {
+         if (instruction instanceof I_LMUL) {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private static boolean usesLongMultiply(Entrypoint entryPoint) {
+      if (entryPoint == null) {
+         return false;
+      }
+
+      if (usesLongMultiply(entryPoint.getMethodModel())) {
+         return true;
+      }
+
+      for (MethodModel calledMethod : entryPoint.getCalledMethods()) {
+         if (usesLongMultiply(calledMethod)) {
+            return true;
+         }
+      }
+
+      return false;
    }
 
    public void writePragma(String _name, boolean _enable) {
@@ -533,6 +569,37 @@ public abstract class KernelWriter extends BlockWriter{
 
       if (Config.enableDoubles || _entryPoint.requiresDoublePragma()) {
          writePragma("cl_khr_fp64", true);
+         newLine();
+      }
+
+      if (usesLongMultiply(_entryPoint)) {
+         // Some OpenCL drivers miscompile native 64-bit integer multiplication.
+         // Compute the low 64 bits with 32-bit operations to preserve Java long multiply semantics.
+         write("inline ulong aparapi_umul64_lo(ulong a, ulong b){");
+         in();
+         {
+            newLine();
+            write("uint a0 = (uint)a;");
+            newLine();
+            write("uint a1 = (uint)(a >> 32);");
+            newLine();
+            write("uint b0 = (uint)b;");
+            newLine();
+            write("uint b1 = (uint)(b >> 32);");
+            newLine();
+            write("uint lo = a0 * b0;");
+            newLine();
+            write("uint hi = mul_hi(a0, b0);");
+            newLine();
+            write("uint cross = hi + (a0 * b1) + (a1 * b0);");
+            newLine();
+            write("return (((ulong)cross) << 32) | (ulong)lo;");
+            out();
+            newLine();
+         }
+         write("}");
+         newLine();
+         write("inline long aparapi_lmul(long a, long b){ return (long)aparapi_umul64_lo((ulong)a, (ulong)b); }");
          newLine();
       }
 
@@ -772,6 +839,32 @@ public abstract class KernelWriter extends BlockWriter{
          write(")");
          write(" >> ");
          writeInstruction(binaryInstruction.getRhs());
+
+         if (needsParenthesis) {
+            write(")");
+         }
+      } else if (_instruction instanceof I_LMUL) {
+         final BinaryOperator binaryInstruction = (BinaryOperator) _instruction;
+         final Instruction parent = binaryInstruction.getParentExpr();
+         boolean needsParenthesis = true;
+
+         if (parent instanceof AssignToLocalVariable) {
+            needsParenthesis = false;
+         } else if (parent instanceof AssignToField) {
+            needsParenthesis = false;
+         } else if (parent instanceof AssignToArrayElement) {
+            needsParenthesis = false;
+         }
+
+         if (needsParenthesis) {
+            write("(");
+         }
+
+         write("aparapi_lmul(");
+         writeInstruction(binaryInstruction.getLhs());
+         write(", ");
+         writeInstruction(binaryInstruction.getRhs());
+         write(")");
 
          if (needsParenthesis) {
             write(")");

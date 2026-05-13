@@ -37,7 +37,7 @@ public class ObjectRefCopyTest extends com.aparapi.codegen.CodeGenJUnitBase {
             + "   this->dummy = dummy;\n"
             + "   this->passid = passid;\n"
             + "   {\n"
-            + "      int myId = get_global_id(0);\n"
+            + "      int myId = (int)get_global_id(0);\n"
             + "      this->dummy[myId]  = this->dummy[(myId + 1)];\n"
             + "      return;\n"
             + "   }\n"

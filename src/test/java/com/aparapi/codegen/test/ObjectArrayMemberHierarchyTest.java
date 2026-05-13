@@ -54,7 +54,7 @@ public class ObjectArrayMemberHierarchyTest extends com.aparapi.codegen.CodeGenJ
         + "   this->dummy = dummy;\n"
         + "   this->passid = passid;\n"
         + "   {\n"
-        + "      int myId = get_global_id(0);\n"
+        + "      int myId = (int)get_global_id(0);\n"
         + "      this->dummy[myId].intField=(com_aparapi_codegen_test_ObjectArrayMemberHierarchy$DummyParent__getIntField( &(this->dummy[myId])) + 2) + com_aparapi_codegen_test_ObjectArrayMemberHierarchy__getSomething(this);\n"
         + "      com_aparapi_codegen_test_ObjectArrayMemberHierarchy$DummyOOA__setFloatField( &(this->dummy[myId]), (this->dummy[myId].floatField + 2.0f));\n"
         + "      return;\n"

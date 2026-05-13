@@ -75,7 +75,7 @@ class SimpleScalaTest {
                        |   this->passid = passid;
                        |   {
                        |      {
-                       |         int i = get_global_id(0);
+                       |         int i = (int)get_global_id(0);
                        |         this->result$2[i]  = (((this->inA$2[i] + this->inB$2[i]) / (this->inA$2[i] / this->inB$2[i])) * ((this->inA$2[i] - this->inB$2[i]) / (this->inA$2[i] * this->inB$2[i]))) - (((this->inB$2[i] - this->inA$2[i]) * (this->inB$2[i] + this->inA$2[i])) * ((this->inB$2[i] - this->inA$2[i]) / (this->inB$2[i] * this->inA$2[i])));
                        |      }
                        |      return;

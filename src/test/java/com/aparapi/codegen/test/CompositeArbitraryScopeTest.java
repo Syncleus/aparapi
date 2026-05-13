@@ -28,7 +28,7 @@ public class CompositeArbitraryScopeTest extends com.aparapi.codegen.CodeGenJUni
 " }\n" +
 "\n" +
 " void com_aparapi_codegen_test_CompositeArbitraryScope__t5(This *this){\n" +
-" int gid = get_global_id(0);\n" +
+" int gid = (int)get_global_id(0);\n" +
 " int numRemaining = 1;\n" +
 " int thisCount = 0;\n" +
 " for (; numRemaining>0 && gid>0; numRemaining++){\n" +
@@ -40,7 +40,7 @@ public class CompositeArbitraryScopeTest extends com.aparapi.codegen.CodeGenJUni
 " return;\n" +
 " }\n" +
 " void com_aparapi_codegen_test_CompositeArbitraryScope__t4(This *this){\n" +
-" int gid = get_global_id(0);\n" +
+" int gid = (int)get_global_id(0);\n" +
 " int numRemaining = 1;\n" +
 " while (numRemaining>0 && gid>0){\n" +
 " numRemaining++;\n" +
@@ -54,7 +54,7 @@ public class CompositeArbitraryScopeTest extends com.aparapi.codegen.CodeGenJUni
 " return;\n" +
 " }\n" +
 " void com_aparapi_codegen_test_CompositeArbitraryScope__t3(This *this){\n" +
-" int gid = get_global_id(0);\n" +
+" int gid = (int)get_global_id(0);\n" +
 " int numRemaining = 1;\n" +
 " while (numRemaining>0){\n" +
 " numRemaining++;\n" +
@@ -67,7 +67,7 @@ public class CompositeArbitraryScopeTest extends com.aparapi.codegen.CodeGenJUni
 " return;\n" +
 " }\n" +
 " void com_aparapi_codegen_test_CompositeArbitraryScope__t2(This *this){\n" +
-" int gid = get_global_id(0);\n" +
+" int gid = (int)get_global_id(0);\n" +
 " int numRemaining = 1;\n" +
 " for (; numRemaining>0; numRemaining){\n" +
 " {\n" +
@@ -78,7 +78,7 @@ public class CompositeArbitraryScopeTest extends com.aparapi.codegen.CodeGenJUni
 " return;\n" +
 " }\n" +
 " void com_aparapi_codegen_test_CompositeArbitraryScope__t1(This *this){\n" +
-" int gid = get_global_id(0);\n" +
+" int gid = (int)get_global_id(0);\n" +
 " int numRemaining = 1;\n" +
 " while (numRemaining>0){\n" +
 " numRemaining++;\n" +
@@ -96,7 +96,7 @@ public class CompositeArbitraryScopeTest extends com.aparapi.codegen.CodeGenJUni
 " This* this=&thisStruct;\n" +
 " this->passid = passid;\n" +
 " {\n" +
-" int gid = get_global_id(0);\n" +
+" int gid = (int)get_global_id(0);\n" +
 " int numRemaining = 1;\n" +
 " com_aparapi_codegen_test_CompositeArbitraryScope__t1(this);\n" +
 " com_aparapi_codegen_test_CompositeArbitraryScope__t2(this);\n" +
