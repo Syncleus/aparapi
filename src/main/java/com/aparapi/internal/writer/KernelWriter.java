@@ -392,6 +392,8 @@ public abstract class KernelWriter extends BlockWriter{
             numDimensions++;
             signature = signature.substring(1);
          }
+         final boolean literalNullArray = isPointer && privateMemorySize == null
+               && _entryPoint.isFinalNullArrayField(field.getName());
 
          // If it is a converted array of objects, emit the struct param
          String className = null;
@@ -425,7 +427,7 @@ public abstract class KernelWriter extends BlockWriter{
             assignLine.append("this->");
             assignLine.append(field.getName());
             assignLine.append(" = ");
-            assignLine.append(field.getName());
+            assignLine.append(literalNullArray ? "NULL" : field.getName());
          }
 
          argLine.append(field.getName());
@@ -433,7 +435,9 @@ public abstract class KernelWriter extends BlockWriter{
          if (privateMemorySize == null) {
             assigns.add(assignLine.toString());
          }
-         argLines.add(argLine.toString());
+         if (!literalNullArray) {
+            argLines.add(argLine.toString());
+         }
          if (privateMemorySize != null) {
             thisStructLine.append("[").append(privateMemorySize).append("]");
          }
@@ -456,12 +460,14 @@ public abstract class KernelWriter extends BlockWriter{
                lenAssignLine.append("this->");
                lenAssignLine.append(lenName);
                lenAssignLine.append(" = ");
-               lenAssignLine.append(lenName);
+               lenAssignLine.append(literalNullArray ? "0" : lenName);
 
                lenArgLine.append("int " + lenName);
 
                assigns.add(lenAssignLine.toString());
-               argLines.add(lenArgLine.toString());
+               if (!literalNullArray) {
+                  argLines.add(lenArgLine.toString());
+               }
                thisStruct.add(lenStructLine.toString());
 
                if (numDimensions > 1) {
@@ -475,12 +481,14 @@ public abstract class KernelWriter extends BlockWriter{
                   dimAssignLine.append("this->");
                   dimAssignLine.append(dimName);
                   dimAssignLine.append(" = ");
-                  dimAssignLine.append(dimName);
+                  dimAssignLine.append(literalNullArray ? "0" : dimName);
 
                   dimArgLine.append("int " + dimName);
 
                   assigns.add(dimAssignLine.toString());
-                  argLines.add(dimArgLine.toString());
+                  if (!literalNullArray) {
+                     argLines.add(dimArgLine.toString());
+                  }
                   thisStruct.add(dimStructLine.toString());
                }
             }
