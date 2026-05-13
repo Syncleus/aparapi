@@ -15,12 +15,12 @@
  */
 package com.aparapi.codegen.test;
 
-import com.aparapi.internal.exception.CodeGenException;
 import org.junit.Test;
 
 public class ReturnByteArrayNewTest extends com.aparapi.codegen.CodeGenJUnitBase {
-    private static final String[] expectedOpenCL = null;
-    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = CodeGenException.class;
+    private static final String[] expectedOpenCL = ReturnArrayNewTestSupport.expectedOpenCL("char",
+            "ReturnByteArrayNew", "returnByteArrayNew");
+    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = null;
 
     
     @Test

@@ -16,7 +16,6 @@
 package com.aparapi.runtime;
 
 import com.aparapi.Kernel;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -26,7 +25,6 @@ import static org.junit.Assert.assertArrayEquals;
 
 public class ReturnInstantiatedArrayDirectlyTest {
     @Test
-    @Ignore("Knon bug, ignoring until fixed.")
     public void test() {
         ReturnDoubleArrayNew kernel = new ReturnDoubleArrayNew();
         kernel.execute(1);
