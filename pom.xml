@@ -149,12 +149,13 @@
                 <configuration>
                 	<forkCount>6</forkCount>
                 	<reuseForks>false</reuseForks>
-                  <argLine>@{argLine} -Xmx2048m -XX:MaxPermSize=512m</argLine>
+                  <argLine>@{argLine} -Xmx2048m</argLine>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
             </plugin>
             <plugin>
                 <groupId>com.mycila.maven-license-plugin</groupId>
