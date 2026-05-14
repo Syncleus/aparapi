@@ -377,6 +377,37 @@ public abstract class BlockWriter{
       return ("(" + raw + ")");
    }
 
+   private String getNewArrayDescriptor(final I_NEWARRAY _newArray) throws CodeGenException {
+      switch (_newArray.getType()) {
+         case 4:
+            return "[Z";
+         case 5:
+            return "[C";
+         case 6:
+            return "[F";
+         case 7:
+            return "[D";
+         case 8:
+            return "[B";
+         case 9:
+            return "[S";
+         case 10:
+            return "[I";
+         case 11:
+            return "[J";
+         default:
+            throw new CodeGenException("Unsupported newarray type " + _newArray.getType());
+      }
+   }
+
+   private void writeNewArrayDimensions(final I_NEWARRAY _newArray) throws CodeGenException {
+      for (Instruction operand = _newArray.getFirstChild(); operand != null; operand = operand.getNextExpr()) {
+         write("[");
+         writeInstruction(operand);
+         write("]");
+      }
+   }
+
    public void writeInstruction(Instruction _instruction) throws CodeGenException {
       if (_instruction instanceof CompositeIfElseInstruction) {
          boolean needParenthesis = isNeedParenthesis(_instruction);
@@ -400,11 +431,7 @@ public abstract class BlockWriter{
               throw new CodeGenException("'newarray' is not allowed after 'return'");
           }
 
-          for (Instruction operand = _instruction.getFirstChild(); operand != null; operand = operand.getNextExpr()) {
-              write("[");
-              writeInstruction(operand);
-              write("]");
-          }
+          writeNewArrayDimensions((I_NEWARRAY) _instruction);
 
       } else if (_instruction instanceof AssignToLocalVariable) {
          final AssignToLocalVariable assignToLocalVariable = (AssignToLocalVariable) _instruction;
@@ -632,6 +659,19 @@ public abstract class BlockWriter{
       } else if (_instruction instanceof Return) {
 
          final Return ret = (Return) _instruction;
+         if (ret.getFirstChild() instanceof I_NEWARRAY) {
+            final I_NEWARRAY newArray = (I_NEWARRAY) ret.getFirstChild();
+            final String returnArrayName = "__aparapi_return_array";
+            write(convertType(getNewArrayDescriptor(newArray), true, true));
+            write(returnArrayName);
+            writeNewArrayDimensions(newArray);
+            write(";");
+            newLine();
+            write("return(");
+            write(returnArrayName);
+            write(")");
+            return;
+         }
          write("return");
          if (ret.getStackConsumeCount() > 0) {
             write("(");

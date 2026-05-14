@@ -25,4 +25,26 @@ public class ReturnLongArrayNew {
         returnLongArrayNew();
     }
 }
-/**{Throws{CodeGenException}Throws}**/
+/**{OpenCL{
+ typedef struct This_s{
+ int passid;
+ }This;
+ int get_pass_id(This *this){
+ return this->passid;
+ }
+ __global long* com_aparapi_codegen_test_ReturnLongArrayNew__returnLongArrayNew(This *this){
+ long __aparapi_return_array[1024];
+ return(__aparapi_return_array);
+ }
+ __kernel void run(
+ int passid
+ ){
+ This thisStruct;
+ This* this=&thisStruct;
+ this->passid = passid;
+ {
+ com_aparapi_codegen_test_ReturnLongArrayNew__returnLongArrayNew(this);
+ return;
+ }
+ }
+ }OpenCL}**/

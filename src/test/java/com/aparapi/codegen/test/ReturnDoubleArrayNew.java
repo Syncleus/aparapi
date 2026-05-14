@@ -25,4 +25,26 @@ public class ReturnDoubleArrayNew {
         returnDoubleArrayNew();
     }
 }
-/**{Throws{CodeGenException}Throws}**/
+/**{OpenCL{
+ typedef struct This_s{
+ int passid;
+ }This;
+ int get_pass_id(This *this){
+ return this->passid;
+ }
+ __global double* com_aparapi_codegen_test_ReturnDoubleArrayNew__returnDoubleArrayNew(This *this){
+ double __aparapi_return_array[1024];
+ return(__aparapi_return_array);
+ }
+ __kernel void run(
+ int passid
+ ){
+ This thisStruct;
+ This* this=&thisStruct;
+ this->passid = passid;
+ {
+ com_aparapi_codegen_test_ReturnDoubleArrayNew__returnDoubleArrayNew(this);
+ return;
+ }
+ }
+ }OpenCL}**/
