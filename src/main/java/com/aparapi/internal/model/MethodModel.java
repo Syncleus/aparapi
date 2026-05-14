@@ -1482,6 +1482,9 @@ public class MethodModel{
             if (_storeSpec.equals(StoreSpec.A)) {
                name = "arr_" + _slotIndex;
                descriptor = "/* arg */";
+            } else if (_storeSpec.equals(StoreSpec.L)) {
+               name = _storeSpec.toString().toLowerCase() + "_" + _slotIndex;
+               descriptor = "J";
             } else {
                name = _storeSpec.toString().toLowerCase() + "_" + _slotIndex;
                descriptor = _storeSpec.toString();
