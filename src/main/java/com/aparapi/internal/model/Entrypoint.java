@@ -300,6 +300,26 @@ public class Entrypoint implements Cloneable {
       return null;
    }
 
+   private void recordArrayField(Instruction arrayRef, Set<String> arrayFields) {
+      final FieldEntry field = getArrayFieldEntry(arrayRef);
+      if (field != null) {
+         final String arrayFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+         arrayFields.add(arrayFieldName);
+         referencedFieldNames.add(arrayFieldName);
+      }
+   }
+
+   private FieldEntry getArrayFieldEntry(Instruction arrayRef) {
+      Instruction ref = arrayRef;
+      while (ref instanceof AccessArrayElement) {
+         ref = ((AccessArrayElement) ref).getArrayRef();
+      }
+      if (ref instanceof AccessField) {
+         return ((AccessField) ref).getConstantPoolFieldEntry();
+      }
+      return null;
+   }
+
    /*
     * Update accessor structures when there is a direct access to an 
     * obect array element's data members
@@ -552,29 +572,11 @@ public class Entrypoint implements Cloneable {
             if (instruction instanceof AssignToArrayElement) {
                final AssignToArrayElement assignment = (AssignToArrayElement) instruction;
 
-               final Instruction arrayRef = assignment.getArrayRef();
-               // AccessField here allows instance and static array refs
-               if (arrayRef instanceof I_GETFIELD) {
-                  final I_GETFIELD getField = (I_GETFIELD) arrayRef;
-                  final FieldEntry field = getField.getConstantPoolFieldEntry();
-                  final String assignedArrayFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-                  arrayFieldAssignments.add(assignedArrayFieldName);
-                  referencedFieldNames.add(assignedArrayFieldName);
-
-               }
+               recordArrayField(assignment.getArrayRef(), arrayFieldAssignments);
             } else if (instruction instanceof AccessArrayElement) {
                final AccessArrayElement access = (AccessArrayElement) instruction;
 
-               final Instruction arrayRef = access.getArrayRef();
-               // AccessField here allows instance and static array refs
-               if (arrayRef instanceof I_GETFIELD) {
-                  final I_GETFIELD getField = (I_GETFIELD) arrayRef;
-                  final FieldEntry field = getField.getConstantPoolFieldEntry();
-                  final String accessedArrayFieldName = field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
-                  arrayFieldAccesses.add(accessedArrayFieldName);
-                  referencedFieldNames.add(accessedArrayFieldName);
-
-               }
+               recordArrayField(access.getArrayRef(), arrayFieldAccesses);
             } else if (instruction instanceof I_ARRAYLENGTH) {
                Instruction child = instruction.getFirstChild();
                while(child instanceof I_AALOAD) {
