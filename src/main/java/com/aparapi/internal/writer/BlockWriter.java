@@ -329,6 +329,7 @@ public abstract class BlockWriter{
          if (instruction instanceof CompositeInstruction) {
             writeComposite((CompositeInstruction) instruction);
          } else if (!instruction.getByteCode().equals(ByteCode.NONE)) {
+            writeHoistedExpressionLocalDeclarations(instruction);
             newLine();
             writeInstruction(instruction);
             write(";");
@@ -361,6 +362,36 @@ public abstract class BlockWriter{
             write(localVariableInfo.getVariableName());
             write(" = 0;");
          }
+      }
+   }
+
+   private void writeHoistedExpressionLocalDeclarations(Instruction instruction) {
+      final LinkedHashMap<LocalVariableKey, LocalVariableInfo> declarations = new LinkedHashMap<LocalVariableKey, LocalVariableInfo>();
+      collectNestedExpressionLocalDeclarations(instruction, declarations);
+      writeHoistedLocalDeclarations(declarations);
+   }
+
+   private void writeHoistedLocalDeclarations(LinkedHashMap<LocalVariableKey, LocalVariableInfo> declarations) {
+      for (Map.Entry<LocalVariableKey, LocalVariableInfo> entry : declarations.entrySet()) {
+         final LocalVariableKey key = entry.getKey();
+         if (!isLocalVariableDeclared(key)) {
+            final LocalVariableInfo localVariableInfo = entry.getValue();
+            currentLocalDeclarationScope().add(key);
+            newLine();
+            write(convertType(localVariableInfo.getVariableDescriptor(), true, false));
+            write(localVariableInfo.getVariableName());
+            write(" = 0;");
+         }
+      }
+   }
+
+   private void collectNestedExpressionLocalDeclarations(Instruction instruction,
+         LinkedHashMap<LocalVariableKey, LocalVariableInfo> declarations) {
+      if (instruction.getByteCode().equals(ByteCode.MULTI_ASSIGN) || instruction.getByteCode().equals(ByteCode.INLINE_ASSIGN)) {
+         collectLocalDeclarations(instruction, declarations);
+      }
+      for (Instruction child = instruction.getFirstChild(); child != null; child = child.getNextExpr()) {
+         collectLocalDeclarations(child, declarations);
       }
    }
 
