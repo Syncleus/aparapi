@@ -109,7 +109,7 @@ public class ArbitraryScope {
  count--;
  }
  }
- int value = (256 * count) / this->maxIterations;
+ (256 * count) / this->maxIterations;
  }
  float scaleSquare = 1.0f;
  return;
