@@ -2474,6 +2474,20 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
+    * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.
+    * This is a CUDA-style alias for {@link #localBarrier()} and maps to
+    * <code>barrier(CLK_LOCAL_MEM_FENCE)</code> in OpenCL.
+    *
+    * @annotion Experimental
+    * @see #localBarrier()
+    */
+   @OpenCLDelegate
+   @Experimental
+   protected final void syncThreads() {
+      kernelState.awaitOnLocalBarrier();
+   }
+
+   /**
     * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.<br> 
     * It will also enforce memory ordering, such that modifications made by each thread in the work-group, to the memory,
     * before entering into this barrier call will be visible by all threads leaving the barrier.
