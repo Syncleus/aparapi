@@ -80,6 +80,8 @@ public abstract class BlockWriter{
 
    public final static String arrayDimMangleSuffix = "__javaArrayDimension";
 
+   private final Stack<Set<String>> hoistedLocalDeclarations = new Stack<Set<String>>();
+
    public abstract void write(String _string);
 
    public void writeln(String _string) {
@@ -320,11 +322,159 @@ public abstract class BlockWriter{
    public void writeBlock(Instruction _first, Instruction _last) throws CodeGenException {
       write("{");
       in();
+      writeHoistedLocalDeclarations(_first, _last);
       writeSequence(_first, _last);
       out();
       newLine();
 
       write("}");
+   }
+
+   private void writeHoistedLocalDeclarations(Instruction _first, Instruction _last) {
+      final LinkedHashMap<String, LocalVariableInfo> declarations = new LinkedHashMap<String, LocalVariableInfo>();
+      final int blockEndPc = _last == null ? Integer.MAX_VALUE : _last.getThisPC();
+
+      for (Instruction instruction = _first; instruction != _last; instruction = instruction.getNextExpr()) {
+         collectHoistedLocalDeclarations(instruction, blockEndPc, declarations);
+      }
+
+      for (final LocalVariableInfo localVariableInfo : declarations.values()) {
+         final String key = localVariableDeclarationKey(localVariableInfo);
+         if (!getHoistedLocalDeclarations().contains(key)) {
+            getHoistedLocalDeclarations().add(key);
+            newLine();
+            writeLocalDeclaration(localVariableInfo, true);
+            write(";");
+         }
+      }
+   }
+
+   private void collectHoistedLocalDeclarations(Instruction instruction, int blockEndPc,
+         Map<String, LocalVariableInfo> declarations) {
+      if (instruction instanceof CompositeInstruction) {
+         if (skipCompositeHoistingScan(instruction)) {
+            return;
+         }
+         final int compositeEndPc = instruction.getThisPC();
+         collectEscapingHoistedLocalDeclarations(instruction.getFirstChild(), null, compositeEndPc, blockEndPc, declarations);
+      } else {
+         collectHoistedLocalDeclarationsInExpression(instruction, blockEndPc, declarations, false);
+      }
+   }
+
+   private void collectEscapingHoistedLocalDeclarations(Instruction first, Instruction last, int nestedBlockEndPc, int blockEndPc,
+         Map<String, LocalVariableInfo> declarations) {
+      for (Instruction instruction = first; instruction != last; instruction = instruction.getNextExpr()) {
+         if (instruction instanceof CompositeInstruction) {
+            if (!skipCompositeHoistingScan(instruction)) {
+               collectEscapingHoistedLocalDeclarations(instruction.getFirstChild(), null, nestedBlockEndPc, blockEndPc, declarations);
+            }
+         } else {
+            collectHoistedLocalDeclarationsInExpression(instruction, blockEndPc, declarations, nestedBlockEndPc, true);
+         }
+      }
+   }
+
+   private boolean skipCompositeHoistingScan(Instruction instruction) {
+      return instruction instanceof CompositeForSunInstruction || instruction instanceof CompositeForEclipseInstruction
+            || instruction instanceof CompositeEmptyLoopInstruction || instruction instanceof CompositeArbitraryScopeInstruction;
+   }
+
+   private void collectHoistedLocalDeclarationsInExpression(Instruction instruction, int blockEndPc,
+         Map<String, LocalVariableInfo> declarations, boolean includeRootAssignment) {
+      collectHoistedLocalDeclarationsInExpression(instruction, blockEndPc, declarations, -1, includeRootAssignment);
+   }
+
+   private void collectHoistedLocalDeclarationsInExpression(Instruction instruction, int blockEndPc,
+         Map<String, LocalVariableInfo> declarations, int mustEscapePc, boolean includeRootAssignment) {
+      if (instruction == null) {
+         return;
+      }
+
+      if (includeRootAssignment && instruction instanceof AssignToLocalVariable) {
+         collectHoistedLocalDeclaration((AssignToLocalVariable) instruction, blockEndPc, declarations, mustEscapePc);
+      }
+
+      if (instruction.getByteCode().equals(ByteCode.INLINE_ASSIGN)) {
+         final InlineAssignInstruction inlineAssignInstruction = (InlineAssignInstruction) instruction;
+         collectHoistedLocalDeclaration(inlineAssignInstruction.getAssignToLocalVariable(), blockEndPc, declarations, mustEscapePc);
+      } else if (instruction.getByteCode().equals(ByteCode.MULTI_ASSIGN)) {
+         final MultiAssignInstruction multiAssignInstruction = (MultiAssignInstruction) instruction;
+         AssignToLocalVariable from = (AssignToLocalVariable) multiAssignInstruction.getFrom();
+         final AssignToLocalVariable last = (AssignToLocalVariable) multiAssignInstruction.getTo();
+         while (from != last) {
+            collectHoistedLocalDeclaration(from, blockEndPc, declarations, mustEscapePc);
+            from = (AssignToLocalVariable) ((Instruction) from).getNextExpr();
+         }
+         collectHoistedLocalDeclarationsInExpression(multiAssignInstruction.getCommon(), blockEndPc, declarations, mustEscapePc, true);
+      }
+
+      for (Instruction child = instruction.getFirstChild(); child != null; child = child.getNextExpr()) {
+         collectHoistedLocalDeclarationsInExpression(child, blockEndPc, declarations, mustEscapePc, true);
+      }
+   }
+
+   private void collectHoistedLocalDeclaration(AssignToLocalVariable assignToLocalVariable, int blockEndPc,
+         Map<String, LocalVariableInfo> declarations, int mustEscapePc) {
+      if (!assignToLocalVariable.isDeclaration()) {
+         return;
+      }
+
+      final LocalVariableInfo localVariableInfo = assignToLocalVariable.getLocalVariableInfo();
+      if (localVariableInfo == null) {
+         return;
+      }
+
+      if ((mustEscapePc >= 0) && (localVariableInfo.getEnd() <= mustEscapePc)) {
+         return;
+      }
+
+      if (localVariableInfo.getEnd() <= blockEndPc) {
+         declarations.put(localVariableDeclarationKey(localVariableInfo), localVariableInfo);
+      }
+   }
+
+   private void writeLocalDeclaration(LocalVariableInfo localVariableInfo, boolean initialize) {
+      writeLocalType(localVariableInfo);
+      write(localVariableInfo.getVariableName());
+      if (initialize) {
+         write(" = ");
+         write(defaultValueForLocalVariable(localVariableInfo));
+      }
+   }
+
+   private void writeLocalType(LocalVariableInfo localVariableInfo) {
+      final String descriptor = localVariableInfo.getVariableDescriptor();
+      if (descriptor.startsWith("[")) {
+         write(" __global ");
+      }
+      write(convertType(descriptor, true, false));
+   }
+
+   private String defaultValueForLocalVariable(LocalVariableInfo localVariableInfo) {
+      final String descriptor = localVariableInfo.getVariableDescriptor();
+      if ("F".equals(descriptor) || "float".equals(descriptor)) {
+         return "0.0f";
+      } else if ("D".equals(descriptor) || "double".equals(descriptor)) {
+         return "0.0";
+      } else if ("J".equals(descriptor) || "long".equals(descriptor)) {
+         return "0L";
+      } else {
+         return "0";
+      }
+   }
+
+   private Set<String> getHoistedLocalDeclarations() {
+      return hoistedLocalDeclarations.isEmpty() ? Collections.<String> emptySet() : hoistedLocalDeclarations.peek();
+   }
+
+   private boolean isHoistedLocalDeclaration(LocalVariableInfo localVariableInfo) {
+      return getHoistedLocalDeclarations().contains(localVariableDeclarationKey(localVariableInfo));
+   }
+
+   private String localVariableDeclarationKey(LocalVariableInfo localVariableInfo) {
+      return localVariableInfo.getVariableIndex() + ":" + localVariableInfo.getVariableDescriptor() + ":"
+            + localVariableInfo.getVariableName();
    }
 
    public Instruction writeConditional(BranchSet _branchSet) throws CodeGenException {
@@ -420,16 +570,11 @@ public abstract class BlockWriter{
                  write(localVariableInfo.getVariableName());
              }
          } else {
-             if (assignToLocalVariable.isDeclaration()) {
-                 final String descriptor = localVariableInfo.getVariableDescriptor();
-                 // Arrays always map to __global arrays
-                 if (descriptor.startsWith("[")) {
-                     write(" __global ");
-                 }
-                 write(convertType(descriptor, true, false));
-             }
              if (localVariableInfo == null) {
                  throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
+             } else if (assignToLocalVariable.isDeclaration() && !isHoistedLocalDeclaration(localVariableInfo)) {
+                 writeLocalType(localVariableInfo);
+                 write(localVariableInfo.getVariableName() + " = ");
              } else {
                  write(localVariableInfo.getVariableName() + " = ");
              }
@@ -682,11 +827,11 @@ public abstract class BlockWriter{
          for (AssignToLocalVariable alv = stack.pop(); alv != null; alv = stack.size() > 0 ? stack.pop() : null) {
 
             final LocalVariableInfo localVariableInfo = alv.getLocalVariableInfo();
-            if (alv.isDeclaration()) {
-               write(convertType(localVariableInfo.getVariableDescriptor(), true, false));
-            }
             if (localVariableInfo == null) {
                throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
+            } else if (alv.isDeclaration() && !isHoistedLocalDeclaration(localVariableInfo)) {
+               writeLocalType(localVariableInfo);
+               write(localVariableInfo.getVariableName() + " = ");
             } else {
                write(localVariableInfo.getVariableName() + " = ");
             }
@@ -698,7 +843,9 @@ public abstract class BlockWriter{
          final AssignToLocalVariable assignToLocalVariable = inlineAssignInstruction.getAssignToLocalVariable();
 
          final LocalVariableInfo localVariableInfo = assignToLocalVariable.getLocalVariableInfo();
-         if (assignToLocalVariable.isDeclaration()) {
+         if (localVariableInfo == null) {
+            throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
+         } else if (assignToLocalVariable.isDeclaration() && !isHoistedLocalDeclaration(localVariableInfo)) {
             // this is bad! we need a general way to hoist up a required declaration
             throw new CodeGenException("/* we can't declare this " + convertType(localVariableInfo.getVariableDescriptor(), true, false)
                   + " here */");
@@ -870,7 +1017,12 @@ public abstract class BlockWriter{
          FieldEntry accessorVariableFieldEntry = _methodModel.getAccessorVariableFieldEntry();
          writeGetterBlock(accessorVariableFieldEntry);
       } else {
-         writeBlock(_methodModel.getExprHead(), null);
+         hoistedLocalDeclarations.push(new HashSet<String>());
+         try {
+            writeBlock(_methodModel.getExprHead(), null);
+         } finally {
+            hoistedLocalDeclarations.pop();
+         }
       }
    }
 
