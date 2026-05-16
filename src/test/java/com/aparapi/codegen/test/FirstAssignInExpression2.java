@@ -47,16 +47,17 @@ public class FirstAssignInExpression2 {
  This* this=&thisStruct;
  this->passid = passid;
  {
+ int assignMe = 0;
  int value = 1;
- int result=0;
- int assignMe=0;
- if (true){
+ int result = 0;
+ if (value==value){
  result = assignMe = value;
- }else{
- assignMe =1;
- result=2;
+ } else {
+ assignMe = 1;
+ result = 2;
  }
  result++;
+ assignMe++;
  return;
  }
  }
