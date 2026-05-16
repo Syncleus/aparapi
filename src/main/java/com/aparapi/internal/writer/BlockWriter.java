@@ -420,17 +420,23 @@ public abstract class BlockWriter{
                  write(localVariableInfo.getVariableName());
              }
          } else {
-             if (assignToLocalVariable.isDeclaration()) {
-                 final String descriptor = localVariableInfo.getVariableDescriptor();
-                 // Arrays always map to __global arrays
-                 if (descriptor.startsWith("[")) {
-                     write(" __global ");
-                 }
-                 write(convertType(descriptor, true, false));
-             }
              if (localVariableInfo == null) {
-                 throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
+                 // javac can omit LocalVariableTable entries for unused stores at the
+                 // end of a scope. Preserve any RHS side effects but do not emit a
+                 // synthetic local name that cannot be recovered from the bytecode.
+                 for (Instruction operand = _instruction.getFirstChild(); operand != null; operand = operand.getNextExpr()) {
+                    writeInstruction(operand);
+                 }
+                 return;
              } else {
+                 if (assignToLocalVariable.isDeclaration()) {
+                    final String descriptor = localVariableInfo.getVariableDescriptor();
+                    // Arrays always map to __global arrays
+                    if (descriptor.startsWith("[")) {
+                       write(" __global ");
+                    }
+                    write(convertType(descriptor, true, false));
+                 }
                  write(localVariableInfo.getVariableName() + " = ");
              }
          }
