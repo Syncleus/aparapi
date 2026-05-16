@@ -2908,6 +2908,75 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
+    * Start execution of <code>_range</code> kernels asynchronously.
+    *
+    * @param _range The range of Kernels that we would like to initiate.
+    * @return an execution handle which can be used to wait for completion
+    */
+   public Execution executeAsync(final Range _range) {
+      return executeAsync(_range, 1);
+   }
+
+   /**
+    * Start execution of <code>_range</code> kernels asynchronously.
+    *
+    * @param _range The number of Kernels that we would like to initiate.
+    * @return an execution handle which can be used to wait for completion
+    */
+   public Execution executeAsync(final int _range) {
+      return executeAsync(createRange(_range), 1);
+   }
+
+   /**
+    * Start execution of <code>_passes</code> iterations of <code>_range</code> kernels asynchronously.
+    *
+    * @param _range The range of Kernels that we would like to initiate.
+    * @param _passes The number of passes to make.
+    * @return an execution handle which can be used to wait for completion
+    */
+   public Execution executeAsync(final Range _range, final int _passes) {
+      return executeAsync("run", _range, _passes);
+   }
+
+   /**
+    * Start execution of <code>_passes</code> iterations over the <code>_range</code> of kernels asynchronously.
+    *
+    * @param _range The number of Kernels that we would like to initiate.
+    * @param _passes The number of passes to make.
+    * @return an execution handle which can be used to wait for completion
+    */
+   public Execution executeAsync(final int _range, final int _passes) {
+      return executeAsync(createRange(_range), _passes);
+   }
+
+   /**
+    * Start execution of <code>_range</code> kernels for the given entrypoint asynchronously.
+    *
+    * @param _entrypoint is the name of the method we wish to use as the entrypoint to the kernel
+    * @param _range The range of Kernels that we would like to initiate.
+    * @return an execution handle which can be used to wait for completion
+    */
+   public Execution executeAsync(final String _entrypoint, final Range _range) {
+      return executeAsync(_entrypoint, _range, 1);
+   }
+
+   /**
+    * Start execution of <code>_passes</code> iterations for the given entrypoint asynchronously.
+    *
+    * @param _entrypoint is the name of the method we wish to use as the entrypoint to the kernel
+    * @param _range The range of Kernels that we would like to initiate.
+    * @param _passes The number of passes to make.
+    * @return an execution handle which can be used to wait for completion
+    */
+   public Execution executeAsync(final String _entrypoint, final Range _range, final int _passes) {
+      return new Execution(this, new Runnable() {
+         @Override public void run() {
+            execute(_entrypoint, _range, _passes);
+         }
+      });
+   }
+
+   /**
     * Force pre-compilation of the kernel for a given device, without executing it.
     * 
     * @param _device the device for which the kernel is to be compiled
