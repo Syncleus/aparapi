@@ -60,7 +60,6 @@ import com.aparapi.internal.model.ClassModel.ConstantPool;
 import com.aparapi.internal.model.ClassModel.ConstantPool.Entry;
 import com.aparapi.internal.model.ClassModel.ConstantPool.FieldEntry;
 import com.aparapi.internal.model.ClassModel.ConstantPool.MethodEntry;
-import com.aparapi.internal.model.ClassModel.LocalVariableTableEntry;
 import com.aparapi.internal.model.ClassModel.LocalVariableInfo;
 import com.aparapi.internal.reader.ByteReader;
 
@@ -84,6 +83,43 @@ public class InstructionSet{
       L, // Long
       A, // Array
       O, // Object
+   }
+
+   private static LocalVariableInfo syntheticStoreLocalVariableInfo(final Instruction instruction, final StoreSpec storeSpec,
+         final int index) {
+      final int start = instruction.getThisPC() + instruction.getLength();
+      final String descriptor = storeSpec == StoreSpec.L ? "J" : storeSpec.toString();
+      final String name = (storeSpec == StoreSpec.A ? "arr" : storeSpec.toString().toLowerCase()) + "_" + index;
+
+      return new LocalVariableInfo(){
+         @Override public int getStart() {
+            return start;
+         }
+
+         @Override public boolean isArray() {
+            return storeSpec == StoreSpec.A;
+         }
+
+         @Override public int getEnd() {
+            return start + 1;
+         }
+
+         @Override public String getVariableName() {
+            return name;
+         }
+
+         @Override public String getVariableDescriptor() {
+            return descriptor;
+         }
+
+         @Override public int getVariableIndex() {
+            return index;
+         }
+
+         @Override public int getLength() {
+            return 1;
+         }
+      };
    }
 
    public static enum TypeSpec {
@@ -1274,9 +1310,19 @@ public class InstructionSet{
       }
 
       @Override public boolean isDeclaration() {
-         LocalVariableInfo lvi = method.getLocalVariableTableEntry().getVariable(getThisPC() + getLength(),
-               getLocalVariableTableIndex());
-             return (lvi != null) && (lvi.getStart() == getThisPC() + getLength() || lvi.getStart() == getThisPC());
+         LocalVariableInfo lvi = getLocalVariableInfo();
+         return (lvi != null) && (lvi.getStart() == getThisPC() + getLength() || lvi.getStart() == getThisPC());
+      }
+
+      @Override public LocalVariableInfo getLocalVariableInfo() {
+         LocalVariableInfo lvi = super.getLocalVariableInfo();
+         if (lvi == null) {
+            lvi = method.getLocalVariableTableEntry().getVariable(getThisPC(), getLocalVariableTableIndex());
+         }
+         if (lvi == null) {
+            lvi = syntheticStoreLocalVariableInfo(this, getByteCode().getStore(), getLocalVariableTableIndex());
+         }
+         return lvi;
       }
 
       @Override public String getDescription() {
@@ -1314,10 +1360,20 @@ public class InstructionSet{
       }
 
       @Override public boolean isDeclaration() {
-         final LocalVariableTableEntry localVariableTableEntry = method.getLocalVariableTableEntry();
-         final LocalVariableInfo localVarInfo = localVariableTableEntry.getVariable(getThisPC() + getLength(),
-               getLocalVariableTableIndex());
-         return ((localVarInfo != null) && (localVarInfo.getStart() == (getThisPC() + getLength())));
+         final LocalVariableInfo localVarInfo = getLocalVariableInfo();
+         return ((localVarInfo != null) && ((localVarInfo.getStart() == (getThisPC() + getLength()))
+               || (localVarInfo.getStart() == getThisPC())));
+      }
+
+      @Override public LocalVariableInfo getLocalVariableInfo() {
+         LocalVariableInfo lvi = super.getLocalVariableInfo();
+         if (lvi == null) {
+            lvi = method.getLocalVariableTableEntry().getVariable(getThisPC(), getLocalVariableTableIndex());
+         }
+         if (lvi == null) {
+            lvi = syntheticStoreLocalVariableInfo(this, getByteCode().getStore(), getLocalVariableTableIndex());
+         }
+         return lvi;
       }
 
       @Override public String getDescription() {
