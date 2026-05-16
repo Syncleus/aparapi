@@ -117,6 +117,38 @@ public abstract class KernelWriter extends BlockWriter{
 
    private Entrypoint entryPoint = null;
 
+   private static final Set<String> openCLReservedIdentifiers = createOpenCLReservedIdentifiers();
+
+   private static Set<String> createOpenCLReservedIdentifiers() {
+      final Set<String> identifiers = new HashSet<String>();
+      Collections.addAll(identifiers,
+            "auto", "bool", "complex", "constant", "event_t", "extern", "global", "half", "imaginary", "inline",
+            "kernel", "local", "private", "quad", "read_only", "read_write", "register", "restrict", "sampler_t",
+            "signed", "sizeof", "struct", "typedef", "union", "unsigned", "write_only", "_Bool", "_Complex",
+            "_Imaginary", "__constant", "__global", "__kernel", "__local", "__private", "__read_only",
+            "__read_write", "__write_only", "atomic_flag", "atomic_int", "atomic_uint", "atomic_long",
+            "atomic_ulong", "atomic_float", "atomic_double", "atomic_half", "clk_event_t", "image1d_t",
+            "image1d_array_t", "image1d_buffer_t", "image2d_t", "image2d_array_t", "image2d_depth_t",
+            "image2d_array_depth_t", "image2d_msaa_t", "image2d_array_msaa_t", "image2d_msaa_depth_t",
+            "image2d_array_msaa_depth_t", "image3d_t", "intptr_t", "uintptr_t", "size_t", "ptrdiff_t",
+            "pipe", "reserve_id_t", "queue_t", "ndrange_t", "uchar", "ushort", "uint", "ulong");
+
+      final String[] vectorTypes = {
+            "char", "uchar", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "half"
+      };
+      final int[] vectorWidths = {2, 3, 4, 8, 16};
+      for (final String type : vectorTypes) {
+         for (final int width : vectorWidths) {
+            identifiers.add(type + width);
+         }
+      }
+      return Collections.unmodifiableSet(identifiers);
+   }
+
+   @Override protected String mangleIdentifier(String _identifier) {
+      return openCLReservedIdentifiers.contains(_identifier) ? _identifier + reservedIdentifierMangleSuffix : _identifier;
+   }
+
    public final static Map<String, String> javaToCLIdentifierMap = new HashMap<String, String>();
    {
       javaToCLIdentifierMap.put("getGlobalId()I", "get_global_id(0)");
@@ -243,7 +275,7 @@ public abstract class KernelWriter extends BlockWriter{
          if (getterField != null && isThis(_methodCall.getArg(0))) {
             String fieldName = getterField.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
             write("this->");
-            write(fieldName);
+            write(mangleIdentifier(fieldName));
             return;
          }
          boolean noCL = _methodEntry.getOwnerClassModel().getNoCLMethods()
@@ -285,7 +317,7 @@ public abstract class KernelWriter extends BlockWriter{
                //assert refAccess instanceof I_GETFIELD : "ref should come from getfield";
                final String fieldName = ((AccessField) refAccess).getConstantPoolFieldEntry().getNameAndTypeEntry()
                      .getNameUTF8Entry().getUTF8();
-               write(" &(this->" + fieldName);
+               write(" &(this->" + mangleIdentifier(fieldName));
                write("[");
                writeInstruction(arrayAccess.getArrayIndex());
                write("])");
@@ -343,6 +375,8 @@ public abstract class KernelWriter extends BlockWriter{
          final StringBuilder thisStructLine = new StringBuilder();
          final StringBuilder argLine = new StringBuilder();
          final StringBuilder assignLine = new StringBuilder();
+         final String fieldName = field.getName();
+         final String mangledFieldName = mangleIdentifier(fieldName);
 
          String signature = field.getDescriptor();
 
@@ -352,11 +386,11 @@ public abstract class KernelWriter extends BlockWriter{
 
          // check the suffix
 
-         String type = field.getName().endsWith(Kernel.LOCAL_SUFFIX) ? __local
-               : (field.getName().endsWith(Kernel.CONSTANT_SUFFIX) ? __constant : __global);
+         String type = fieldName.endsWith(Kernel.LOCAL_SUFFIX) ? __local
+               : (fieldName.endsWith(Kernel.CONSTANT_SUFFIX) ? __constant : __global);
          Integer privateMemorySize = null;
          try {
-            privateMemorySize = _entryPoint.getClassModel().getPrivateMemorySize(field.getName());
+            privateMemorySize = _entryPoint.getClassModel().getPrivateMemorySize(fieldName);
          } catch (ClassParseException e) {
             throw new CodeGenException(e);
          }
@@ -423,13 +457,13 @@ public abstract class KernelWriter extends BlockWriter{
 
          if (privateMemorySize == null) {
             assignLine.append("this->");
-            assignLine.append(field.getName());
+            assignLine.append(mangledFieldName);
             assignLine.append(" = ");
-            assignLine.append(field.getName());
+            assignLine.append(mangledFieldName);
          }
 
-         argLine.append(field.getName());
-         thisStructLine.append(field.getName());
+         argLine.append(mangledFieldName);
+         thisStructLine.append(mangledFieldName);
          if (privateMemorySize == null) {
             assigns.add(assignLine.toString());
          }
@@ -441,7 +475,7 @@ public abstract class KernelWriter extends BlockWriter{
 
          // Add int field into "this" struct for supporting java arraylength op
          // named like foo__javaArrayLength
-         if (isPointer && _entryPoint.getArrayFieldArrayLengthUsed().contains(field.getName()) || isPointer && numDimensions > 1) {
+         if (isPointer && _entryPoint.getArrayFieldArrayLengthUsed().contains(fieldName) || isPointer && numDimensions > 1) {
 
             for (int i = 0; i < numDimensions; i++) {
                final StringBuilder lenStructLine = new StringBuilder();
@@ -449,7 +483,7 @@ public abstract class KernelWriter extends BlockWriter{
                final StringBuilder lenAssignLine = new StringBuilder();
 
                String suffix = numDimensions == 1 ? "" : Integer.toString(i);
-               String lenName = field.getName() + BlockWriter.arrayLengthMangleSuffix + suffix;
+               String lenName = mangleIdentifier(fieldName + BlockWriter.arrayLengthMangleSuffix + suffix);
 
                lenStructLine.append("int " + lenName);
 
@@ -468,7 +502,7 @@ public abstract class KernelWriter extends BlockWriter{
                   final StringBuilder dimStructLine = new StringBuilder();
                   final StringBuilder dimArgLine = new StringBuilder();
                   final StringBuilder dimAssignLine = new StringBuilder();
-                  String dimName = field.getName() + BlockWriter.arrayDimMangleSuffix + suffix;
+                  String dimName = mangleIdentifier(fieldName + BlockWriter.arrayDimMangleSuffix + suffix);
 
                   dimStructLine.append("int " + dimName);
 
@@ -562,7 +596,7 @@ public abstract class KernelWriter extends BlockWriter{
 
                final String cType = convertType(field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8(), true, false);
                assert cType != null : "could not find type for " + field.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
-               writeln(cType + " " + field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8() + ";");
+               writeln(cType + " " + mangleIdentifier(field.getNameAndTypeEntry().getNameUTF8Entry().getUTF8()) + ";");
             }
 
             // compute total size for OpenCL buffer
@@ -687,7 +721,7 @@ public abstract class KernelWriter extends BlockWriter{
                }
                
                write(convertType(descriptor, true, false));
-               write(lvi.getVariableName());
+               write(mangleIdentifier(lvi.getVariableName()));
                alreadyHasFirstArg = true;
                
                localVariableIndex++;
