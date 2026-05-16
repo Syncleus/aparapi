@@ -39,7 +39,7 @@ public class FirstAssignInExpression {
  return this->passid;
  }
 
- void func(This *this, int _arg){
+ void com_amd_aparapi_test_FirstAssignInExpression__func(This *this, int _arg){
  return;
  }
  __kernel void run(
@@ -49,8 +49,9 @@ public class FirstAssignInExpression {
  This* this=&thisStruct;
  this->passid = passid;
  {
- int result;
- func(this, result = 0);
+ int value = 1;
+ int result = 0;
+ com_amd_aparapi_test_FirstAssignInExpression__func(this, result=value);
  return;
  }
  }
