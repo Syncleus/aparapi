@@ -1484,7 +1484,7 @@ public class MethodModel{
                descriptor = "/* arg */";
             } else {
                name = _storeSpec.toString().toLowerCase() + "_" + _slotIndex;
-               descriptor = _storeSpec.toString();
+               descriptor = getTypeDescriptor(_storeSpec);
             }
          }
 
@@ -1530,6 +1530,10 @@ public class MethodModel{
       }
 
       List<LocalVariableInfo> list = new ArrayList<LocalVariableInfo>();
+
+      private String getTypeDescriptor(StoreSpec _storeSpec) {
+         return _storeSpec == StoreSpec.L ? "J" : _storeSpec.toString();
+      }
 
       public FakeLocalVariableTableEntry(Map<Integer, Instruction> _pcMap, ClassModelMethod _method) {
          int numberOfSlots = _method.getCodeEntry().getMaxLocals();

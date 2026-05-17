@@ -24,6 +24,7 @@
 * Toon Baeyens <toon.baeyens@gmail.com>
 * Luis Mendes <luis.p.mendes@gmail.com>
 * Saurabh Rawat <saurabh.rawat90@gmail.com>
+* jynbil1 - https://github.com/jynbil1
 
 # Details
 
