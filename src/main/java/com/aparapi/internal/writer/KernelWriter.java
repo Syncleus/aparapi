@@ -687,7 +687,7 @@ public abstract class KernelWriter extends BlockWriter{
                }
                
                write(convertType(descriptor, true, false));
-               write(lvi.getVariableName());
+               write(escapeOpenCLIdentifier(lvi.getVariableName()));
                alreadyHasFirstArg = true;
                
                localVariableIndex++;
