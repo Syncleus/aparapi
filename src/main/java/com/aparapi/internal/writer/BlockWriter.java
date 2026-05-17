@@ -80,7 +80,21 @@ public abstract class BlockWriter{
 
    public final static String arrayDimMangleSuffix = "__javaArrayDimension";
 
+   private static final Set<String> openCLReservedWords = new HashSet<String>(Arrays.asList(
+         "__kernel", "kernel", "__global", "global", "__local", "local", "__constant", "constant", "__private",
+         "private", "read_only", "write_only", "read_write", "image2d_t", "image3d_t", "sampler_t", "event_t",
+         "bool", "char", "uchar", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "half",
+         "void", "struct", "union", "enum", "typedef", "const", "volatile", "restrict", "unsigned", "signed", "if",
+         "else", "while", "do", "for", "switch", "case", "default", "break", "continue", "return", "goto", "sizeof"));
+
    public abstract void write(String _string);
+
+   public String escapeOpenCLIdentifier(String identifier) {
+      if (openCLReservedWords.contains(identifier)) {
+         return identifier + "$";
+      }
+      return identifier;
+   }
 
    public void writeln(String _string) {
       write(_string);
@@ -417,7 +431,7 @@ public abstract class BlockWriter{
              } else {
                  final String descriptor = localVariableInfo.getVariableDescriptor();
                  write(convertType(descriptor, true, true));
-                 write(localVariableInfo.getVariableName());
+                 write(escapeOpenCLIdentifier(localVariableInfo.getVariableName()));
              }
          } else {
              if (assignToLocalVariable.isDeclaration()) {
@@ -431,7 +445,7 @@ public abstract class BlockWriter{
              if (localVariableInfo == null) {
                  throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
              } else {
-                 write(localVariableInfo.getVariableName() + " = ");
+                 write(escapeOpenCLIdentifier(localVariableInfo.getVariableName()) + " = ");
              }
          }
 
@@ -581,13 +595,13 @@ public abstract class BlockWriter{
       } else if (_instruction instanceof AccessLocalVariable) {
          final AccessLocalVariable localVariableLoadInstruction = (AccessLocalVariable) _instruction;
          final LocalVariableInfo localVariable = localVariableLoadInstruction.getLocalVariableInfo();
-         write(localVariable.getVariableName());
+         write(escapeOpenCLIdentifier(localVariable.getVariableName()));
       } else if (_instruction instanceof I_IINC) {
          final I_IINC location = (I_IINC) _instruction;
          final LocalVariableInfo localVariable = location.getLocalVariableInfo();
          final int adjust = location.getAdjust();
 
-         write(localVariable.getVariableName());
+         write(escapeOpenCLIdentifier(localVariable.getVariableName()));
          if (adjust == 1) {
             write("++");
          } else if (adjust == -1) {
@@ -688,7 +702,7 @@ public abstract class BlockWriter{
             if (localVariableInfo == null) {
                throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
             } else {
-               write(localVariableInfo.getVariableName() + " = ");
+               write(escapeOpenCLIdentifier(localVariableInfo.getVariableName()) + " = ");
             }
 
          }
@@ -703,7 +717,7 @@ public abstract class BlockWriter{
             throw new CodeGenException("/* we can't declare this " + convertType(localVariableInfo.getVariableDescriptor(), true, false)
                   + " here */");
          }
-         write(localVariableInfo.getVariableName());
+         write(escapeOpenCLIdentifier(localVariableInfo.getVariableName()));
          write("=");
          writeInstruction(inlineAssignInstruction.getRhs());
       } else if (_instruction.getByteCode().equals(ByteCode.FIELD_ARRAY_ELEMENT_ASSIGN)) {
