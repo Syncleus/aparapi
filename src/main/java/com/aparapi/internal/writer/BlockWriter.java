@@ -80,6 +80,8 @@ public abstract class BlockWriter{
 
    public final static String arrayDimMangleSuffix = "__javaArrayDimension";
 
+   private final Set<String> declaredExpressionLocals = new HashSet<String>();
+
    public abstract void write(String _string);
 
    public void writeln(String _string) {
@@ -304,6 +306,63 @@ public abstract class BlockWriter{
 
    }
 
+   private void collectExpressionDeclarations(Instruction _instruction, Set<LocalVariableInfo> _locals) {
+      if (_instruction == null) {
+         return;
+      }
+
+      if (_instruction.getByteCode().equals(ByteCode.MULTI_ASSIGN)) {
+         final MultiAssignInstruction multiAssignInstruction = (MultiAssignInstruction) _instruction;
+         AssignToLocalVariable from = (AssignToLocalVariable) multiAssignInstruction.getFrom();
+         final AssignToLocalVariable last = (AssignToLocalVariable) multiAssignInstruction.getTo();
+
+         while (from != last) {
+            addExpressionDeclaration(from, _locals);
+            from = (AssignToLocalVariable) ((Instruction) from).getNextExpr();
+         }
+      } else if (_instruction.getByteCode().equals(ByteCode.INLINE_ASSIGN)) {
+         final InlineAssignInstruction inlineAssignInstruction = (InlineAssignInstruction) _instruction;
+         addExpressionDeclaration(inlineAssignInstruction.getAssignToLocalVariable(), _locals);
+      }
+
+      for (Instruction child = _instruction.getFirstChild(); child != null; child = child.getNextExpr()) {
+         collectExpressionDeclarations(child, _locals);
+      }
+   }
+
+   private void addExpressionDeclaration(AssignToLocalVariable _assignToLocalVariable, Set<LocalVariableInfo> _locals) {
+      final LocalVariableInfo localVariableInfo = _assignToLocalVariable.getLocalVariableInfo();
+      if (_assignToLocalVariable.isDeclaration() && localVariableInfo != null
+            && !declaredExpressionLocals.contains(getLocalVariableKey(localVariableInfo))) {
+         _locals.add(localVariableInfo);
+      }
+   }
+
+   private String getLocalVariableKey(LocalVariableInfo _localVariableInfo) {
+      return _localVariableInfo.getVariableIndex() + ":" + _localVariableInfo.getVariableName();
+   }
+
+   private boolean hasExpressionDeclaration(LocalVariableInfo _localVariableInfo) {
+      return declaredExpressionLocals.contains(getLocalVariableKey(_localVariableInfo));
+   }
+
+   private void writeExpressionDeclarations(Instruction _first, Instruction _last) throws CodeGenException {
+      final Set<LocalVariableInfo> locals = new LinkedHashSet<LocalVariableInfo>();
+      for (Instruction instruction = _first; instruction != _last; instruction = instruction.getNextExpr()) {
+         collectExpressionDeclarations(instruction, locals);
+      }
+
+      for (LocalVariableInfo localVariableInfo : locals) {
+         final String localVariableKey = getLocalVariableKey(localVariableInfo);
+         if (!declaredExpressionLocals.contains(localVariableKey)) {
+            newLine();
+            write(convertType(localVariableInfo.getVariableDescriptor(), true, false));
+            write(localVariableInfo.getVariableName() + "=0;");
+            declaredExpressionLocals.add(localVariableKey);
+         }
+      }
+   }
+
    protected void writeGetterBlock(FieldEntry accessorVariableFieldEntry) {
       write("{");
       in();
@@ -320,6 +379,7 @@ public abstract class BlockWriter{
    public void writeBlock(Instruction _first, Instruction _last) throws CodeGenException {
       write("{");
       in();
+      writeExpressionDeclarations(_first, _last);
       writeSequence(_first, _last);
       out();
       newLine();
@@ -420,7 +480,7 @@ public abstract class BlockWriter{
                  write(localVariableInfo.getVariableName());
              }
          } else {
-             if (assignToLocalVariable.isDeclaration()) {
+             if (assignToLocalVariable.isDeclaration() && !hasExpressionDeclaration(localVariableInfo)) {
                  final String descriptor = localVariableInfo.getVariableDescriptor();
                  // Arrays always map to __global arrays
                  if (descriptor.startsWith("[")) {
@@ -682,9 +742,6 @@ public abstract class BlockWriter{
          for (AssignToLocalVariable alv = stack.pop(); alv != null; alv = stack.size() > 0 ? stack.pop() : null) {
 
             final LocalVariableInfo localVariableInfo = alv.getLocalVariableInfo();
-            if (alv.isDeclaration()) {
-               write(convertType(localVariableInfo.getVariableDescriptor(), true, false));
-            }
             if (localVariableInfo == null) {
                throw new CodeGenException("outOfScope" + _instruction.getThisPC() + " = ");
             } else {
@@ -698,11 +755,6 @@ public abstract class BlockWriter{
          final AssignToLocalVariable assignToLocalVariable = inlineAssignInstruction.getAssignToLocalVariable();
 
          final LocalVariableInfo localVariableInfo = assignToLocalVariable.getLocalVariableInfo();
-         if (assignToLocalVariable.isDeclaration()) {
-            // this is bad! we need a general way to hoist up a required declaration
-            throw new CodeGenException("/* we can't declare this " + convertType(localVariableInfo.getVariableDescriptor(), true, false)
-                  + " here */");
-         }
          write(localVariableInfo.getVariableName());
          write("=");
          writeInstruction(inlineAssignInstruction.getRhs());
@@ -866,6 +918,7 @@ public abstract class BlockWriter{
    }
 
    public void writeMethodBody(MethodModel _methodModel) throws CodeGenException {
+      declaredExpressionLocals.clear();
       if (_methodModel.isGetter() && !_methodModel.isNoCL()) {
          FieldEntry accessorVariableFieldEntry = _methodModel.getAccessorVariableFieldEntry();
          writeGetterBlock(accessorVariableFieldEntry);
