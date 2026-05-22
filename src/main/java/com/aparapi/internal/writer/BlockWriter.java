@@ -420,7 +420,7 @@ public abstract class BlockWriter{
                  write(localVariableInfo.getVariableName());
              }
          } else {
-             if (assignToLocalVariable.isDeclaration()) {
+             if (assignToLocalVariable.isDeclaration() && !predeclaredLocalVariableInfos.contains(localVariableInfo)) {
                  final String descriptor = localVariableInfo.getVariableDescriptor();
                  // Arrays always map to __global arrays
                  if (descriptor.startsWith("[")) {
