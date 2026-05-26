@@ -15,7 +15,21 @@ grep -q '^[[:space:]]*- os: osx' .travis.yml || {
 }
 
 echo "==> macOS before_install skips Homebrew OpenCV"
-if awk '/TRAVIS_OS_NAME.*osx/,/fi/ {print}' .travis.yml | grep -q 'brew install.*opencv'; then
+macos_block="$(awk '/TRAVIS_OS_NAME.*osx/,/fi/ {print}' .travis.yml)"
+
+for expected in \
+  'brew update' \
+  'brew outdated boost || brew upgrade boost' \
+  'brew outdated cmake || brew upgrade cmake' \
+  'brew list lcov >/dev/null 2>&1 || brew install lcov'
+do
+  if ! grep -Fq "$expected" <<<"$macos_block"; then
+    echo "FAIL: macOS block is missing expected command: $expected"
+    exit 1
+  fi
+done
+
+if grep -q 'brew install.*opencv' <<<"$macos_block"; then
   echo "FAIL: macOS block still runs 'brew install ... opencv'"
   exit 1
 fi
