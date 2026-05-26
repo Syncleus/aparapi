@@ -1,0 +1,29 @@
+name: Validate Travis config
+
+on:
+  pull_request:
+    paths:
+      - '.travis.yml'
+      - '.github/workflows/validate-travis.yml'
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - '.travis.yml'
+
+jobs:
+  yaml:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse .travis.yml
+        run: ruby -e 'require "yaml"; YAML.load_file(".travis.yml"); puts "travis.yml: yaml ok"'
+      - name: Ensure macOS matrix is enabled
+        run: |
+          grep -q '^[[:space:]]*- os: osx' .travis.yml
+          echo "macOS matrix entry present"
+      - name: Ensure macOS skips broken Homebrew OpenCV bootstrap
+        run: |
+          awk '/TRAVIS_OS_NAME.*osx/,/fi/' .travis.yml | grep -q 'true'
+          echo "macOS before_install uses no-op (no opencv brew install)"
