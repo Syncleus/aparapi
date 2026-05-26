@@ -9,12 +9,11 @@ on:
       - 'scripts/validate-travis-macos.sh'
   push:
     branches:
-      - master
-      - main
-      - fix/macos-travis-bounty-35
+      - '**'
     paths:
       - '.travis.yml'
       - '.github/workflows/validate-travis.yml'
+      - 'scripts/validate-travis-macos.sh'
 
 jobs:
   yaml:
