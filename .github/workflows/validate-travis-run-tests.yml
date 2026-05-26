@@ -1,0 +1,23 @@
+name: Validate Travis RUN_TESTS
+
+on:
+  pull_request:
+    paths:
+      - '.travis.yml'
+      - '.github/workflows/validate-travis-run-tests.yml'
+      - 'scripts/validate-travis-run-tests.sh'
+  push:
+    branches:
+      - fix/bounty-95-run-tests
+    paths:
+      - '.travis.yml'
+      - '.github/workflows/validate-travis-run-tests.yml'
+      - 'scripts/validate-travis-run-tests.sh'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: chmod +x scripts/validate-travis-run-tests.sh
+      - run: ./scripts/validate-travis-run-tests.sh
