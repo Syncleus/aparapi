@@ -9,8 +9,10 @@ on:
     branches:
       - master
       - main
+      - fix/macos-travis-bounty-35
     paths:
       - '.travis.yml'
+      - '.github/workflows/validate-travis.yml'
 
 jobs:
   yaml:
