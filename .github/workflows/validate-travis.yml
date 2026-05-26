@@ -1,0 +1,24 @@
+name: Validate Travis config
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.travis.yml'
+      - '.github/workflows/validate-travis.yml'
+      - 'scripts/validate-travis-macos.sh'
+  push:
+    branches:
+      - '**'
+    paths:
+      - '.travis.yml'
+      - '.github/workflows/validate-travis.yml'
+      - 'scripts/validate-travis-macos.sh'
+
+jobs:
+  yaml:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate macOS Travis fix (issue #35)
+        run: ./scripts/validate-travis-macos.sh
