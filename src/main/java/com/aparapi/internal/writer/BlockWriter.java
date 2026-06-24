@@ -296,12 +296,57 @@ public abstract class BlockWriter{
             writeComposite((CompositeInstruction) instruction);
          } else if (!instruction.getByteCode().equals(ByteCode.NONE)) {
             newLine();
+            writeInlineLocalVariableDeclarations(instruction);
             writeInstruction(instruction);
             write(";");
 
          }
       }
 
+   }
+
+   private void writeInlineLocalVariableDeclarations(Instruction instruction) throws CodeGenException {
+      final Map<Integer, AssignToLocalVariable> declarations = new LinkedHashMap<Integer, AssignToLocalVariable>();
+      collectInlineLocalVariableDeclarations(instruction, declarations);
+
+      for (final AssignToLocalVariable declaration : declarations.values()) {
+         final LocalVariableInfo localVariableInfo = declaration.getLocalVariableInfo();
+         if (localVariableInfo == null) {
+            throw new CodeGenException("outOfScope" + ((Instruction) declaration).getThisPC() + " = ");
+         }
+
+         final String descriptor = localVariableInfo.getVariableDescriptor();
+         if (descriptor.startsWith("[")) {
+            write(" __global ");
+         }
+         write(convertType(descriptor, true, false));
+         write(localVariableInfo.getVariableName());
+         write(";");
+         newLine();
+      }
+   }
+
+   private void collectInlineLocalVariableDeclarations(Instruction instruction, Map<Integer, AssignToLocalVariable> declarations) {
+      if (instruction == null) {
+         return;
+      }
+
+      if (instruction instanceof InlineAssignInstruction) {
+         final InlineAssignInstruction inlineAssignInstruction = (InlineAssignInstruction) instruction;
+         final AssignToLocalVariable assignToLocalVariable = inlineAssignInstruction.getAssignToLocalVariable();
+         if (assignToLocalVariable.isDeclaration()) {
+            declarations.put(assignToLocalVariable.getLocalVariableTableIndex(), assignToLocalVariable);
+         }
+         collectInlineLocalVariableDeclarations(inlineAssignInstruction.getRhs(), declarations);
+      }
+
+      final Instruction lastChild = instruction.getLastChild();
+      for (Instruction child = instruction.getFirstChild(); child != null; child = child.getNextExpr()) {
+         collectInlineLocalVariableDeclarations(child, declarations);
+         if (child == lastChild) {
+            break;
+         }
+      }
    }
 
    protected void writeGetterBlock(FieldEntry accessorVariableFieldEntry) {
@@ -698,11 +743,6 @@ public abstract class BlockWriter{
          final AssignToLocalVariable assignToLocalVariable = inlineAssignInstruction.getAssignToLocalVariable();
 
          final LocalVariableInfo localVariableInfo = assignToLocalVariable.getLocalVariableInfo();
-         if (assignToLocalVariable.isDeclaration()) {
-            // this is bad! we need a general way to hoist up a required declaration
-            throw new CodeGenException("/* we can't declare this " + convertType(localVariableInfo.getVariableDescriptor(), true, false)
-                  + " here */");
-         }
          write(localVariableInfo.getVariableName());
          write("=");
          writeInstruction(inlineAssignInstruction.getRhs());
