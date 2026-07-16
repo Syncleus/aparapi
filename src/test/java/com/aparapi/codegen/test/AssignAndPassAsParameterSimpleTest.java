@@ -15,23 +15,35 @@
  */
 package com.aparapi.codegen.test;
 
-import com.aparapi.internal.exception.ClassParseException;
-import com.aparapi.internal.exception.CodeGenException;
-import org.junit.Ignore;
+import static org.junit.Assert.assertTrue;
+
+import com.aparapi.internal.model.ClassModel;
+import com.aparapi.internal.model.Entrypoint;
+import com.aparapi.internal.writer.KernelWriter;
 import org.junit.Test;
 
 public class AssignAndPassAsParameterSimpleTest extends com.aparapi.codegen.CodeGenJUnitBase {
 
-    private static final String[] expectedOpenCL = null;
-    private static final Class<? extends com.aparapi.internal.exception.AparapiException> expectedException = CodeGenException.class;
-
-    @Test
-    public void AssignAndPassAsParameterSimpleTest() {
-        test(com.aparapi.codegen.test.AssignAndPassAsParameterSimple.class, expectedException, expectedOpenCL);
+    private String generateOpenCL() throws Exception {
+        Class<?> testClass = com.aparapi.codegen.test.AssignAndPassAsParameterSimple.class;
+        ClassModel classModel = ClassModel.createClassModel(testClass);
+        Object kernelInstance = testClass.getConstructor((Class<?>[]) null).newInstance();
+        Entrypoint entrypoint = classModel.getEntrypoint("run", null);
+        return KernelWriter.writeToString(entrypoint);
     }
 
     @Test
-    public void AssignAndPassAsParameterSimpleTestWorksWithCaching() {
-        test(com.aparapi.codegen.test.AssignAndPassAsParameterSimple.class, expectedException, expectedOpenCL);
+    public void AssignAndPassAsParameterSimpleTest() throws Exception {
+        String actual = generateOpenCL();
+        assertTrue(actual.contains("int z;"));
+        assertTrue(actual.contains("z=1"));
+        assertTrue(actual.indexOf("int z;") < actual.indexOf("z=1"));
+    }
+
+    @Test
+    public void AssignAndPassAsParameterSimpleTestWorksWithCaching() throws Exception {
+        String actual = generateOpenCL();
+        assertTrue(actual.contains("int z;"));
+        assertTrue(actual.contains("z=1"));
     }
 }

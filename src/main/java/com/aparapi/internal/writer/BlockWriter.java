@@ -76,6 +76,8 @@ import java.util.*;
 
 public abstract class BlockWriter{
 
+   private boolean hoistInlineDeclarations;
+
    public final static String arrayLengthMangleSuffix = "__javaArrayLength";
 
    public final static String arrayDimMangleSuffix = "__javaArrayDimension";
@@ -320,11 +322,71 @@ public abstract class BlockWriter{
    public void writeBlock(Instruction _first, Instruction _last) throws CodeGenException {
       write("{");
       in();
+      if (hoistInlineDeclarations) {
+         writeHoistedInlineDeclarations(_first, _last);
+         hoistInlineDeclarations = false;
+      }
       writeSequence(_first, _last);
       out();
       newLine();
 
       write("}");
+   }
+
+   private void writeHoistedInlineDeclarations(Instruction _first, Instruction _last) throws CodeGenException {
+      final Map<String, LocalVariableInfo> declarations = new LinkedHashMap<String, LocalVariableInfo>();
+      collectInlineDeclarations(_first, _last, declarations);
+
+      for (final LocalVariableInfo localVariableInfo : declarations.values()) {
+         newLine();
+         final String descriptor = localVariableInfo.getVariableDescriptor();
+         if (descriptor.startsWith("[")) {
+            write(" __global ");
+         }
+         write(convertType(descriptor, true, false));
+         write(localVariableInfo.getVariableName());
+         write(";");
+      }
+   }
+
+   private void collectInlineDeclarations(Instruction _first, Instruction _last,
+         Map<String, LocalVariableInfo> _declarations) {
+      for (Instruction instruction = _first; instruction != _last && instruction != null;
+            instruction = instruction.getNextExpr()) {
+         collectInlineDeclarations(instruction, _declarations);
+      }
+   }
+
+   private void collectInlineDeclarations(Instruction _instruction,
+         Map<String, LocalVariableInfo> _declarations) {
+      if (_instruction == null) {
+         return;
+      }
+      if (_instruction instanceof InlineAssignInstruction) {
+         final InlineAssignInstruction inlineAssignInstruction = (InlineAssignInstruction) _instruction;
+         final AssignToLocalVariable assignToLocalVariable = inlineAssignInstruction.getAssignToLocalVariable();
+         final LocalVariableInfo localVariableInfo = assignToLocalVariable.getLocalVariableInfo();
+         if (assignToLocalVariable.isDeclaration() && localVariableInfo != null) {
+            final String key = localVariableInfo.getVariableIndex() + ":"
+                  + localVariableInfo.getVariableName() + ":"
+                  + localVariableInfo.getVariableDescriptor();
+            _declarations.put(key, localVariableInfo);
+         }
+         collectInlineDeclarations(inlineAssignInstruction.getRhs(), _declarations);
+      }
+
+      if (_instruction instanceof MultiAssignInstruction) {
+         final MultiAssignInstruction multiAssignInstruction = (MultiAssignInstruction) _instruction;
+         collectInlineDeclarations(multiAssignInstruction.getFrom(), _declarations);
+         collectInlineDeclarations(multiAssignInstruction.getTo(), _declarations);
+         collectInlineDeclarations(multiAssignInstruction.getCommon(), _declarations);
+      }
+
+      final Instruction firstChild = _instruction.getFirstChild();
+      final Instruction lastChild = _instruction.getLastChild();
+      if (firstChild != null && lastChild != null) {
+         collectInlineDeclarations(firstChild, lastChild.getNextExpr(), _declarations);
+      }
    }
 
    public Instruction writeConditional(BranchSet _branchSet) throws CodeGenException {
@@ -698,11 +760,7 @@ public abstract class BlockWriter{
          final AssignToLocalVariable assignToLocalVariable = inlineAssignInstruction.getAssignToLocalVariable();
 
          final LocalVariableInfo localVariableInfo = assignToLocalVariable.getLocalVariableInfo();
-         if (assignToLocalVariable.isDeclaration()) {
-            // this is bad! we need a general way to hoist up a required declaration
-            throw new CodeGenException("/* we can't declare this " + convertType(localVariableInfo.getVariableDescriptor(), true, false)
-                  + " here */");
-         }
+         // Declarations used as method arguments are emitted at the start of the method body.
          write(localVariableInfo.getVariableName());
          write("=");
          writeInstruction(inlineAssignInstruction.getRhs());
@@ -870,6 +928,7 @@ public abstract class BlockWriter{
          FieldEntry accessorVariableFieldEntry = _methodModel.getAccessorVariableFieldEntry();
          writeGetterBlock(accessorVariableFieldEntry);
       } else {
+         hoistInlineDeclarations = true;
          writeBlock(_methodModel.getExprHead(), null);
       }
    }
