@@ -2453,6 +2453,56 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
+    * Exchanges an integer value with another work-item in the same work-group using a caller supplied local-memory
+    * buffer.
+    * <br>
+    * Every work-item in the work-group must call this method, and <code>_mailbox</code> must be a {@link Local}
+    * buffer, or a buffer named with {@link #LOCAL_SUFFIX}, with at least <code>getLocalSize()</code> entries. Each
+    * work-item publishes <code>_value</code> at its local id, waits for the work-group, reads the value published by
+    * <code>_targetLocalId</code>, and waits again before returning. As with {@link #localBarrier()}, all work-items
+    * must reach the same calls in the same order.
+    *
+    * @param _mailbox local-memory buffer used as a mailbox between work-items
+    * @param _targetLocalId local id whose value should be read by the current work-item
+    * @param _value value published by the current work-item
+    * @return value published by <code>_targetLocalId</code>
+    */
+   @OpenCLMapping
+   @Experimental
+   protected final int localExchange(int[] _mailbox, int _targetLocalId, int _value) {
+      _mailbox[getLocalId()] = _value;
+      localBarrier();
+      final int value = _mailbox[_targetLocalId];
+      localBarrier();
+      return value;
+   }
+
+   /**
+    * Broadcasts an integer value from one work-item to the rest of the current work-group.
+    * <br>
+    * Every work-item in the work-group must call this method, and <code>_mailbox</code> must be a {@link Local}
+    * buffer, or a buffer named with {@link #LOCAL_SUFFIX}, with at least one entry. The work-item whose local id equals
+    * <code>_sourceLocalId</code> writes <code>_value</code>, then all work-items read and return that value. As with
+    * {@link #localBarrier()}, all work-items must reach the same calls in the same order.
+    *
+    * @param _mailbox local-memory buffer used to publish the broadcast value
+    * @param _sourceLocalId local id of the work-item providing the broadcast value
+    * @param _value value published by the source work-item
+    * @return value published by <code>_sourceLocalId</code>
+    */
+   @OpenCLMapping
+   @Experimental
+   protected final int localBroadcast(int[] _mailbox, int _sourceLocalId, int _value) {
+      if (getLocalId() == _sourceLocalId) {
+         _mailbox[0] = _value;
+      }
+      localBarrier();
+      final int value = _mailbox[0];
+      localBarrier();
+      return value;
+   }
+
+   /**
     * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.<br> 
     * It will also enforce memory ordering, such that modifications made by each thread in the work-group, to the memory,
     * before entering into this barrier call will be visible by all threads leaving the barrier.
