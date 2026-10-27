@@ -318,6 +318,80 @@ public abstract class KernelWriter extends BlockWriter{
       newLine();
    }
 
+   private boolean usesLocalMessagePassing(Entrypoint _entryPoint, String _methodName) {
+      if (usesLocalMessagePassing(_entryPoint.getMethodModel(), _methodName)) {
+         return true;
+      }
+      for (final MethodModel methodModel : _entryPoint.getCalledMethods()) {
+         if (usesLocalMessagePassing(methodModel, _methodName)) {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private boolean usesLocalMessagePassing(MethodModel _methodModel, String _methodName) {
+      for (final MethodCall methodCall : _methodModel.getMethodCalls()) {
+         final MethodEntry methodEntry = methodCall.getConstantPoolMethodEntry();
+         final String methodName = methodEntry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8();
+         final String methodSignature = methodEntry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
+         if (Kernel.isMappedMethod(methodEntry) && _methodName.equals(methodName) && "([III)I".equals(methodSignature)) {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private void writeLocalExchangeHelper() {
+      write("int localExchange(__local int *_mailbox, int _targetLocalId, int _value){");
+      in();
+      {
+         newLine();
+         write("_mailbox[get_local_id(0)] = _value;");
+         newLine();
+         write("barrier(CLK_LOCAL_MEM_FENCE);");
+         newLine();
+         write("int value = _mailbox[_targetLocalId];");
+         newLine();
+         write("barrier(CLK_LOCAL_MEM_FENCE);");
+         newLine();
+         write("return value;");
+         out();
+         newLine();
+      }
+      write("}");
+      newLine();
+   }
+
+   private void writeLocalBroadcastHelper() {
+      write("int localBroadcast(__local int *_mailbox, int _sourceLocalId, int _value){");
+      in();
+      {
+         newLine();
+         write("if (get_local_id(0)==_sourceLocalId){");
+         in();
+         {
+            newLine();
+            write("_mailbox[0] = _value;");
+            out();
+            newLine();
+         }
+         write("}");
+         newLine();
+         write("barrier(CLK_LOCAL_MEM_FENCE);");
+         newLine();
+         write("int value = _mailbox[0];");
+         newLine();
+         write("barrier(CLK_LOCAL_MEM_FENCE);");
+         newLine();
+         write("return value;");
+         out();
+         newLine();
+      }
+      write("}");
+      newLine();
+   }
+
    public final static String __local = "__local";
 
    public final static String __global = "__global";
@@ -528,6 +602,18 @@ public abstract class KernelWriter extends BlockWriter{
          }
          write("}");
 
+         newLine();
+      }
+
+      boolean usesLocalExchange = usesLocalMessagePassing(_entryPoint, "localExchange");
+      boolean usesLocalBroadcast = usesLocalMessagePassing(_entryPoint, "localBroadcast");
+      if (usesLocalExchange || usesLocalBroadcast) {
+         if (usesLocalExchange) {
+            writeLocalExchangeHelper();
+         }
+         if (usesLocalBroadcast) {
+            writeLocalBroadcastHelper();
+         }
          newLine();
       }
 
