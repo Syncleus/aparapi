@@ -119,3 +119,11 @@ Kernel kernel = new Kernel() {
 Range range = Range.create(result.length);
 kernel.execute(range);
 ```
+
+### Work-group message passing
+
+`Kernel.localSend(int[] mailbox, int slot, int value)` publishes an integer to
+work-group local scratch memory. `localReceive(int[] mailbox, int slot)` waits
+for the sends, reads a slot, and waits for all receivers before the next round.
+See [the message-passing example](docs/local-message-passing.md) for the complete
+protocol and host/device buffer handling.

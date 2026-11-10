@@ -2453,6 +2453,58 @@ public abstract class Kernel implements Cloneable {
    }
 
    /**
+    * Publish an integer message to a work-group local mailbox slot.
+    * This call does not wait; pair it with {@link #localReceive(int[], int)}
+    * to make the message visible to receivers before reusing the mailbox.
+    *
+    * <p>The mailbox must be a {@link Local} array (or use {@link #LOCAL_SUFFIX}).
+    * Each slot read in a round must have exactly one writer in that round.
+    * Multiple work-items may read the same slot, allowing broadcasts. Slots are
+    * explicit indices, independent of the dimensionality of the work-group;
+    * callers must keep them within the mailbox bounds.</p>
+    *
+    * <p>Messages are confined to the current work-group. For host/device data,
+    * use ordinary input/output arrays and {@code put}/{@code get} around kernel
+    * execution. Local mailboxes are scratch space, not host/device buffers.</p>
+    *
+    * @param mailbox work-group shared scratch array
+    * @param slot destination mailbox slot
+    * @param value message to publish
+    */
+   @OpenCLDelegate
+   @Experimental
+   protected final void localSend(@Local int[] mailbox, int slot, int value) {
+      mailbox[slot] = value;
+   }
+
+   /**
+    * Collectively receive an integer message from a work-group local mailbox.
+    * Waits for all work-items to finish their sends, reads the requested slot,
+    * then waits for all receivers before allowing the next round of sends.
+    * Thus the same mailbox can safely be reused in a loop without extra barriers.
+    *
+    * <p>Every work-item in the work-group must call this method the same number
+    * of times, in the same control-flow order, including work-items that did not
+    * send a message. Different receivers may read different slots. A slot must
+    * have been written by exactly one work-item before this call; see
+    * {@link #localSend(int[], int, int)}. All participants must use the same
+    * mailbox. This collective protocol requires JTP or OpenCL execution;
+    * sequential execution cannot rendezvous multiple work-items.</p>
+    *
+    * @param mailbox work-group shared scratch array
+    * @param slot mailbox slot to read
+    * @return message published to the slot in this round
+    */
+   @OpenCLDelegate
+   @Experimental
+   protected final int localReceive(@Local int[] mailbox, int slot) {
+      localBarrier();
+      int value = mailbox[slot];
+      localBarrier();
+      return value;
+   }
+
+   /**
     * Wait for all kernels in the current work group to rendezvous at this call before continuing execution.<br> 
     * It will also enforce memory ordering, such that modifications made by each thread in the work-group, to the memory,
     * before entering into this barrier call will be visible by all threads leaving the barrier.
