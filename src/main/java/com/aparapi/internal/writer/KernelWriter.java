@@ -157,6 +157,9 @@ public abstract class KernelWriter extends BlockWriter{
 
       javaToCLIdentifierMap.put("getPassId()I", "get_pass_id(this)");
 
+      javaToCLIdentifierMap.put("localSend([III)V", "aparapi_local_send");
+      javaToCLIdentifierMap.put("localReceive([II)I", "aparapi_local_receive");
+
       javaToCLIdentifierMap.put("localBarrier()V", "barrier(CLK_LOCAL_MEM_FENCE)");
 
       javaToCLIdentifierMap.put("globalBarrier()V", "barrier(CLK_GLOBAL_MEM_FENCE)");
@@ -533,6 +536,31 @@ public abstract class KernelWriter extends BlockWriter{
 
       if (Config.enableDoubles || _entryPoint.requiresDoublePragma()) {
          writePragma("cl_khr_fp64", true);
+         newLine();
+      }
+
+      // Keep unrelated kernels unchanged; include calls in reachable helpers too.
+      final List<MethodModel> messageMethods = new ArrayList<MethodModel>(_entryPoint.getCalledMethods());
+      messageMethods.add(_entryPoint.getMethodModel());
+      boolean usesLocalMessages = false;
+      for (MethodModel method : messageMethods) {
+         for (MethodCall call : method.getMethodCalls()) {
+            MethodEntry entry = call.getConstantPoolMethodEntry();
+            String signature = entry.getNameAndTypeEntry().getNameUTF8Entry().getUTF8()
+                  + entry.getNameAndTypeEntry().getDescriptorUTF8Entry().getUTF8();
+            if (signature.equals("localSend([III)V") || signature.equals("localReceive([II)I")) {
+               usesLocalMessages = true;
+            }
+         }
+      }
+      if (usesLocalMessages) {
+         write("void aparapi_local_send(__local int *mailbox, int slot, int value) {\n"
+               + "   mailbox[slot] = value;\n}\n");
+         write("int aparapi_local_receive(__local int *mailbox, int slot) {\n"
+               + "   barrier(CLK_LOCAL_MEM_FENCE);\n"
+               + "   int value = mailbox[slot];\n"
+               + "   barrier(CLK_LOCAL_MEM_FENCE);\n"
+               + "   return value;\n}\n");
          newLine();
       }
 
